@@ -62,4 +62,5 @@ export interface HeroContent {
     subtitle: string;
     icon: LucideIcon;
   };
+  imageAlt: string;
 }

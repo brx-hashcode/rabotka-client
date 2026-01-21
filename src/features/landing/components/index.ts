@@ -11,3 +11,4 @@ export { ImpactSection } from './impact-section';
 export { VisionSection } from './vision-section';
 export { CTASection } from './cta-section';
 export { Footer } from './footer';
+export { ScrollToTop } from './scroll-to-top';

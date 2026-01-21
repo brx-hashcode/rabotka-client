@@ -9,7 +9,7 @@ export function WhyWhatsAppSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="py-20 lg:py-32 bg-background" ref={ref}>
+    <section className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Content */}

@@ -84,7 +84,7 @@ export function HowItWorksSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="py-20 lg:py-32 bg-background" ref={ref}>
+    <section id="how-it-works" className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
       <div className="section-container space-y-24 lg:space-y-32">
         <FlowCard
           subtitle={howItWorksContent.worker.subtitle}

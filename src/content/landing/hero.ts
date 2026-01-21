@@ -14,8 +14,8 @@ export const heroContent: HeroContent = {
   description:
     "Rabotka connecte les travailleurs informels et les employeurs grâce à un assistant WhatsApp simple — sans application, sans complexité.",
   cta: {
-    primary: 'Trouver un emploi sur WhatsApp',
-    secondary: 'Trouver un travailleur sur WhatsApp',
+    primary: 'Trouver un emploi',
+    secondary: 'Trouver un travailleur',
   },
   stats: [
     {
@@ -36,4 +36,5 @@ export const heroContent: HeroContent = {
     subtitle: 'Bonjour ! J\'ai trouvé 3 opportunités d\'emploi près de chez vous. Voulez-vous les voir ?',
     icon: MessageCircle,
   },
+  imageAlt: 'Femme africaine utilisant WhatsApp dans un marché vibrant',
 };

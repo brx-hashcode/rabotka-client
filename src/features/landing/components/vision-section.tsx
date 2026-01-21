@@ -9,7 +9,7 @@ export function VisionSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="relative py-20 lg:py-32 overflow-hidden" ref={ref}>
+    <section id="about" className="relative py-20 lg:py-32 overflow-hidden" ref={ref}>
       {/* Background Image */}
       <div className="absolute inset-0">
         <img

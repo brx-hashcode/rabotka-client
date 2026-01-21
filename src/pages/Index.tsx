@@ -12,32 +12,28 @@ import {
   VisionSection,
   CTASection,
   Footer,
+  ScrollToTop,
 } from '@/features/landing/components';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       <Header />
-      <main>
+      <main className="overflow-x-hidden w-full">
         <HeroSection />
         <RealitySection />
         <WhyWhatsAppSection />
         <WhatIsRabotkaSection />
-        <section id="how-it-works">
-          <HowItWorksSection />
-        </section>
+        <HowItWorksSection />
         <DirectContactSection />
-        <section id="trust">
-          <TrustSection />
-        </section>
+        <TrustSection />
         <AccessibilitySection />
         <ImpactSection />
-        <section id="about">
-          <VisionSection />
-        </section>
+        <VisionSection />
         <CTASection />
       </main>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };

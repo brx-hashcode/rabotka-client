@@ -8,7 +8,7 @@ export function TrustSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="py-20 lg:py-32 bg-background relative overflow-hidden" ref={ref}>
+    <section id="trust" className="py-20 lg:py-32 bg-background relative overflow-hidden" ref={ref}>
       {/* Decorative background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-whatsapp/5 blur-3xl" />
