@@ -17,9 +17,9 @@ import {
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen bg-background w-full">
       <Header />
-      <main className="overflow-x-hidden w-full">
+      <main className="w-full">
         <HeroSection />
         <RealitySection />
         <WhyWhatsAppSection />
