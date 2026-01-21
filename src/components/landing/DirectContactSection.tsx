@@ -10,7 +10,7 @@ const DirectContactSection = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-medium">
             <img
               src={phoneConversationImage}
-              alt="Two people having a friendly phone conversation"
+              alt="Deux personnes ayant une conversation téléphonique amicale"
               className="w-full h-auto object-cover aspect-[16/10]"
             />
           </div>
@@ -19,15 +19,15 @@ const DirectContactSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                Direct Connection
+                Connexion Directe
               </span>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-                No middlemen. No barriers.
+                Pas d'intermédiaires. Pas de barrières.
               </h2>
               
               <p className="text-lg text-muted-foreground">
-                Once a match is found, you connect directly. Rabotka removes friction and builds trust.
+                Une fois le match trouvé, vous vous connectez directement. Rabotka élimine les frictions et construit la confiance.
               </p>
             </div>
 
@@ -37,8 +37,8 @@ const DirectContactSection = () => {
                   <Phone className="w-6 h-6 text-whatsapp-dark" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Call directly</p>
-                  <p className="text-sm text-muted-foreground">One tap to connect</p>
+                  <p className="font-semibold text-foreground">Appelez directement</p>
+                  <p className="text-sm text-muted-foreground">Un seul clic pour se connecter</p>
                 </div>
               </div>
               
@@ -47,14 +47,14 @@ const DirectContactSection = () => {
                   <MessageCircle className="w-6 h-6 text-whatsapp-dark" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Chat on WhatsApp</p>
-                  <p className="text-sm text-muted-foreground">Message instantly</p>
+                  <p className="font-semibold text-foreground">Chattez sur WhatsApp</p>
+                  <p className="text-sm text-muted-foreground">Messagerie instantanée</p>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 text-whatsapp font-medium">
-              <span>Start connecting today</span>
+              <span>Commencez à vous connecter aujourd'hui</span>
               <ArrowRight className="w-4 h-4" />
             </div>
           </div>

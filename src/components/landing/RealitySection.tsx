@@ -2,11 +2,11 @@ import streetWorkersImage from "@/assets/street-workers.jpg";
 
 const RealitySection = () => {
   const workers = [
-    "Domestic workers",
-    "Hairdressers",
-    "Tutors",
-    "Mechanics",
-    "Freelancers",
+    "Employés de maison",
+    "Coiffeurs/Coiffeuses",
+    "Répétiteurs",
+    "Mécaniciens",
+    "Freelances",
   ];
 
   return (
@@ -17,7 +17,7 @@ const RealitySection = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-medium order-2 lg:order-1">
             <img
               src={streetWorkersImage}
-              alt="Busy African street scene with informal workers"
+              alt="Scène de rue africaine animée avec des travailleurs informels"
               className="w-full h-auto object-cover aspect-[16/10]"
             />
           </div>
@@ -25,15 +25,15 @@ const RealitySection = () => {
           {/* Content */}
           <div className="space-y-6 order-1 lg:order-2">
             <span className="inline-block px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
-              The Challenge
+              Le Défi
             </span>
             
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-              Informal work is everywhere — but opportunities are hard to find
+              Le travail informel est partout — mais les opportunités sont difficiles à trouver
             </h2>
             
             <p className="text-lg text-muted-foreground">
-              In African cities, millions work informally:
+              Dans les villes africaines, des millions de personnes travaillent de manière informelle :
             </p>
 
             <ul className="grid grid-cols-2 gap-3">
@@ -49,7 +49,7 @@ const RealitySection = () => {
             </ul>
 
             <p className="text-lg text-muted-foreground pt-4">
-              Yet finding work still depends on word of mouth, uncertainty, and trust issues.
+              Pourtant, trouver du travail dépend encore du bouche-à-oreille, de l'incertitude et des problèmes de confiance.
             </p>
           </div>
         </div>

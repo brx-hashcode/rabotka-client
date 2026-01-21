@@ -5,15 +5,15 @@ const ImpactSection = () => {
   const impacts = [
     {
       icon: TrendingUp,
-      text: "Empowers informal workers",
+      text: "Autonomise les travailleurs informels",
     },
     {
       icon: Heart,
-      text: "Reduces unemployment friction",
+      text: "Réduit les frictions du chômage",
     },
     {
       icon: Users,
-      text: "Supports families and communities",
+      text: "Soutient les familles et les communautés",
     },
   ];
 
@@ -25,7 +25,7 @@ const ImpactSection = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-medium">
             <img
               src={workersTogetherImage}
-              alt="Group of diverse African workers smiling together"
+              alt="Groupe de travailleurs africains divers souriant ensemble"
               className="w-full h-auto object-cover aspect-[16/10]"
             />
           </div>
@@ -34,11 +34,11 @@ const ImpactSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
-                Social Impact
+                Impact Social
               </span>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-                Creating opportunity where it matters
+                Créer des opportunités là où ça compte
               </h2>
             </div>
 

@@ -20,13 +20,13 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              How it works
+              Comment ça marche
             </a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About
+              À propos
             </a>
             <a href="#trust" className="text-muted-foreground hover:text-foreground transition-colors">
-              Trust & Safety
+              Confiance & Sécurité
             </a>
           </nav>
 
@@ -34,7 +34,7 @@ const Header = () => {
           <div className="hidden md:block">
             <Button variant="whatsapp" size="default">
               <MessageCircle className="w-4 h-4" />
-              Get Started
+              Commencer
             </Button>
           </div>
 
@@ -42,7 +42,7 @@ const Header = () => {
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label="Ouvrir le menu"
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -57,25 +57,25 @@ const Header = () => {
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                How it works
+                Comment ça marche
               </a>
               <a
                 href="#about"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                À propos
               </a>
               <a
                 href="#trust"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Trust & Safety
+                Confiance & Sécurité
               </a>
               <Button variant="whatsapp" size="default" className="w-full mt-2">
                 <MessageCircle className="w-4 h-4" />
-                Get Started
+                Commencer
               </Button>
             </nav>
           </div>

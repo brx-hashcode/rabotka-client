@@ -4,23 +4,23 @@ const WhatIsRabotkaSection = () => {
   const features = [
     {
       icon: UserCheck,
-      title: "Creates worker profiles",
-      description: "Build your professional identity",
+      title: "Crée des profils de travailleurs",
+      description: "Construisez votre identité professionnelle",
     },
     {
       icon: Bot,
-      title: "Matches jobs and skills",
-      description: "AI-powered matching",
+      title: "Associe emplois et compétences",
+      description: "Matching intelligent par IA",
     },
     {
       icon: MessageSquare,
-      title: "Suggests trusted profiles",
-      description: "Verified recommendations",
+      title: "Suggère des profils de confiance",
+      description: "Recommandations vérifiées",
     },
     {
       icon: Phone,
-      title: "Enables direct contact",
-      description: "Via WhatsApp or phone",
+      title: "Permet le contact direct",
+      description: "Via WhatsApp ou téléphone",
     },
   ];
 
@@ -29,15 +29,15 @@ const WhatIsRabotkaSection = () => {
       <div className="section-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-2 rounded-full bg-whatsapp/10 text-whatsapp-dark text-sm font-medium mb-4">
-            What is Rabotka
+            Qu'est-ce que Rabotka
           </span>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-            Your personal job assistant
+            Votre assistant emploi personnel
           </h2>
           
           <p className="text-lg text-muted-foreground">
-            Rabotka is an AI-powered assistant that connects workers with opportunities and employers with trusted help — all through WhatsApp.
+            Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les employeurs à une aide de confiance — le tout via WhatsApp.
           </p>
         </div>
 

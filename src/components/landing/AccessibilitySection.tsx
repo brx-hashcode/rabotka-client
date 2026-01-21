@@ -5,18 +5,18 @@ const AccessibilitySection = () => {
   const features = [
     {
       icon: Wifi,
-      title: "Works with low internet",
-      description: "Optimized for slow connections",
+      title: "Fonctionne avec peu d'internet",
+      description: "Optimisé pour les connexions lentes",
     },
     {
       icon: Sparkles,
-      title: "No technical skills required",
-      description: "Simple and intuitive for everyone",
+      title: "Aucune compétence technique requise",
+      description: "Simple et intuitif pour tous",
     },
     {
       icon: Globe,
-      title: "Local languages friendly",
-      description: "Communicate in your language",
+      title: "Adapté aux langues locales",
+      description: "Communiquez dans votre langue",
     },
   ];
 
@@ -28,15 +28,15 @@ const AccessibilitySection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                Designed for Africa
+                Conçu pour l'Afrique
               </span>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-                Simple. Affordable. Accessible.
+                Simple. Abordable. Accessible.
               </h2>
               
               <p className="text-lg text-muted-foreground">
-                Built for real life, not theory. Rabotka works the way you work.
+                Conçu pour la vraie vie, pas pour la théorie. Rabotka fonctionne comme vous travaillez.
               </p>
             </div>
 
@@ -62,7 +62,7 @@ const AccessibilitySection = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-medium">
             <img
               src={communitySceneImage}
-              alt="Vibrant African community neighborhood"
+              alt="Quartier communautaire africain vibrant"
               className="w-full h-auto object-cover aspect-[16/10]"
             />
           </div>
