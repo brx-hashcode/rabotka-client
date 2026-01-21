@@ -15,16 +15,16 @@ const Footer = () => {
 
           {/* Tagline */}
           <p className="flex items-center gap-2 text-primary-foreground/70 text-center">
-            Made with <Heart className="w-4 h-4 text-accent fill-accent" /> for Africa
+            Fait avec <Heart className="w-4 h-4 text-accent fill-accent" /> pour l'Afrique
           </p>
 
           {/* Links */}
           <div className="flex items-center gap-6 text-sm text-primary-foreground/70">
             <a href="#" className="hover:text-primary-foreground transition-colors">
-              Privacy
+              Confidentialité
             </a>
             <a href="#" className="hover:text-primary-foreground transition-colors">
-              Terms
+              Conditions
             </a>
             <a href="#" className="hover:text-primary-foreground transition-colors">
               Contact
@@ -33,7 +33,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-          © {new Date().getFullYear()} Rabotka (Padrabotka). All rights reserved.
+          © {new Date().getFullYear()} Rabotka (Padrabotka). Tous droits réservés.
         </div>
       </div>
     </footer>

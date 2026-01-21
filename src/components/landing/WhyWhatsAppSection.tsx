@@ -5,18 +5,18 @@ const WhyWhatsAppSection = () => {
   const benefits = [
     {
       icon: Download,
-      title: "No new app to download",
-      description: "Use the app you already have",
+      title: "Pas de nouvelle appli à télécharger",
+      description: "Utilisez l'application que vous avez déjà",
     },
     {
       icon: Smartphone,
-      title: "Works on low-end smartphones",
-      description: "Optimized for any device",
+      title: "Fonctionne sur les téléphones basiques",
+      description: "Optimisé pour tous les appareils",
     },
     {
       icon: Users,
-      title: "Familiar to all generations",
-      description: "Easy for everyone to use",
+      title: "Familier pour toutes les générations",
+      description: "Facile à utiliser pour tout le monde",
     },
   ];
 
@@ -28,15 +28,15 @@ const WhyWhatsAppSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
-                Why WhatsApp
+                Pourquoi WhatsApp
               </span>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-                The platform people already use
+                La plateforme que les gens utilisent déjà
               </h2>
               
               <p className="text-lg text-muted-foreground">
-                WhatsApp is already part of everyday life. Rabotka meets people where they already are.
+                WhatsApp fait déjà partie du quotidien. Rabotka rencontre les gens là où ils sont.
               </p>
             </div>
 
@@ -63,7 +63,7 @@ const WhyWhatsAppSection = () => {
             <div className="rounded-3xl overflow-hidden shadow-medium max-w-sm mx-auto">
               <img
                 src={whatsappPhoneImage}
-                alt="Hands holding phone with WhatsApp chat"
+                alt="Mains tenant un téléphone avec WhatsApp"
                 className="w-full h-auto object-cover aspect-square"
               />
             </div>

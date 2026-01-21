@@ -4,18 +4,18 @@ const TrustSection = () => {
   const trustFeatures = [
     {
       icon: UserCheck,
-      title: "Profile verification",
-      description: "Every profile is reviewed and verified",
+      title: "Vérification des profils",
+      description: "Chaque profil est examiné et vérifié",
     },
     {
       icon: Lock,
-      title: "Identity checks",
-      description: "Secure identity verification process",
+      title: "Contrôles d'identité",
+      description: "Processus de vérification d'identité sécurisé",
     },
     {
       icon: Users,
-      title: "Community-based trust",
-      description: "Reviews and ratings from real users",
+      title: "Confiance communautaire",
+      description: "Avis et évaluations de vrais utilisateurs",
     },
   ];
 
@@ -33,11 +33,11 @@ const TrustSection = () => {
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-            Built on trust
+            Construit sur la confiance
           </h2>
           
           <p className="text-lg text-muted-foreground">
-            Designed to protect both workers and employers. Safety is at the core of everything we do.
+            Conçu pour protéger les travailleurs et les employeurs. La sécurité est au cœur de tout ce que nous faisons.
           </p>
         </div>
 

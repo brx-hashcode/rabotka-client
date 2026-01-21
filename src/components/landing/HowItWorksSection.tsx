@@ -66,46 +66,46 @@ const HowItWorksSection = () => {
   const workerSteps = [
     {
       icon: UserPlus,
-      title: "Create a profile",
-      description: "Add your skills, experience, and location",
+      title: "Créez votre profil",
+      description: "Ajoutez vos compétences, expérience et localisation",
     },
     {
       icon: ShieldCheck,
-      title: "Profile verification",
-      description: "We verify your identity for trust",
+      title: "Vérification du profil",
+      description: "Nous vérifions votre identité pour la confiance",
     },
     {
       icon: Link,
-      title: "Join Rabotka on WhatsApp",
-      description: "Receive a link to connect with our bot",
+      title: "Rejoignez Rabotka sur WhatsApp",
+      description: "Recevez un lien pour vous connecter à notre bot",
     },
     {
       icon: MessageCircle,
-      title: "Get job opportunities",
-      description: "Receive matching jobs directly in chat",
+      title: "Recevez des opportunités d'emploi",
+      description: "Recevez des offres correspondantes directement par chat",
     },
   ];
 
   const employerSteps = [
     {
       icon: UserPlus,
-      title: "Submit your need",
-      description: "House help, tutor, hairdresser, and more",
+      title: "Soumettez votre besoin",
+      description: "Aide ménagère, répétiteur, coiffeur, et plus encore",
     },
     {
       icon: ShieldCheck,
-      title: "Verification",
-      description: "We verify your request for safety",
+      title: "Vérification",
+      description: "Nous vérifions votre demande pour la sécurité",
     },
     {
       icon: Link,
-      title: "Join Rabotka on WhatsApp",
-      description: "Connect with our assistant",
+      title: "Rejoignez Rabotka sur WhatsApp",
+      description: "Connectez-vous à notre assistant",
     },
     {
       icon: MessageCircle,
-      title: "Receive matched profiles",
-      description: "Contact workers directly via WhatsApp or phone",
+      title: "Recevez des profils correspondants",
+      description: "Contactez les travailleurs directement via WhatsApp ou téléphone",
     },
   ];
 
@@ -113,19 +113,19 @@ const HowItWorksSection = () => {
     <section className="py-20 lg:py-32 bg-background">
       <div className="section-container space-y-24 lg:space-y-32">
         <FlowCard
-          subtitle="For Workers"
-          title="How it works for workers"
+          subtitle="Pour les Travailleurs"
+          title="Comment ça marche pour les travailleurs"
           steps={workerSteps}
           image={workerSmilingImage}
-          imageAlt="Worker smiling while using phone"
+          imageAlt="Travailleur souriant en utilisant son téléphone"
         />
         
         <FlowCard
-          subtitle="For Employers"
-          title="How it works for employers"
+          subtitle="Pour les Employeurs"
+          title="Comment ça marche pour les employeurs"
           steps={employerSteps}
           image={familyHomeImage}
-          imageAlt="Family at home using smartphone"
+          imageAlt="Famille à la maison utilisant un smartphone"
           reversed
         />
       </div>

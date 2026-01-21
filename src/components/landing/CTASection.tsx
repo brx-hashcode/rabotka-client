@@ -11,22 +11,22 @@ const CTASection = () => {
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-            Start today, inside WhatsApp
+            Commencez aujourd'hui, sur WhatsApp
           </h2>
           
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Whether you're looking for work or looking for help, Rabotka makes it simple. Join thousands already connected.
+            Que vous cherchiez du travail ou de l'aide, Rabotka rend les choses simples. Rejoignez les milliers de personnes déjà connectées.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button variant="hero" size="lg" className="group">
               <MessageCircle className="w-5 h-5 transition-transform group-hover:scale-110" />
-              Join Rabotka as a Worker
+              Rejoindre Rabotka comme Travailleur
               <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button variant="hero-outline" size="lg" className="group">
               <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
-              Find a Worker Now
+              Trouver un Travailleur Maintenant
               <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
