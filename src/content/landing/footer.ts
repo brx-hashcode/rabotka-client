@@ -1,7 +1,9 @@
 import type { FooterLinkGroup, ContactInfo } from '@/types';
 
 export const footerLinks: FooterLinkGroup = {
-  Liens: ['Confidentialité', 'Conditions', 'Contact'],
+  Produit: ['Comment ça marche', 'Trouver un emploi', 'Trouver un travailleur', 'Profils vérifiés'],
+  Entreprise: ['À propos', 'Carrières', 'Presse', 'Blog'],
+  Légal: ['Politique de confidentialité', 'Conditions d\'utilisation', 'Politique des cookies'],
 };
 
 export const contactInfo: ContactInfo = {
@@ -11,7 +13,7 @@ export const contactInfo: ContactInfo = {
 };
 
 export const footerContent = {
-  brandDescription: 'Fait avec ❤️ pour l\'Afrique',
-  tagline: 'Fait avec ❤️ pour l\'Afrique',
-  copyright: `© ${new Date().getFullYear()} Rabotka (Padrabotka). Tous droits réservés.`,
+  brandDescription:
+    'Connecter les travailleurs informels et les employeurs grâce à WhatsApp. Simple, accessible, sans application.',
+  socialLinks: ['Twitter', 'LinkedIn', 'Facebook', 'Instagram'],
 };

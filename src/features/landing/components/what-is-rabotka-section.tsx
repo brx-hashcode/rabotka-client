@@ -1,52 +1,42 @@
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { Bot, UserCheck, MessageSquare, Phone } from "lucide-react";
+import { whatIsRabotkaContent } from "@/content/landing/what-is-rabotka";
 
 export function WhatIsRabotkaSection() {
-  const features = [
-    {
-      icon: UserCheck,
-      title: "Crée des profils de travailleurs",
-      description: "Construisez votre identité professionnelle",
-    },
-    {
-      icon: Bot,
-      title: "Associe emplois et compétences",
-      description: "Matching intelligent par IA",
-    },
-    {
-      icon: MessageSquare,
-      title: "Suggère des profils de confiance",
-      description: "Recommandations vérifiées",
-    },
-    {
-      icon: Phone,
-      title: "Permet le contact direct",
-      description: "Via WhatsApp ou téléphone",
-    },
-  ];
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="py-20 lg:py-32 bg-whatsapp-light">
+    <section className="py-20 lg:py-32 bg-whatsapp-light" ref={ref}>
       <div className="section-container">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-16"
+        >
           <span className="inline-block px-4 py-2 rounded-full bg-whatsapp/10 text-whatsapp-dark text-sm font-medium mb-4">
-            Qu'est-ce que Rabotka
+            {whatIsRabotkaContent.badge}
           </span>
           
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-            Votre assistant emploi personnel
+            {whatIsRabotkaContent.title}
           </h2>
           
           <p className="text-lg text-muted-foreground">
-            Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les employeurs à une aide de confiance — le tout via WhatsApp.
+            {whatIsRabotkaContent.description}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <div
+          {whatIsRabotkaContent.features.map((feature, index) => (
+            <motion.div
               key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
               className="group relative bg-card rounded-2xl p-6 shadow-soft hover:shadow-medium transition-all hover:-translate-y-1"
-              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="w-14 h-14 rounded-2xl bg-whatsapp/10 flex items-center justify-center mb-4 group-hover:bg-whatsapp/20 transition-colors">
                 <feature.icon className="w-7 h-7 text-whatsapp-dark" />
@@ -54,7 +44,7 @@ export function WhatIsRabotkaSection() {
               
               <h3 className="font-display font-bold text-foreground text-lg mb-2">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

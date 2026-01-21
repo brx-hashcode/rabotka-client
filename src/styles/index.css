@@ -8,7 +8,7 @@
 
 @theme {
   --font-family-sans: 'Inter', sans-serif;
-  --font-family-display: 'Space Grotesk', sans-serif;
+  --font-family-display: 'Poppins', sans-serif;
 
   --radius: 1rem;
   --radius-lg: var(--radius);
@@ -166,7 +166,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
@@ -200,6 +200,6 @@
 
 @layer utilities {
   .font-display {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 }

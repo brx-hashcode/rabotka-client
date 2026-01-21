@@ -1,49 +1,45 @@
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { Smartphone, Download, Users } from "lucide-react";
 import whatsappPhoneImage from "@/assets/whatsapp-phone.jpg";
+import { whyWhatsAppContent } from "@/content/landing/why-whatsapp";
 
 export function WhyWhatsAppSection() {
-  const benefits = [
-    {
-      icon: Download,
-      title: "Pas de nouvelle appli à télécharger",
-      description: "Utilisez l'application que vous avez déjà",
-    },
-    {
-      icon: Smartphone,
-      title: "Fonctionne sur les téléphones basiques",
-      description: "Optimisé pour tous les appareils",
-    },
-    {
-      icon: Users,
-      title: "Familier pour toutes les générations",
-      description: "Facile à utiliser pour tout le monde",
-    },
-  ];
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="py-20 lg:py-32 bg-background">
+    <section className="py-20 lg:py-32 bg-background" ref={ref}>
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Content */}
-          <div className="space-y-8">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
+          >
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
-                Pourquoi WhatsApp
+                {whyWhatsAppContent.badge}
               </span>
               
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
-                La plateforme que les gens utilisent déjà
+                {whyWhatsAppContent.title}
               </h2>
               
               <p className="text-lg text-muted-foreground">
-                WhatsApp fait déjà partie du quotidien. Rabotka rencontre les gens là où ils sont.
+                {whyWhatsAppContent.description}
               </p>
             </div>
 
             <div className="grid gap-6">
-              {benefits.map((benefit) => (
-                <div
+              {whyWhatsAppContent.benefits.map((benefit, index) => (
+                <motion.div
                   key={benefit.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: 0.3 + index * 0.1 }}
                   className="flex items-start gap-4 p-4 rounded-2xl bg-card shadow-soft transition-all hover:shadow-medium"
                 >
                   <div className="w-12 h-12 rounded-xl bg-whatsapp-light flex items-center justify-center flex-shrink-0">
@@ -53,13 +49,18 @@ export function WhyWhatsAppSection() {
                     <h3 className="font-display font-semibold text-foreground">{benefit.title}</h3>
                     <p className="text-muted-foreground">{benefit.description}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Image */}
-          <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8 }}
+            className="relative"
+          >
             <div className="rounded-3xl overflow-hidden shadow-medium max-w-sm mx-auto">
               <img
                 src={whatsappPhoneImage}
@@ -69,7 +70,7 @@ export function WhyWhatsAppSection() {
             </div>
             {/* Decorative */}
             <div className="absolute -z-10 inset-0 bg-whatsapp/10 rounded-3xl transform rotate-3" />
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
