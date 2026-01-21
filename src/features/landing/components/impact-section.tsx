@@ -1,7 +1,7 @@
 import { TrendingUp, Heart, Users } from "lucide-react";
 import workersTogetherImage from "@/assets/workers-together.jpg";
 
-const ImpactSection = () => {
+export function ImpactSection() {
   const impacts = [
     {
       icon: TrendingUp,
@@ -37,7 +37,7 @@ const ImpactSection = () => {
                 Impact Social
               </span>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 Créer des opportunités là où ça compte
               </h2>
             </div>
@@ -60,6 +60,4 @@ const ImpactSection = () => {
       </div>
     </section>
   );
-};
-
-export default ImpactSection;
+}

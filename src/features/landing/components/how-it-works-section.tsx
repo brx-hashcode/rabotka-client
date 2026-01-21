@@ -25,7 +25,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed }: FlowPro
             {subtitle}
           </span>
           
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
             {title}
           </h2>
         </div>
@@ -40,7 +40,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed }: FlowPro
                 {index + 1}
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">{step.title}</h3>
+                <h3 className="font-display font-semibold text-foreground">{step.title}</h3>
                 <p className="text-muted-foreground text-sm">{step.description}</p>
               </div>
             </div>
@@ -62,7 +62,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed }: FlowPro
   );
 };
 
-const HowItWorksSection = () => {
+export function HowItWorksSection() {
   const workerSteps = [
     {
       icon: UserPlus,
@@ -131,6 +131,4 @@ const HowItWorksSection = () => {
       </div>
     </section>
   );
-};
-
-export default HowItWorksSection;
+}

@@ -1,0 +1,13 @@
+export { Header } from './header';
+export { HeroSection } from './hero-section';
+export { RealitySection } from './reality-section';
+export { WhyWhatsAppSection } from './why-whatsapp-section';
+export { WhatIsRabotkaSection } from './what-is-rabotka-section';
+export { HowItWorksSection } from './how-it-works-section';
+export { DirectContactSection } from './direct-contact-section';
+export { TrustSection } from './trust-section';
+export { AccessibilitySection } from './accessibility-section';
+export { ImpactSection } from './impact-section';
+export { VisionSection } from './vision-section';
+export { CTASection } from './cta-section';
+export { Footer } from './footer';

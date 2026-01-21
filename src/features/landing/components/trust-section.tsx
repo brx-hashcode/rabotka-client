@@ -1,6 +1,6 @@
 import { ShieldCheck, UserCheck, Users, Lock } from "lucide-react";
 
-const TrustSection = () => {
+export function TrustSection() {
   const trustFeatures = [
     {
       icon: UserCheck,
@@ -32,7 +32,7 @@ const TrustSection = () => {
             <ShieldCheck className="w-8 h-8 text-whatsapp-dark" />
           </div>
           
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
             Construit sur la confiance
           </h2>
           
@@ -51,7 +51,7 @@ const TrustSection = () => {
                 <feature.icon className="w-8 h-8 text-whatsapp" />
               </div>
               
-              <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
+              <h3 className="font-display text-xl font-bold text-foreground mb-3">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
@@ -59,6 +59,4 @@ const TrustSection = () => {
       </div>
     </section>
   );
-};
-
-export default TrustSection;
+}

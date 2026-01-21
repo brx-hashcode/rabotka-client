@@ -1,6 +1,6 @@
 import { Bot, UserCheck, MessageSquare, Phone } from "lucide-react";
 
-const WhatIsRabotkaSection = () => {
+export function WhatIsRabotkaSection() {
   const features = [
     {
       icon: UserCheck,
@@ -32,7 +32,7 @@ const WhatIsRabotkaSection = () => {
             Qu'est-ce que Rabotka
           </span>
           
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
             Votre assistant emploi personnel
           </h2>
           
@@ -52,7 +52,7 @@ const WhatIsRabotkaSection = () => {
                 <feature.icon className="w-7 h-7 text-whatsapp-dark" />
               </div>
               
-              <h3 className="font-bold text-foreground text-lg mb-2">{feature.title}</h3>
+              <h3 className="font-display font-bold text-foreground text-lg mb-2">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
@@ -60,6 +60,4 @@ const WhatIsRabotkaSection = () => {
       </div>
     </section>
   );
-};
-
-export default WhatIsRabotkaSection;
+}

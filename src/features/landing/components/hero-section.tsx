@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Users } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
-const HeroSection = () => {
+export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-whatsapp-light">
       {/* Decorative elements */}
@@ -21,7 +21,7 @@ const HeroSection = () => {
                 Plateforme d'emploi via WhatsApp
               </span>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight text-balance">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight text-balance">
                 Trouvez du travail. Trouvez de l'aide.{" "}
                 <span className="text-whatsapp">Directement sur WhatsApp.</span>
               </h1>
@@ -86,6 +86,4 @@ const HeroSection = () => {
       </div>
     </section>
   );
-};
-
-export default HeroSection;
+}

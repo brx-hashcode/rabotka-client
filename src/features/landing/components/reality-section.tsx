@@ -1,6 +1,6 @@
 import streetWorkersImage from "@/assets/street-workers.jpg";
 
-const RealitySection = () => {
+export function RealitySection() {
   const workers = [
     "Employés de maison",
     "Coiffeurs/Coiffeuses",
@@ -28,7 +28,7 @@ const RealitySection = () => {
               Le Défi
             </span>
             
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
               Le travail informel est partout — mais les opportunités sont difficiles à trouver
             </h2>
             
@@ -56,6 +56,4 @@ const RealitySection = () => {
       </div>
     </section>
   );
-};
-
-export default RealitySection;
+}

@@ -1,6 +1,6 @@
 import { MessageCircle, Heart } from "lucide-react";
 
-const Footer = () => {
+export function Footer() {
   return (
     <footer className="py-12 bg-foreground text-primary-foreground">
       <div className="section-container">
@@ -10,7 +10,7 @@ const Footer = () => {
             <div className="w-10 h-10 rounded-xl bg-whatsapp flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">Rabotka</span>
+            <span className="font-display text-xl font-bold">Rabotka</span>
           </div>
 
           {/* Tagline */}
@@ -38,6 +38,4 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

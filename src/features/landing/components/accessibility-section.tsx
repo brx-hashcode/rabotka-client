@@ -1,7 +1,7 @@
 import { Wifi, Sparkles, Globe } from "lucide-react";
 import communitySceneImage from "@/assets/community-scene.jpg";
 
-const AccessibilitySection = () => {
+export function AccessibilitySection() {
   const features = [
     {
       icon: Wifi,
@@ -31,7 +31,7 @@ const AccessibilitySection = () => {
                 Conçu pour l'Afrique
               </span>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 Simple. Abordable. Accessible.
               </h2>
               
@@ -50,7 +50,7 @@ const AccessibilitySection = () => {
                     <feature.icon className="w-6 h-6 text-whatsapp-dark" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                    <h3 className="font-display font-semibold text-foreground">{feature.title}</h3>
                     <p className="text-muted-foreground">{feature.description}</p>
                   </div>
                 </div>
@@ -70,6 +70,4 @@ const AccessibilitySection = () => {
       </div>
     </section>
   );
-};
-
-export default AccessibilitySection;
+}

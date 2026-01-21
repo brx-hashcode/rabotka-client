@@ -1,16 +1,18 @@
-import Header from "@/components/landing/Header";
-import HeroSection from "@/components/landing/HeroSection";
-import RealitySection from "@/components/landing/RealitySection";
-import WhyWhatsAppSection from "@/components/landing/WhyWhatsAppSection";
-import WhatIsRabotkaSection from "@/components/landing/WhatIsRabotkaSection";
-import HowItWorksSection from "@/components/landing/HowItWorksSection";
-import DirectContactSection from "@/components/landing/DirectContactSection";
-import TrustSection from "@/components/landing/TrustSection";
-import AccessibilitySection from "@/components/landing/AccessibilitySection";
-import ImpactSection from "@/components/landing/ImpactSection";
-import VisionSection from "@/components/landing/VisionSection";
-import CTASection from "@/components/landing/CTASection";
-import Footer from "@/components/landing/Footer";
+import {
+  Header,
+  HeroSection,
+  RealitySection,
+  WhyWhatsAppSection,
+  WhatIsRabotkaSection,
+  HowItWorksSection,
+  DirectContactSection,
+  TrustSection,
+  AccessibilitySection,
+  ImpactSection,
+  VisionSection,
+  CTASection,
+  Footer,
+} from '@/features/landing/components';
 
 const Index = () => {
   return (

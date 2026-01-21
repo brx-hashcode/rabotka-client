@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Menu, X } from "lucide-react";
 
-const Header = () => {
+export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ const Header = () => {
             <div className="w-9 h-9 rounded-xl bg-whatsapp flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">Rabotka</span>
+            <span className="font-display text-xl font-bold text-foreground">Rabotka</span>
           </a>
 
           {/* Desktop Navigation */}
@@ -83,6 +83,4 @@ const Header = () => {
       </div>
     </header>
   );
-};
-
-export default Header;
+}

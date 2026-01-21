@@ -1,7 +1,7 @@
 import { MapPin, ArrowRight } from "lucide-react";
 import citySunsetImage from "@/assets/city-sunset.jpg";
 
-const VisionSection = () => {
+export function VisionSection() {
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background Image */}
@@ -22,7 +22,7 @@ const VisionSection = () => {
               Notre Vision
             </div>
             
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight">
               Du Congo à l'Afrique
             </h2>
             
@@ -39,6 +39,4 @@ const VisionSection = () => {
       </div>
     </section>
   );
-};
-
-export default VisionSection;
+}

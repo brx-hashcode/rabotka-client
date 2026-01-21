@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
 @layer base {
   :root {
+    --font-family-sans: 'Inter', sans-serif;
+    --font-family-display: 'Space Grotesk', sans-serif;
     /* WhatsApp-inspired greens */
     --whatsapp: 142 70% 49%;
     --whatsapp-dark: 142 72% 42%;
@@ -113,7 +113,11 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
@@ -144,5 +148,9 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: 'Space Grotesk', sans-serif;
   }
 }

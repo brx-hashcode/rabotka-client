@@ -1,7 +1,7 @@
 import { Smartphone, Download, Users } from "lucide-react";
 import whatsappPhoneImage from "@/assets/whatsapp-phone.jpg";
 
-const WhyWhatsAppSection = () => {
+export function WhyWhatsAppSection() {
   const benefits = [
     {
       icon: Download,
@@ -31,7 +31,7 @@ const WhyWhatsAppSection = () => {
                 Pourquoi WhatsApp
               </span>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 La plateforme que les gens utilisent déjà
               </h2>
               
@@ -50,7 +50,7 @@ const WhyWhatsAppSection = () => {
                     <benefit.icon className="w-6 h-6 text-whatsapp-dark" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{benefit.title}</h3>
+                    <h3 className="font-display font-semibold text-foreground">{benefit.title}</h3>
                     <p className="text-muted-foreground">{benefit.description}</p>
                   </div>
                 </div>
@@ -74,6 +74,4 @@ const WhyWhatsAppSection = () => {
       </div>
     </section>
   );
-};
-
-export default WhyWhatsAppSection;
+}

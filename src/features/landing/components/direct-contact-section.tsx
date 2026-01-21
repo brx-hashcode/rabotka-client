@@ -1,7 +1,7 @@
 import { Phone, MessageCircle, ArrowRight } from "lucide-react";
 import phoneConversationImage from "@/assets/phone-conversation.jpg";
 
-const DirectContactSection = () => {
+export function DirectContactSection() {
   return (
     <section className="py-20 lg:py-32 bg-secondary/30">
       <div className="section-container">
@@ -22,7 +22,7 @@ const DirectContactSection = () => {
                 Connexion Directe
               </span>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 Pas d'intermédiaires. Pas de barrières.
               </h2>
               
@@ -62,6 +62,4 @@ const DirectContactSection = () => {
       </div>
     </section>
   );
-};
-
-export default DirectContactSection;
+}

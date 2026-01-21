@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users, ArrowRight } from "lucide-react";
 
-const CTASection = () => {
+export function CTASection() {
   return (
     <section className="py-20 lg:py-32 bg-whatsapp-light">
       <div className="section-container">
@@ -10,7 +10,7 @@ const CTASection = () => {
             <MessageCircle className="w-10 h-10 text-primary-foreground" />
           </div>
           
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
             Commencez aujourd'hui, sur WhatsApp
           </h2>
           
@@ -34,6 +34,4 @@ const CTASection = () => {
       </div>
     </section>
   );
-};
-
-export default CTASection;
+}
