@@ -1,4 +1,4 @@
-# Rabotka Landing Page
+# Rabotka
 
 A modern landing page for **Rabotka** — a WhatsApp-based job platform connecting informal workers and employers in African cities, starting with Brazzaville, Congo.
 
@@ -65,7 +65,7 @@ src/
 
 ```bash
 # Clone the repository
-git clone <YOUR_GIT_URL>
+git clone https://github.com/bruxx-6243/rabotka-landing.git
 cd rabotka-landing
 
 # Install dependencies
