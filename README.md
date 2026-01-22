@@ -1,73 +1,127 @@
-# Welcome to your Lovable project
+# Rabotka Landing Page
 
-## Project info
+A modern landing page for **Rabotka** — a WhatsApp-based job platform connecting informal workers and employers in African cities, starting with Brazzaville, Congo.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## About Rabotka
 
-## How can I edit this code?
+Rabotka revolutionizes job matching by connecting informal workers and employers through a simple WhatsApp assistant. Our mission: **Find work. Find help. Directly on WhatsApp** — no app download, no complexity, just simple connections.
 
-There are several ways of editing your application.
+### Key Features
 
-**Use Lovable**
+- **WhatsApp-Based** — Works directly on WhatsApp, no app to download
+- **Free Platform** — No fees for workers or employers
+- **Verified Profiles** — Trust and security built into every connection
+- **Direct Contact** — Connect directly via WhatsApp chat or phone call
+- **Accessible** — Works on any smartphone with WhatsApp, no internet required for basic use
+- **Local Focus** — Designed for African markets, starting with Brazzaville
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Vision
 
-Changes made via Lovable will be committed automatically to this repo.
+Built for informal workers and employers in African cities. Simple, accessible, and trusted — connecting opportunities through the platform everyone already uses.
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| Category | Technology |
+|----------|------------|
+| Build Tool | Vite 5 |
+| Framework | React 18 |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 4 + tw-animate-css |
+| UI Components | shadcn/ui (Radix UI primitives) |
+| Animations | Framer Motion |
+| Routing | React Router DOM 6 |
+| State/Data | TanStack React Query |
+| Testing | Vitest + Testing Library |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Project Structure
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── app/           # App entry, providers, routes
+├── assets/        # Images and static assets
+├── components/    # Shared UI components (shadcn/ui)
+│   ├── common/    # Common reusable components
+│   └── ui/        # shadcn/ui components
+├── content/       # Content data (hero, features, etc.)
+│   └── landing/   # Landing page content
+├── features/      # Feature-based modules
+│   └── landing/   # Landing page feature components
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions
+├── pages/         # Page components
+├── styles/        # Global CSS
+├── test/          # Test setup and files
+└── types/         # TypeScript type definitions
 ```
 
-**Edit a file directly in GitHub**
+## Getting Started
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Prerequisites
 
-**Use GitHub Codespaces**
+- Node.js 18+
+- pnpm (recommended) or npm
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Installation
 
-## What technologies are used for this project?
+```bash
+# Clone the repository
+git clone <YOUR_GIT_URL>
+cd rabotka-landing
 
-This project is built with:
+# Install dependencies
+pnpm install
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Start development server
+pnpm dev
+```
 
-## How can I deploy this project?
+### Available Scripts
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server with hot reload |
+| `pnpm build` | Build for production |
+| `pnpm build:dev` | Build in development mode |
+| `pnpm preview` | Preview production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run tests |
+| `pnpm test:watch` | Run tests in watch mode |
 
-## Can I connect a custom domain to my Lovable project?
+## Development Notes
 
-Yes, you can!
+### Content Management
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Landing page content is centralized in `src/content/landing/` for easy updates:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `hero.ts` — Hero section content
+- `reality.ts` — Reality section content
+- `why-whatsapp.ts` — Why WhatsApp section
+- `what-is-rabotka.ts` — What is Rabotka section
+- `how-it-works.ts` — How it works steps
+- `direct-contact.ts` — Direct contact section
+- `trust.ts` — Trust and security section
+- `accessibility.ts` — Accessibility section
+- `impact.ts` — Impact section
+- `vision.ts` — Vision section
+- `cta.ts` — Call-to-action section
+- `navigation.ts` — Navigation links
+- `footer.ts` — Footer content
+
+### Component Organization
+
+Components follow a feature-based architecture:
+
+- **`src/components/ui/`** — shadcn/ui base components
+- **`src/components/common/`** — Shared custom components
+- **`src/features/landing/components/`** — Landing page specific sections
+
+### Design System
+
+- **Fonts**: Poppins (headings) and Inter (body text)
+- **Colors**: WhatsApp-inspired green palette with warm African accents
+- **Animations**: Framer Motion for scroll-triggered animations
+- **Responsive**: Mobile-first design approach
+
+## License
+
+Private project.
