@@ -1,7 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Smartphone, Download, Users } from "lucide-react";
-import whatsappPhoneImage from "@/assets/whatsapp-phone.jpg";
+import whatsappPhoneImage from "@/assets/whatsapp-phone.png";
 import { whyWhatsAppContent } from "@/content/landing/why-whatsapp";
 
 export function WhyWhatsAppSection() {
@@ -12,7 +11,6 @@ export function WhyWhatsAppSection() {
     <section className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -54,7 +52,6 @@ export function WhyWhatsAppSection() {
             </div>
           </motion.div>
 
-          {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -65,10 +62,9 @@ export function WhyWhatsAppSection() {
               <img
                 src={whatsappPhoneImage}
                 alt="Mains tenant un téléphone avec WhatsApp"
-                className="w-full h-auto object-cover aspect-square"
+                className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
               />
             </div>
-            {/* Decorative */}
             <div className="absolute -z-10 inset-0 bg-whatsapp/10 rounded-3xl transform rotate-3" />
           </motion.div>
         </div>

@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import streetWorkersImage from "@/assets/street-workers.jpg";
+import streetWorkersImage from "@/assets/street-workers.png";
 import { realityContent } from "@/content/landing/reality";
 
 export function RealitySection() {
@@ -11,7 +11,6 @@ export function RealitySection() {
     <section className="py-20 lg:py-32 bg-secondary/30 overflow-x-hidden" ref={ref}>
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -21,11 +20,10 @@ export function RealitySection() {
             <img
               src={streetWorkersImage}
               alt="Scène de rue africaine animée avec des travailleurs informels"
-              className="w-full h-auto object-cover aspect-[16/10]"
+              className="w-full h-auto object-cover aspect-16/10"
             />
           </motion.div>
-
-          {/* Content */}
+    
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}

@@ -1,7 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { TrendingUp, Heart, Users } from "lucide-react";
-import workersTogetherImage from "@/assets/workers-together.jpg";
+import workersTogetherImage from "@/assets/workers-together.png";
 import { impactContent } from "@/content/landing/impact";
 
 export function ImpactSection() {
@@ -12,21 +11,19 @@ export function ImpactSection() {
     <section className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
-            className="relative rounded-3xl overflow-hidden shadow-medium"
+            className="relative rounded-3xl overflow-hidden"
           >
             <img
               src={workersTogetherImage}
               alt="Groupe de travailleurs africains divers souriant ensemble"
-              className="w-full h-auto object-cover aspect-[16/10]"
+              className="w-full h-auto object-cover aspect-16/10"
             />
           </motion.div>
 
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}

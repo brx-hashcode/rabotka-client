@@ -1,6 +1,5 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { UserPlus, ShieldCheck, Link, MessageCircle } from "lucide-react";
 import workerSmilingImage from "@/assets/worker-smiling.jpg";
 import familyHomeImage from "@/assets/family-home.jpg";
 import { howItWorksContent } from "@/content/landing/how-it-works";
@@ -22,7 +21,6 @@ interface FlowProps {
 const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView }: FlowProps) => {
   return (
     <div className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? 'lg:flex-row-reverse' : ''}`}>
-      {/* Content */}
       <motion.div
         initial={{ opacity: 0, x: reversed ? 50 : -50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -48,7 +46,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
               transition={{ delay: 0.3 + index * 0.1 }}
               className="flex items-start gap-4 p-4 rounded-2xl bg-card shadow-soft"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-whatsapp text-primary-foreground font-bold flex-shrink-0">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-whatsapp text-primary-foreground font-bold shrink-0">
                 {index + 1}
               </div>
               <div>
@@ -60,7 +58,6 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
         </div>
       </motion.div>
 
-      {/* Image */}
       <motion.div
         initial={{ opacity: 0, x: reversed ? -50 : 50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -71,7 +68,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
           <img
             src={image}
             alt={imageAlt}
-            className="w-full h-auto object-cover aspect-[3/4] lg:aspect-[4/5]"
+            className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
           />
         </div>
       </motion.div>
