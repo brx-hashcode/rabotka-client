@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { MapPin, ArrowRight } from "lucide-react";
-import citySunsetImage from "@/assets/city-sunset.jpg";
+import citySunsetImage from "@/assets/city-sunset.png";
 import { visionContent } from "@/content/landing/vision";
 
 export function VisionSection() {

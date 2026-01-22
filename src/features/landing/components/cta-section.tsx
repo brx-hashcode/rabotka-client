@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users, ArrowRight } from "lucide-react";
 import { ctaContent } from "@/content/landing/cta";
+import rabotkaLogo from "@/assets/rabotka-logo.png";
 
 export function CTASection() {
   const ref = useRef(null);
@@ -17,9 +18,11 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto space-y-8"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-whatsapp shadow-glow mb-4">
-            <MessageCircle className="w-10 h-10 text-primary-foreground" />
-          </div>
+            <img 
+              src={rabotkaLogo} 
+              alt="Logo Rabotka" 
+              className="w-20 h-20 object-cover mx-auto"
+            />
           
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
             {ctaContent.title}

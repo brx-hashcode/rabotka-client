@@ -41,7 +41,7 @@ export function TrustSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 + index * 0.1 }}
-              className="text-center p-8 rounded-3xl bg-card shadow-soft hover:shadow-medium transition-all"
+              className="text-center p-8 rounded-3xl bg-card shadow-soft transition-all"
             >
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-whatsapp/10 mb-6">
                 <feature.icon className="w-8 h-8 text-whatsapp" />

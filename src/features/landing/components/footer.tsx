@@ -1,5 +1,6 @@
-import { MapPin, Mail, Phone, MessageCircle } from "lucide-react";
+import { MapPin, Mail, Phone } from "lucide-react";
 import { footerLinks, contactInfo, footerContent } from "@/content/landing/footer";
+import rabotkaLogo from "@/assets/rabotka-logo.png";
 
 export function Footer() {
   return (
@@ -9,9 +10,11 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-whatsapp flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img 
+                src={rabotkaLogo} 
+                alt="Logo Rabotka" 
+                className="w-10 h-10 object-contain"
+              />
               <span className="font-display font-bold text-xl">Rabotka</span>
             </div>
             <p className="text-background/70 mb-6 max-w-sm">

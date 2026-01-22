@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Menu, X } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
+import rabotkaLogo from "@/assets/rabotka-logo.png";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,9 +22,11 @@ export function Header() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-whatsapp flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img 
+              src={rabotkaLogo} 
+              alt="Logo Rabotka" 
+              className="w-10 h-10 object-contain mix-blend-multiply"
+            />
             <span className="font-display text-xl font-bold text-foreground">Rabotka</span>
           </a>
 

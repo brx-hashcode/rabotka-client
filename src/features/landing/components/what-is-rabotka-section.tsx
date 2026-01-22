@@ -1,6 +1,5 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Bot, UserCheck, MessageSquare, Phone } from "lucide-react";
 import { whatIsRabotkaContent } from "@/content/landing/what-is-rabotka";
 
 export function WhatIsRabotkaSection() {
@@ -36,9 +35,9 @@ export function WhatIsRabotkaSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group relative bg-card rounded-2xl p-6 shadow-soft hover:shadow-medium transition-all hover:-translate-y-1"
+              className="relative bg-card rounded-2xl p-6 shadow-soft transition-all"
             >
-              <div className="w-14 h-14 rounded-2xl bg-whatsapp/10 flex items-center justify-center mb-4 group-hover:bg-whatsapp/20 transition-colors">
+              <div className="w-14 h-14 rounded-2xl bg-whatsapp/10 flex items-center justify-center mb-4 transition-colors">
                 <feature.icon className="w-7 h-7 text-whatsapp-dark" />
               </div>
               

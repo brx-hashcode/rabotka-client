@@ -22,7 +22,7 @@ export function DirectContactSection() {
             <img
               src={phoneConversationImage}
               alt="Deux personnes ayant une conversation téléphonique amicale"
-              className="w-full h-auto object-cover aspect-[16/10]"
+              className="w-full h-auto object-cover aspect-16/10"
             />
           </motion.div>
 
