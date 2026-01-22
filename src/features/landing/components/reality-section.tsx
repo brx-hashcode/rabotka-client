@@ -20,10 +20,10 @@ export function RealitySection() {
             <img
               src={streetWorkersImage}
               alt="Scène de rue africaine animée avec des travailleurs informels"
-              className="w-full h-auto object-cover aspect-16/10"
+              className="w-full h-auto object-cover aspect-5/4"
             />
           </motion.div>
-    
+
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}

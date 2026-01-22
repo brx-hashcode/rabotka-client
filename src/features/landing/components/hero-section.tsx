@@ -1,15 +1,14 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users } from "lucide-react";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/hero-image.png";
 import { heroContent } from "@/content/landing/hero";
 
 export function HeroSection() {
   const { badge, title, description, cta, stats, floatingCard, imageAlt } = heroContent;
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-whatsapp-light">
-      {/* Decorative elements */}
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-whatsapp/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
@@ -17,7 +16,6 @@ export function HeroSection() {
 
       <div className="section-container relative z-10 py-20 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -71,7 +69,6 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -82,9 +79,8 @@ export function HeroSection() {
               <img
                 src={heroImage}
                 alt={imageAlt}
-                className="w-full h-auto object-cover aspect-[4/3]"
+                className="w-full h-auto object-cover aspect-4/3"
               />
-              {/* Floating chat bubble */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -92,7 +88,7 @@ export function HeroSection() {
                 className="absolute bottom-6 left-6 right-6 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-medium animate-float"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-whatsapp flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-whatsapp flex items-center justify-center shrink-0">
                     <floatingCard.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div className="space-y-1">

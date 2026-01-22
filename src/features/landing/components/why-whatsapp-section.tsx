@@ -38,9 +38,9 @@ export function WhyWhatsAppSection() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ delay: 0.3 + index * 0.1 }}
-                  className="flex items-start gap-4 p-4 rounded-2xl bg-card shadow-soft transition-all hover:shadow-medium"
+                  className="flex items-start gap-4 p-4 rounded-2xl bg-card shadow-soft transition-all"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-whatsapp-light flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-whatsapp-light flex items-center justify-center shrink-0">
                     <benefit.icon className="w-6 h-6 text-whatsapp-dark" />
                   </div>
                   <div>
@@ -65,7 +65,6 @@ export function WhyWhatsAppSection() {
                 className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
               />
             </div>
-            <div className="absolute -z-10 inset-0 bg-whatsapp/10 rounded-3xl transform rotate-3" />
           </motion.div>
         </div>
       </div>
