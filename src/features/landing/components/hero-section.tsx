@@ -75,7 +75,7 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative"
           >
-            <div className="relative rounded-3xl overflow-hidden shadow-medium">
+            <div className="relative rounded-3xl overflow-hidden">
               <img
                 src={heroImage}
                 alt={imageAlt}
