@@ -6,11 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
-interface ProvidersProps {
+type ProvidersProps = {
   children: ReactNode;
 }
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children }: Readonly<ProvidersProps>) {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
