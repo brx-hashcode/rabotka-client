@@ -1,15 +1,10 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router";
 import { Providers } from "./providers";
 import { AppRoutes } from "./routes";
 
 const App = () => (
   <Providers>
-    <BrowserRouter
-      future={{
-        v7_relativeSplatPath: true,
-        v7_startTransition: true,
-      }}
-    >
+    <BrowserRouter>
       <AppRoutes />
     </BrowserRouter>
   </Providers>

@@ -1,6 +1,5 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
