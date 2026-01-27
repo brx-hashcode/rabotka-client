@@ -10,14 +10,13 @@ export function VisionSection() {
 
   return (
     <section id="about" className="relative py-20 lg:py-32 overflow-hidden" ref={ref}>
-      {/* Background Image */}
       <div className="absolute inset-0">
         <img
           src={citySunsetImage}
           alt="Horizon d'une ville africaine au coucher du soleil"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/80 to-foreground/60" />
+        <div className="absolute inset-0 bg-linear-to-r from-foreground/90 via-foreground/80 to-foreground/60" />
       </div>
 
       <div className="section-container relative z-10">
