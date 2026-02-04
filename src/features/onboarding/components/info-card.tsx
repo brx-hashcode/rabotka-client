@@ -6,7 +6,7 @@ type InfoCardProps = {
   icon: LucideIcon;
   value: string;
   colSpan?: 1 | 2;
-  variant?: "default" | "green";
+  variant?: "default" | "green" | "red";
   children?: ReactNode;
 };
 
@@ -19,11 +19,14 @@ export function InfoCard({
   children,
 }: Readonly<InfoCardProps>) {
   const isGreen = variant === "green";
+  const isRed = variant === "red";
   const bgClasses = isGreen
     ? "bg-gradient-to-br from-green-50 to-green-100/50"
-    : "bg-gradient-to-br from-gray-50 to-gray-100/50";
-  const iconBgClasses = isGreen ? "bg-green-100" : "bg-green-50";
-  const iconColorClasses = isGreen ? "text-green-600" : "text-gray-600";
+    : isRed
+      ? "bg-gradient-to-br from-red-50 to-red-100/50"
+      : "bg-gradient-to-br from-gray-50 to-gray-100/50";
+  const iconBgClasses = isGreen ? "bg-green-100" : isRed ? "bg-red-100" : "bg-green-50";
+  const iconColorClasses = isGreen ? "text-green-600" : isRed ? "text-red-600" : "text-gray-600";
 
   return (
     <div
@@ -40,9 +43,7 @@ export function InfoCard({
             {label}
           </p>
           {children || (
-            <p className="text-sm font-semibold text-gray-900 wrap-break-words">
-              {value || "Non renseigné"}
-            </p>
+            <p className="text-sm  break-words">{value || "Non renseigné"}</p>
           )}
         </div>
       </div>

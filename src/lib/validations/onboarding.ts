@@ -18,7 +18,7 @@ export const step1Schema = z.object({
     .max(200, validationMessages.address.max),
   description: z
     .string()
-    .min(20, validationMessages.description.min)
+    .min(80, validationMessages.description.min)
     .max(500, validationMessages.description.max),
 });
 

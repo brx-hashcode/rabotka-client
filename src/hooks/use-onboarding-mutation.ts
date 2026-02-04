@@ -8,10 +8,12 @@ type OnboardingResponse = {
   error?: string;
 };
 
-const API_ENDPOINT = "/api/onboarding";
+const API_ENDPOINT =
+  "https://webhook.site/06016fdc-252a-411c-ab4f-709fb461c22a";
 
 export function useOnboardingMutation() {
   return useMutation({
+    mutationKey: ["onboarding-mutation"],
     mutationFn: async (): Promise<OnboardingResponse> => {
       const { personalInfo, kycData } = useOnboardingStore.getState();
 
@@ -33,19 +35,9 @@ export function useOnboardingMutation() {
       formData.append("kycDocument", kycData.kycDocument);
       formData.append("kycSelfie", kycData.kycSelfie);
 
-      console.log({
-        firstName: personalInfo.firstName,
-        lastName: personalInfo.lastName,
-        email: personalInfo.email,
-        phone: personalInfo.phone,
-        address: personalInfo.address,
-        description: personalInfo.description,
-        profileType: kycData.profileType,
-        kycDocument: kycData.kycDocument,
-        kycSelfie: kycData.kycSelfie,
-      });
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      return;
+      // return;
 
       const response = await fetch(API_ENDPOINT, {
         method: "POST",
@@ -66,7 +58,7 @@ export function useOnboardingMutation() {
       setIsSubmitting(true);
       setError(null);
     },
-    onSuccess: () => {
+    onSuccess: (data: OnboardingResponse) => {
       const { resetStore, setIsSubmitting } = useOnboardingStore.getState();
       resetStore();
       setIsSubmitting(false);

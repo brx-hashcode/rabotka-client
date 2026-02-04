@@ -16,6 +16,7 @@ import {
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
 import { StepIndicator } from "./step-indicator";
+import { cn } from "@/lib/utils";
 
 type OnboardingStep =
   | "personal-informations"
@@ -106,12 +107,17 @@ export function ConfirmationView({
               label={content.personalInfo.fields.profileType}
               icon={Briefcase}
               value=""
-              variant="green"
+              variant={kycData.profileType === "worker" ? "green" : "red"}
               colSpan={2}
             >
               <Badge
                 variant="default"
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-1"
+                className={cn(
+                  "text-white font-semibold px-3 py-1",
+                  kycData.profileType === "worker"
+                    ? "bg-green-500 hover:bg-green-600"
+                    : "bg-red-500 hover:bg-red-600"
+                )}
               >
                 {kycData.profileType === "worker"
                   ? content.profileTypes.worker
