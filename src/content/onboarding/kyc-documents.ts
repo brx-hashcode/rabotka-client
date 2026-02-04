@@ -16,12 +16,20 @@ export const kycDocumentsContent = {
       description:
         "Téléchargez une photo claire de votre pièce d'identité officielle (carte d'identité nationale, passeport ou permis de conduire). Le document doit être lisible, valide et toutes les informations doivent être visibles.",
       helperText: "PDF, JPG, JPEG, PNG - Max 5MB",
+      infoTooltip:
+        "Photo claire de votre pièce d'identité (recto/verso si nécessaire).",
+      infoImageKey: "document" as const,
+      infoImageAlt: "Exemple de document d'identité accepté",
     },
     kycSelfie: {
       label: "Selfie avec document d'identité",
       description:
         "Prenez un selfie en tenant votre pièce d'identité à côté de votre visage. Votre visage et le document doivent être clairement visibles et bien éclairés pour la vérification.",
       helperText: "JPG, JPEG, PNG - Max 5MB",
+      infoTooltip:
+        "Selfie avec votre visage et le document d'identité visibles côte à côte.",
+      infoImageKey: "selfie" as const,
+      infoImageAlt: "Exemple de selfie avec document d'identité",
     },
   },
   buttons: {

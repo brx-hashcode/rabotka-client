@@ -1,9 +1,10 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { X, FileText, User, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fileUploadContent } from "@/content/onboarding";
+import { InfoIcon } from "./info-icon";
 
 type FileUploadZoneProps = {
   readonly onFileSelect: (file: File) => void;
@@ -17,6 +18,9 @@ type FileUploadZoneProps = {
   readonly helperText: string;
   readonly error?: string;
   readonly type?: "document" | "selfie";
+  readonly infoTooltip?: string;
+  readonly infoImage?: string;
+  readonly infoImageAlt?: string;
 };
 
 export function FileUploadZone({
@@ -31,6 +35,9 @@ export function FileUploadZone({
   helperText,
   error,
   type = "document",
+  infoTooltip,
+  infoImage,
+  infoImageAlt,
 }: Readonly<FileUploadZoneProps>) {
   const isImage = preview && /\.(jpg|jpeg|png)$/i.test(fileName || "");
   const isPDF = fileName && /\.pdf$/i.test(fileName);
@@ -57,14 +64,6 @@ export function FileUploadZone({
     noClick: hasPreview,
   });
 
-  useEffect(() => {
-    return () => {
-      if (preview?.startsWith("blob:")) {
-        URL.revokeObjectURL(preview);
-      }
-    };
-  }, [preview]);
-
   const openFileDialog = () => {
     open();
   };
@@ -79,10 +78,22 @@ export function FileUploadZone({
     return "border-dashed border-gray-300 bg-gray-50/50 hover:border-green-500 hover:bg-green-50/30";
   };
 
+  const showInfoIcon =
+    infoTooltip && infoImage && infoImageAlt;
+
   return (
     <div className="space-y-2">
       <div>
-        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm font-medium text-gray-700">{label}</label>
+          {showInfoIcon && (
+            <InfoIcon
+              tooltipText={infoTooltip}
+              imageSrc={infoImage}
+              imageAlt={infoImageAlt}
+            />
+          )}
+        </div>
         {description && (
           <p className="text-xs text-gray-500 mt-1">{description}</p>
         )}

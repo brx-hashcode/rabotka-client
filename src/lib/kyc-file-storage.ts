@@ -5,11 +5,11 @@ const KYC_SELFIE_KEY = "onboarding-kyc-selfie";
 
 type KycFileKey = "kycDocument" | "kycSelfie";
 
-interface StoredFileMeta {
+type StoredFileMeta = {
   blob: Blob;
   fileName: string;
   type: string;
-}
+};
 
 function blobToFile(blob: Blob, fileName: string, type: string): File {
   return new File([blob], fileName, { type });
