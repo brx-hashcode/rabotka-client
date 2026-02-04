@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import notFoundImage from "@/assets/not-found.png";
 
-const NotFound = () => {
+export default function NotFound() {
   const location = useLocation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    console.error(
+      "404 Error: User attempted to access non-existent route:",
+      location.pathname
+    );
   }, [location.pathname]);
 
   return (
@@ -38,13 +41,14 @@ const NotFound = () => {
           <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white mb-4 drop-shadow-lg">
             404
           </h1>
-          
+
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">
             Vous semblez perdu...
           </h2>
-          
+
           <p className="text-lg sm:text-xl text-white/90 mb-8 drop-shadow-sm max-w-xl mx-auto">
-            Cette page n'existe pas ou a été déplacée. Ne vous inquiétez pas, nous pouvons vous aider à retrouver votre chemin.
+            Cette page n'existe pas ou a été déplacée. Ne vous inquiétez pas,
+            nous pouvons vous aider à retrouver votre chemin.
           </p>
 
           <motion.div
@@ -52,11 +56,7 @@ const NotFound = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Button
-              variant="whatsapp"
-              size="lg"
-              asChild
-            >
+            <Button variant="whatsapp" size="lg" asChild>
               <Link to="/">
                 <Home className="w-5 h-5" />
                 Retourner à l'accueil
@@ -67,6 +67,4 @@ const NotFound = () => {
       </motion.div>
     </div>
   );
-};
-
-export default NotFound;
+}
