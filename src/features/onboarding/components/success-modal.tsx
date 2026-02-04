@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { CheckCircle } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { StatusModal } from "./status-modal";
+import { modalsContent } from "@/content/onboarding";
 
 type SuccessModalProps = {
   open: boolean;
@@ -33,9 +34,9 @@ export function SuccessModal({
       open={open}
       onOpenChange={onOpenChange}
       icon={icon}
-      title="Votre profil a bien été créé avec succès"
-      description="Vous allez recevoir un lien sur WhatsApp afin de finaliser la création de votre profil et vérification"
-      buttonText="J'ai compris"
+      title={modalsContent.success.title}
+      description={modalsContent.success.description}
+      buttonText={modalsContent.success.button}
       onButtonClick={handleClose}
       buttonClassName="w-full bg-green-500 hover:bg-green-600 text-white"
     />

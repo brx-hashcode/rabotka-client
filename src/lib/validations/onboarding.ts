@@ -1,29 +1,30 @@
 import { z } from "zod";
+import { validationMessages } from "@/content/onboarding";
 
 export const step1Schema = z.object({
   firstName: z
     .string()
-    .min(2, "Minimum 2 caractères")
-    .max(50, "Maximum 50 caractères"),
+    .min(2, validationMessages.firstName.min)
+    .max(50, validationMessages.firstName.max),
   lastName: z
     .string()
-    .min(2, "Minimum 2 caractères")
-    .max(50, "Maximum 50 caractères"),
-  email: z.string().email("Email invalide"),
-  phone: z.string().regex(/^\+242\d{9}$/, "Format: +242XXXXXXXXX"),
+    .min(2, validationMessages.lastName.min)
+    .max(50, validationMessages.lastName.max),
+  email: z.string().email(validationMessages.email.invalid),
+  phone: z.string().regex(/^\+242\d{9}$/, validationMessages.phone.invalid),
   address: z
     .string()
-    .min(10, "Adresse trop courte")
-    .max(200, "Adresse trop longue"),
+    .min(10, validationMessages.address.min)
+    .max(200, validationMessages.address.max),
   description: z
     .string()
-    .min(20, "Minimum 20 caractères")
-    .max(500, "Maximum 500 caractères"),
+    .min(20, validationMessages.description.min)
+    .max(500, validationMessages.description.max),
 });
 
 export const step2Schema = z.object({
   profileType: z.enum(["worker", "employer"], {
-    errorMap: () => ({ message: "Sélectionnez un type de profil" }),
+    errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
   kycDocument: z.custom<File>(
     (file) => {
@@ -38,7 +39,7 @@ export const step2Schema = z.object({
       return validTypes.includes(file.type);
     },
     {
-      message: "Document invalide (PDF, JPG, PNG - Max 5MB)",
+      message: validationMessages.kycDocument.invalid,
     }
   ),
   kycSelfie: z.custom<File>(
@@ -49,7 +50,7 @@ export const step2Schema = z.object({
       return validTypes.includes(file.type);
     },
     {
-      message: "Selfie invalide (JPG, PNG - Max 5MB)",
+      message: validationMessages.kycSelfie.invalid,
     }
   ),
 });

@@ -14,6 +14,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
+import { confirmationContent } from "@/content/onboarding";
 
 type ConfirmationViewProps = {
   onBack: () => void;
@@ -40,6 +41,8 @@ export function ConfirmationView({
     }
   }, [mutation, onSuccess, onError]);
 
+  const content = confirmationContent;
+
   return (
     <div className="space-y-6">
       <div className="space-y-6">
@@ -49,37 +52,48 @@ export function ConfirmationView({
               <UserCircle className="h-5 w-5 text-green-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-900">
-              Informations personnelles
+              {content.personalInfo.title}
             </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoCard
-              label="Prénom"
+              label={content.personalInfo.fields.firstName}
               icon={User}
               value={personalInfo.firstName}
             />
-            <InfoCard label="Nom" icon={User} value={personalInfo.lastName} />
-            <InfoCard label="Email" icon={Mail} value={personalInfo.email} />
             <InfoCard
-              label="Téléphone"
+              label={content.personalInfo.fields.lastName}
+              icon={User}
+              value={personalInfo.lastName}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.email}
+              icon={Mail}
+              value={personalInfo.email}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.phone}
               icon={Phone}
               value={personalInfo.phone}
             />
             <InfoCard
-              label="Adresse"
+              label={content.personalInfo.fields.address}
               icon={MapPin}
               value={personalInfo.address}
               colSpan={2}
             />
             <InfoCard
-              label="Description"
+              label={content.personalInfo.fields.description}
               icon={FileText}
-              value={personalInfo.description || "Aucune description"}
+              value={
+                personalInfo.description ||
+                content.personalInfo.defaultDescription
+              }
               colSpan={2}
             />
             <InfoCard
-              label="Type de profil"
+              label={content.personalInfo.fields.profileType}
               icon={Briefcase}
               value=""
               variant="green"
@@ -89,7 +103,9 @@ export function ConfirmationView({
                 variant="default"
                 className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-1"
               >
-                {kycData.profileType === "worker" ? "Worker" : "Employer"}
+                {kycData.profileType === "worker"
+                  ? content.profileTypes.worker
+                  : content.profileTypes.employer}
               </Badge>
             </InfoCard>
           </div>
@@ -97,12 +113,12 @@ export function ConfirmationView({
 
         <section>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Documents KYC
+            {content.kycDocuments.title}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-gray-300 rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
-                Document d'identité
+                {content.kycDocuments.documentIdentity}
               </p>
               {kycData.kycDocumentPreview ? (
                 <div className="space-y-2">
@@ -116,12 +132,16 @@ export function ConfirmationView({
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucun document</p>
+                <p className="text-sm text-gray-500">
+                  {content.kycDocuments.noDocument}
+                </p>
               )}
             </div>
 
             <div className="border border-gray-300 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Selfie</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                {content.kycDocuments.selfie}
+              </p>
               {kycData.kycSelfiePreview ? (
                 <div className="space-y-2">
                   <img
@@ -134,7 +154,9 @@ export function ConfirmationView({
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucun selfie</p>
+                <p className="text-sm text-gray-500">
+                  {content.kycDocuments.noSelfie}
+                </p>
               )}
             </div>
           </div>
@@ -149,7 +171,7 @@ export function ConfirmationView({
           disabled={isSubmitting}
           className="flex-1"
         >
-          Retour
+          {content.buttons.back}
         </Button>
         <Button
           type="button"
@@ -160,10 +182,10 @@ export function ConfirmationView({
           {isSubmitting || mutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Envoi en cours...
+              {content.buttons.submitting}
             </>
           ) : (
-            "Confirmer"
+            content.buttons.confirm
           )}
         </Button>
       </div>

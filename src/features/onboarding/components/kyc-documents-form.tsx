@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
+import { kycDocumentsContent } from "@/content/onboarding";
 
 type KycDocumentsFormProps = {
   onBack: () => void;
@@ -89,16 +90,13 @@ export function KycDocumentsForm({
 
   const kycDocumentError = form.formState.errors.kycDocument?.message;
   const kycSelfieError = form.formState.errors.kycSelfie?.message;
+  const content = kycDocumentsContent;
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Type de profil et documents KYC
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Sélectionnez votre type de profil et téléchargez vos documents
-        </p>
+        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
       </div>
 
       <Form {...form}>
@@ -108,23 +106,29 @@ export function KycDocumentsForm({
             name="profileType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type de profil</FormLabel>
+                <FormLabel>{content.profileType.label}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un type" />
+                      <SelectValue
+                        placeholder={content.profileType.placeholder}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="worker">Worker</SelectItem>
-                    <SelectItem value="employer">Employer</SelectItem>
+                    <SelectItem value="worker">
+                      {content.profileType.options.worker}
+                    </SelectItem>
+                    <SelectItem value="employer">
+                      {content.profileType.options.employer}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Simplifiez le travail à employer !
+                  {content.profileType.helperText}
                 </p>
                 <FormMessage />
               </FormItem>
@@ -143,8 +147,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycDocument")}
                   accept="image/*,application/pdf"
                   maxSize={5 * 1024 * 1024}
-                  label="Document d'identité KYC"
-                  helperText="PDF, JPG, JPEG, PNG - Max 5MB"
+                  label={content.documents.kycDocument.label}
+                  helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
                 />
@@ -165,8 +169,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycSelfie")}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
-                  label="Selfie avec document d'identité"
-                  helperText="JPG, JPEG, PNG - Max 5MB"
+                  label={content.documents.kycSelfie.label}
+                  helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"
                 />
@@ -182,14 +186,14 @@ export function KycDocumentsForm({
               onClick={onBack}
               className="flex-1"
             >
-              Retour
+              {content.buttons.back}
             </Button>
             <Button
               type="submit"
               disabled={!form.formState.isValid}
               className="flex-1 bg-green-500 hover:bg-green-600 text-white"
             >
-              Confirmer
+              {content.buttons.confirm}
             </Button>
           </div>
         </form>

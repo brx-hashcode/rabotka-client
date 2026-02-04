@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import { apiErrors } from "@/content/onboarding";
 
 interface OnboardingResponse {
   success: boolean;
@@ -15,7 +16,7 @@ export function useOnboardingMutation() {
       const { personalInfo, kycData } = useOnboardingStore.getState();
 
       if (!kycData.kycDocument || !kycData.kycSelfie) {
-        throw new Error("Les documents KYC sont requis");
+        throw new Error(apiErrors.kycDocumentsRequired);
       }
 
       const formData = new FormData();
@@ -50,9 +51,9 @@ export function useOnboardingMutation() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({
-          error: "Une erreur technique est survenue. Veuillez réessayer",
+          error: apiErrors.technicalError,
         }));
-        throw new Error(errorData.error || "Erreur lors de la soumission");
+        throw new Error(errorData.error || apiErrors.submissionError);
       }
 
       return await response.json();

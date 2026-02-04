@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { X, FileText, User, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { fileUploadContent } from "@/content/onboarding";
 
 interface FileUploadZoneProps {
   readonly onFileSelect: (file: File) => void;
@@ -126,7 +127,7 @@ export function FileUploadZone({
                   className="bg-white/90 text-gray-900 hover:bg-white"
                 >
                   <Upload className="h-4 w-4" />
-                  Changer
+                  {fileUploadContent.buttons.change}
                 </Button>
                 <Button
                   onClick={(e) => {
@@ -137,7 +138,7 @@ export function FileUploadZone({
                   size="sm"
                 >
                   <X className="h-4 w-4" />
-                  Retirer
+                  {fileUploadContent.buttons.remove}
                 </Button>
               </div>
             </div>
@@ -158,15 +159,15 @@ export function FileUploadZone({
             <div className="space-y-1">
               <h3 className="text-base font-semibold text-gray-900">
                 {isDragActive
-                  ? "Déposez le fichier ici"
-                  : "Cliquez ou glissez votre fichier"}
+                  ? fileUploadContent.dropzone.dropHere
+                  : fileUploadContent.dropzone.clickOrDrag}
               </h3>
               <p className="text-xs text-gray-500">{helperText}</p>
             </div>
 
             <Button variant="outline" size="sm" type="button" className="mt-1">
               <Upload className="h-4 w-4" />
-              Parcourir les fichiers
+              {fileUploadContent.dropzone.browseFiles}
             </Button>
           </div>
         )}

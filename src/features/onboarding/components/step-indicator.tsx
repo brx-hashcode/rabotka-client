@@ -1,9 +1,11 @@
+import { stepIndicatorContent } from "@/content/onboarding";
+
 type OnboardingStep =
   | "personal-informations"
   | "kyc-documents"
   | "confirmation";
 
-interface StepIndicatorProps {
+type StepIndicatorProps = {
   currentStep: OnboardingStep;
 }
 
@@ -13,16 +15,17 @@ const stepMap: Record<OnboardingStep, number> = {
   confirmation: 3,
 };
 
-export function StepIndicator({ currentStep }: StepIndicatorProps) {
+export function StepIndicator({ currentStep }: Readonly<StepIndicatorProps>) {
   const currentStepNumber = stepMap[currentStep];
-  const totalSteps = 3;
+  const totalSteps = stepIndicatorContent.totalSteps;
+  const stepText = stepIndicatorContent.stepFormat
+    .replace("{current}", currentStepNumber.toString())
+    .replace("{total}", totalSteps.toString());
 
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">
-          Étape {currentStepNumber}/{totalSteps}
-        </span>
+        <span className="text-sm font-medium text-gray-700">{stepText}</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div

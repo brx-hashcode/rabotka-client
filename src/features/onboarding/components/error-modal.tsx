@@ -3,6 +3,7 @@ import { XCircle } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useCallback, useMemo } from "react";
 import { StatusModal } from "./status-modal";
+import { modalsContent } from "@/content/onboarding";
 
 type ErrorModalProps = {
   open: boolean;
@@ -32,11 +33,9 @@ export function ErrorModal({ open, onOpenChange }: Readonly<ErrorModalProps>) {
       open={open}
       onOpenChange={onOpenChange}
       icon={icon}
-      title="Une erreur s'est produite lors de la création de votre profil"
-      description={
-        error || "Une erreur technique est survenue. Veuillez réessayer"
-      }
-      buttonText="Réessayer"
+      title={modalsContent.error.title}
+      description={error || modalsContent.error.defaultDescription}
+      buttonText={modalsContent.error.button}
       onButtonClick={handleClose}
     />
   );

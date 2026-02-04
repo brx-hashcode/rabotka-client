@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { personalInfoContent } from "@/content/onboarding";
 
 interface PersonalInfoFormProps {
   onNext: () => void;
@@ -37,15 +38,13 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
     onNext();
   };
 
+  const content = personalInfoContent;
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Informations personnelles
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Remplissez vos informations personnelles
-        </p>
+        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
       </div>
 
       <Form {...form}>
@@ -56,9 +55,12 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prénom</FormLabel>
+                  <FormLabel>{content.fields.firstName.label}</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input
+                      placeholder={content.fields.firstName.placeholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -70,9 +72,12 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom</FormLabel>
+                  <FormLabel>{content.fields.lastName.label}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input
+                      placeholder={content.fields.lastName.placeholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -86,11 +91,11 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{content.fields.email.label}</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="john.doe@gmail.com"
+                      placeholder={content.fields.email.placeholder}
                       {...field}
                     />
                   </FormControl>
@@ -104,9 +109,13 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Téléphone</FormLabel>
+                  <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+242069917686" {...field} />
+                    <Input
+                      type="tel"
+                      placeholder={content.fields.phone.placeholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,10 +128,10 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Adresse</FormLabel>
+                <FormLabel>{content.fields.address.label}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="19 rue de la joie Brazzaville"
+                    placeholder={content.fields.address.placeholder}
                     {...field}
                   />
                 </FormControl>
@@ -136,11 +145,11 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{content.fields.description.label}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Textarea
-                      placeholder="Je suis John Doe coiffeur de profession..."
+                      placeholder={content.fields.description.placeholder}
                       className="min-h-[120px] pr-16"
                       {...field}
                     />
@@ -149,7 +158,8 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
                         isOverLimit ? "text-red-500" : "text-gray-500"
                       }`}
                     >
-                      {charCount}/500
+                      {charCount}
+                      {content.fields.description.charCount}
                     </div>
                   </div>
                 </FormControl>
@@ -163,7 +173,7 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
             disabled={!form.formState.isValid}
             className="w-full bg-green-500 hover:bg-green-600 text-white"
           >
-            Continuer
+            {content.button.continue}
           </Button>
         </form>
       </Form>
