@@ -193,7 +193,7 @@ export function KycDocumentsForm({
                   preview={kycData.kycDocumentPreview}
                   fileName={kycData.kycDocument?.name || null}
                   onRemove={() => handleRemoveFile("kycDocument")}
-                  accept="image/*,application/pdf"
+                  accept="image/*"
                   maxSize={5 * 1024 * 1024}
                   label={content.documents.kycDocument.label}
                   description={content.documents.kycDocument.description}

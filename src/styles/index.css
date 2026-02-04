@@ -159,6 +159,11 @@
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
   }
 
   body {
@@ -198,7 +203,7 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    @apply bg-linear-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 
   .glow-effect {
