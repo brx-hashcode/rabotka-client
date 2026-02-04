@@ -52,7 +52,7 @@ export function KycDocumentsForm({
   const form = useForm<Step2FormData>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
-      profileType: kycData.profileType || "worker",
+      profileType: kycData.profileType || "WORKER",
     },
     mode: "onChange",
   });
