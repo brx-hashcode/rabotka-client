@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Menu, X } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
+import { headerContent } from "@/content/landing/header";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { Link } from "react-router";
 
@@ -24,11 +25,11 @@ export function Header() {
           <a href="/" className="flex items-center gap-2">
             <img
               src={rabotkaLogo}
-              alt="Logo Rabotka"
+              alt={headerContent.logo.alt}
               className="w-10 h-10 object-contain mix-blend-multiply"
             />
             <span className="font-display text-xl font-bold text-foreground">
-              Rabotka
+              {headerContent.logo.brandName}
             </span>
           </a>
 
@@ -48,7 +49,7 @@ export function Header() {
             <Button variant="whatsapp" size="default" asChild>
               <Link to="/onboarding">
                 <MessageCircle className="w-4 h-4" />
-                Commencer
+                {headerContent.cta.button}
               </Link>
             </Button>
           </div>
@@ -56,7 +57,7 @@ export function Header() {
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Ouvrir le menu"
+            aria-label={headerContent.menu.openLabel}
           >
             {isMenuOpen ? (
               <X className="w-6 h-6" />
@@ -98,7 +99,7 @@ export function Header() {
               >
                 <Link to="/onboarding">
                   <MessageCircle className="w-4 h-4" />
-                  Commencer
+                  {headerContent.cta.button}
                 </Link>
               </Button>
             </div>
