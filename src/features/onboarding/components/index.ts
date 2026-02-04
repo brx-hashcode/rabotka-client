@@ -8,3 +8,4 @@ export { StatusModal } from "./status-modal";
 export { FileUploadZone } from "./file-upload-zone";
 export { DocumentPreview } from "./document-preview";
 export { OnboardingLayout } from "./onboarding-layout";
+export { InfoCard } from "./info-card";

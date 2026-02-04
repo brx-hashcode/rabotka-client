@@ -1,9 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  FileText,
+  Briefcase,
+  UserCircle,
+} from "lucide-react";
+import { InfoCard } from "./info-card";
 
 type ConfirmationViewProps = {
   onBack: () => void;
@@ -17,8 +27,6 @@ export function ConfirmationView({
   onError,
 }: Readonly<ConfirmationViewProps>) {
   const { personalInfo, kycData, isSubmitting } = useOnboardingStore();
-
-  const [previewSheetOpen, setPreviewSheetOpen] = useState(false);
 
   const mutation = useOnboardingMutation();
 
@@ -36,43 +44,54 @@ export function ConfirmationView({
     <div className="space-y-6">
       <div className="space-y-6">
         <section>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Informations personnelles
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-24">Prénom:</span>
-              <span className="text-gray-900">{personalInfo.firstName}</span>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <UserCircle className="h-5 w-5 text-green-600" />
             </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-24">Nom:</span>
-              <span className="text-gray-900">{personalInfo.lastName}</span>
-            </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-24">Email:</span>
-              <span className="text-gray-900">{personalInfo.email}</span>
-            </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-24">Téléphone:</span>
-              <span className="text-gray-900">{personalInfo.phone}</span>
-            </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-24">Adresse:</span>
-              <span className="text-gray-900">{personalInfo.address}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-medium text-gray-700 mb-1">
-                Description:
-              </span>
-              <span className="text-gray-900">{personalInfo.description}</span>
-            </div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Informations personnelles
+            </h3>
+          </div>
 
-            <div className="flex gap-2 items-center">
-              <span className="font-medium text-gray-700">Type de profil:</span>
-              <Badge variant="default">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoCard
+              label="Prénom"
+              icon={User}
+              value={personalInfo.firstName}
+            />
+            <InfoCard label="Nom" icon={User} value={personalInfo.lastName} />
+            <InfoCard label="Email" icon={Mail} value={personalInfo.email} />
+            <InfoCard
+              label="Téléphone"
+              icon={Phone}
+              value={personalInfo.phone}
+            />
+            <InfoCard
+              label="Adresse"
+              icon={MapPin}
+              value={personalInfo.address}
+              colSpan={2}
+            />
+            <InfoCard
+              label="Description"
+              icon={FileText}
+              value={personalInfo.description || "Aucune description"}
+              colSpan={2}
+            />
+            <InfoCard
+              label="Type de profil"
+              icon={Briefcase}
+              value=""
+              variant="green"
+              colSpan={2}
+            >
+              <Badge
+                variant="default"
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-1"
+              >
                 {kycData.profileType === "worker" ? "Worker" : "Employer"}
               </Badge>
-            </div>
+            </InfoCard>
           </div>
         </section>
 

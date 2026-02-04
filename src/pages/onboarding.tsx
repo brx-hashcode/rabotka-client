@@ -68,10 +68,8 @@ export default function Onboarding() {
 
   return (
     <OnboardingLayout>
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-lg lg:p-8 p-4 mt-8">
-          {renderStep()}
-        </div>
+      <div className="w-full max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
       </div>
 
       <SuccessModal
