@@ -13,9 +13,9 @@ import {
   CTASection,
   Footer,
   ScrollToTop,
-} from '@/features/landing/components';
+} from "@/features/landing/components";
 
-const Index = () => {
+export default function Index() {
   return (
     <div className="min-h-screen bg-background w-full">
       <Header />
@@ -36,6 +36,4 @@ const Index = () => {
       <ScrollToTop />
     </div>
   );
-};
-
-export default Index;
+}
