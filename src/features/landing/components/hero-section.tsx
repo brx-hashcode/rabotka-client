@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Users } from "lucide-react";
 import heroImage from "@/assets/hero-image.png";
 import { heroContent } from "@/content/landing/hero";
+import { Link } from "react-router";
 
 export function HeroSection() {
-  const { badge, title, description, cta, stats, floatingCard, imageAlt } = heroContent;
+  const { badge, title, description, cta, stats, floatingCard, imageAlt } =
+    heroContent;
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light">
@@ -32,25 +34,29 @@ export function HeroSection() {
                 <badge.icon className="w-4 h-4" />
                 {badge.text}
               </span>
-              
+
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
-                {title.main}{' '}
+                {title.main}{" "}
                 <span className="text-whatsapp">{title.highlight}</span>
               </h1>
-              
+
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
                 {description}
               </p>
             </motion.div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="lg">
-                <MessageCircle className="w-5 h-5" />
-                {cta.primary}
+              <Button variant="hero" size="lg" asChild>
+                <Link to="/onboarding">
+                  <MessageCircle className="w-5 h-5" />
+                  {cta.primary}
+                </Link>
               </Button>
-              <Button variant="hero-outline" size="lg">
-                <Users className="w-5 h-5" />
-                {cta.secondary}
+              <Button variant="hero-outline" size="lg" asChild>
+                <Link to="/onboarding">
+                  <Users className="w-5 h-5" />
+                  {cta.secondary}
+                </Link>
               </Button>
             </div>
 
@@ -58,7 +64,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center justify-center lg:justify-start gap-8 pt-4 text-sm text-muted-foreground"
+              className="flex items-center justify-center flex-wrap lg:justify-start gap-8 pt-4 text-sm text-muted-foreground"
             >
               {stats.map((stat) => (
                 <div key={stat.label} className="flex items-center gap-2">
@@ -92,7 +98,9 @@ export function HeroSection() {
                     <floatingCard.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-foreground text-sm">{floatingCard.title}</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      {floatingCard.title}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {floatingCard.subtitle}
                     </p>
