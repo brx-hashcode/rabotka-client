@@ -23,7 +23,7 @@ export const step1Schema = z.object({
 });
 
 export const step2Schema = z.object({
-  profileType: z.enum(["worker", "employer"], {
+  profileType: z.enum(["WORKER", "EMPLOYER"], {
     errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
   kycDocument: z.custom<File>(
