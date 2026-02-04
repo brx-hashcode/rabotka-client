@@ -34,6 +34,12 @@ export default function Onboarding() {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
+  useEffect(() => {
+    return () => {
+      useOnboardingStore.getState().resetStore();
+    };
+  }, []);
+
   const renderStep = useCallback(() => {
     switch (step) {
       case "personal-informations":
