@@ -6,6 +6,7 @@ export { SuccessModal } from "./success-modal";
 export { ErrorModal } from "./error-modal";
 export { StatusModal } from "./status-modal";
 export { FileUploadZone } from "./file-upload-zone";
+export { InfoIcon } from "./info-icon";
 export { DocumentPreview } from "./document-preview";
 export { OnboardingLayout } from "../layouts/onboarding-layout";
 export { InfoCard } from "./info-card";
