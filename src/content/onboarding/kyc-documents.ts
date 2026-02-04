@@ -34,6 +34,6 @@ export const kycDocumentsContent = {
   },
   buttons: {
     back: "Retour",
-    confirm: "Confirmer",
+    next: "Continuer",
   },
 };

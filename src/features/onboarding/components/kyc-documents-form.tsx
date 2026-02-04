@@ -81,7 +81,13 @@ export function KycDocumentsForm({
     if (Object.keys(updates).length > 0) {
       setKycData(updates);
     }
-  }, [kycData.kycDocument, kycData.kycSelfie, kycData.kycDocumentPreview, kycData.kycSelfiePreview, setKycData]);
+  }, [
+    kycData.kycDocument,
+    kycData.kycSelfie,
+    kycData.kycDocumentPreview,
+    kycData.kycSelfiePreview,
+    setKycData,
+  ]);
 
   const handleFileSelect = (
     file: File,
@@ -155,10 +161,7 @@ export function KycDocumentsForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{content.profileType.label}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue
@@ -198,7 +201,9 @@ export function KycDocumentsForm({
                   error={kycDocumentError}
                   type="document"
                   infoTooltip={content.documents.kycDocument.infoTooltip}
-                  infoImage={kycExampleImages[content.documents.kycDocument.infoImageKey]}
+                  infoImage={
+                    kycExampleImages[content.documents.kycDocument.infoImageKey]
+                  }
                   infoImageAlt={content.documents.kycDocument.infoImageAlt}
                 />
                 <FormMessage />
@@ -224,7 +229,9 @@ export function KycDocumentsForm({
                   error={kycSelfieError}
                   type="selfie"
                   infoTooltip={content.documents.kycSelfie.infoTooltip}
-                  infoImage={kycExampleImages[content.documents.kycSelfie.infoImageKey]}
+                  infoImage={
+                    kycExampleImages[content.documents.kycSelfie.infoImageKey]
+                  }
                   infoImageAlt={content.documents.kycSelfie.infoImageAlt}
                 />
                 <FormMessage />
@@ -246,7 +253,7 @@ export function KycDocumentsForm({
               disabled={!form.formState.isValid}
               className="flex-1 bg-green-500 hover:bg-green-600 text-white"
             >
-              {content.buttons.confirm}
+              {content.buttons.next}
             </Button>
           </div>
         </form>
