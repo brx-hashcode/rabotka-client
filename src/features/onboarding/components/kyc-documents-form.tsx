@@ -22,6 +22,13 @@ import {
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent } from "@/content/onboarding";
 import { StepIndicator } from "./step-indicator";
+import kycDocumentExample from "@/assets/kyc_document.png";
+import kycSelfieExample from "@/assets/kyc_selfie.png";
+
+const kycExampleImages: Record<"document" | "selfie", string> = {
+  document: kycDocumentExample,
+  selfie: kycSelfieExample,
+};
 
 type OnboardingStep =
   | "personal-informations"
@@ -62,6 +69,19 @@ export function KycDocumentsForm({
       form.setValue("kycSelfie", kycData.kycSelfie, { shouldValidate: true });
     }
   }, [kycData.kycDocument, kycData.kycSelfie, form]);
+
+  useEffect(() => {
+    const updates: Partial<typeof kycData> = {};
+    if (kycData.kycDocument && !kycData.kycDocumentPreview) {
+      updates.kycDocumentPreview = URL.createObjectURL(kycData.kycDocument);
+    }
+    if (kycData.kycSelfie && !kycData.kycSelfiePreview) {
+      updates.kycSelfiePreview = URL.createObjectURL(kycData.kycSelfie);
+    }
+    if (Object.keys(updates).length > 0) {
+      setKycData(updates);
+    }
+  }, [kycData.kycDocument, kycData.kycSelfie, kycData.kycDocumentPreview, kycData.kycSelfiePreview, setKycData]);
 
   const handleFileSelect = (
     file: File,
@@ -177,6 +197,9 @@ export function KycDocumentsForm({
                   helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
+                  infoTooltip={content.documents.kycDocument.infoTooltip}
+                  infoImage={kycExampleImages[content.documents.kycDocument.infoImageKey]}
+                  infoImageAlt={content.documents.kycDocument.infoImageAlt}
                 />
                 <FormMessage />
               </FormItem>
@@ -200,6 +223,9 @@ export function KycDocumentsForm({
                   helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"
+                  infoTooltip={content.documents.kycSelfie.infoTooltip}
+                  infoImage={kycExampleImages[content.documents.kycSelfie.infoImageKey]}
+                  infoImageAlt={content.documents.kycSelfie.infoImageAlt}
                 />
                 <FormMessage />
               </FormItem>

@@ -1,20 +1,10 @@
-import { useLocation, Link } from "react-router";
-import { useEffect } from "react";
+import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import notFoundImage from "@/assets/not-found.png";
 
 export default function NotFound() {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
