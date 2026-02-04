@@ -29,13 +29,8 @@ export const step2Schema = z.object({
   kycDocument: z.custom<File>(
     (file) => {
       if (!file || !(file instanceof File)) return false;
-      if (file.size > 5 * 1024 * 1024) return false; // 5MB
-      const validTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-      ];
+      if (file.size > 5 * 1024 * 1024) return false;
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
       return validTypes.includes(file.type);
     },
     {
@@ -45,7 +40,7 @@ export const step2Schema = z.object({
   kycSelfie: z.custom<File>(
     (file) => {
       if (!file || !(file instanceof File)) return false;
-      if (file.size > 5 * 1024 * 1024) return false; // 5MB
+      if (file.size > 5 * 1024 * 1024) return false;
       const validTypes = ["image/jpeg", "image/jpg", "image/png"];
       return validTypes.includes(file.type);
     },
