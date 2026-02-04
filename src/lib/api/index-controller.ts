@@ -7,7 +7,7 @@ export type CreateProfilePayload = {
   phone: string;
   address: string;
   description: string;
-  profileType: "WORKER" | "EMPLOYER";
+  profileType: "WORKER" | "EMPLOYER" | "";
   kycDocument: File;
   kycSelfie: File;
 };
@@ -20,7 +20,7 @@ export type OnboardingResponse = {
 
 export class IndexController extends BaseController {
   constructor() {
-    super("https://api.example.com");
+    super(import.meta.env.VITE_API_URL);
   }
 
   async createProfile(data: CreateProfilePayload): Promise<OnboardingResponse> {
@@ -36,10 +36,12 @@ export class IndexController extends BaseController {
       formData.append("kycDocument", data.kycDocument);
       formData.append("kycSelfie", data.kycSelfie);
 
-      const url = this.getApiUrl("/profiles");
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      // return { success: true };
-      return await this.apiService.post<OnboardingResponse>(url, formData);
+      return await this.apiService.post<OnboardingResponse>(
+        "/profiles",
+        formData
+      );
     } catch (error) {
       this.handleError(error);
     }
