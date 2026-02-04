@@ -157,7 +157,7 @@ export function KycDocumentsForm({
                 <FormLabel>{content.profileType.label}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -167,10 +167,10 @@ export function KycDocumentsForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="worker">
+                    <SelectItem value="WORKER">
                       {content.profileType.options.worker}
                     </SelectItem>
-                    <SelectItem value="employer">
+                    <SelectItem value="EMPLOYER">
                       {content.profileType.options.employer}
                     </SelectItem>
                   </SelectContent>
