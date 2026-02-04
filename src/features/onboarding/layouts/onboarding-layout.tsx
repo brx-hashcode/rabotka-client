@@ -2,11 +2,13 @@ import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { Link } from "react-router";
 import { layoutContent } from "@/content/onboarding";
 
-interface OnboardingLayoutProps {
+type OnboardingLayoutProps = {
   readonly children: React.ReactNode;
-}
+};
 
-export function OnboardingLayout({ children }: OnboardingLayoutProps) {
+export function OnboardingLayout({
+  children,
+}: Readonly<OnboardingLayoutProps>) {
   const footerText = layoutContent.footer.copyright.replace(
     "{year}",
     new Date().getFullYear().toString()
