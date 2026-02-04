@@ -14,12 +14,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
+import { StepIndicator } from "./step-indicator";
+
+type OnboardingStep =
+  | "personal-informations"
+  | "kyc-documents"
+  | "confirmation";
 
 interface PersonalInfoFormProps {
+  currentStep: OnboardingStep;
   onNext: () => void;
 }
 
-export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
+export function PersonalInfoForm({
+  currentStep,
+  onNext,
+}: Readonly<PersonalInfoFormProps>) {
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
   const setPersonalInfo = useOnboardingStore((state) => state.setPersonalInfo);
 
@@ -42,9 +52,12 @@ export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+          <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
+        </div>
+        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
 
       <Form {...form}>

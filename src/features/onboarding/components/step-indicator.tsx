@@ -7,7 +7,8 @@ type OnboardingStep =
 
 type StepIndicatorProps = {
   currentStep: OnboardingStep;
-}
+  variant?: "full" | "compact";
+};
 
 const stepMap: Record<OnboardingStep, number> = {
   "personal-informations": 1,
@@ -15,12 +16,21 @@ const stepMap: Record<OnboardingStep, number> = {
   confirmation: 3,
 };
 
-export function StepIndicator({ currentStep }: Readonly<StepIndicatorProps>) {
+export function StepIndicator({
+  currentStep,
+  variant = "full",
+}: Readonly<StepIndicatorProps>) {
   const currentStepNumber = stepMap[currentStep];
   const totalSteps = stepIndicatorContent.totalSteps;
   const stepText = stepIndicatorContent.stepFormat
     .replace("{current}", currentStepNumber.toString())
     .replace("{total}", totalSteps.toString());
+
+  if (variant === "compact") {
+    return (
+      <span className="text-sm font-medium text-gray-700">{stepText}</span>
+    );
+  }
 
   return (
     <div className="w-full">

@@ -15,14 +15,22 @@ import {
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
+import { StepIndicator } from "./step-indicator";
+
+type OnboardingStep =
+  | "personal-informations"
+  | "kyc-documents"
+  | "confirmation";
 
 type ConfirmationViewProps = {
+  currentStep: OnboardingStep;
   onBack: () => void;
   onSuccess: () => void;
   onError: () => void;
 };
 
 export function ConfirmationView({
+  currentStep,
   onBack,
   onSuccess,
   onError,
@@ -45,17 +53,19 @@ export function ConfirmationView({
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-green-100 rounded-lg">
+            <UserCircle className="h-5 w-5 text-green-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">
+            {content.personalInfo.title}
+          </h3>
+        </div>
+        <StepIndicator currentStep={currentStep} variant="compact" />
+      </div>
       <div className="space-y-6">
         <section>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <UserCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">
-              {content.personalInfo.title}
-            </h3>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoCard
               label={content.personalInfo.fields.firstName}

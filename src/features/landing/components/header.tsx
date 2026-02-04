@@ -5,32 +5,33 @@ import { MessageCircle, Menu, X } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
+import { Link } from "react-router";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScroll(50);
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-background/80 backdrop-blur-lg border-b border-border/50' 
-          : 'bg-transparent border-b border-transparent'
+        isScrolled
+          ? "bg-background/80 backdrop-blur-lg border-b border-border/50"
+          : "bg-transparent border-b border-transparent"
       }`}
     >
       <nav className="section-container">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
           <a href="/" className="flex items-center gap-2">
-            <img 
-              src={rabotkaLogo} 
-              alt="Logo Rabotka" 
+            <img
+              src={rabotkaLogo}
+              alt="Logo Rabotka"
               className="w-10 h-10 object-contain mix-blend-multiply"
             />
-            <span className="font-display text-xl font-bold text-foreground">Rabotka</span>
+            <span className="font-display text-xl font-bold text-foreground">
+              Rabotka
+            </span>
           </a>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
@@ -43,21 +44,25 @@ export function Header() {
             ))}
           </div>
 
-          {/* CTA Button */}
           <div className="hidden md:block">
-            <Button variant="whatsapp" size="default">
-              <MessageCircle className="w-4 h-4" />
-              Commencer
+            <Button variant="whatsapp" size="default" asChild>
+              <Link to="/onboarding">
+                <MessageCircle className="w-4 h-4" />
+                Commencer
+              </Link>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Ouvrir le menu"
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </nav>
@@ -66,12 +71,12 @@ export function Header() {
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className={`md:hidden border-b ${
-              isScrolled 
-                ? 'bg-background border-border' 
-                : 'bg-background/95 backdrop-blur-lg border-border/50'
+              isScrolled
+                ? "bg-background border-border"
+                : "bg-background/95 backdrop-blur-lg border-border/50"
             }`}
           >
             <div className="section-container py-4 flex flex-col gap-4">
@@ -85,9 +90,16 @@ export function Header() {
                   {link.label}
                 </a>
               ))}
-              <Button variant="whatsapp" size="default" className="w-full mt-2">
-                <MessageCircle className="w-4 h-4" />
-                Commencer
+              <Button
+                variant="whatsapp"
+                size="default"
+                className="w-full"
+                asChild
+              >
+                <Link to="/onboarding">
+                  <MessageCircle className="w-4 h-4" />
+                  Commencer
+                </Link>
               </Button>
             </div>
           </motion.div>

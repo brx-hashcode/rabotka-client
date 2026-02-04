@@ -45,10 +45,16 @@ export default function Onboarding() {
   const renderStep = () => {
     switch (step) {
       case "personal-informations":
-        return <PersonalInfoForm onNext={() => setStep("kyc-documents")} />;
+        return (
+          <PersonalInfoForm
+            currentStep="personal-informations"
+            onNext={() => setStep("kyc-documents")}
+          />
+        );
       case "kyc-documents":
         return (
           <KycDocumentsForm
+            currentStep="kyc-documents"
             onBack={() => setStep("personal-informations")}
             onNext={() => setStep("confirmation")}
           />
@@ -56,13 +62,19 @@ export default function Onboarding() {
       case "confirmation":
         return (
           <ConfirmationView
+            currentStep="confirmation"
             onBack={() => setStep("kyc-documents")}
             onSuccess={() => setIsSuccessModalOpen(true)}
             onError={() => setIsErrorModalOpen(true)}
           />
         );
       default:
-        return <PersonalInfoForm onNext={() => setStep("kyc-documents")} />;
+        return (
+          <PersonalInfoForm
+            currentStep="personal-informations"
+            onNext={() => setStep("kyc-documents")}
+          />
+        );
     }
   };
 

@@ -20,13 +20,21 @@ import {
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent } from "@/content/onboarding";
+import { StepIndicator } from "./step-indicator";
+
+type OnboardingStep =
+  | "personal-informations"
+  | "kyc-documents"
+  | "confirmation";
 
 type KycDocumentsFormProps = {
+  currentStep: OnboardingStep;
   onBack: () => void;
   onNext: () => void;
 };
 
 export function KycDocumentsForm({
+  currentStep,
   onBack,
   onNext,
 }: Readonly<KycDocumentsFormProps>) {
@@ -94,9 +102,12 @@ export function KycDocumentsForm({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+          <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
+        </div>
+        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
 
       <Form {...form}>
