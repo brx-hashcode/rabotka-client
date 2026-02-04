@@ -38,8 +38,6 @@ export class IndexController extends BaseController {
 
       const url = this.getApiUrl("/profiles");
 
-      console.log(formData.get("firstName"));
-
       // return { success: true };
       return await this.apiService.post<OnboardingResponse>(url, formData);
     } catch (error) {
