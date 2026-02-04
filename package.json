@@ -13,6 +13,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@base-ui/react": "^1.1.0",
+    "@cyntler/react-doc-viewer": "^1.17.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -55,6 +57,7 @@
     "react": "^19.2.4",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.2.4",
+    "react-dropzone": "^14.4.0",
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
     "react-router": "^7.13.0",
@@ -62,7 +65,8 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "vaul": "^0.9.9",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

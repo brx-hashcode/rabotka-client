@@ -1,0 +1,8 @@
+export { StepIndicator } from "./step-indicator";
+export { PersonalInfoForm } from "./personal-info-form";
+export { KycDocumentsForm } from "./kyc-documents-form";
+export { ConfirmationView } from "./confirmation-view";
+export { SuccessModal } from "./success-modal";
+export { ErrorModal } from "./error-modal";
+export { FileUploadZone } from "./file-upload-zone";
+export { DocumentPreview } from "./document-preview";
