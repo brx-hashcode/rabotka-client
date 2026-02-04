@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { X, FileText, User, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,14 +56,6 @@ export function FileUploadZone({
     multiple: false,
     noClick: hasPreview,
   });
-
-  useEffect(() => {
-    return () => {
-      if (preview?.startsWith("blob:")) {
-        URL.revokeObjectURL(preview);
-      }
-    };
-  }, [preview]);
 
   const openFileDialog = () => {
     open();

@@ -63,6 +63,19 @@ export function KycDocumentsForm({
     }
   }, [kycData.kycDocument, kycData.kycSelfie, form]);
 
+  useEffect(() => {
+    const updates: Partial<typeof kycData> = {};
+    if (kycData.kycDocument && !kycData.kycDocumentPreview) {
+      updates.kycDocumentPreview = URL.createObjectURL(kycData.kycDocument);
+    }
+    if (kycData.kycSelfie && !kycData.kycSelfiePreview) {
+      updates.kycSelfiePreview = URL.createObjectURL(kycData.kycSelfie);
+    }
+    if (Object.keys(updates).length > 0) {
+      setKycData(updates);
+    }
+  }, [kycData.kycDocument, kycData.kycSelfie, kycData.kycDocumentPreview, kycData.kycSelfiePreview, setKycData]);
+
   const handleFileSelect = (
     file: File,
     fieldName: "kycDocument" | "kycSelfie"

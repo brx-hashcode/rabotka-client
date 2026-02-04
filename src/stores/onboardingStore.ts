@@ -6,24 +6,24 @@ import {
   clearKycFiles,
 } from "@/lib/kyc-file-storage";
 
-export interface PersonalInfo {
+export type PersonalInfo = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   address: string;
   description: string;
-}
+};
 
-export interface KycData {
-  profileType: "worker" | "employer" | "";
+export type KycData = {
+  profileType: "WORKER" | "EMPLOYER" | "";
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycSelfie: File | null;
   kycSelfiePreview: string | null;
-}
+};
 
-interface OnboardingStore {
+type OnboardingStore = {
   personalInfo: PersonalInfo;
   kycData: KycData;
   isSubmitting: boolean;
@@ -36,7 +36,7 @@ interface OnboardingStore {
   resetStore: () => void;
   hydrateFromStorage: () => Promise<void>;
   saveToStorage: () => void;
-}
+};
 
 const STORAGE_KEY = "onboarding-storage";
 
@@ -76,7 +76,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     }));
     get().saveToStorage();
 
-    if (typeof window === "undefined") return;
+    if (typeof globalThis === "undefined") return;
 
     if (data.kycDocument !== undefined) {
       if (data.kycDocument) {
@@ -100,14 +100,14 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
 
   resetStore: () => {
     set(initialState);
-    if (typeof window !== "undefined") {
+    if (typeof globalThis !== "undefined") {
       clearKycFiles().catch(console.error);
       sessionStorage.removeItem(STORAGE_KEY);
     }
   },
 
   hydrateFromStorage: async () => {
-    if (typeof window === "undefined") return;
+    if (typeof globalThis === "undefined") return;
 
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -144,18 +144,16 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   },
 
   saveToStorage: () => {
-    if (typeof window === "undefined") return;
+    if (typeof globalThis === "undefined") return;
 
     try {
       const { personalInfo, kycData } = get();
-      // Don't store File objects, only metadata
       const dataToStore = {
         personalInfo,
         kycData: {
           profileType: kycData.profileType,
           kycDocumentPreview: kycData.kycDocumentPreview,
           kycSelfiePreview: kycData.kycSelfiePreview,
-          // File objects omitted
         },
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
