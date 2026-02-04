@@ -107,19 +107,19 @@ export function ConfirmationView({
               label={content.personalInfo.fields.profileType}
               icon={Briefcase}
               value=""
-              variant={kycData.profileType === "worker" ? "green" : "red"}
+              variant={kycData.profileType === "WORKER" ? "green" : "red"}
               colSpan={2}
             >
               <Badge
                 variant="default"
                 className={cn(
                   "text-white font-semibold px-3 py-1",
-                  kycData.profileType === "worker"
+                  kycData.profileType === "WORKER"
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-red-500 hover:bg-red-600"
                 )}
               >
-                {kycData.profileType === "worker"
+                {kycData.profileType === "WORKER"
                   ? content.profileTypes.worker
                   : content.profileTypes.employer}
               </Badge>
