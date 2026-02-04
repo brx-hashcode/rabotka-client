@@ -2,11 +2,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { apiErrors } from "@/content/onboarding";
 
-interface OnboardingResponse {
+type OnboardingResponse = {
   success: boolean;
   userId?: string;
   error?: string;
-}
+};
 
 const API_ENDPOINT = "/api/onboarding";
 
@@ -26,7 +26,10 @@ export function useOnboardingMutation() {
       formData.append("phone", personalInfo.phone);
       formData.append("address", personalInfo.address);
       formData.append("description", personalInfo.description);
-      formData.append("profileType", kycData.profileType);
+      formData.append(
+        "profileType",
+        kycData.profileType.toUpperCase() as "WORKER" | "EMPLOYER"
+      );
       formData.append("kycDocument", kycData.kycDocument);
       formData.append("kycSelfie", kycData.kycSelfie);
 

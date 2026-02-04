@@ -138,9 +138,6 @@ export function KycDocumentsForm({
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500 mt-1">
-                  {content.profileType.helperText}
-                </p>
                 <FormMessage />
               </FormItem>
             )}
@@ -159,6 +156,7 @@ export function KycDocumentsForm({
                   accept="image/*,application/pdf"
                   maxSize={5 * 1024 * 1024}
                   label={content.documents.kycDocument.label}
+                  description={content.documents.kycDocument.description}
                   helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
@@ -181,6 +179,7 @@ export function KycDocumentsForm({
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
                   label={content.documents.kycSelfie.label}
+                  description={content.documents.kycSelfie.description}
                   helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"

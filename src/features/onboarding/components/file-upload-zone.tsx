@@ -13,6 +13,7 @@ interface FileUploadZoneProps {
   readonly accept: string;
   readonly maxSize: number;
   readonly label: string;
+  readonly description?: string;
   readonly helperText: string;
   readonly error?: string;
   readonly type?: "document" | "selfie";
@@ -26,6 +27,7 @@ export function FileUploadZone({
   accept,
   maxSize,
   label,
+  description,
   helperText,
   error,
   type = "document",
@@ -79,7 +81,12 @@ export function FileUploadZone({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <div>
+        <label className="text-sm font-medium text-gray-700">{label}</label>
+        {description && (
+          <p className="text-xs text-gray-500 mt-1">{description}</p>
+        )}
+      </div>
       <div
         className={cn(
           "group relative overflow-hidden rounded-xl border transition-all duration-200",

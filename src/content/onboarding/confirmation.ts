@@ -20,8 +20,8 @@ export const confirmationContent = {
     noSelfie: "Aucun selfie",
   },
   profileTypes: {
-    worker: "Worker",
-    employer: "Employer",
+    worker: "Travailleur",
+    employer: "Employeur",
   },
   buttons: {
     back: "Retour",
