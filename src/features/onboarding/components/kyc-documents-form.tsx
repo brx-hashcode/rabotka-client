@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { step2Schema, type Step2FormData } from "@/lib/validations/onboarding";
@@ -49,6 +50,19 @@ export function KycDocumentsForm({
     mode: "onChange",
   });
 
+  useEffect(() => {
+    const docValue = form.getValues("kycDocument");
+    const selfieValue = form.getValues("kycSelfie");
+    if (kycData.kycDocument && !docValue) {
+      form.setValue("kycDocument", kycData.kycDocument, {
+        shouldValidate: true,
+      });
+    }
+    if (kycData.kycSelfie && !selfieValue) {
+      form.setValue("kycSelfie", kycData.kycSelfie, { shouldValidate: true });
+    }
+  }, [kycData.kycDocument, kycData.kycSelfie, form]);
+
   const handleFileSelect = (
     file: File,
     fieldName: "kycDocument" | "kycSelfie"
@@ -76,7 +90,7 @@ export function KycDocumentsForm({
       const preview = kycData[
         `${fieldName}Preview` as keyof typeof kycData
       ] as string;
-      if (preview && preview.startsWith("blob:")) {
+      if (preview?.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
     }
@@ -86,15 +100,18 @@ export function KycDocumentsForm({
     });
   };
 
-  const onSubmit = (data: Step2FormData) => {
-    const fullData = {
-      ...data,
-      kycDocument: kycData.kycDocument!,
-      kycSelfie: kycData.kycSelfie!,
-    };
-    setKycData(fullData);
-    onNext();
-  };
+  const onSubmit = useCallback(
+    (data: Step2FormData) => {
+      const fullData = {
+        ...data,
+        kycDocument: kycData.kycDocument,
+        kycSelfie: kycData.kycSelfie,
+      };
+      setKycData(fullData);
+      onNext();
+    },
+    [kycData.kycDocument, kycData.kycSelfie, onNext, setKycData]
+  );
 
   const kycDocumentError = form.formState.errors.kycDocument?.message;
   const kycSelfieError = form.formState.errors.kycSelfie?.message;

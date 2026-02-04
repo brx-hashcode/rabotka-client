@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fileUploadContent } from "@/content/onboarding";
 
-interface FileUploadZoneProps {
+type FileUploadZoneProps = {
   readonly onFileSelect: (file: File) => void;
   readonly preview: string | null;
   readonly fileName: string | null;
@@ -17,7 +17,7 @@ interface FileUploadZoneProps {
   readonly helperText: string;
   readonly error?: string;
   readonly type?: "document" | "selfie";
-}
+};
 
 export function FileUploadZone({
   onFileSelect,
@@ -31,7 +31,7 @@ export function FileUploadZone({
   helperText,
   error,
   type = "document",
-}: FileUploadZoneProps) {
+}: Readonly<FileUploadZoneProps>) {
   const isImage = preview && /\.(jpg|jpeg|png)$/i.test(fileName || "");
   const isPDF = fileName && /\.pdf$/i.test(fileName);
   const hasPreview = !!(preview && fileName);

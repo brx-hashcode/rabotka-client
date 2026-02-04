@@ -35,9 +35,9 @@ export function useOnboardingMutation() {
       formData.append("kycDocument", kycData.kycDocument);
       formData.append("kycSelfie", kycData.kycSelfie);
 
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      // return;
+      return;
 
       const response = await fetch(API_ENDPOINT, {
         method: "POST",

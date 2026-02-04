@@ -1,4 +1,10 @@
 import { create } from "zustand";
+import {
+  saveKycFile,
+  loadKycFiles,
+  clearKycFile,
+  clearKycFiles,
+} from "@/lib/kyc-file-storage";
 
 export interface PersonalInfo {
   firstName: string;
@@ -28,7 +34,7 @@ interface OnboardingStore {
   setIsSubmitting: (value: boolean) => void;
   setError: (error: string | null) => void;
   resetStore: () => void;
-  hydrateFromStorage: () => void;
+  hydrateFromStorage: () => Promise<void>;
   saveToStorage: () => void;
 }
 
@@ -69,6 +75,23 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       kycData: { ...state.kycData, ...data },
     }));
     get().saveToStorage();
+
+    if (typeof window === "undefined") return;
+
+    if (data.kycDocument !== undefined) {
+      if (data.kycDocument) {
+        saveKycFile("kycDocument", data.kycDocument).catch(console.error);
+      } else {
+        clearKycFile("kycDocument").catch(console.error);
+      }
+    }
+    if (data.kycSelfie !== undefined) {
+      if (data.kycSelfie) {
+        saveKycFile("kycSelfie", data.kycSelfie).catch(console.error);
+      } else {
+        clearKycFile("kycSelfie").catch(console.error);
+      }
+    }
   },
 
   setIsSubmitting: (value) => set({ isSubmitting: value }),
@@ -78,11 +101,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   resetStore: () => {
     set(initialState);
     if (typeof window !== "undefined") {
+      clearKycFiles().catch(console.error);
       sessionStorage.removeItem(STORAGE_KEY);
     }
   },
 
-  hydrateFromStorage: () => {
+  hydrateFromStorage: async () => {
     if (typeof window === "undefined") return;
 
     try {
@@ -94,12 +118,25 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           kycData: {
             ...initialState.kycData,
             profileType: data.kycData?.profileType || "",
-            kycDocumentPreview: data.kycData?.kycDocumentPreview || null,
-            kycSelfiePreview: data.kycData?.kycSelfiePreview || null,
-            // Note: Files cannot be stored in sessionStorage
-            // They need to be re-uploaded if user refreshes
           },
         });
+      }
+
+      const files = await loadKycFiles();
+      if (files.kycDocument || files.kycSelfie) {
+        set((state) => ({
+          kycData: {
+            ...state.kycData,
+            kycDocument: files.kycDocument ?? state.kycData.kycDocument,
+            kycDocumentPreview: files.kycDocument
+              ? URL.createObjectURL(files.kycDocument)
+              : state.kycData.kycDocumentPreview,
+            kycSelfie: files.kycSelfie ?? state.kycData.kycSelfie,
+            kycSelfiePreview: files.kycSelfie
+              ? URL.createObjectURL(files.kycSelfie)
+              : state.kycData.kycSelfiePreview,
+          },
+        }));
       }
     } catch (error) {
       console.error("Failed to hydrate from storage:", error);
