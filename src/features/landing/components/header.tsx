@@ -12,6 +12,27 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScroll(50);
 
+  const handleMobileNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      setIsMenuOpen(false);
+      const id = href.slice(1);
+      const element = document.getElementById(id);
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -22,7 +43,7 @@ export function Header() {
     >
       <nav className="section-container">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <a href="/" className="flex items-center gap-2">
+          <a href="#" className="flex items-center gap-2">
             <img
               src={rabotkaLogo}
               alt={headerContent.logo.alt}
@@ -86,7 +107,7 @@ export function Header() {
                   key={link.label}
                   href={link.href}
                   className="text-foreground font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={(e) => handleMobileNavClick(e, link.href)}
                 >
                   {link.label}
                 </a>

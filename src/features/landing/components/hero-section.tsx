@@ -64,7 +64,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center justify-center lg:justify-start gap-8 pt-4 text-sm text-muted-foreground"
+              className="flex items-center justify-center flex-wrap lg:justify-start gap-8 pt-4 text-sm text-muted-foreground"
             >
               {stats.map((stat) => (
                 <div key={stat.label} className="flex items-center gap-2">

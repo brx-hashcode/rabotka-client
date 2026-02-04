@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import {
@@ -34,15 +34,7 @@ export default function Onboarding() {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
-  const showProgress = useMemo(
-    () =>
-      step === "personal-informations" ||
-      step === "kyc-documents" ||
-      step === "confirmation",
-    [step]
-  );
-
-  const renderStep = () => {
+  const renderStep = useCallback(() => {
     switch (step) {
       case "personal-informations":
         return (
@@ -69,18 +61,13 @@ export default function Onboarding() {
           />
         );
       default:
-        return (
-          <PersonalInfoForm
-            currentStep="personal-informations"
-            onNext={() => setStep("kyc-documents")}
-          />
-        );
+        return null;
     }
-  };
+  }, [step, setStep]);
 
   return (
     <OnboardingLayout>
-      <div className="w-full max-w-3xl mx-auto">
+      <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
         <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
       </div>
 
