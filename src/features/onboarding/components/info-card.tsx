@@ -18,15 +18,26 @@ export function InfoCard({
   variant = "default",
   children,
 }: Readonly<InfoCardProps>) {
-  const isGreen = variant === "green";
-  const isRed = variant === "red";
-  const bgClasses = isGreen
-    ? "bg-gradient-to-br from-green-50 to-green-100/50"
-    : isRed
-      ? "bg-gradient-to-br from-red-50 to-red-100/50"
-      : "bg-gradient-to-br from-gray-50 to-gray-100/50";
-  const iconBgClasses = isGreen ? "bg-green-100" : isRed ? "bg-red-100" : "bg-green-50";
-  const iconColorClasses = isGreen ? "text-green-600" : isRed ? "text-red-600" : "text-gray-600";
+  const bgClassesMap = {
+    green: "bg-gradient-to-br from-green-50 to-green-100/50",
+    red: "bg-gradient-to-br from-red-50 to-red-100/50",
+    default: "bg-gradient-to-br from-gray-50 to-gray-100/50",
+  } as const;
+  const bgClasses = bgClassesMap[variant];
+
+  const iconBgMap = {
+    green: "bg-green-100",
+    red: "bg-red-100",
+    default: "bg-green-50",
+  } as const;
+  const iconBgClasses = iconBgMap[variant];
+
+  const iconColorMap = {
+    green: "text-green-600",
+    red: "text-red-600",
+    default: "text-gray-600",
+  } as const;
+  const iconColorClasses = iconColorMap[variant];
 
   return (
     <div
