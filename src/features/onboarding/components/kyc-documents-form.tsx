@@ -20,19 +20,22 @@ import {
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
 
-interface KycDocumentsFormProps {
+type KycDocumentsFormProps = {
   onBack: () => void;
   onNext: () => void;
-}
+};
 
-export function KycDocumentsForm({ onBack, onNext }: KycDocumentsFormProps) {
+export function KycDocumentsForm({
+  onBack,
+  onNext,
+}: Readonly<KycDocumentsFormProps>) {
   const kycData = useOnboardingStore((state) => state.kycData);
   const setKycData = useOnboardingStore((state) => state.setKycData);
 
   const form = useForm<Step2FormData>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
-      profileType: kycData.profileType || "",
+      profileType: kycData.profileType || "worker",
     },
     mode: "onChange",
   });
@@ -41,13 +44,11 @@ export function KycDocumentsForm({ onBack, onNext }: KycDocumentsFormProps) {
     file: File,
     fieldName: "kycDocument" | "kycSelfie"
   ) => {
-    // Validation manuelle avec Zod
     const fieldSchema = step2Schema.shape[fieldName];
     const result = fieldSchema.safeParse(file);
 
     if (result.success) {
       form.setValue(fieldName, file, { shouldValidate: true });
-      // Créer preview et sauvegarder dans Zustand
       const preview = URL.createObjectURL(file);
       setKycData({
         [fieldName]: file,
@@ -61,7 +62,7 @@ export function KycDocumentsForm({ onBack, onNext }: KycDocumentsFormProps) {
   };
 
   const handleRemoveFile = (fieldName: "kycDocument" | "kycSelfie") => {
-    form.setValue(fieldName, null as any, { shouldValidate: true });
+    form.setValue(fieldName, null as unknown as File, { shouldValidate: true });
     if (kycData[`${fieldName}Preview` as keyof typeof kycData]) {
       const preview = kycData[
         `${fieldName}Preview` as keyof typeof kycData
@@ -77,7 +78,6 @@ export function KycDocumentsForm({ onBack, onNext }: KycDocumentsFormProps) {
   };
 
   const onSubmit = (data: Step2FormData) => {
-    // Les fichiers sont déjà dans le store, on les récupère
     const fullData = {
       ...data,
       kycDocument: kycData.kycDocument!,

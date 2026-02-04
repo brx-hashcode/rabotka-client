@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import {
-  StepIndicator,
   PersonalInfoForm,
   KycDocumentsForm,
   ConfirmationView,
   SuccessModal,
   ErrorModal,
+  OnboardingLayout,
 } from "@/features/onboarding/components";
 
 type OnboardingStep =
@@ -30,15 +30,17 @@ export default function Onboarding() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
-  // Hydrate store from sessionStorage on mount
   useEffect(() => {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
-  const showProgress =
-    step === "personal-informations" ||
-    step === "kyc-documents" ||
-    step === "confirmation";
+  const showProgress = useMemo(
+    () =>
+      step === "personal-informations" ||
+      step === "kyc-documents" ||
+      step === "confirmation",
+    [step]
+  );
 
   const renderStep = () => {
     switch (step) {
@@ -65,20 +67,18 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {showProgress && <StepIndicator currentStep={step} />}
-        <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
+    <OnboardingLayout>
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg lg:p-8 p-4 mt-8">
           {renderStep()}
         </div>
       </div>
 
-      {/* Modals */}
       <SuccessModal
         open={isSuccessModalOpen}
         onOpenChange={setIsSuccessModalOpen}
       />
       <ErrorModal open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen} />
-    </div>
+    </OnboardingLayout>
   );
 }

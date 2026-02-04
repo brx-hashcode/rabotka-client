@@ -18,7 +18,7 @@ interface PersonalInfoFormProps {
   onNext: () => void;
 }
 
-export function PersonalInfoForm({ onNext }: PersonalInfoFormProps) {
+export function PersonalInfoForm({ onNext }: Readonly<PersonalInfoFormProps>) {
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
   const setPersonalInfo = useOnboardingStore((state) => state.setPersonalInfo);
 

@@ -7,19 +7,17 @@ interface OnboardingResponse {
   error?: string;
 }
 
-const API_ENDPOINT = "/api/onboarding"; // À configurer selon le backend
+const API_ENDPOINT = "/api/onboarding";
 
 export function useOnboardingMutation() {
   return useMutation({
     mutationFn: async (): Promise<OnboardingResponse> => {
-      const { personalInfo, kycData, setIsSubmitting, setError } =
-        useOnboardingStore.getState();
+      const { personalInfo, kycData } = useOnboardingStore.getState();
 
       if (!kycData.kycDocument || !kycData.kycSelfie) {
         throw new Error("Les documents KYC sont requis");
       }
 
-      // Préparer FormData
       const formData = new FormData();
       formData.append("firstName", personalInfo.firstName);
       formData.append("lastName", personalInfo.lastName);
@@ -30,6 +28,20 @@ export function useOnboardingMutation() {
       formData.append("profileType", kycData.profileType);
       formData.append("kycDocument", kycData.kycDocument);
       formData.append("kycSelfie", kycData.kycSelfie);
+
+      console.log({
+        firstName: personalInfo.firstName,
+        lastName: personalInfo.lastName,
+        email: personalInfo.email,
+        phone: personalInfo.phone,
+        address: personalInfo.address,
+        description: personalInfo.description,
+        profileType: kycData.profileType,
+        kycDocument: kycData.kycDocument,
+        kycSelfie: kycData.kycSelfie,
+      });
+
+      return;
 
       const response = await fetch(API_ENDPOINT, {
         method: "POST",

@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { X, FileText, User, Camera } from "lucide-react";
+import { X, FileText, User, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface FileUploadZoneProps {
   readonly onFileSelect: (file: File) => void;
@@ -28,6 +29,10 @@ export function FileUploadZone({
   error,
   type = "document",
 }: FileUploadZoneProps) {
+  const isImage = preview && /\.(jpg|jpeg|png)$/i.test(fileName || "");
+  const isPDF = fileName && /\.pdf$/i.test(fileName);
+  const hasPreview = !!(preview && fileName);
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
@@ -38,7 +43,7 @@ export function FileUploadZone({
     [onFileSelect]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: accept.split(",").reduce((acc, mime) => {
       acc[mime.trim()] = [];
@@ -46,6 +51,7 @@ export function FileUploadZone({
     }, {} as Record<string, string[]>),
     maxSize,
     multiple: false,
+    noClick: hasPreview,
   });
 
   useEffect(() => {
@@ -56,83 +62,115 @@ export function FileUploadZone({
     };
   }, [preview]);
 
-  const isImage = preview && /\.(jpg|jpeg|png)$/i.test(fileName || "");
-  const isPDF = fileName && /\.pdf$/i.test(fileName);
+  const openFileDialog = () => {
+    open();
+  };
+
+  const getContainerClasses = () => {
+    if (isDragActive) {
+      return "border-dashed border-green-500 bg-green-50";
+    }
+    if (hasPreview) {
+      return "border border-gray-300 bg-background hover:border-green-500/50";
+    }
+    return "border-dashed border-gray-300 bg-gray-50/50 hover:border-green-500 hover:bg-green-50/30";
+  };
 
   return (
     <div className="space-y-2">
-      {preview && fileName ? (
-        // Preview remplace complètement la zone d'upload
-        <div className="border border-gray-300 rounded-lg p-4">
-          <div className="flex items-center gap-4">
-            {/* Miniature */}
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <div
+        className={cn(
+          "group relative overflow-hidden rounded-xl border transition-all duration-200",
+          getContainerClasses(),
+          error && "border-red-500"
+        )}
+        {...(hasPreview ? {} : getRootProps())}
+      >
+        <input {...getInputProps()} className="sr-only" />
+
+        {hasPreview ? (
+          <div className="relative h-[200px] w-full">
             {isImage && (
               <img
                 src={preview}
                 alt={label}
-                className="w-20 h-20 object-cover rounded"
+                className="h-full w-full object-cover"
+                onError={() => {}}
               />
             )}
             {!isImage && isPDF && (
-              <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded">
-                <FileText className="w-10 h-10 text-gray-400" />
+              <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                <FileText className="size-16 text-gray-400" />
               </div>
             )}
 
-            {/* Nom et infos */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-3">
+              <p className="text-sm font-medium text-white truncate">
                 {fileName}
               </p>
-              <p className="text-xs text-gray-500 mt-1">{helperText}</p>
+              <p className="text-xs text-white/80 mt-0.5">{helperText}</p>
             </div>
 
-            {/* Bouton x petit */}
-            <button
-              type="button"
-              onClick={onRemove}
-              className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
-              aria-label="Retirer le fichier"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        // Zone d'upload avec label
-        <>
-          <label className="text-sm font-medium text-gray-700">{label}</label>
-          <div
-            {...getRootProps()}
-            className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-              isDragActive
-                ? "border-green-500 bg-green-50"
-                : "border-gray-300 hover:border-green-500",
-              error && "border-red-500"
-            )}
-          >
-            <input {...getInputProps()} />
-            <div className="flex flex-col items-center gap-4">
-              {type === "document" && (
-                <User className="w-12 h-12 text-gray-400" />
-              )}
-              {type === "selfie" && (
-                <Camera className="w-12 h-12 text-gray-400" />
-              )}
-              <div>
-                <p className="text-sm font-medium text-gray-700">
-                  {isDragActive
-                    ? "Déposez le fichier ici"
-                    : "Cliquez ou glissez votre fichier"}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">{helperText}</p>
+            <div className="absolute inset-0 bg-black/0 transition-all duration-200 group-hover:bg-black/40" />
+
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <div className="flex gap-2">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openFileDialog();
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  className="bg-white/90 text-gray-900 hover:bg-white"
+                >
+                  <Upload className="h-4 w-4" />
+                  Changer
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove();
+                  }}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <X className="h-4 w-4" />
+                  Retirer
+                </Button>
               </div>
             </div>
           </div>
-        </>
-      )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+        ) : (
+          <div className="flex h-[200px] w-full cursor-pointer flex-col items-center justify-center gap-3 py-6 px-4 text-center">
+            {type === "document" && (
+              <div className="rounded-full bg-green-100 p-3">
+                <User className="size-6 text-green-600" />
+              </div>
+            )}
+            {type === "selfie" && (
+              <div className="rounded-full bg-green-100 p-3">
+                <Camera className="size-6 text-green-600" />
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-gray-900">
+                {isDragActive
+                  ? "Déposez le fichier ici"
+                  : "Cliquez ou glissez votre fichier"}
+              </h3>
+              <p className="text-xs text-gray-500">{helperText}</p>
+            </div>
+
+            <Button variant="outline" size="sm" type="button" className="mt-1">
+              <Upload className="h-4 w-4" />
+              Parcourir les fichiers
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
