@@ -136,6 +136,7 @@ export function FileUploadZone({
             <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <div className="flex gap-2">
                 <Button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     openFileDialog();
@@ -148,6 +149,7 @@ export function FileUploadZone({
                   {fileUploadContent.buttons.change}
                 </Button>
                 <Button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onRemove();

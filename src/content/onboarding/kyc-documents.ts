@@ -15,7 +15,7 @@ export const kycDocumentsContent = {
       label: "Document d'identité KYC",
       description:
         "Téléchargez une photo claire de votre pièce d'identité officielle (carte d'identité nationale, passeport ou permis de conduire). Le document doit être lisible, valide et toutes les informations doivent être visibles.",
-      helperText: "PDF, JPG, JPEG, PNG - Max 5MB",
+      helperText: "JPG, JPEG, PNG - Max 5MB",
       infoTooltip:
         "Photo claire de votre pièce d'identité (recto/verso si nécessaire).",
       infoImageKey: "document" as const,
@@ -34,6 +34,6 @@ export const kycDocumentsContent = {
   },
   buttons: {
     back: "Retour",
-    confirm: "Confirmer",
+    next: "Continuer",
   },
 };

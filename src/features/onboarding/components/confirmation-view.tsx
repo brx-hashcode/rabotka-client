@@ -11,7 +11,7 @@ import {
   MapPin,
   FileText,
   Briefcase,
-  UserCircle,
+  ClipboardList,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
@@ -57,10 +57,10 @@ export function ConfirmationView({
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-green-100 rounded-lg">
-            <UserCircle className="h-5 w-5 text-green-600" />
+            <ClipboardList className="h-5 w-5 text-green-600" />
           </div>
           <h3 className="text-xl font-bold text-gray-900">
-            {content.personalInfo.title}
+            {content.pageTitle}
           </h3>
         </div>
         <StepIndicator currentStep={currentStep} variant="compact" />
@@ -107,19 +107,19 @@ export function ConfirmationView({
               label={content.personalInfo.fields.profileType}
               icon={Briefcase}
               value=""
-              variant={kycData.profileType === "worker" ? "green" : "red"}
+              variant={kycData.profileType === "WORKER" ? "green" : "red"}
               colSpan={2}
             >
               <Badge
                 variant="default"
                 className={cn(
                   "text-white font-semibold px-3 py-1",
-                  kycData.profileType === "worker"
+                  kycData.profileType === "WORKER"
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-red-500 hover:bg-red-600"
                 )}
               >
-                {kycData.profileType === "worker"
+                {kycData.profileType === "WORKER"
                   ? content.profileTypes.worker
                   : content.profileTypes.employer}
               </Badge>
@@ -185,7 +185,7 @@ export function ConfirmationView({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="flex-1"
+          className="flex-1 hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
         >
           {content.buttons.back}
         </Button>
