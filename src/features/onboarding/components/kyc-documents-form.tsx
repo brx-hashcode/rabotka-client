@@ -91,7 +91,7 @@ export function KycDocumentsForm({
 
   const handleFileSelect = (
     file: File,
-    fieldName: "kycDocument" | "kycSelfie"
+    fieldName: "kycDocument" | "kycSelfie",
   ) => {
     const fieldSchema = step2Schema.shape[fieldName];
     const result = fieldSchema.safeParse(file);
@@ -136,7 +136,7 @@ export function KycDocumentsForm({
       setKycData(fullData);
       onNext();
     },
-    [kycData.kycDocument, kycData.kycSelfie, onNext, setKycData]
+    [kycData.kycDocument, kycData.kycSelfie, onNext, setKycData],
   );
 
   const kycDocumentError = form.formState.errors.kycDocument?.message;
@@ -244,7 +244,7 @@ export function KycDocumentsForm({
               type="button"
               variant="outline"
               onClick={onBack}
-              className="flex-1"
+              className="flex-1 hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
             >
               {content.buttons.back}
             </Button>

@@ -185,7 +185,7 @@ export function ConfirmationView({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="flex-1"
+          className="flex-1 hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
         >
           {content.buttons.back}
         </Button>
