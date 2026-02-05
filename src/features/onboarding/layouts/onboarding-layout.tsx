@@ -11,7 +11,7 @@ export function OnboardingLayout({
 }: Readonly<OnboardingLayoutProps>) {
   const footerText = layoutContent.footer.copyright.replace(
     "{year}",
-    new Date().getFullYear().toString()
+    new Date().getFullYear().toString(),
   );
 
   return (
