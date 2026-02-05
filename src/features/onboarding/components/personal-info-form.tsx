@@ -21,10 +21,10 @@ type OnboardingStep =
   | "kyc-documents"
   | "confirmation";
 
-interface PersonalInfoFormProps {
+type PersonalInfoFormProps = {
   currentStep: OnboardingStep;
   onNext: () => void;
-}
+};
 
 export function PersonalInfoForm({
   currentStep,
@@ -163,7 +163,7 @@ export function PersonalInfoForm({
                   <div className="relative">
                     <Textarea
                       placeholder={content.fields.description.placeholder}
-                      className="min-h-[120px] pr-16"
+                      className="min-h-[140px] pr-16 resize-none"
                       {...field}
                     />
                     <div

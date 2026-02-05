@@ -1,4 +1,5 @@
 export const confirmationContent = {
+  pageTitle: "Récapitulatif",
   personalInfo: {
     title: "Informations personnelles",
     fields: {
