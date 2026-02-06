@@ -10,6 +10,7 @@ export const confirmationContent = {
       address: "Adresse",
       description: "Description",
       profileType: "Type de profil",
+      documentType: "Type de document",
     },
     defaultDescription: "Aucune description",
   },
@@ -23,6 +24,11 @@ export const confirmationContent = {
   profileTypes: {
     worker: "Travailleur",
     employer: "Employeur",
+  },
+  documentTypes: {
+    identityCard: "Carte d'identité",
+    passport: "Passeport",
+    driverLicense: "Permis de conduire",
   },
   buttons: {
     back: "Retour",

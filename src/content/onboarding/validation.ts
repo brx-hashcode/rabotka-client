@@ -24,6 +24,9 @@ export const validationMessages = {
   profileType: {
     required: "Sélectionnez un type de profil",
   },
+  documentType: {
+    required: "Sélectionnez un type de document",
+  },
   kycDocument: {
     invalid: "Document invalide (PDF, JPG, PNG - Max 5MB)",
   },

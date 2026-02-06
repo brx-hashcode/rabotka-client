@@ -17,6 +17,7 @@ export type PersonalInfo = {
 
 export type KycData = {
   profileType: "WORKER" | "EMPLOYER" | "";
+  documentType: "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "";
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycSelfie: File | null;
@@ -51,6 +52,7 @@ const initialState = {
   },
   kycData: {
     profileType: "" as const,
+    documentType: "" as const,
     kycDocument: null,
     kycDocumentPreview: null,
     kycSelfie: null,
@@ -118,6 +120,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           kycData: {
             ...initialState.kycData,
             profileType: data.kycData?.profileType || "",
+            documentType: data.kycData?.documentType || "",
           },
         });
       }
@@ -152,6 +155,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         personalInfo,
         kycData: {
           profileType: kycData.profileType,
+          documentType: kycData.documentType,
           kycDocumentPreview: kycData.kycDocumentPreview,
           kycSelfiePreview: kycData.kycSelfiePreview,
         },
