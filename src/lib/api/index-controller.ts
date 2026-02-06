@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { BaseController } from "mvc-front-sdk";
 
 export type CreateProfilePayload = {
@@ -21,7 +22,7 @@ export type OnboardingResponse = {
 
 export class IndexController extends BaseController {
   constructor() {
-    super(import.meta.env.VITE_API_URL);
+    super(env.VITE_API_URL);
   }
 
   async createProfile(data: CreateProfilePayload): Promise<OnboardingResponse> {

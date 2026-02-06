@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { BaseController } from "mvc-front-sdk";
 
 export type SendOTPPayload = {
@@ -22,7 +23,7 @@ export type VerifyOTPResponse = {
 
 export class AuthController extends BaseController {
   constructor() {
-    super(import.meta.env.VITE_API_URL);
+    super(env.VITE_API_URL);
   }
 
   async sendOTP(emailOrPhone: string): Promise<SendOTPResponse> {
