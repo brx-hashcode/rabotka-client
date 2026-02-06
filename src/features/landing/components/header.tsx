@@ -12,7 +12,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScroll(50);
 
-  const handleMobileNavClick = (
+  const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     href: string
   ) => {
@@ -59,6 +59,7 @@ export function Header() {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 {link.label}
@@ -107,7 +108,7 @@ export function Header() {
                   key={link.label}
                   href={link.href}
                   className="text-foreground font-medium py-2"
-                  onClick={(e) => handleMobileNavClick(e, link.href)}
+                  onClick={(e) => handleNavClick(e, link.href)}
                 >
                   {link.label}
                 </a>

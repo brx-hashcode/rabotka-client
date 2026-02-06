@@ -53,6 +53,7 @@ export function KycDocumentsForm({
     resolver: zodResolver(step2Schema),
     defaultValues: {
       profileType: kycData.profileType || "WORKER",
+      documentType: kycData.documentType || "IDENTITY_CARD",
     },
     mode: "onChange",
   });
@@ -155,33 +156,66 @@ export function KycDocumentsForm({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="profileType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{content.profileType.label}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={content.profileType.placeholder}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="WORKER">
-                      {content.profileType.options.worker}
-                    </SelectItem>
-                    <SelectItem value="EMPLOYER">
-                      {content.profileType.options.employer}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="profileType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{content.profileType.label}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={content.profileType.placeholder}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="WORKER">
+                        {content.profileType.options.worker}
+                      </SelectItem>
+                      <SelectItem value="EMPLOYER">
+                        {content.profileType.options.employer}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="documentType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{content.documentType.label}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={content.documentType.placeholder}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="IDENTITY_CARD">
+                        {content.documentType.options.identityCard}
+                      </SelectItem>
+                      <SelectItem value="PASSPORT">
+                        {content.documentType.options.passport}
+                      </SelectItem>
+                      <SelectItem value="DRIVER_LICENSE">
+                        {content.documentType.options.driverLicense}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}

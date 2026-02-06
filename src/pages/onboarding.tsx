@@ -29,6 +29,7 @@ export default function Onboarding() {
   );
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   useEffect(() => {
     hydrateFromStorage();
@@ -62,7 +63,10 @@ export default function Onboarding() {
           <ConfirmationView
             currentStep="confirmation"
             onBack={() => setStep("kyc-documents")}
-            onSuccess={() => setIsSuccessModalOpen(true)}
+            onSuccess={(email) => {
+              setSubmittedEmail(email);
+              setIsSuccessModalOpen(true);
+            }}
             onError={() => setIsErrorModalOpen(true)}
           />
         );
@@ -82,6 +86,7 @@ export default function Onboarding() {
       <SuccessModal
         open={isSuccessModalOpen}
         onOpenChange={setIsSuccessModalOpen}
+        email={submittedEmail}
       />
       <ErrorModal open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen} />
     </OnboardingLayout>

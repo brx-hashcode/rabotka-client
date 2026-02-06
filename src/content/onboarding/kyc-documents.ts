@@ -10,6 +10,16 @@ export const kycDocumentsContent = {
     },
     helperText: "Simplifiez le travail à employer !",
   },
+  documentType: {
+    label: "Type de document",
+    placeholder: "Sélectionnez un type",
+    options: {
+      identityCard: "Carte d'identité",
+      passport: "Passeport",
+      driverLicense: "Permis de conduire",
+    },
+    helperText: "Type de document d'identité",
+  },
   documents: {
     kycDocument: {
       label: "Document d'identité KYC",

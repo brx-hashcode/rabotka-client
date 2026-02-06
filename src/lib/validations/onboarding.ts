@@ -26,6 +26,9 @@ export const step2Schema = z.object({
   profileType: z.enum(["WORKER", "EMPLOYER"], {
     errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
+  documentType: z.enum(["IDENTITY_CARD", "PASSPORT", "DRIVER_LICENSE"], {
+    errorMap: () => ({ message: validationMessages.documentType.required }),
+  }),
   kycDocument: z.custom<File>(
     (file) => {
       if (!file || !(file instanceof File)) return false;

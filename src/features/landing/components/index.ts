@@ -9,6 +9,7 @@ export { TrustSection } from './trust-section';
 export { AccessibilitySection } from './accessibility-section';
 export { ImpactSection } from './impact-section';
 export { VisionSection } from './vision-section';
+export { FAQSection } from './faq-section';
 export { CTASection } from './cta-section';
 export { Footer } from './footer';
 export { ScrollToTop } from './scroll-to-top';

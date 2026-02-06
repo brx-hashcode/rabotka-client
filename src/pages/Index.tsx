@@ -9,6 +9,7 @@ import {
   AccessibilitySection,
   ImpactSection,
   VisionSection,
+  FAQSection,
   CTASection,
 } from "@/features/landing/components";
 import { LandingLayout } from "@/features/landing/layouts";
@@ -26,6 +27,7 @@ export default function Index() {
       <AccessibilitySection />
       <ImpactSection />
       <VisionSection />
+      <FAQSection />
       <CTASection />
     </LandingLayout>
   );
