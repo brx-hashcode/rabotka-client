@@ -81,6 +81,9 @@ export const LoginDialog = ({
       setApiError(null);
       try {
         await new Promise((resolve) => setTimeout(resolve, 500));
+
+        throw new Error("Impossible de se connecter");
+
         if (!emailOrPhone) {
           throw new Error("Email or phone number is required");
         }
