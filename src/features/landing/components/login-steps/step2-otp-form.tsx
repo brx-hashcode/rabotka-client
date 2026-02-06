@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -18,71 +18,79 @@ import { loginContent } from "@/content/landing/login";
 type Step2OTPFormProps = {
   onSubmit: (data: { otp: string }) => Promise<void>;
   onResend: () => Promise<void>;
-  isLoading: boolean;
-  error: string | null;
+  isVerifying: boolean;
+  isResending: boolean;
+  serverError: string | null;
 };
 
-const otpInputKeys = ["otp-0", "otp-1", "otp-2", "otp-3", "otp-4", "otp-5"];
+const OTP_LENGTH = 6;
+const EMPTY_OTP = new Array<string>(OTP_LENGTH).fill("");
+const OTP_INPUT_KEYS = EMPTY_OTP.map((_, i) => `otp-${i}`);
+const OTP_CHAR_REGEX = /^[0-9A-Za-z]$/;
+
+const focusInput = (index: number) => {
+  document.getElementById(`otp-input-${index}`)?.focus();
+};
+
+const isValidOtpChar = (char: string) => OTP_CHAR_REGEX.test(char);
 
 export function Step2OTPForm({
   onSubmit,
   onResend,
-  isLoading,
-  error,
+  isVerifying,
+  isResending,
+  serverError,
 }: Readonly<Step2OTPFormProps>) {
-  const [otpValues, setOtpValues] = useState<string[]>([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [otpValues, setOtpValues] = useState<string[]>([...EMPTY_OTP]);
 
   const form = useForm<{ otp: string }>({
     resolver: zodResolver(z.object({ otp: otpSchema })),
-    defaultValues: {
-      otp: "",
-    },
+    defaultValues: { otp: "" },
   });
+
+  useEffect(() => {
+    if (serverError) {
+      form.setError("otp", { type: "server", message: serverError });
+    }
+  }, [serverError, form]);
+
+  const updateOtpValues = useCallback(
+    (newValues: string[], fieldOnChange: (value: string) => void) => {
+      setOtpValues(newValues);
+      fieldOnChange(newValues.join(""));
+    },
+    [],
+  );
 
   const handleOtpChange = useCallback(
     (index: number, value: string, fieldOnChange: (value: string) => void) => {
       const char = value.slice(-1).toUpperCase();
-      if (char && /^[0-9A-Za-z]$/.test(char)) {
-        const newOtpValues = [...otpValues];
-        newOtpValues[index] = char;
-        setOtpValues(newOtpValues);
 
-        const otpString = newOtpValues.join("");
-        fieldOnChange(otpString);
+      if (char && isValidOtpChar(char)) {
+        const newValues = [...otpValues];
+        newValues[index] = char;
+        updateOtpValues(newValues, fieldOnChange);
 
-        if (index < 5 && char) {
-          const nextInput = document.getElementById(`otp-input-${index + 1}`);
-          nextInput?.focus();
+        if (index < OTP_LENGTH - 1) {
+          focusInput(index + 1);
         }
       } else if (value === "") {
-        const newOtpValues = [...otpValues];
-        newOtpValues[index] = "";
-        setOtpValues(newOtpValues);
-
-        const otpString = newOtpValues.join("");
-        fieldOnChange(otpString);
+        const newValues = [...otpValues];
+        newValues[index] = "";
+        updateOtpValues(newValues, fieldOnChange);
 
         if (index > 0) {
-          const prevInput = document.getElementById(`otp-input-${index - 1}`);
-          prevInput?.focus();
+          focusInput(index - 1);
         }
       }
     },
-    [otpValues],
+    [otpValues, updateOtpValues],
   );
 
   const handleKeyDown = useCallback(
     (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-        const prevInput = document.getElementById(`otp-input-${index - 1}`);
-        prevInput?.focus();
+        focusInput(index - 1);
       }
     },
     [otpValues],
@@ -96,33 +104,30 @@ export function Step2OTPForm({
       e.preventDefault();
       const pastedData = e.clipboardData
         .getData("text")
-        .slice(0, 6)
+        .slice(0, OTP_LENGTH)
         .toUpperCase();
-      if (/^[0-9A-Za-z]{0,6}$/.test(pastedData)) {
-        const newOtpValues = [...otpValues];
-        for (let i = 0; i < 6; i++) {
-          newOtpValues[i] = pastedData[i] || "";
-        }
-        setOtpValues(newOtpValues);
-        fieldOnChange(newOtpValues.join(""));
 
-        const nextEmptyIndex = newOtpValues.findIndex((val) => !val);
-        const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
-        const nextInput = document.getElementById(`otp-input-${focusIndex}`);
-        nextInput?.focus();
+      const isValidPaste = pastedData
+        .split("")
+        .every((char) => isValidOtpChar(char));
+      if (!isValidPaste && pastedData) {
+        return;
       }
+
+      const newValues = EMPTY_OTP.map((_, i) => pastedData[i] || "");
+      updateOtpValues(newValues, fieldOnChange);
+
+      const nextEmptyIndex = newValues.findIndex((val) => !val);
+      focusInput(nextEmptyIndex === -1 ? OTP_LENGTH - 1 : nextEmptyIndex);
     },
-    [otpValues],
+    [updateOtpValues],
   );
 
   const handleResend = useCallback(async () => {
-    setOtpValues(["", "", "", "", "", ""]);
+    setOtpValues([...EMPTY_OTP]);
     form.reset();
     await onResend();
-    setTimeout(() => {
-      const firstInput = document.getElementById("otp-input-0");
-      firstInput?.focus();
-    }, 100);
+    setTimeout(() => focusInput(0), 100);
   }, [form, onResend]);
 
   return (
@@ -138,7 +143,7 @@ export function Step2OTPForm({
                   <div className="flex gap-4 w-full justify-center">
                     {otpValues.map((value, index) => (
                       <Input
-                        key={otpInputKeys[index]}
+                        key={OTP_INPUT_KEYS[index]}
                         id={`otp-input-${index}`}
                         type="text"
                         maxLength={1}
@@ -148,7 +153,7 @@ export function Step2OTPForm({
                         }
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={(e) => handlePaste(e, field.onChange)}
-                        disabled={isLoading}
+                        disabled={isVerifying || isResending}
                         className="w-full h-12 text-center text-5xl font-black"
                         autoFocus={index === 0}
                       />
@@ -160,10 +165,13 @@ export function Step2OTPForm({
             </FormItem>
           )}
         />
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="space-y-2">
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isVerifying || isResending}
+          >
+            {isVerifying ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Vérification...
@@ -177,9 +185,16 @@ export function Step2OTPForm({
             variant="ghost"
             className="w-full text-sm"
             onClick={handleResend}
-            disabled={isLoading}
+            disabled={isVerifying || isResending}
           >
-            {loginContent.step2.resendLink}
+            {isResending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi...
+              </>
+            ) : (
+              loginContent.step2.resendLink
+            )}
           </Button>
         </div>
       </form>

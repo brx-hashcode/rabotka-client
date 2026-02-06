@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -18,13 +19,13 @@ import { loginContent } from "@/content/landing/login";
 type Step1EmailPhoneFormProps = {
   onSubmit: (data: { emailOrPhone: string }) => Promise<void>;
   isLoading: boolean;
-  error: string | null;
+  serverError: string | null;
 };
 
 export function Step1EmailPhoneForm({
   onSubmit,
   isLoading,
-  error,
+  serverError,
 }: Readonly<Step1EmailPhoneFormProps>) {
   const form = useForm<{ emailOrPhone: string }>({
     resolver: zodResolver(z.object({ emailOrPhone: emailOrPhoneSchema })),
@@ -33,6 +34,15 @@ export function Step1EmailPhoneForm({
     },
     mode: "onSubmit",
   });
+
+  useEffect(() => {
+    if (serverError) {
+      form.setError("emailOrPhone", {
+        type: "server",
+        message: serverError,
+      });
+    }
+  }, [serverError, form]);
 
   return (
     <Form {...form}>
@@ -47,8 +57,8 @@ export function Step1EmailPhoneForm({
           control={form.control}
           name="emailOrPhone"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email ou téléphone</FormLabel>
+            <FormItem className="space-y-2">
+              <FormLabel>{loginContent.step1.label}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -60,7 +70,6 @@ export function Step1EmailPhoneForm({
             </FormItem>
           )}
         />
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>

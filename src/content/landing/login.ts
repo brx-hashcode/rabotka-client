@@ -6,6 +6,7 @@ export const loginContent = {
 
     placeholder: "Email ou numéro de téléphone",
     submitButton: "Continuer",
+    label: "Email ou téléphone",
   },
   step2: {
     title: "Vérification",
