@@ -9,4 +9,4 @@ export const headerContent = {
   menu: {
     openLabel: "Ouvrir le menu",
   },
-};
+} as const;

@@ -1,10 +1,10 @@
 import { UserPlus, ShieldCheck, Link, MessageCircle } from "lucide-react";
-import type { Step } from '@/types';
+import type { Step } from "@/types";
 
 export const howItWorksContent = {
   worker: {
-    subtitle: 'Pour les Travailleurs',
-    title: 'Comment ça marche pour les travailleurs',
+    subtitle: "Pour les Travailleurs",
+    title: "Comment ça marche pour les travailleurs",
     steps: [
       {
         icon: UserPlus,
@@ -28,9 +28,10 @@ export const howItWorksContent = {
       },
     ] as Step[],
   },
+
   employer: {
-    subtitle: 'Pour les Employeurs',
-    title: 'Comment ça marche pour les employeurs',
+    subtitle: "Pour les Employeurs",
+    title: "Comment ça marche pour les employeurs",
     steps: [
       {
         icon: UserPlus,
@@ -50,8 +51,9 @@ export const howItWorksContent = {
       {
         icon: MessageCircle,
         title: "Recevez des profils correspondants",
-        description: "Contactez les travailleurs directement via WhatsApp ou téléphone",
+        description:
+          "Contactez les travailleurs directement via WhatsApp ou téléphone",
       },
     ] as Step[],
   },
-};
+} as const;
