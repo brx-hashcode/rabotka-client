@@ -161,7 +161,7 @@ export function KycDocumentsForm({
               control={form.control}
               name="profileType"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.profileType.label}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -189,7 +189,7 @@ export function KycDocumentsForm({
               control={form.control}
               name="documentType"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.documentType.label}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -221,7 +221,7 @@ export function KycDocumentsForm({
             control={form.control}
             name="kycDocument"
             render={() => (
-              <FormItem>
+              <FormItem className="flex flex-col gap-1">
                 <FileUploadZone
                   onFileSelect={(file) => handleFileSelect(file, "kycDocument")}
                   preview={kycData.kycDocumentPreview}
@@ -249,7 +249,7 @@ export function KycDocumentsForm({
             control={form.control}
             name="kycSelfie"
             render={() => (
-              <FormItem>
+              <FormItem className="flex flex-col gap-1">
                 <FileUploadZone
                   onFileSelect={(file) => handleFileSelect(file, "kycSelfie")}
                   preview={kycData.kycSelfiePreview}
