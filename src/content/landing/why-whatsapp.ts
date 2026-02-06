@@ -1,10 +1,11 @@
 import { Smartphone, Download, Users } from "lucide-react";
-import type { Benefit } from '@/types';
+import type { Benefit } from "@/types";
 
 export const whyWhatsAppContent = {
-  badge: 'Pourquoi WhatsApp',
-  title: 'La plateforme que les gens utilisent déjà',
-  description: 'WhatsApp fait déjà partie du quotidien. Rabotka rencontre les gens là où ils sont.',
+  badge: "Pourquoi WhatsApp",
+  title: "La plateforme que les gens utilisent déjà",
+  description:
+    "WhatsApp fait déjà partie du quotidien. Rabotka rencontre les gens là où ils sont.",
   benefits: [
     {
       icon: Download,
@@ -22,4 +23,4 @@ export const whyWhatsAppContent = {
       description: "Facile à utiliser pour tout le monde",
     },
   ] as Benefit[],
-};
+} as const;

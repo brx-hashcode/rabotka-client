@@ -33,4 +33,4 @@ export const validationMessages = {
   kycSelfie: {
     invalid: "Selfie invalide (JPG, PNG - Max 5MB)",
   },
-};
+} as const;

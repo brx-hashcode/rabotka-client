@@ -4,10 +4,11 @@ export const realityContent = {
   description: 'Dans les villes africaines, des millions de personnes travaillent de manière informelle :',
   workers: [
     'Employés de maison',
-    'Coiffeurs/Coiffeuses',
-    'Répétiteurs',
-    'Mécaniciens',
-    'Freelances',
+    "Coiffeurs/Coiffeuses",
+    "Répétiteurs",
+    "Mécaniciens",
+    "Freelances",
   ],
-  conclusion: 'Pourtant, trouver du travail dépend encore du bouche-à-oreille, de l\'incertitude et des problèmes de confiance.',
-};
+  conclusion:
+    "Pourtant, trouver du travail dépend encore du bouche-à-oreille, de l'incertitude et des problèmes de confiance.",
+} as const;

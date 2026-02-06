@@ -1,10 +1,11 @@
 import { Bot, UserCheck, MessageSquare, Phone } from "lucide-react";
-import type { Feature } from '@/types';
+import type { Feature } from "@/types";
 
 export const whatIsRabotkaContent = {
-  badge: 'Qu\'est-ce que Rabotka',
-  title: 'Votre assistant emploi personnel',
-  description: 'Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les employeurs à une aide de confiance — le tout via WhatsApp.',
+  badge: "Qu'est-ce que Rabotka",
+  title: "Votre assistant emploi personnel",
+  description:
+    "Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les employeurs à une aide de confiance — le tout via WhatsApp.",
   features: [
     {
       icon: UserCheck,
@@ -27,4 +28,4 @@ export const whatIsRabotkaContent = {
       description: "Via WhatsApp ou téléphone",
     },
   ] as Feature[],
-};
+} as const;
