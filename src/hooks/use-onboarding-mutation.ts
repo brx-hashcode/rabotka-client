@@ -33,7 +33,7 @@ export function useOnboardingMutation() {
       setIsSubmitting(true);
       setError(null);
     },
-    onSuccess: (data: OnboardingResponse) => {
+    onSuccess: () => {
       const { resetStore, setIsSubmitting } = useOnboardingStore.getState();
       resetStore();
       setIsSubmitting(false);
