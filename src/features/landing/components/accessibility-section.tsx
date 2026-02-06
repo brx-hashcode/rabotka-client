@@ -1,15 +1,17 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Wifi, Sparkles, Globe } from "lucide-react";
 import communitySceneImage from "@/assets/community-scene.jpg";
 import { accessibilityContent } from "@/content/landing/accessibility";
 
 export function AccessibilitySection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-20 lg:py-32 bg-secondary/30 overflow-x-hidden" ref={ref}>
+    <section
+      className="py-20 lg:py-32 bg-secondary/30 overflow-x-hidden"
+      ref={ref}
+    >
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Content */}
@@ -23,11 +25,11 @@ export function AccessibilitySection() {
               <span className="inline-block px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
                 {accessibilityContent.badge}
               </span>
-              
+
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 {accessibilityContent.title}
               </h2>
-              
+
               <p className="text-lg text-muted-foreground">
                 {accessibilityContent.description}
               </p>
@@ -46,8 +48,12 @@ export function AccessibilitySection() {
                     <feature.icon className="w-6 h-6 text-whatsapp-dark" />
                   </div>
                   <div>
-                    <h3 className="font-display font-semibold text-foreground">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <h3 className="font-display font-semibold text-foreground">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </div>
                 </motion.div>
               ))}
