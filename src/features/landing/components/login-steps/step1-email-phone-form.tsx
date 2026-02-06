@@ -57,7 +57,7 @@ export function Step1EmailPhoneForm({
           control={form.control}
           name="emailOrPhone"
           render={({ field }) => (
-            <FormItem className="space-y-2">
+            <FormItem className="flex flex-col gap-1">
               <FormLabel>{loginContent.step1.label}</FormLabel>
               <FormControl>
                 <Input
