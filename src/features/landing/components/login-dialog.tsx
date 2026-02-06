@@ -121,11 +121,14 @@ export const LoginDialog = ({
     setApiError(null);
   }, []);
 
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setIsOpen(false);
-    }
-  };
+  const handleDialogClose = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        setIsOpen(false);
+      }
+    },
+    [setIsOpen],
+  );
 
   const getDialogTitle = () => {
     if (step === 1) return loginContent.step1.title;
