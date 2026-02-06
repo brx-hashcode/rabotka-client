@@ -12,6 +12,7 @@ import {
   FileText,
   Briefcase,
   ClipboardList,
+  CreditCard,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
@@ -108,7 +109,6 @@ export function ConfirmationView({
               icon={Briefcase}
               value=""
               variant={kycData.profileType === "WORKER" ? "green" : "red"}
-              colSpan={2}
             >
               <Badge
                 variant="default"
@@ -122,6 +122,24 @@ export function ConfirmationView({
                 {kycData.profileType === "WORKER"
                   ? content.profileTypes.worker
                   : content.profileTypes.employer}
+              </Badge>
+            </InfoCard>
+            <InfoCard
+              label={content.personalInfo.fields.documentType}
+              icon={CreditCard}
+              value=""
+            >
+              <Badge
+                variant="outline"
+                className="text-gray-700 font-semibold px-3 py-1 border-gray-300"
+              >
+                {kycData.documentType === "IDENTITY_CARD"
+                  ? content.documentTypes.identityCard
+                  : kycData.documentType === "PASSPORT"
+                    ? content.documentTypes.passport
+                    : kycData.documentType === "DRIVER_LICENSE"
+                      ? content.documentTypes.driverLicense
+                      : "-"}
               </Badge>
             </InfoCard>
           </div>

@@ -8,6 +8,7 @@ export type CreateProfilePayload = {
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
+  documentType: "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "";
   kycDocument: File;
   kycSelfie: File;
 };
@@ -33,6 +34,7 @@ export class IndexController extends BaseController {
       formData.append("address", data.address);
       formData.append("description", data.description);
       formData.append("profileType", data.profileType);
+      formData.append("documentType", data.documentType);
       formData.append("kycDocument", data.kycDocument);
       formData.append("kycSelfie", data.kycSelfie);
 
