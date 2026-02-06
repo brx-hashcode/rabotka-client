@@ -7,6 +7,7 @@ import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { Link } from "react-router";
+import { LoginButton } from "@/features/landing/components/login-button";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,7 +15,7 @@ export function Header() {
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
+    href: string,
   ) => {
     if (href.startsWith("#")) {
       e.preventDefault();
@@ -68,12 +69,7 @@ export function Header() {
           </div>
 
           <div className="hidden md:block">
-            <Button variant="whatsapp" size="default" asChild>
-              <Link to="/onboarding">
-                <MessageCircle className="w-4 h-4" />
-                {headerContent.cta.button}
-              </Link>
-            </Button>
+            <LoginButton />
           </div>
 
           <button

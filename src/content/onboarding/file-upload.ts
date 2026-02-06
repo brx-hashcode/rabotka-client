@@ -8,4 +8,4 @@ export const fileUploadContent = {
     change: "Changer",
     remove: "Retirer",
   },
-};
+} as const;

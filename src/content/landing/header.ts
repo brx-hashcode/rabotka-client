@@ -4,9 +4,9 @@ export const headerContent = {
     brandName: "Rabotka",
   },
   cta: {
-    button: "Commencer",
+    button: "Mon Profil",
   },
   menu: {
     openLabel: "Ouvrir le menu",
   },
-};
+} as const;

@@ -35,4 +35,4 @@ export const faqContent = {
         "Rabotka couvre une large gamme de services informels, notamment l'aide ménagère, les répétiteurs, les coiffeurs, les réparateurs, les jardiniers, et bien plus encore. Si vous avez besoin d'un service ou si vous offrez un service, Rabotka peut vous aider à vous connecter.",
     },
   ],
-};
+} as const;

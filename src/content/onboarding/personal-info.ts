@@ -31,4 +31,4 @@ export const personalInfoContent = {
   button: {
     continue: "Continuer",
   },
-};
+} as const;

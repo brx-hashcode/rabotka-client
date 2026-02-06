@@ -21,4 +21,4 @@ export const trustContent = {
       description: "Avis et évaluations de vrais utilisateurs",
     },
   ] as Feature[],
-};
+} as const;

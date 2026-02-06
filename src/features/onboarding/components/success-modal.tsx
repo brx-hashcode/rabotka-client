@@ -28,14 +28,14 @@ export function SuccessModal({
         <CheckCircle className="h-10 w-10 text-green-500" />
       </div>
     ),
-    []
+    [],
   );
 
   const description = useMemo(() => {
     const emailAddress = email || "";
     const emailMessage = modalsContent.success.emailSent.replace(
       "{profile_email}",
-      emailAddress || "votre adresse email"
+      emailAddress || "votre adresse email",
     );
     return `${emailMessage}\n\n${modalsContent.success.whatsappMessage}`;
   }, [email]);
@@ -43,7 +43,7 @@ export function SuccessModal({
   return (
     <StatusModal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleClose}
       icon={icon}
       title={modalsContent.success.title}
       description={description}

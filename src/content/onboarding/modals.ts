@@ -12,4 +12,4 @@ export const modalsContent = {
     defaultDescription: "Une erreur technique est survenue. Veuillez réessayer",
     button: "Réessayer",
   },
-};
+} as const;
