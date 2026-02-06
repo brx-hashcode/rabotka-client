@@ -27,12 +27,19 @@ const OTP_LENGTH = 6;
 const EMPTY_OTP = new Array<string>(OTP_LENGTH).fill("");
 const OTP_INPUT_KEYS = EMPTY_OTP.map((_, i) => `otp-${i}`);
 const OTP_CHAR_REGEX = /^\d$/;
+const RESEND_COOLDOWN_SECONDS = 5 * 60;
 
 const focusInput = (index: number) => {
   document.getElementById(`otp-input-${index}`)?.focus();
 };
 
 const isValidOtpChar = (char: string) => OTP_CHAR_REGEX.test(char);
+
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
 
 export function Step2OTPForm({
   onSubmit,
@@ -42,6 +49,7 @@ export function Step2OTPForm({
   serverError,
 }: Readonly<Step2OTPFormProps>) {
   const [otpValues, setOtpValues] = useState<string[]>([...EMPTY_OTP]);
+  const [resendCooldown, setResendCooldown] = useState<number>(0);
 
   const form = useForm<{ otp: string }>({
     resolver: zodResolver(z.object({ otp: otpSchema })),
@@ -53,6 +61,16 @@ export function Step2OTPForm({
       form.setError("otp", { type: "server", message: serverError });
     }
   }, [serverError, form]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const updateOtpValues = useCallback(
     (newValues: string[], fieldOnChange: (value: string) => void) => {
@@ -124,8 +142,26 @@ export function Step2OTPForm({
     setOtpValues([...EMPTY_OTP]);
     form.reset();
     await onResend();
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
     setTimeout(() => focusInput(0), 100);
   }, [form, onResend]);
+
+  const getResendButtonText = useCallback(() => {
+    if (isResending) {
+      return (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Envoi...
+        </>
+      );
+    }
+
+    if (resendCooldown > 0) {
+      return `Renvoyer dans (${formatTime(resendCooldown)})`;
+    }
+
+    return loginContent.step2.resendButton;
+  }, [isResending, resendCooldown]);
 
   return (
     <Form {...form}>
@@ -152,7 +188,7 @@ export function Step2OTPForm({
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={(e) => handlePaste(e, field.onChange)}
                         disabled={isVerifying || isResending}
-                        className="w-full h-12 text-center text-5xl font-black"
+                        className="w-full h-12 aspect-square text-center text-5xl font-black"
                         autoFocus={index === 0}
                       />
                     ))}
@@ -183,16 +219,9 @@ export function Step2OTPForm({
             variant="ghost"
             className="w-full text-sm"
             onClick={handleResend}
-            disabled={isVerifying || isResending}
+            disabled={isVerifying || isResending || resendCooldown > 0}
           >
-            {isResending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi...
-              </>
-            ) : (
-              loginContent.step2.resendLink
-            )}
+            {getResendButtonText()}
           </Button>
         </div>
       </form>
