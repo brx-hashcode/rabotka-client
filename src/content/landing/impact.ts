@@ -1,9 +1,9 @@
 import { TrendingUp, Heart, Users } from "lucide-react";
-import type { Impact } from '@/types';
+import type { Impact } from "@/types";
 
 export const impactContent = {
-  badge: 'Impact Social',
-  title: 'Créer des opportunités là où ça compte',
+  badge: "Impact Social",
+  title: "Créer des opportunités là où ça compte",
   impacts: [
     {
       icon: TrendingUp,
@@ -18,4 +18,4 @@ export const impactContent = {
       text: "Soutient les familles et les communautés",
     },
   ] as Impact[],
-};
+} as const;

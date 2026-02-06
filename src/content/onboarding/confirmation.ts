@@ -35,4 +35,4 @@ export const confirmationContent = {
     confirm: "Confirmer",
     submitting: "Envoi en cours...",
   },
-};
+} as const;

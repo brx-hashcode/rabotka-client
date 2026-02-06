@@ -46,4 +46,4 @@ export const kycDocumentsContent = {
     back: "Retour",
     next: "Continuer",
   },
-};
+} as const;

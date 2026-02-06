@@ -67,7 +67,7 @@ export function PersonalInfoForm({
               control={form.control}
               name="firstName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.fields.firstName.label}</FormLabel>
                   <FormControl>
                     <Input
@@ -84,7 +84,7 @@ export function PersonalInfoForm({
               control={form.control}
               name="lastName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.fields.lastName.label}</FormLabel>
                   <FormControl>
                     <Input
@@ -103,7 +103,7 @@ export function PersonalInfoForm({
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.fields.email.label}</FormLabel>
                   <FormControl>
                     <Input
@@ -121,7 +121,7 @@ export function PersonalInfoForm({
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col gap-1">
                   <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
                     <Input
@@ -140,7 +140,7 @@ export function PersonalInfoForm({
             control={form.control}
             name="address"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.fields.address.label}</FormLabel>
                 <FormControl>
                   <Input
@@ -157,7 +157,7 @@ export function PersonalInfoForm({
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.fields.description.label}</FormLabel>
                 <FormControl>
                   <div className="relative">

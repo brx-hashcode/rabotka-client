@@ -48,12 +48,12 @@ export function FAQSection() {
                 <AccordionItem
                   value={`item-${index}`}
                   className={cn(
-                    "rounded-2xl bg-card border-none p-0 overflow-hidden",
+                    "rounded-2xl bg-card border-none p-0 overflow-hidden shadow-soft",
                   )}
                 >
                   <AccordionTrigger
                     className={cn(
-                      "px-6 py-4 cursor-pointer hover:no-underline",
+                      "px-6 py-4 cursor-pointer  hover:no-underline",
                       "[&>svg]:hidden",
                       "[&[data-state=open]>div>div:last-child>svg]:rotate-180",
                     )}
