@@ -20,7 +20,7 @@ export function useVerifyOtpMutation() {
       if (otp === "123456") {
         return { success: true };
       }
-      throw new Error("Your OTP is incorrect");
+      throw new Error("Le code de vérification est incorrect");
     },
   });
 }
