@@ -111,6 +111,7 @@ export const LoginDialog = ({
     if (step === 1) return loginContent.step1.title;
     if (step === 2) return loginContent.step2.title;
     if (step === 3) return loginContent.step3.title;
+
     return "";
   };
 
@@ -118,6 +119,7 @@ export const LoginDialog = ({
     if (step === 1) return loginContent.step1.description;
     if (step === 2) return loginContent.step2.description;
     if (step === 3) return loginContent.step3.redirecting;
+
     return null;
   };
 

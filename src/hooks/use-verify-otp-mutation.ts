@@ -1,5 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { type VerifyOTPResponse } from "@/lib/api/auth-controller";
+import { toastMessages } from "@/content/landing/login";
+import { toast } from "@/hooks/use-toast";
 
 type VerifyOtpVariables = {
   emailOrPhone: string;
@@ -21,6 +23,18 @@ export function useVerifyOtpMutation() {
         return { success: true };
       }
       throw new Error("Le code de vérification est incorrect");
+    },
+    onSuccess: () => {
+      toast({
+        title: toastMessages.step2.success.title,
+        description: toastMessages.step2.success.description,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: toastMessages.step2.error.title,
+        description: error.message,
+      });
     },
   });
 }
