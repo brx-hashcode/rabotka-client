@@ -4,24 +4,20 @@ export const loginContent = {
     description:
       "Veuillez renseigner votre adresse e-mail ou votre numéro de téléphone pour recevoir un code de vérification sécurisé.",
 
-    emailPlaceholder: "Email",
-    phonePlaceholder: "Numéro de téléphone (+242XXXXXXXXX)",
+    placeholder: "Email ou numéro de téléphone",
     submitButton: "Continuer",
   },
   step2: {
     title: "Vérification",
-    description: "Entrez le code à 6 chiffres envoyé à votre compte",
+    description:
+      "Veuillez entrer le code de vérification à 6 chiffres qui a été envoyé à votre compte.",
     otpLabel: "Code de vérification",
     submitButton: "Vérifier",
     resendLink: "Renvoyer le code",
   },
   step3: {
-    redirecting: "Redirection en cours...",
-  },
-  success: {
     title: "Connexion réussie",
-    description: "Vous allez être redirigé vers votre tableau de bord",
-    button: "Continuer",
+    redirecting: "Vous allez être redirigé dans quelques instants…",
   },
   error: {
     title: "Erreur de connexion",

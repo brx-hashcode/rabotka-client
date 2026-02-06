@@ -51,13 +51,9 @@ export function Step1EmailPhoneForm({
               <FormLabel>Email ou téléphone</FormLabel>
               <FormControl>
                 <Input
-                  placeholder={
-                    loginContent.step1.emailPlaceholder +
-                    " / " +
-                    loginContent.step1.phonePlaceholder
-                  }
                   {...field}
                   disabled={isLoading}
+                  placeholder={loginContent.step1.placeholder}
                 />
               </FormControl>
               <FormMessage />
