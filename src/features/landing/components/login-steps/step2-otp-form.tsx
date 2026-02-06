@@ -26,7 +26,7 @@ type Step2OTPFormProps = {
 const OTP_LENGTH = 6;
 const EMPTY_OTP = new Array<string>(OTP_LENGTH).fill("");
 const OTP_INPUT_KEYS = EMPTY_OTP.map((_, i) => `otp-${i}`);
-const OTP_CHAR_REGEX = /^[0-9A-Za-z]$/;
+const OTP_CHAR_REGEX = /^\d$/;
 
 const focusInput = (index: number) => {
   document.getElementById(`otp-input-${index}`)?.focus();
@@ -64,7 +64,7 @@ export function Step2OTPForm({
 
   const handleOtpChange = useCallback(
     (index: number, value: string, fieldOnChange: (value: string) => void) => {
-      const char = value.slice(-1).toUpperCase();
+      const char = value.slice(-1);
 
       if (char && isValidOtpChar(char)) {
         const newValues = [...otpValues];
@@ -102,10 +102,7 @@ export function Step2OTPForm({
       fieldOnChange: (value: string) => void,
     ) => {
       e.preventDefault();
-      const pastedData = e.clipboardData
-        .getData("text")
-        .slice(0, OTP_LENGTH)
-        .toUpperCase();
+      const pastedData = e.clipboardData.getData("text").slice(0, OTP_LENGTH);
 
       const isValidPaste = pastedData
         .split("")
@@ -145,7 +142,8 @@ export function Step2OTPForm({
                       <Input
                         key={OTP_INPUT_KEYS[index]}
                         id={`otp-input-${index}`}
-                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         maxLength={1}
                         value={value}
                         onChange={(e) =>

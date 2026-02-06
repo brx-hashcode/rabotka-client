@@ -14,7 +14,7 @@ export function useSendOtpMutation() {
       } else if (emailOrPhone === "+242069917686") {
         return { success: true };
       }
-      throw new Error("Your email or phone is incorrect");
+      throw new Error("L'email ou le numéro de téléphone est incorrect");
     },
   });
 }
