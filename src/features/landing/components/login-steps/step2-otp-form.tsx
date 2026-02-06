@@ -10,7 +10,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { otpSchema } from "@/lib/validations/auth";
@@ -90,9 +89,15 @@ export function Step2OTPForm({
   );
 
   const handlePaste = useCallback(
-    (e: React.ClipboardEvent<HTMLInputElement>, fieldOnChange: (value: string) => void) => {
+    (
+      e: React.ClipboardEvent<HTMLInputElement>,
+      fieldOnChange: (value: string) => void,
+    ) => {
       e.preventDefault();
-      const pastedData = e.clipboardData.getData("text").slice(0, 6).toUpperCase();
+      const pastedData = e.clipboardData
+        .getData("text")
+        .slice(0, 6)
+        .toUpperCase();
       if (/^[0-9A-Za-z]{0,6}$/.test(pastedData)) {
         const newOtpValues = [...otpValues];
         for (let i = 0; i < 6; i++) {
@@ -122,16 +127,12 @@ export function Step2OTPForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="otp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{loginContent.step2.otpLabel}</FormLabel>
               <FormControl>
                 <div className="flex flex-col items-center gap-4 w-full">
                   <div className="flex gap-4 w-full justify-center">
@@ -147,9 +148,9 @@ export function Step2OTPForm({
                         }
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={(e) => handlePaste(e, field.onChange)}
-                                  disabled={isLoading}
-                                  className="w-full h-14 text-center text-3xl font-bold"
-                                  autoFocus={index === 0}
+                        disabled={isLoading}
+                        className="w-full h-12 text-center text-5xl font-black"
+                        autoFocus={index === 0}
                       />
                     ))}
                   </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { CheckCircle, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +21,7 @@ type LoginDialogProps = {
   setIsOpen: (open: boolean) => void;
 };
 
-type Step = 1 | 2 | 3 | "success" | "error";
-
-type SuccessStateProps = {
-  description: string;
-};
+type Step = 1 | 2 | 3 | "error";
 
 type ErrorStateProps = {
   errorMessage: string | null;
@@ -79,29 +75,29 @@ export const LoginDialog = ({
     }
   };
 
-  const handleStep2Submit = useCallback(async (data: { otp: string }) => {
-    setIsLoading(true);
-    setApiError(null);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (!emailOrPhone) {
-        throw new Error("Email or phone number is required");
-      }
-      setStep("success");
-      setTimeout(() => {
+  const handleStep2Submit = useCallback(
+    async (data: { otp: string }) => {
+      setIsLoading(true);
+      setApiError(null);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (!emailOrPhone) {
+          throw new Error("Email or phone number is required");
+        }
         setStep(3);
-      }, 1500);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Code de vérification invalide";
-      setApiError(errorMessage);
-      setStep("error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [emailOrPhone]);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Code de vérification invalide";
+        setApiError(errorMessage);
+        setStep("error");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [emailOrPhone],
+  );
 
   const handleResendOTP = useCallback(async () => {
     setIsLoading(true);
@@ -134,15 +130,15 @@ export const LoginDialog = ({
   const getDialogTitle = () => {
     if (step === 1) return loginContent.step1.title;
     if (step === 2) return loginContent.step2.title;
-    if (step === "success") return loginContent.success.title;
+    if (step === 3) return loginContent.step3.title;
     if (step === "error") return loginContent.error.title;
-    return loginContent.step3.redirecting;
+    return "";
   };
 
   const getDialogDescription = () => {
     if (step === 1) return loginContent.step1.description;
     if (step === 2) return loginContent.step2.description;
-    if (step === "success") return loginContent.success.description;
+    if (step === 3) return loginContent.step3.redirecting;
     if (step === "error")
       return apiError || "Une erreur s'est produite lors de la connexion";
     return null;
@@ -150,12 +146,10 @@ export const LoginDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>{getDialogTitle()}</DialogTitle>
-          {step !== 3 && (
-            <DialogDescription>{getDialogDescription()}</DialogDescription>
-          )}
+          <DialogDescription>{getDialogDescription()}</DialogDescription>
         </DialogHeader>
 
         {step === 1 && (
@@ -177,26 +171,11 @@ export const LoginDialog = ({
 
         {step === 3 && <Step3Redirecting />}
 
-        {step === "success" && (
-          <SuccessState description={loginContent.success.description} />
-        )}
-
         {step === "error" && (
           <ErrorState errorMessage={apiError} onRetry={handleRetry} />
         )}
       </DialogContent>
     </Dialog>
-  );
-};
-
-const SuccessState = ({ description }: Readonly<SuccessStateProps>) => {
-  return (
-    <div className="flex flex-col items-center space-y-4 py-4">
-      <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-        <CheckCircle className="h-10 w-10 text-green-500" />
-      </div>
-      <p className="text-sm text-muted-foreground text-center">{description}</p>
-    </div>
   );
 };
 
