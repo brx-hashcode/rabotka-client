@@ -40,9 +40,11 @@ export class IndexController extends BaseController {
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
 
+      return { success: true, userId: "123" };
+
       return await this.apiService.post<OnboardingResponse>(
         "/profiles",
-        formData
+        formData,
       );
     } catch (error) {
       this.handleError(error);

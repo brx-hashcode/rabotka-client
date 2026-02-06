@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ type OnboardingStep =
 type ConfirmationViewProps = {
   currentStep: OnboardingStep;
   onBack: () => void;
-  onSuccess: () => void;
+  onSuccess: (email: string) => void;
   onError: () => void;
 };
 
@@ -44,14 +44,27 @@ export function ConfirmationView({
   const handleSubmit = useCallback(async () => {
     try {
       await mutation.mutateAsync();
-      onSuccess();
+      onSuccess(personalInfo.email);
     } catch (error) {
       console.error(error);
       onError();
     }
-  }, [mutation, onSuccess, onError]);
+  }, [mutation, onSuccess, onError, personalInfo.email]);
 
   const content = confirmationContent;
+
+  const documentTypeLabel = useMemo(() => {
+    if (kycData.documentType === "IDENTITY_CARD") {
+      return content.documentTypes.identityCard;
+    }
+    if (kycData.documentType === "PASSPORT") {
+      return content.documentTypes.passport;
+    }
+    if (kycData.documentType === "DRIVER_LICENSE") {
+      return content.documentTypes.driverLicense;
+    }
+    return "-";
+  }, [kycData.documentType, content.documentTypes]);
 
   return (
     <div className="space-y-6">
@@ -133,13 +146,7 @@ export function ConfirmationView({
                 variant="outline"
                 className="text-gray-700 font-semibold px-3 py-1 border-gray-300"
               >
-                {kycData.documentType === "IDENTITY_CARD"
-                  ? content.documentTypes.identityCard
-                  : kycData.documentType === "PASSPORT"
-                    ? content.documentTypes.passport
-                    : kycData.documentType === "DRIVER_LICENSE"
-                      ? content.documentTypes.driverLicense
-                      : "-"}
+                {documentTypeLabel}
               </Badge>
             </InfoCard>
           </div>
