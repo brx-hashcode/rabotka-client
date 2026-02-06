@@ -1,8 +1,10 @@
 export const modalsContent = {
   success: {
     title: "Votre profil a bien été créé avec succès",
-    description:
-      "Vous allez recevoir un lien sur WhatsApp afin de finaliser la création de votre profil et vérification",
+    emailSent:
+      "Un message de création de compte a été envoyé à l'adresse {profile_email}.",
+    whatsappMessage:
+      "Une fois votre profil vérifié, vous recevrez un lien sur WhatsApp pour finaliser la création de votre profil.",
     button: "J'ai compris",
   },
   error: {

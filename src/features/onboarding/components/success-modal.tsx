@@ -7,11 +7,13 @@ import { modalsContent } from "@/content/onboarding";
 type SuccessModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  email?: string;
 };
 
 export function SuccessModal({
   open,
   onOpenChange,
+  email,
 }: Readonly<SuccessModalProps>) {
   const navigate = useNavigate();
 
@@ -29,13 +31,22 @@ export function SuccessModal({
     []
   );
 
+  const description = useMemo(() => {
+    const emailAddress = email || "";
+    const emailMessage = modalsContent.success.emailSent.replace(
+      "{profile_email}",
+      emailAddress || "votre adresse email"
+    );
+    return `${emailMessage}\n\n${modalsContent.success.whatsappMessage}`;
+  }, [email]);
+
   return (
     <StatusModal
       open={open}
       onOpenChange={onOpenChange}
       icon={icon}
       title={modalsContent.success.title}
-      description={modalsContent.success.description}
+      description={description}
       buttonText={modalsContent.success.button}
       onButtonClick={handleClose}
       buttonClassName="w-full bg-green-500 hover:bg-green-600 text-white"

@@ -36,7 +36,7 @@ export function StatusModal({
           <div className="flex flex-col items-center space-y-4">
             {icon}
             <DialogTitle className="text-center text-xl">{title}</DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogDescription className="text-center whitespace-pre-line">
               {description}
             </DialogDescription>
           </div>
