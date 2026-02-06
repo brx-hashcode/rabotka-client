@@ -48,6 +48,16 @@ export class AuthController extends BaseController {
       this.handleError(error);
     }
   }
+
+  async resendOTP(emailOrPhone: string): Promise<SendOTPResponse> {
+    try {
+      return await this.apiService.post<SendOTPResponse>("/auth/resend-otp", {
+        emailOrPhone,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { sendOTP, verifyOTP } = new AuthController();
+export const { sendOTP, verifyOTP, resendOTP } = new AuthController();
