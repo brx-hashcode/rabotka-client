@@ -14,7 +14,7 @@ export const loginContent = {
       "Veuillez entrer le code de vérification à 6 chiffres qui a été envoyé à votre compte.",
     otpLabel: "Code de vérification",
     submitButton: "Vérifier",
-    resendLink: "Renvoyer le code",
+    resendButton: "Renvoyer le code",
   },
   step3: {
     title: "Connexion réussie",
