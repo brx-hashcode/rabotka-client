@@ -10,7 +10,9 @@ export function useResendOtpMutation() {
       // TODO: Remove mock and use real API
       // return await sendOTP(emailOrPhone);
       await new Promise((resolve) => setTimeout(resolve, 500));
-      return { success: true };
+
+      throw new Error("Impossible de demander un nouveau code OTP pour le moment. Veuillez réessayer plus tard.");
+      // return { success: true };
     },
     onSuccess: () => {
       toast({
