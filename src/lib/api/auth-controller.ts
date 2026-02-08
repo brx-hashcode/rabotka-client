@@ -1,5 +1,4 @@
-import { env } from "@/env";
-import { BaseController } from "mvc-front-sdk";
+import { RabotkaBaseController } from "./base-controller";
 
 export type SendOTPPayload = {
   emailOrPhone: string;
@@ -21,14 +20,10 @@ export type VerifyOTPResponse = {
   user?: object;
 };
 
-export class AuthController extends BaseController {
-  constructor() {
-    super(env.VITE_API_URL);
-  }
-
+export class AuthController extends RabotkaBaseController {
   async sendOTP(emailOrPhone: string): Promise<SendOTPResponse> {
     try {
-      return await this.apiService.post<SendOTPResponse>("/auth/send-otp", {
+      return await this.post<SendOTPResponse>("/auth/send-otp", {
         emailOrPhone,
       });
     } catch (error) {
@@ -41,7 +36,7 @@ export class AuthController extends BaseController {
     otp: string,
   ): Promise<VerifyOTPResponse> {
     try {
-      return await this.apiService.post<VerifyOTPResponse>("/auth/verify-otp", {
+      return await this.post<VerifyOTPResponse>("/auth/verify-otp", {
         emailOrPhone,
         otp,
       });

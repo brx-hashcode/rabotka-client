@@ -3,13 +3,13 @@ import { useOnboardingStore } from "@/stores/onboardingStore";
 import { apiErrors } from "@/content/onboarding";
 import {
   createProfile,
-  type OnboardingResponse,
-} from "@/lib/api/index-controller";
+  type CreateProfileResponse,
+} from "@/lib/api/profile-controller";
 
 export function useOnboardingMutation() {
   return useMutation({
     mutationKey: ["onboarding-mutation"],
-    mutationFn: async (): Promise<OnboardingResponse> => {
+    mutationFn: async (): Promise<CreateProfileResponse> => {
       const { personalInfo, kycData } = useOnboardingStore.getState();
 
       if (!kycData.kycDocument || !kycData.kycSelfie) {
