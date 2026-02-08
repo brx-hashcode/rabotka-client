@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { getMe, type ProfileMeResponse } from "@/lib/api/profile-controller";
+import { type ProfileMeResponse } from "@/lib/api/profile-controller";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProfileMe } from "@/hooks/use-profile-me";
 
 function ProfileSkeleton() {
   return (
@@ -55,14 +55,7 @@ function formatStatus(status: string): string {
 }
 
 export default function Dashboard() {
-  const {
-    data: profile,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["profile", "me"],
-    queryFn: getMe,
-  });
+  const { data: profile, isLoading, error } = useProfileMe();
 
   if (isLoading) {
     return (
