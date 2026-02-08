@@ -54,12 +54,12 @@ function formatStatus(status: string): string {
   return status.split("_").join(" ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
 }
 
-export default function Dashboard() {
+export default function Profile() {
   const { data: profile, isLoading, error } = useProfileMe();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
         <ProfileSkeleton />
       </div>
     );
@@ -67,7 +67,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-foreground">Erreur</h1>
           <p className="text-muted-foreground">
@@ -83,10 +83,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">Tableau de bord</h1>
+          <h1 className="text-3xl font-bold text-foreground">Mon profil</h1>
           <div className="flex gap-2">
             <Badge variant={getStatusBadgeVariant(profile.status)}>
               {formatStatus(profile.status)}
@@ -144,3 +144,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

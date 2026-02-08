@@ -6,12 +6,24 @@ import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { LoginButton } from "@/features/landing/components/login-button";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScroll(50);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const scrollToElement = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    }
+  };
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -21,13 +33,14 @@ export function Header() {
       e.preventDefault();
       setIsMenuOpen(false);
       const id = href.slice(1);
-      const element = document.getElementById(id);
-      if (element) {
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      // If not on home page, navigate to home first then scroll
+      if (location.pathname !== "/") {
+        navigate("/");
+        // Wait for navigation to complete, then scroll
+        setTimeout(() => scrollToElement(id), 100);
+      } else {
+        scrollToElement(id);
       }
     } else {
       setIsMenuOpen(false);
@@ -44,7 +57,7 @@ export function Header() {
     >
       <nav className="section-container">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <a href="#" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <img
               src={rabotkaLogo}
               alt={headerContent.logo.alt}
@@ -53,7 +66,7 @@ export function Header() {
             <span className="font-display text-xl font-bold text-foreground">
               {headerContent.logo.brandName}
             </span>
-          </a>
+          </Link>
 
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (

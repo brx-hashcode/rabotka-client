@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router";
 import Index from "@/pages/index";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/onboarding";
-import Dashboard from "@/pages/dashboard";
+import Profile from "@/pages/profile";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout } from "@/features/landing/layouts/landing-layout";
 
@@ -16,7 +16,7 @@ export function AppRoutes() {
         element={
           <AuthGuard>
             <LandingLayout>
-              <Dashboard />
+              <Profile />
             </LandingLayout>
           </AuthGuard>
         }
