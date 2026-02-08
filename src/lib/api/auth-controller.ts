@@ -16,8 +16,7 @@ export type SendOTPResponse = {
 
 export type VerifyOTPResponse = {
   success: boolean;
-  token?: string;
-  user?: object;
+  message?: string;
 };
 
 export class AuthController extends RabotkaBaseController {
