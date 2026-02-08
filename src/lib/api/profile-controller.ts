@@ -17,6 +17,22 @@ export type CreateProfileResponse = {
   message: string;
 };
 
+export type ProfileMeResponse = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  description: string;
+  profileType: "WORKER" | "EMPLOYER";
+  status: "PENDING_PAYMENT" | "ACTIVE" | "SUSPENDED" | "BANNED";
+  verificationStatus: "PENDING" | "VERIFIED" | "REJECTED";
+  reliabilityScore: number | null;
+  whatsappConnected: boolean;
+  createdAt: string;
+};
+
 export class ProfileController extends RabotkaBaseController {
   async createProfile(
     data: CreateProfilePayload,
@@ -39,6 +55,10 @@ export class ProfileController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  getMe(): Promise<ProfileMeResponse> {
+    return this.get<ProfileMeResponse>("/profile/me");
+  }
 }
 
-export const { createProfile } = new ProfileController();
+export const { createProfile, getMe } = new ProfileController();

@@ -53,7 +53,7 @@ export const LoginDialog = ({
     if (step === 3) {
       const timer = setTimeout(() => {
         setIsOpen(false);
-        navigate("/dashboard");
+        navigate("/profile");
       }, 2000);
       return () => clearTimeout(timer);
     }
