@@ -1,23 +1,8 @@
 import { env } from "@/env";
 import { BaseController } from "mvc-front-sdk";
 
-export type CreateProfilePayload = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  description: string;
-  profileType: "WORKER" | "EMPLOYER" | "";
-  documentType: "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "";
-  kycDocument: File;
-  kycSelfie: File;
-};
-
-export type OnboardingResponse = {
-  success: boolean;
-  userId?: string;
-  error?: string;
+type GenerateCsrfTokenResponse = {
+  csrfToken: string;
 };
 
 export class IndexController extends BaseController {
@@ -25,32 +10,13 @@ export class IndexController extends BaseController {
     super(env.VITE_API_URL);
   }
 
-  async createProfile(data: CreateProfilePayload): Promise<OnboardingResponse> {
+  async generateCsrfToken(): Promise<GenerateCsrfTokenResponse> {
     try {
-      const formData = new FormData();
-      formData.append("firstName", data.firstName);
-      formData.append("lastName", data.lastName);
-      formData.append("email", data.email);
-      formData.append("phone", data.phone);
-      formData.append("address", data.address);
-      formData.append("description", data.description);
-      formData.append("profileType", data.profileType);
-      formData.append("documentType", data.documentType);
-      formData.append("kycDocument", data.kycDocument);
-      formData.append("kycSelfie", data.kycSelfie);
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      return { success: true, userId: "123" };
-
-      return await this.apiService.post<OnboardingResponse>(
-        "/profiles",
-        formData,
-      );
+      return await this.apiService.get<GenerateCsrfTokenResponse>("/csrf");
     } catch (error) {
       this.handleError(error);
     }
   }
 }
 
-export const { createProfile } = new IndexController();
+export const { generateCsrfToken } = new IndexController();

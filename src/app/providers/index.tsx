@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { CsrfProvider } from "./csrf-provider";
 
 type ProvidersProps = {
   children: ReactNode;
@@ -22,14 +23,16 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: Readonly<ProvidersProps>) {
   return (
-    <NuqsAdapter>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          {children}
-        </TooltipProvider>
-      </QueryClientProvider>
-    </NuqsAdapter>
+    <CsrfProvider>
+      <NuqsAdapter>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            {children}
+          </TooltipProvider>
+        </QueryClientProvider>
+      </NuqsAdapter>
+    </CsrfProvider>
   );
 }
