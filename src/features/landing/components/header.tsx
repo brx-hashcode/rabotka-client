@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Menu, X } from "lucide-react";
@@ -15,15 +15,17 @@ export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const scrollToElement = (id: string) => {
+  const scrollToElement = useCallback((id: string, retries = 5) => {
     const element = document.getElementById(id);
     if (element) {
       const headerOffset = 80;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    } else if (retries > 0) {
+      setTimeout(() => scrollToElement(id, retries - 1), 100);
     }
-  };
+  }, []);
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -34,13 +36,11 @@ export function Header() {
       setIsMenuOpen(false);
       const id = href.slice(1);
 
-      // If not on home page, navigate to home first then scroll
-      if (location.pathname !== "/") {
-        navigate("/");
-        // Wait for navigation to complete, then scroll
-        setTimeout(() => scrollToElement(id), 100);
-      } else {
+      if (location.pathname === "/") {
         scrollToElement(id);
+      } else {
+        navigate("/");
+        setTimeout(() => scrollToElement(id), 150);
       }
     } else {
       setIsMenuOpen(false);
