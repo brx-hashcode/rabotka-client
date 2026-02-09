@@ -67,6 +67,7 @@ export default function Profile() {
               <AvatarImage
                 src={profile.avatarUrl ?? WHATSAPP_PLACEHOLDER}
                 alt={fullName}
+                className="object-cover"
               />
               <AvatarFallback className="bg-muted text-muted-foreground text-3xl">
                 {initials || <User className="h-12 w-12" />}

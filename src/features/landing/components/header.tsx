@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LoginButton } from "@/features/landing/components/login-button";
+import { MobileLoginButton } from "@/features/landing/components/mobile-login-button";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -122,17 +122,7 @@ export function Header() {
                   {link.label}
                 </a>
               ))}
-              <Button
-                variant="whatsapp"
-                size="default"
-                className="w-full"
-                asChild
-              >
-                <Link to="/onboarding">
-                  <MessageCircle className="w-4 h-4" />
-                  {headerContent.cta.button}
-                </Link>
-              </Button>
+              <MobileLoginButton />
             </div>
           </motion.div>
         )}

@@ -42,7 +42,6 @@ export function EditProfileSheetButton({
 }: EditProfileSheetButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
-  const [isDirty, setIsDirty] = useState(false);
 
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
   const { toast } = useToast();
@@ -66,7 +65,6 @@ export function EditProfileSheetButton({
       description: profile.description,
     });
     setAvatarUrl(profile.avatarUrl);
-    setIsDirty(false);
     setIsOpen(true);
   };
 
@@ -77,7 +75,6 @@ export function EditProfileSheetButton({
         lastName: data.lastName,
         address: data.address,
         description: data.description,
-        ...(isDirty && { avatarUrl }),
       },
       {
         onSuccess: () => {
@@ -85,7 +82,6 @@ export function EditProfileSheetButton({
             description: content.toast.success,
           });
           setIsOpen(false);
-          setIsDirty(false);
         },
         onError: () => {
           toast({
@@ -99,7 +95,6 @@ export function EditProfileSheetButton({
 
   const handleAvatarChange = (newAvatarUrl: string) => {
     setAvatarUrl(newAvatarUrl);
-    setIsDirty(true);
   };
 
   return (
@@ -195,6 +190,7 @@ export function EditProfileSheetButton({
                       <Textarea
                         placeholder={content.fields.description.placeholder}
                         rows={8}
+                        className="resize-none overflow-hidden"
                         {...field}
                       />
                     </FormControl>

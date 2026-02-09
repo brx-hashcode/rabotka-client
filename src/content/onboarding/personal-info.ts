@@ -23,8 +23,8 @@ export const personalInfoContent = {
       placeholder: "19 rue de la joie Brazzaville",
     },
     description: {
-      label: "Description",
-      placeholder: "Je suis John Doe coiffeur de profession...",
+      label: "À propos de vous",
+      placeholder: "Présentez-vous en quelques phrases...",
       charCount: "/500",
     },
   },
