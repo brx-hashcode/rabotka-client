@@ -34,6 +34,16 @@ export type ProfileMeResponse = {
   createdAt: string;
 };
 
+export type UpdateProfilePayload = {
+  firstName?: string;
+  lastName?: string;
+  description?: string;
+};
+
+export type UpdateAvatarResponse = {
+  avatarUrl: string;
+};
+
 export class ProfileController extends RabotkaBaseController {
   async createProfile(
     data: CreateProfilePayload,
@@ -60,6 +70,29 @@ export class ProfileController extends RabotkaBaseController {
   getMe(): Promise<ProfileMeResponse> {
     return this.get<ProfileMeResponse>("/profile/me");
   }
+
+  async updateProfile(data: UpdateProfilePayload): Promise<ProfileMeResponse> {
+    try {
+      return await this.patch<ProfileMeResponse>(
+        "/profile",
+        data as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async updateAvatar(file: File): Promise<UpdateAvatarResponse> {
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      return await this.post<UpdateAvatarResponse>("/profile/avatar", formData);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { createProfile, getMe } = new ProfileController();
+export const { createProfile, getMe, updateProfile, updateAvatar } =
+  new ProfileController();
