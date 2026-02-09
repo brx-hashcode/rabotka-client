@@ -1,8 +1,17 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -16,6 +25,10 @@ import { useUpdateProfile } from "@/hooks/use-update-profile";
 import { useToast } from "@/hooks/use-toast";
 import { editProfileContent } from "@/content/profile";
 import { AvatarUpload } from "./avatar-upload";
+import {
+  editProfileSchema,
+  type EditProfileFormData,
+} from "@/lib/validations/profile";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
 
 const content = editProfileContent;
@@ -28,28 +41,43 @@ export function EditProfileSheetButton({
   profile,
 }: EditProfileSheetButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [firstName, setFirstName] = useState(profile.firstName);
-  const [lastName, setLastName] = useState(profile.lastName);
-  const [description, setDescription] = useState(profile.description);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
+  const [isDirty, setIsDirty] = useState(false);
 
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
   const { toast } = useToast();
 
+  const form = useForm<EditProfileFormData>({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      address: profile.address,
+      description: profile.description,
+    },
+    mode: "onChange",
+  });
+
   const handleOpen = () => {
-    setFirstName(profile.firstName);
-    setLastName(profile.lastName);
-    setDescription(profile.description);
+    form.reset({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      address: profile.address,
+      description: profile.description,
+    });
     setAvatarUrl(profile.avatarUrl);
+    setIsDirty(false);
     setIsOpen(true);
   };
 
-  const handleSave = () => {
+  const onSubmit = (data: EditProfileFormData) => {
     updateProfile(
       {
-        firstName,
-        lastName,
-        description,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        address: data.address,
+        description: data.description,
+        ...(isDirty && { avatarUrl }),
       },
       {
         onSuccess: () => {
@@ -57,6 +85,7 @@ export function EditProfileSheetButton({
             description: content.toast.success,
           });
           setIsOpen(false);
+          setIsDirty(false);
         },
         onError: () => {
           toast({
@@ -70,6 +99,7 @@ export function EditProfileSheetButton({
 
   const handleAvatarChange = (newAvatarUrl: string) => {
     setAvatarUrl(newAvatarUrl);
+    setIsDirty(true);
   };
 
   return (
@@ -94,57 +124,96 @@ export function EditProfileSheetButton({
             <SheetDescription>{content.sheet.description}</SheetDescription>
           </SheetHeader>
 
-          <div className="py-6 space-y-6">
-            <AvatarUpload
-              defaultAvatar={avatarUrl}
-              onAvatarChange={handleAvatarChange}
-            />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="py-6 space-y-6"
+            >
+              <AvatarUpload
+                defaultAvatar={avatarUrl}
+                onAvatarChange={handleAvatarChange}
+              />
 
-            <div className="space-y-4">
-              <div className="space-y-4">
-                <Label htmlFor="firstName">
-                  {content.fields.firstName.label}
-                </Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder={content.fields.firstName.placeholder}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.firstName.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={content.fields.firstName.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-4">
-                <Label htmlFor="lastName">
-                  {content.fields.lastName.label}
-                </Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder={content.fields.lastName.placeholder}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.lastName.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={content.fields.lastName.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-4">
-                <Label htmlFor="description">
-                  {content.fields.description.label}
-                </Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={content.fields.description.placeholder}
-                  rows={8}
-                />
-              </div>
-            </div>
-          </div>
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.address.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={content.fields.address.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <SheetFooter>
-            <Button onClick={handleSave} disabled={isSaving} className="w-full">
-              {isSaving ? content.buttons.saving : content.buttons.save}
-            </Button>
-          </SheetFooter>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.description.label}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={content.fields.description.placeholder}
+                        rows={8}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <SheetFooter>
+                <Button
+                  type="submit"
+                  disabled={isSaving || !form.formState.isValid}
+                  className="w-full"
+                >
+                  {isSaving ? content.buttons.saving : content.buttons.save}
+                </Button>
+              </SheetFooter>
+            </form>
+          </Form>
         </SheetContent>
       </Sheet>
     </>

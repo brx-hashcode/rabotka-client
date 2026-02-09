@@ -1,47 +1,52 @@
 import { useState, useCallback, useRef, useId } from "react";
 
-export interface FileWithPreview {
+export type FileWithPreview = {
   id: string;
   file: File;
   preview: string;
-}
+};
 
-export interface UseFileUploadOptions {
+export type UseFileUploadOptions = {
   maxFiles?: number;
   maxSize?: number;
   accept?: string;
   multiple?: boolean;
   onFilesChange?: (files: FileWithPreview[]) => void;
-}
+};
 
-export interface UseFileUploadState {
+export type UseFileUploadState = {
   files: FileWithPreview[];
   isDragging: boolean;
   errors: string[];
-}
+};
 
-export interface UseFileUploadActions {
+export type UseFileUploadActions = {
   removeFile: (id: string) => void;
   handleDragEnter: (e: React.DragEvent) => void;
   handleDragLeave: (e: React.DragEvent) => void;
   handleDragOver: (e: React.DragEvent) => void;
   handleDrop: (e: React.DragEvent) => void;
   openFileDialog: () => void;
-  getInputProps: () => React.InputHTMLAttributes<HTMLInputElement>;
+  getInputProps: () => React.DetailedHTMLProps<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  >;
   clearFiles: () => void;
   clearErrors: () => void;
-}
+};
 
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  return (
+    Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  );
 }
 
 export function useFileUpload(
-  options: UseFileUploadOptions = {}
+  options: UseFileUploadOptions = {},
 ): [UseFileUploadState, UseFileUploadActions] {
   const {
     maxFiles = 1,
@@ -80,7 +85,7 @@ export function useFileUpload(
 
       return null;
     },
-    [maxSize, accept]
+    [maxSize, accept],
   );
 
   const processFiles = useCallback(
@@ -119,7 +124,7 @@ export function useFileUpload(
         onFilesChange?.(updatedFiles);
       }
     },
-    [files, maxFiles, multiple, validateFile, uniqueId, onFilesChange]
+    [files, maxFiles, multiple, validateFile, uniqueId, onFilesChange],
   );
 
   const removeFile = useCallback(
@@ -132,7 +137,7 @@ export function useFileUpload(
       setFiles(updatedFiles);
       onFilesChange?.(updatedFiles);
     },
-    [files, onFilesChange]
+    [files, onFilesChange],
   );
 
   const clearFiles = useCallback(() => {
@@ -174,7 +179,7 @@ export function useFileUpload(
         processFiles(droppedFiles);
       }
     },
-    [processFiles]
+    [processFiles],
   );
 
   const openFileDialog = useCallback(() => {
@@ -191,19 +196,19 @@ export function useFileUpload(
       // Reset input value to allow selecting the same file again
       e.target.value = "";
     },
-    [processFiles]
+    [processFiles],
   );
 
   const getInputProps = useCallback(
-    (): React.InputHTMLAttributes<HTMLInputElement> => ({
-      ref: inputRef as React.Ref<HTMLInputElement>,
-      type: "file",
+    () => ({
+      ref: inputRef,
+      type: "file" as const,
       accept,
       multiple,
-      onChange: handleInputChange as unknown as React.ChangeEventHandler<HTMLInputElement>,
-      style: { display: "none" },
+      onChange: handleInputChange,
+      style: { display: "none" } as React.CSSProperties,
     }),
-    [accept, multiple, handleInputChange]
+    [accept, multiple, handleInputChange],
   );
 
   return [

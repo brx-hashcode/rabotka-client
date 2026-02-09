@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { User, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFileUpload, formatBytes } from "@/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { useUpdateAvatar } from "@/hooks/use-update-avatar";
 import { editProfileContent } from "@/content/profile";
 
@@ -21,7 +21,6 @@ export function AvatarUpload({
   defaultAvatar,
   onAvatarChange,
 }: AvatarUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const { mutate: uploadAvatar, isPending: isUploading } = useUpdateAvatar();
 
   const [
@@ -93,13 +92,6 @@ export function AvatarUpload({
     );
   };
 
-  const getStatusLabel = () => {
-    if (isUploading) return content.uploading;
-    if (currentFile) return content.uploaded;
-
-    return content.upload;
-  };
-
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
       <div className="relative">
@@ -120,7 +112,7 @@ export function AvatarUpload({
           onClick={openFileDialog}
           aria-label={content.upload}
         >
-          <input {...getInputProps()} ref={inputRef} className="sr-only" />
+          <input {...getInputProps()} className="sr-only" />
 
           {renderAvatarContent()}
         </button>
@@ -140,13 +132,6 @@ export function AvatarUpload({
             <X className="h-3.5 w-3.5" />
           </Button>
         )}
-      </div>
-
-      <div className="text-center space-y-0.5">
-        <p className="text-sm font-medium">{getStatusLabel()}</p>
-        <p className="text-xs text-muted-foreground">
-          PNG, JPG {formatBytes(maxSize)}
-        </p>
       </div>
 
       {errors.length > 0 && (

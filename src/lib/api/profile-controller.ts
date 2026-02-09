@@ -38,6 +38,7 @@ export type UpdateProfilePayload = {
   firstName?: string;
   lastName?: string;
   description?: string;
+  address?: string;
 };
 
 export type UpdateAvatarResponse = {
