@@ -35,6 +35,13 @@ export default function Onboarding() {
   }, [hydrateFromStorage]);
 
   useEffect(() => {
+    if (typeof globalThis !== "undefined") {
+      globalThis.history.scrollRestoration = "manual";
+      globalThis.scrollTo(0, 0);
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       useOnboardingStore.getState().resetStore();
     };

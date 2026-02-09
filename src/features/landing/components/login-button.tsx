@@ -27,7 +27,11 @@ export const LoginButton = () => {
         className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         <Avatar className="h-10 w-10 border-2 border-primary cursor-pointer hover:opacity-80 transition-opacity">
-          <AvatarImage src={profile.avatarUrl ?? undefined} alt={fullName} />
+          <AvatarImage
+            src={profile.avatarUrl ?? undefined}
+            alt={fullName}
+            className="object-cover"
+          />
           <AvatarFallback className="bg-primary text-primary-foreground font-medium">
             {initials || <User className="h-5 w-5" />}
           </AvatarFallback>

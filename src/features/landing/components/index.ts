@@ -15,3 +15,4 @@ export { Footer } from "./footer";
 export { ScrollToTop } from "./scroll-to-top";
 export { LoginButton } from "./login-button";
 export { LoginDialog } from "./login-dialog";
+export { MobileLoginButton } from "./mobile-login-button";
