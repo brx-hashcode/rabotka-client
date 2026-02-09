@@ -19,9 +19,10 @@ export function InfoCard({
   children,
 }: Readonly<InfoCardProps>) {
   const bgClassesMap = {
-    green: "bg-gradient-to-br from-green-50 to-green-100/50",
-    red: "bg-gradient-to-br from-red-50 to-red-100/50",
-    default: "bg-gradient-to-br from-gray-50 to-gray-100/50",
+    green:
+      "bg-gradient-to-br from-green-50 to-green-100/50 border border-border",
+    red: "bg-gradient-to-br from-red-50 to-red-100/50 border border-border",
+    default: "bg-card rounded-lg p-4 border border-border",
   } as const;
   const bgClasses = bgClassesMap[variant];
 
@@ -47,10 +48,10 @@ export function InfoCard({
     >
       <div className="flex items-start gap-3">
         <div className={`p-2 bg-white rounded-lg ${iconBgClasses}`}>
-          <Icon className={`size-4 ${iconColorClasses}`} />
+          <Icon className={`size-5 ${iconColorClasses}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             {label}
           </p>
           {children || (

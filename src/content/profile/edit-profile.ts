@@ -15,6 +15,10 @@ export const editProfileContent = {
     },
   },
   fields: {
+    address: {
+      label: "Adresse",
+      placeholder: "Votre adresse",
+    },
     firstName: {
       label: "Prenom",
       placeholder: "Votre prenom",

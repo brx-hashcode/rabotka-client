@@ -17,11 +17,11 @@ export function OnboardingLayout({
   return (
     <div className="relative min-h-screen flex flex-col bg-white">
       <div
-        className="absolute inset-0 bg-size-[40px_40px] bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]"
+        className="hidden absolute inset-0 bg-size-[40px_40px] bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-white mask-[radial-gradient(ellipse_at_center,transparent_20%,black)]"
+        className="hidden pointer-events-none absolute inset-0 bg-white mask-[radial-gradient(ellipse_at_center,transparent_20%,black)]"
         aria-hidden
       />
       <div className="relative z-10 flex min-h-screen flex-1 flex-col">
