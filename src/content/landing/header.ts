@@ -4,9 +4,13 @@ export const headerContent = {
     brandName: "Rabotka",
   },
   cta: {
-    button: "Mon Profil",
+    button: "Se connecter",
+    profile: "Mon Profil",
   },
   menu: {
     openLabel: "Ouvrir le menu",
+  },
+  profile: {
+    label: "Mon Profil",
   },
 } as const;
