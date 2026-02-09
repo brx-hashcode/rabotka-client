@@ -57,8 +57,7 @@ export default function Profile() {
   return (
     <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Mon profil</h1>
+        <div className="flex items-center justify-end">
           <EditProfileSheetButton profile={profile} />
         </div>
 
