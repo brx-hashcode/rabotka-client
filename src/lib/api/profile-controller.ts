@@ -30,6 +30,7 @@ export type ProfileMeResponse = {
   verificationStatus: "PENDING" | "VERIFIED" | "REJECTED";
   reliabilityScore: number | null;
   whatsappConnected: boolean;
+  avatarUrl: string | null;
   createdAt: string;
 };
 

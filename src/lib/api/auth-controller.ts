@@ -47,6 +47,14 @@ export class AuthController extends RabotkaBaseController {
   async resendOTP(emailOrPhone: string): Promise<SendOTPResponse> {
     return await this.sendOTP(emailOrPhone);
   }
+
+  async logout(): Promise<{ success: boolean }> {
+    try {
+      return await this.post<{ success: boolean }>("/auth/logout");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { sendOTP, verifyOTP, resendOTP } = new AuthController();
+export const { sendOTP, verifyOTP, resendOTP, logout } = new AuthController();
