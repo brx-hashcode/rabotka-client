@@ -12,11 +12,10 @@ import {
   FAQSection,
   CTASection,
 } from "@/features/landing/components";
-import { LandingLayout } from "@/features/landing/layouts";
 
 export default function Index() {
   return (
-    <LandingLayout>
+    <>
       <HeroSection />
       <RealitySection />
       <WhyWhatsAppSection />
@@ -29,6 +28,6 @@ export default function Index() {
       <VisionSection />
       <FAQSection />
       <CTASection />
-    </LandingLayout>
+    </>
   );
 }
