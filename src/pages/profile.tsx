@@ -89,8 +89,8 @@ export default function Profile() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ProfileInfoItem label="Email" value={profile.email} />
           <ProfileInfoItem label="Téléphone" value={profile.phone} />
+          <ProfileInfoItem label="Email" value={profile.email} />
           <ProfileInfoItem label="Adresse" value={profile.address} />
           <ProfileInfoItem
             label="Type de profil"
