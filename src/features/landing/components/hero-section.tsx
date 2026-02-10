@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users } from "lucide-react";
 import heroImage from "@/assets/hero-image.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
 
@@ -94,8 +95,12 @@ export function HeroSection() {
                 className="absolute bottom-6 left-6 right-6 bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-medium animate-float"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-whatsapp flex items-center justify-center shrink-0">
-                    <floatingCard.icon className="w-5 h-5 text-primary-foreground" />
+                  <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shrink-0 overflow-hidden p-1">
+                    <img
+                      src={rabotkaLogo}
+                      alt="Rabotka"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <div className="space-y-1">
                     <p className="font-semibold text-foreground text-sm">
