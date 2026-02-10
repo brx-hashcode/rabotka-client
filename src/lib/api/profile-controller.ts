@@ -45,6 +45,36 @@ export type UpdateAvatarResponse = {
   avatarUrl: string;
 };
 
+export type ProfilePenaltyItem = {
+  id: string;
+  amount: number;
+  reason: string | null;
+  appliedAt: string;
+  applicationId: string;
+  jobOfferTitle?: string;
+};
+
+export type ProfileApplicationItem = {
+  id: string;
+  status: string;
+  createdAt: string;
+  jobOffer: {
+    id: string;
+    title: string;
+    scheduledAt: string;
+    amount: number;
+    address: string;
+    status: string;
+  };
+};
+
+export type ProfileApplicationsResponse = {
+  data: ProfileApplicationItem[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export class ProfileController extends RabotkaBaseController {
   async createProfile(
     data: CreateProfilePayload,
@@ -68,8 +98,37 @@ export class ProfileController extends RabotkaBaseController {
     }
   }
 
-  getMe(): Promise<ProfileMeResponse> {
-    return this.get<ProfileMeResponse>("/profile/me");
+  async getMe(): Promise<ProfileMeResponse> {
+    try {
+      return await this.get<ProfileMeResponse>("/profile/me");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async getPenalties(): Promise<ProfilePenaltyItem[]> {
+    try {
+      return await this.get<ProfilePenaltyItem[]>("/profile/penalties");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async getApplications(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<ProfileApplicationsResponse> {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    try {
+      return await this.get<ProfileApplicationsResponse>(
+        `/profile/applications?${params.toString()}`,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async updateProfile(data: UpdateProfilePayload): Promise<ProfileMeResponse> {
@@ -95,5 +154,11 @@ export class ProfileController extends RabotkaBaseController {
   }
 }
 
-export const { createProfile, getMe, updateProfile, updateAvatar } =
-  new ProfileController();
+export const {
+  createProfile,
+  getMe,
+  getPenalties,
+  getApplications,
+  updateProfile,
+  updateAvatar,
+} = new ProfileController();
