@@ -1,5 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { type SendOTPResponse } from "@/lib/api/auth-controller";
+import {
+  resendOTP,
+  type SendOTPResponse,
+} from "@/lib/api/auth-controller";
 import { toast } from "@/hooks/use-toast";
 import { toastMessages } from "@/content/landing/login";
 
@@ -7,12 +10,7 @@ export function useResendOtpMutation() {
   return useMutation({
     mutationKey: ["resend-otp"],
     mutationFn: async (emailOrPhone: string): Promise<SendOTPResponse> => {
-      // TODO: Remove mock and use real API
-      // return await sendOTP(emailOrPhone);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      throw new Error("Impossible de demander un nouveau code OTP pour le moment. Veuillez réessayer plus tard.");
-      // return { success: true };
+      return await resendOTP(emailOrPhone);
     },
     onSuccess: () => {
       toast({
