@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -9,28 +8,17 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { FileWarning } from "lucide-react";
-import { getPenalties } from "@/lib/api/profile-controller";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatAmount, formatDate } from "@/lib/utils";
+import { penaltiesContent } from "@/content/profile";
+import { useProfilePenalties } from "@/hooks/use-profile-penalties";
 
-const formatAmount = (amount: number) =>
-  new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const content = penaltiesContent;
 
 export const PenaltiesSheetButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { data: penalties, isLoading } = useQuery({
-    queryKey: ["profile", "penalties"],
-    queryFn: getPenalties,
+  const { data: penalties, isLoading } = useProfilePenalties({
     enabled: isOpen,
   });
 
@@ -45,16 +33,14 @@ export const PenaltiesSheetButton = () => {
         onClick={() => setIsOpen(true)}
       >
         <FileWarning className="h-4 w-4" />
-        Voir mes pénalités
+        {content.button}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Mes pénalités</SheetTitle>
-            <SheetDescription>
-              Consultez l'historique de vos pénalités
-            </SheetDescription>
+            <SheetTitle>{content.sheet.title}</SheetTitle>
+            <SheetDescription>{content.sheet.description}</SheetDescription>
           </SheetHeader>
 
           {isLoading && (
@@ -70,7 +56,7 @@ export const PenaltiesSheetButton = () => {
                 <FileWarning className="h-12 w-12 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground text-center">
-                Vous n'avez aucune pénalité pour le moment.
+                {content.empty}
               </p>
             </div>
           )}

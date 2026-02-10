@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -9,40 +8,24 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ClipboardList } from "lucide-react";
-import { getApplications } from "@/lib/api/profile-controller";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatAmount, formatDate } from "@/lib/utils";
+import { applicationsContent } from "@/content/profile";
+import { useProfileApplications } from "@/hooks/use-profile-applications";
 
-const APPLICATION_STATUS_LABELS: Record<string, string> = {
-  PENDING: "En attente",
-  ACCEPTED: "Acceptée",
-  REJECTED: "Refusée",
-  CANCELLED: "Annulée",
-};
-
-const formatAmount = (amount: number) =>
-  new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const content = applicationsContent;
 
 const getStatusLabel = (status: string) =>
-  APPLICATION_STATUS_LABELS[status] ?? status;
+  content.statusLabels[status] ?? status;
 
 export const ApplicationsSheetButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const page = 1;
   const limit = 10;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["profile", "applications", page],
-    queryFn: () => getApplications(page, limit),
+  const { data, isLoading } = useProfileApplications({
+    page,
+    limit,
     enabled: isOpen,
   });
 
@@ -58,16 +41,14 @@ export const ApplicationsSheetButton = () => {
         onClick={() => setIsOpen(true)}
       >
         <ClipboardList className="h-4 w-4" />
-        Voir mes candidatures
+        {content.button}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Mes candidatures</SheetTitle>
-            <SheetDescription>
-              Suivez l'état de vos candidatures
-            </SheetDescription>
+            <SheetTitle>{content.sheet.title}</SheetTitle>
+            <SheetDescription>{content.sheet.description}</SheetDescription>
           </SheetHeader>
 
           {isLoading && (
@@ -83,7 +64,7 @@ export const ApplicationsSheetButton = () => {
                 <ClipboardList className="h-12 w-12 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground text-center">
-                Vous n'avez aucune candidature pour le moment.
+                {content.empty}
               </p>
             </div>
           )}
@@ -91,7 +72,9 @@ export const ApplicationsSheetButton = () => {
             <div className="py-4 space-y-4">
               {total > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {total} {total > 1 ? "candidatures" : "candidature"} au total
+                  {total}{" "}
+                  {total > 1 ? content.total.plural : content.total.singular}{" "}
+                  {content.total.suffix}
                 </p>
               )}
               <ul className="space-y-3">
