@@ -48,7 +48,13 @@ export const MobileLoginButton = () => {
 
   return (
     <>
-      <Button variant="whatsapp" size="default" className="w-full">
+      <Button
+        type="button"
+        size="default"
+        variant="whatsapp"
+        className="w-full"
+        onClick={() => setIsDialogOpen(true)}
+      >
         <User className="w-4 h-4" />
         {headerContent.cta.button}
       </Button>
