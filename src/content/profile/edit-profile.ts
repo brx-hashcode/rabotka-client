@@ -30,6 +30,7 @@ export const editProfileContent = {
     description: {
       label: "A propos de moi",
       placeholder: "Decrivez-vous en quelques mots...",
+      charCount: "/500",
     },
   },
   buttons: {

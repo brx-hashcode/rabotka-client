@@ -57,6 +57,10 @@ export function EditProfileSheetButton({
     mode: "onChange",
   });
 
+  const descriptionValue = form.watch("description");
+  const charCount = descriptionValue?.length || 0;
+  const isOverLimit = charCount > 500;
+
   const handleOpen = () => {
     form.reset({
       firstName: profile.firstName,
@@ -187,12 +191,22 @@ export function EditProfileSheetButton({
                   <FormItem className="flex flex-col gap-1">
                     <FormLabel>{content.fields.description.label}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder={content.fields.description.placeholder}
-                        rows={8}
-                        className="resize-none overflow-hidden"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Textarea
+                          placeholder={content.fields.description.placeholder}
+                          rows={8}
+                          className="min-h-[140px] pr-16 resize-none overflow-hidden"
+                          {...field}
+                        />
+                        <div
+                          className={`absolute bottom-2 right-2 text-sm ${
+                            isOverLimit ? "text-red-500" : "text-gray-500"
+                          }`}
+                        >
+                          {charCount}
+                          {content.fields.description.charCount}
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
