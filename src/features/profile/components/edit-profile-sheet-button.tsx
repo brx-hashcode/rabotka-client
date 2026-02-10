@@ -23,6 +23,7 @@ import {
 import { Pencil } from "lucide-react";
 import { useUpdateProfile } from "@/hooks/use-update-profile";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { editProfileContent } from "@/content/profile";
 import { AvatarUpload } from "./avatar-upload";
 import {
@@ -42,6 +43,7 @@ export function EditProfileSheetButton({
 }: EditProfileSheetButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
+  const isMobile = useIsMobile();
 
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
   const { toast } = useToast();
@@ -56,6 +58,10 @@ export function EditProfileSheetButton({
     },
     mode: "onChange",
   });
+
+  const descriptionValue = form.watch("description");
+  const charCount = descriptionValue?.length || 0;
+  const isOverLimit = charCount > 500;
 
   const handleOpen = () => {
     form.reset({
@@ -100,13 +106,18 @@ export function EditProfileSheetButton({
   return (
     <>
       <Button
-        variant="outline"
-        size="sm"
+        variant={isMobile ? "default" : "outline"}
+        size={isMobile ? "icon" : "sm"}
         onClick={handleOpen}
-        className="gap-2"
+        className={
+          isMobile
+            ? "fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-whatsapp text-primary-foreground shadow-lg hover:bg-whatsapp-dark transition-colors duration-300 ease-in-out flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            : "gap-2"
+        }
+        aria-label={isMobile ? content.buttons.edit : undefined}
       >
-        <Pencil className="h-4 w-4" />
-        {content.buttons.edit}
+        <Pencil className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+        {!isMobile && content.buttons.edit}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -187,12 +198,22 @@ export function EditProfileSheetButton({
                   <FormItem className="flex flex-col gap-1">
                     <FormLabel>{content.fields.description.label}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder={content.fields.description.placeholder}
-                        rows={8}
-                        className="resize-none overflow-hidden"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Textarea
+                          placeholder={content.fields.description.placeholder}
+                          rows={8}
+                          className="min-h-[140px] pr-16 resize-none overflow-hidden"
+                          {...field}
+                        />
+                        <div
+                          className={`absolute bottom-2 right-2 text-sm ${
+                            isOverLimit ? "text-red-500" : "text-gray-500"
+                          }`}
+                        >
+                          {charCount}
+                          {content.fields.description.charCount}
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -215,3 +236,4 @@ export function EditProfileSheetButton({
     </>
   );
 }
+

@@ -45,7 +45,13 @@ export class AuthController extends RabotkaBaseController {
   }
 
   async resendOTP(emailOrPhone: string): Promise<SendOTPResponse> {
-    return await this.sendOTP(emailOrPhone);
+    try {
+      return await this.post<SendOTPResponse>("/auth/resend-otp", {
+        emailOrPhone,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async logout(): Promise<{ success: boolean }> {
