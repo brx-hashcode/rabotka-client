@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useLogout } from "@/hooks/use-logout";
 import { User, LogOut, BadgeCheck } from "lucide-react";
@@ -107,10 +108,20 @@ export default function Profile() {
                 : `${profile.reliabilityScore}%`
             }
           />
-          <ProfileInfoItem
-            label="WhatsApp connecté"
-            value={profile.whatsappConnected ? "Oui" : "Non"}
-          />
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-sm text-muted-foreground mb-1">
+              WhatsApp connecté
+            </p>
+            <Badge
+              className={
+                profile.whatsappConnected
+                  ? "bg-green-500/80 hover:bg-green-600/80 text-white"
+                  : "bg-red-500/80 hover:bg-red-600/80 text-white"
+              }
+            >
+              {profile.whatsappConnected ? "Oui" : "Non"}
+            </Badge>
+          </div>
         </div>
 
         {profile.description && (
