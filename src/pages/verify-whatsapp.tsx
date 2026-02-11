@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { Loader, CheckCircle, XCircle } from "lucide-react";
 import { useVerifyWhatsApp } from "@/hooks/use-verify-whatsapp";
@@ -8,17 +7,11 @@ type Status = "loading" | "success" | "error" | "no-token";
 export default function VerifyWhatsApp() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const { mutate, isPending, isSuccess, isError } = useVerifyWhatsApp();
-
-  useEffect(() => {
-    if (token) {
-      mutate(token);
-    }
-  }, [token, mutate]);
+  const { isLoading, isSuccess, isError } = useVerifyWhatsApp(token);
 
   let status: Status = "no-token";
   if (token) {
-    if (isPending) {
+    if (isLoading) {
       status = "loading";
     } else if (isSuccess) {
       status = "success";
