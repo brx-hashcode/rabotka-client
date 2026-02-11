@@ -110,7 +110,7 @@ export default function Profile() {
           />
           <div className="bg-card rounded-lg p-4 border border-border">
             <p className="text-sm text-muted-foreground mb-1">
-              WhatsApp connecté
+              Statut de vérification WhatsApp
             </p>
             <Badge
               className={
@@ -119,7 +119,7 @@ export default function Profile() {
                   : "bg-red-500/80 hover:bg-red-500/80 text-white"
               }
             >
-              {profile.whatsappConnected ? "Oui" : "Non"}
+              {profile.whatsappConnected ? "Vérifié" : "Non vérifié"}
             </Badge>
           </div>
         </div>
