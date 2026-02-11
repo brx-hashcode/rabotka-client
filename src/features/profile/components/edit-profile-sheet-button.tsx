@@ -221,11 +221,7 @@ export function EditProfileSheetButton({
               />
 
               <SheetFooter>
-                <Button
-                  type="submit"
-                  disabled={isSaving || !form.formState.isValid}
-                  className="w-full"
-                >
+                <Button type="submit" disabled={isSaving} className="w-full">
                   {isSaving ? content.buttons.saving : content.buttons.save}
                 </Button>
               </SheetFooter>
@@ -236,4 +232,3 @@ export function EditProfileSheetButton({
     </>
   );
 }
-

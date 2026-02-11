@@ -16,7 +16,6 @@ export const editProfileSchema = z.object({
     .max(200, validationMessages.address.max),
   description: z
     .string()
-    .min(80, validationMessages.description.min)
     .max(500, validationMessages.description.max)
     .optional()
     .default(""),
