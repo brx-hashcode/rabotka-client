@@ -26,7 +26,7 @@ export default function VerifyWhatsApp() {
         <>
           <Loader className="size-10 animate-spin text-whatsapp" />
           <p className="mt-4 text-sm text-muted-foreground">
-            Vérification en cours…
+            Vérification du numéro WhatsApp en cours…
           </p>
         </>
       )}
@@ -35,10 +35,10 @@ export default function VerifyWhatsApp() {
         <>
           <CheckCircle className="size-12 text-green-600 dark:text-green-500" />
           <p className="mt-4 text-center font-medium text-foreground">
-            Votre compte WhatsApp est maintenant lié.
+            Votre numéro WhatsApp a été vérifié avec succès.
           </p>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            Vous pouvez fermer cette page.
+            Vous pouvez désormais fermer cette page en toute sécurité.
           </p>
         </>
       )}
@@ -48,11 +48,11 @@ export default function VerifyWhatsApp() {
           <XCircle className="size-12 text-destructive" />
           <p className="mt-4 text-center font-medium text-foreground">
             {status === "no-token"
-              ? "Lien invalide : aucun code de vérification."
-              : "Ce lien est invalide ou a déjà été utilisé."}
+              ? "Lien de vérification invalide ou manquant."
+              : "Ce lien de vérification est invalide ou a déjà expiré."}
           </p>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            Demandez un nouveau lien si nécessaire.
+            Veuillez demander un nouveau lien de vérification si nécessaire.
           </p>
         </>
       )}
