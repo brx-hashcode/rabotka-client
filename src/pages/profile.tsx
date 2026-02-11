@@ -115,8 +115,8 @@ export default function Profile() {
             <Badge
               className={
                 profile.whatsappConnected
-                  ? "bg-green-500/80 hover:bg-green-600/80 text-white"
-                  : "bg-red-500/80 hover:bg-red-600/80 text-white"
+                  ? "bg-green-500/80 hover:bg-green-500/80 text-white"
+                  : "bg-red-500/80 hover:bg-red-500/80 text-white"
               }
             >
               {profile.whatsappConnected ? "Oui" : "Non"}
