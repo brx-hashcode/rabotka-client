@@ -1,9 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
 
-export type VerifyWhatsAppPayload = {
-  token: string;
-};
-
 export type VerifyWhatsAppResponse = {
   success: boolean;
 };
@@ -11,9 +7,10 @@ export type VerifyWhatsAppResponse = {
 export class VerifyController extends RabotkaBaseController {
   async verifyWhatsApp(token: string): Promise<VerifyWhatsAppResponse> {
     try {
-      return await this.post<VerifyWhatsAppResponse>("/whatsapp/verify", {
-        token,
-      });
+      const encodedToken = encodeURIComponent(token);
+      return await this.get<VerifyWhatsAppResponse>(
+        `/whatsapp/verify?token=${encodedToken}`,
+      );
     } catch (error) {
       this.handleError(error);
     }
