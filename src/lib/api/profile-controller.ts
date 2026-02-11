@@ -155,10 +155,10 @@ export class ProfileController extends RabotkaBaseController {
 }
 
 export const {
-  createProfile,
   getMe,
   getPenalties,
-  getApplications,
-  updateProfile,
   updateAvatar,
+  updateProfile,
+  createProfile,
+  getApplications,
 } = new ProfileController();
