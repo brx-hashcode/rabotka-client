@@ -1,34 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { Loader, CheckCircle, XCircle } from "lucide-react";
-import { env } from "@/env";
+import { useVerifyWhatsApp } from "@/hooks/use-verify-whatsapp";
 
 type Status = "loading" | "success" | "error" | "no-token";
 
 export default function VerifyWhatsApp() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const [status, setStatus] = useState<Status>(() =>
-    token ? "loading" : "no-token",
-  );
+  const { mutate, isPending, isSuccess, isError } = useVerifyWhatsApp();
 
   useEffect(() => {
-    if (!token) {
-      setStatus("no-token");
-      return;
+    if (token) {
+      mutate(token);
     }
+  }, [token, mutate]);
 
-    const url = `${env.VITE_API_URL}/verify/whatsapp?token=${encodeURIComponent(token)}`;
-    fetch(url, { credentials: "include" })
-      .then((res) => {
-        if (res.ok) {
-          setStatus("success");
-        } else {
-          setStatus("error");
-        }
-      })
-      .catch(() => setStatus("error"));
-  }, [token]);
+  let status: Status = "no-token";
+  if (token) {
+    if (isPending) {
+      status = "loading";
+    } else if (isSuccess) {
+      status = "success";
+    } else if (isError) {
+      status = "error";
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">
