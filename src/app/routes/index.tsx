@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/onboarding";
 import Profile from "@/pages/profile";
+import VerifyWhatsApp from "@/pages/verify-whatsapp";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout } from "@/features/landing/layouts/landing-layout";
 import Index from "@/pages/Index";
@@ -35,6 +36,7 @@ export function AppRoutes() {
           </AuthGuard>
         }
       />
+      <Route path="/verify/whatsapp" element={<VerifyWhatsApp />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
