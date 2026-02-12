@@ -27,7 +27,7 @@ const OTP_LENGTH = 6;
 const EMPTY_OTP = new Array<string>(OTP_LENGTH).fill("");
 const OTP_INPUT_KEYS = EMPTY_OTP.map((_, i) => `otp-${i}`);
 const OTP_CHAR_REGEX = /^\d$/;
-const RESEND_COOLDOWN_SECONDS = 5 * 60;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const focusInput = (index: number) => {
   document.getElementById(`otp-input-${index}`)?.focus();
