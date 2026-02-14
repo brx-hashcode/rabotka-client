@@ -122,7 +122,7 @@ export function PersonalInfoForm({
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
+                <FormItem className="flex min-h-12 min-w-0 flex-col gap-1">
                   <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
                     <PhoneInput
