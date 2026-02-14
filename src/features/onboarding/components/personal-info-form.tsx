@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { StepIndicator } from "./step-indicator";
@@ -121,13 +122,14 @@ export function PersonalInfoForm({
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
+                <FormItem className="flex min-h-12 min-w-0 flex-col gap-1">
                   <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="tel"
+                    <PhoneInput
+                      defaultCountry="CG"
                       placeholder={content.fields.phone.placeholder}
-                      {...field}
+                      value={field.value}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

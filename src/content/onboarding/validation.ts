@@ -11,7 +11,8 @@ export const validationMessages = {
     invalid: "Email invalide",
   },
   phone: {
-    invalid: "Format: +242XXXXXXXXX",
+    required: "Numéro de téléphone requis",
+    invalid: "Numéro de téléphone invalide pour le pays sélectionné",
   },
   address: {
     min: "Adresse trop courte",

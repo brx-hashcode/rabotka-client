@@ -16,7 +16,7 @@ export const personalInfoContent = {
     },
     phone: {
       label: "Téléphone",
-      placeholder: "+242069917686",
+      placeholder: "Numéro avec indicatif pays",
     },
     address: {
       label: "Adresse",
