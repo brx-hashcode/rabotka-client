@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { validationMessages } from "@/content/onboarding";
 
 export const step1Schema = z.object({
@@ -11,7 +12,10 @@ export const step1Schema = z.object({
     .min(2, validationMessages.lastName.min)
     .max(50, validationMessages.lastName.max),
   email: z.string().email(validationMessages.email.invalid),
-  phone: z.string().regex(/^\+242\d{9}$/, validationMessages.phone.invalid),
+  phone: z
+    .string()
+    .min(1, validationMessages.phone.required)
+    .refine(isValidPhoneNumber, validationMessages.phone.invalid),
   address: z
     .string()
     .min(10, validationMessages.address.min)
