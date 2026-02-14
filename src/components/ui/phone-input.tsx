@@ -23,6 +23,18 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+const CENTRAL_AFRICAN_COUNTRIES: RPNInput.Country[] = [
+  "AO", // Angola
+  "CM", // Cameroon
+  "CF", // Central African Republic
+  "TD", // Chad
+  "CG", // Congo
+  "CD", // Democratic Republic of the Congo
+  "GQ", // Equatorial Guinea
+  "GA", // Gabon
+  "ST", // São Tomé and Príncipe
+];
+
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,
   "onChange" | "value" | "ref"
@@ -32,8 +44,20 @@ type PhoneInputProps = Omit<
   };
 
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
-  React.forwardRef<React.ComponentRef<typeof PhoneNumberInputRoot>, PhoneInputProps>(
-    ({ className, onChange, value, ...props }, ref) => {
+  React.forwardRef<
+    React.ComponentRef<typeof PhoneNumberInputRoot>,
+    PhoneInputProps
+  >(
+    (
+      {
+        className,
+        onChange,
+        value,
+        countries = CENTRAL_AFRICAN_COUNTRIES,
+        ...props
+      },
+      ref,
+    ) => {
       return (
         <PhoneNumberInputRoot
           ref={ref}
@@ -41,6 +65,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
             "flex border border-input rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
             className,
           )}
+          countries={countries}
           flagComponent={FlagComponent}
           countrySelectComponent={CountrySelect}
           inputComponent={InputComponent}
@@ -68,7 +93,10 @@ const InputComponent = React.forwardRef<
   React.ComponentProps<"input">
 >(({ className, ...props }, ref) => (
   <Input
-    className={cn("h-10 rounded-e-lg rounded-s-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0", className)}
+    className={cn(
+      "h-10 rounded-e-lg rounded-s-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+      className,
+    )}
     {...props}
     ref={ref}
   />
@@ -99,7 +127,7 @@ const CountrySelect = ({
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
-        open && setSearchValue("");
+        if (open) setSearchValue("");
       }}
     >
       <PopoverTrigger asChild>
