@@ -46,7 +46,7 @@ const initialState = {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "+242",
+    phone: "",
     address: "",
     description: "",
   },
