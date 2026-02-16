@@ -4,7 +4,7 @@ import workerSmilingImage from "@/assets/worker-smiling.jpg";
 import familyHomeImage from "@/assets/family-home.jpg";
 import { howItWorksContent } from "@/content/landing/how-it-works";
 
-interface FlowProps {
+type FlowProps = {
   title: string;
   subtitle: string;
   steps: Array<{
@@ -16,22 +16,32 @@ interface FlowProps {
   imageAlt: string;
   reversed?: boolean;
   isInView: boolean;
-}
+};
 
-const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView }: FlowProps) => {
+const FlowCard = ({
+  title,
+  subtitle,
+  steps,
+  image,
+  imageAlt,
+  reversed,
+  isInView,
+}: FlowProps) => {
   return (
-    <div className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? 'lg:flex-row-reverse' : ''}`}>
+    <div
+      className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? "lg:flex-row-reverse" : ""}`}
+    >
       <motion.div
         initial={{ opacity: 0, x: reversed ? 50 : -50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.8 }}
-        className={`space-y-8 ${reversed ? 'lg:order-2' : ''}`}
+        className={`space-y-8 ${reversed ? "lg:order-2" : ""}`}
       >
         <div className="space-y-4">
           <span className="inline-block px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
             {subtitle}
           </span>
-          
+
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
             {title}
           </h2>
@@ -50,8 +60,12 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
                 {index + 1}
               </div>
               <div>
-                <h3 className="font-display font-semibold text-foreground">{step.title}</h3>
-                <p className="text-muted-foreground text-sm">{step.description}</p>
+                <h3 className="font-display font-semibold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {step.description}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -62,7 +76,7 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
         initial={{ opacity: 0, x: reversed ? -50 : 50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.8 }}
-        className={`relative ${reversed ? 'lg:order-1' : ''}`}
+        className={`relative ${reversed ? "lg:order-1" : ""}`}
       >
         <div className="rounded-3xl overflow-hidden shadow-medium">
           <img
@@ -78,10 +92,14 @@ const FlowCard = ({ title, subtitle, steps, image, imageAlt, reversed, isInView 
 
 export function HowItWorksSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="how-it-works" className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
+    <section
+      id="how-it-works"
+      className="py-20 lg:py-32 bg-background overflow-x-hidden"
+      ref={ref}
+    >
       <div className="section-container space-y-24 lg:space-y-32">
         <FlowCard
           subtitle={howItWorksContent.worker.subtitle}
@@ -91,7 +109,7 @@ export function HowItWorksSection() {
           imageAlt="Travailleur souriant en utilisant son téléphone"
           isInView={isInView}
         />
-        
+
         <FlowCard
           subtitle={howItWorksContent.employer.subtitle}
           title={howItWorksContent.employer.title}
