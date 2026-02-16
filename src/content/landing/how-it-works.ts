@@ -9,17 +9,19 @@ export const howItWorksContent = {
       {
         icon: UserPlus,
         title: "Créez votre profil",
-        description: "Ajoutez vos compétences, expérience et localisation",
+        description:
+          "Renseignez vos informations personnelles, choisissez Travailleur et ajoutez pièce d'identité + selfie",
       },
       {
         icon: ShieldCheck,
-        title: "Vérification du profil",
+        title: "Vérification d'identité (KYC)",
         description: "Nous vérifions votre identité pour la confiance",
       },
       {
         icon: Link,
         title: "Rejoignez Rabotka sur WhatsApp",
-        description: "Recevez un lien pour vous connecter à notre bot",
+        description:
+          "Recevez un lien envoyé sur votre téléphone pour vous connecter à notre bot",
       },
       {
         icon: MessageCircle,
@@ -35,18 +37,20 @@ export const howItWorksContent = {
     steps: [
       {
         icon: UserPlus,
-        title: "Soumettez votre besoin",
-        description: "Aide ménagère, répétiteur, coiffeur, et plus encore",
+        title: "Créez votre profil",
+        description:
+          "Renseignez vos informations personnelles, choisissez Employeur et ajoutez pièce d'identité + selfie",
       },
       {
         icon: ShieldCheck,
-        title: "Vérification",
-        description: "Nous vérifions votre demande pour la sécurité",
+        title: "Vérification d'identité (KYC)",
+        description: "Nous vérifions votre identité pour la sécurité",
       },
       {
         icon: Link,
         title: "Rejoignez Rabotka sur WhatsApp",
-        description: "Connectez-vous à notre assistant",
+        description:
+          "Recevez un lien envoyé sur votre téléphone pour vous connecter à notre assistant",
       },
       {
         icon: MessageCircle,
