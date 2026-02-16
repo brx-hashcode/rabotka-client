@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CsrfProvider } from "./csrf-provider";
+import { CookieConsent } from "@/components/cookie-consent";
 
 type ProvidersProps = {
   children: ReactNode;
@@ -29,6 +30,7 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <CookieConsent />
             {children}
           </TooltipProvider>
         </QueryClientProvider>
