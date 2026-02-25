@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { config } from "@/config";
 import { BaseController } from "mvc-front-sdk";
 
 type GenerateCsrfTokenResponse = {
@@ -7,7 +7,7 @@ type GenerateCsrfTokenResponse = {
 
 export class IndexController extends BaseController {
   constructor() {
-    super(env.VITE_API_URL);
+    super(config.apiUrl);
   }
 
   async generateCsrfToken(): Promise<GenerateCsrfTokenResponse> {
