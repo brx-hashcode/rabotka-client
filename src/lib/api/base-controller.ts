@@ -1,12 +1,12 @@
-import { env } from "@/env";
 import { BaseController } from "mvc-front-sdk";
 import { useCsrfStore } from "@/stores/csrf-store";
+import { config } from "@/config";
 
 type RequestBody = Record<string, unknown> | FormData;
 
 export class RabotkaBaseController extends BaseController {
   constructor() {
-    super(env.VITE_API_URL);
+    super(config.apiUrl);
   }
 
   protected mergeCsrfHeaders(headers?: HeadersInit): HeadersInit {
