@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useLogout } from "@/hooks/use-logout";
-import { User, LogOut, BadgeCheck } from "lucide-react";
+import { User, LogOut, BadgeCheck, Link2 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
@@ -55,6 +55,7 @@ export default function Profile() {
   }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
+  const isWhatsappConnected = profile.whatsappConnected;
   const initials =
     `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`.toUpperCase();
   const isVerified = profile.verificationStatus === "VERIFIED";
@@ -87,8 +88,11 @@ export default function Profile() {
             )}
           </div>
 
-          <h2 className="text-2xl font-bold text-foreground text-center">
-            {fullName}
+          <h2 className="text-2xl font-bold text-foreground text-center flex items-center gap-2 justify-center">
+            <span>{fullName}</span>
+            {isWhatsappConnected && (
+              <Link2 className="h-5 w-5 text-primary" aria-label="Compte relié à WhatsApp" />
+            )}
           </h2>
         </div>
 
