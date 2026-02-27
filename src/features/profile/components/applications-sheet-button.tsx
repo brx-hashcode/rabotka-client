@@ -9,14 +9,55 @@ import {
 } from "@/components/ui/sheet";
 import { ClipboardList } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAmount, formatDate } from "@/lib/utils";
+import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 import { applicationsContent } from "@/content/profile";
 import { useProfileApplications } from "@/hooks/use-profile-applications";
+import type { ProfileApplicationItem } from "@/lib/api/profile-controller";
 
 const content = applicationsContent;
 
+const getStatusBadg = (status: string) => {
+  return cn(
+    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+    {
+      "bg-yellow-100 text-yellow-800": status === "PENDING",
+      "bg-green-100 text-green-800": status === "ACCEPTED",
+      "bg-red-100 text-red-800":
+        status === "REJECTED" || status === "CANCELLED",
+    },
+  );
+};
+
 const getStatusLabel = (status: string) =>
   content.statusLabels[status] ?? status;
+
+type ApplicationCardProps = {
+  application: ProfileApplicationItem;
+};
+
+const ApplicationCard = ({ application }: ApplicationCardProps) => {
+  const app = application;
+
+  return (
+    <li className="rounded-lg border border-border bg-card p-4 space-y-1">
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-medium text-foreground">{app.jobOffer.title}</p>
+        <span className={getStatusBadg(app.status)}>
+          {getStatusLabel(app.status)}
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {formatDateTime(app.jobOffer.scheduledAt)}
+      </p>
+      <p className="text-sm text-muted-foreground">
+        {formatAmount(app.jobOffer.amount)}
+      </p>
+      <p className="text-sm text-muted-foreground truncate">
+        {app.jobOffer.address}
+      </p>
+    </li>
+  );
+};
 
 export const ApplicationsSheetButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,35 +110,11 @@ export const ApplicationsSheetButton = () => {
             </div>
           )}
           {!isLoading && hasApplications && (
-            <div className="py-4 space-y-4">
-              {total > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {total}{" "}
-                  {total > 1 ? content.total.plural : content.total.singular}{" "}
-                  {content.total.suffix}
-                </p>
-              )}
-              <ul className="space-y-3">
-                {applications.map((app) => (
-                  <li
-                    key={app.id}
-                    className="rounded-lg border border-border bg-card p-4 space-y-2"
-                  >
-                    <p className="font-medium text-foreground">
-                      {app.jobOffer.title}
-                    </p>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                      <span>{getStatusLabel(app.status)}</span>
-                      <span>{formatDate(app.jobOffer.scheduledAt)}</span>
-                      <span>{formatAmount(app.jobOffer.amount)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {app.jobOffer.address}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ul className="space-y-3 py-3">
+              {applications.map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </ul>
           )}
         </SheetContent>
       </Sheet>

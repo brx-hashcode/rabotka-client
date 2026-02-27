@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Grip, LayoutGrid } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
@@ -91,9 +91,9 @@ export function Header() {
             aria-label={headerContent.menu.openLabel}
           >
             {isMenuOpen ? (
-              <X className="w-6 h-6" />
+              <Grip className="w-6 h-6" />
             ) : (
-              <Menu className="w-6 h-6" />
+              <LayoutGrid className="w-6 h-6" />
             )}
           </button>
         </div>
