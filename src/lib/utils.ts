@@ -17,3 +17,12 @@ export const formatDate = (dateStr: string) =>
     month: "short",
     year: "numeric",
   });
+
+export const formatDateTime = (dateStr: string) =>
+  new Date(dateStr).toLocaleString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
