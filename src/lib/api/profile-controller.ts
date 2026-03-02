@@ -8,7 +8,15 @@ export type CreateProfilePayload = {
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
-  documentType: "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "";
+  documentType:
+    | "IDENTITY_CARD"
+    | "PASSPORT"
+    | "DRIVER_LICENSE"
+    | "BIRTH_CERTIFICATE"
+    | "STUDENT_CARD"
+    | "NIU_CARD"
+    | "OTHER"
+    | "";
   kycDocument: File;
   kycSelfie: File;
 };

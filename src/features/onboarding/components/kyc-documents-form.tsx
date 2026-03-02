@@ -1,7 +1,11 @@
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { step2Schema, type Step2FormData } from "@/lib/validations/onboarding";
+import {
+  step2Schema,
+  step2SchemaBase,
+  type Step2FormData,
+} from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +57,7 @@ export function KycDocumentsForm({
     resolver: zodResolver(step2Schema),
     defaultValues: {
       profileType: kycData.profileType || "WORKER",
-      documentType: kycData.documentType || "IDENTITY_CARD",
+      documentType: kycData.documentType || "",
     },
     mode: "onChange",
   });
@@ -94,7 +98,7 @@ export function KycDocumentsForm({
     file: File,
     fieldName: "kycDocument" | "kycSelfie",
   ) => {
-    const fieldSchema = step2Schema.shape[fieldName];
+    const fieldSchema = step2SchemaBase.shape[fieldName];
     const result = fieldSchema.safeParse(file);
 
     if (result.success) {
@@ -208,6 +212,18 @@ export function KycDocumentsForm({
                       </SelectItem>
                       <SelectItem value="DRIVER_LICENSE">
                         {content.documentType.options.driverLicense}
+                      </SelectItem>
+                      <SelectItem value="BIRTH_CERTIFICATE">
+                        {content.documentType.options.birthCertificate}
+                      </SelectItem>
+                      <SelectItem value="STUDENT_CARD">
+                        {content.documentType.options.studentCard}
+                      </SelectItem>
+                      <SelectItem value="NIU_CARD">
+                        {content.documentType.options.niuCard}
+                      </SelectItem>
+                      <SelectItem value="OTHER">
+                        {content.documentType.options.other}
                       </SelectItem>
                     </SelectContent>
                   </Select>

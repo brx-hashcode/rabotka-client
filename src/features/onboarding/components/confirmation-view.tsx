@@ -54,16 +54,16 @@ export function ConfirmationView({
   const content = confirmationContent;
 
   const documentTypeLabel = useMemo(() => {
-    if (kycData.documentType === "IDENTITY_CARD") {
-      return content.documentTypes.identityCard;
-    }
-    if (kycData.documentType === "PASSPORT") {
-      return content.documentTypes.passport;
-    }
-    if (kycData.documentType === "DRIVER_LICENSE") {
-      return content.documentTypes.driverLicense;
-    }
-    return "-";
+    const map: Record<string, string> = {
+      IDENTITY_CARD: content.documentTypes.identityCard,
+      PASSPORT: content.documentTypes.passport,
+      DRIVER_LICENSE: content.documentTypes.driverLicense,
+      BIRTH_CERTIFICATE: content.documentTypes.birthCertificate,
+      STUDENT_CARD: content.documentTypes.studentCard,
+      NIU_CARD: content.documentTypes.niuCard,
+      OTHER: content.documentTypes.other,
+    };
+    return (kycData.documentType && map[kycData.documentType]) || "-";
   }, [kycData.documentType, content.documentTypes]);
 
   return (

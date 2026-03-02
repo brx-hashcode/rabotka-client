@@ -29,6 +29,10 @@ export const confirmationContent = {
     identityCard: "Carte d'identité",
     passport: "Passeport",
     driverLicense: "Permis de conduire",
+    birthCertificate: "Acte de naissance",
+    studentCard: "Carte étudiant",
+    niuCard: "Carte NIU",
+    other: "Autre",
   },
   buttons: {
     back: "Retour",
