@@ -6,6 +6,8 @@ import {
   clearKycFiles,
 } from "@/lib/kyc-file-storage";
 
+export type DocumentType = "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "BIRTH_CERTIFICATE" | "STUDENT_CARD" | "NIU_CARD" | "OTHER";
+
 export type PersonalInfo = {
   firstName: string;
   lastName: string;
@@ -17,7 +19,7 @@ export type PersonalInfo = {
 
 export type KycData = {
   profileType: "WORKER" | "EMPLOYER" | "";
-  documentType: "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "";
+  documentType: DocumentType | "";
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycSelfie: File | null;
