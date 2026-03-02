@@ -26,13 +26,22 @@ export const step1Schema = z.object({
     .max(500, validationMessages.description.max),
 });
 
-export const step2Schema = z.object({
+const step2SchemaBase = z.object({
   profileType: z.enum(["WORKER", "EMPLOYER"], {
     errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
-  documentType: z.enum(["IDENTITY_CARD", "PASSPORT", "DRIVER_LICENSE"], {
-    errorMap: () => ({ message: validationMessages.documentType.required }),
-  }),
+  documentType: z.union([
+    z.enum([
+      "IDENTITY_CARD",
+      "PASSPORT",
+      "DRIVER_LICENSE",
+      "BIRTH_CERTIFICATE",
+      "STUDENT_CARD",
+      "NIU_CARD",
+      "OTHER",
+    ]),
+    z.literal(""),
+  ]),
   kycDocument: z.custom<File>(
     (file) => {
       if (!file || !(file instanceof File)) return false;
@@ -56,6 +65,17 @@ export const step2Schema = z.object({
     }
   ),
 });
+
+export const step2Schema = step2SchemaBase.refine(
+  (data) => data.documentType !== "",
+  {
+    message: validationMessages.documentType.required,
+    path: ["documentType"],
+  }
+);
+
+/** Base schema for step 2 (use .shape for field-level validation). */
+export { step2SchemaBase };
 
 export type Step1FormData = z.infer<typeof step1Schema>;
 export type Step2FormData = z.infer<typeof step2Schema>;
