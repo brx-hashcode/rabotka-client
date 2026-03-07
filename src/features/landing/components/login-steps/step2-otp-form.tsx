@@ -188,7 +188,7 @@ export function Step2OTPForm({
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={(e) => handlePaste(e, field.onChange)}
                         disabled={isVerifying || isResending}
-                        className="w-full md:h-12 h-10 aspect-square text-center md:text-2xl font-black"
+                        className="w-full md:h-12 h-10 aspect-square text-center text-base md:text-2xl font-black"
                         autoFocus={index === 0}
                       />
                     ))}
