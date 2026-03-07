@@ -64,6 +64,7 @@ export function Step1EmailPhoneForm({
                   {...field}
                   disabled={isLoading}
                   placeholder={loginContent.step1.placeholder}
+                  className="text-base"
                 />
               </FormControl>
               <FormMessage />

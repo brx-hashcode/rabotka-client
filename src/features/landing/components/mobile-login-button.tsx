@@ -1,14 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { headerContent } from "@/content/landing/header";
 import { User } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router";
-import { LoginDialog } from "@/features/landing/components/login-dialog";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export const MobileLoginButton = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: profile, isLoading } = useProfileMe();
   const navigate = useNavigate();
 
@@ -47,19 +44,15 @@ export const MobileLoginButton = () => {
   }
 
   return (
-    <>
-      <Button
-        type="button"
-        size="default"
-        variant="whatsapp"
-        className="w-full"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        <User className="w-4 h-4" />
-        {headerContent.cta.button}
-      </Button>
-
-      <LoginDialog isOpen={isDialogOpen} setIsOpen={setIsDialogOpen} />
-    </>
+    <Button
+      type="button"
+      size="default"
+      variant="whatsapp"
+      className="w-full"
+      onClick={() => navigate("/login")}
+    >
+      <User className="w-4 h-4" />
+      {headerContent.cta.button}
+    </Button>
   );
 };
