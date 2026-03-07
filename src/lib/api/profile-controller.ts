@@ -40,6 +40,10 @@ export type ProfileMeResponse = {
   whatsappConnected: boolean;
   avatarUrl: string | null;
   createdAt: string;
+  jobOffersCount: number;
+  applicationsCount: number;
+  penaltiesCount: number;
+  unpaidPenaltiesCount: number;
 };
 
 export type UpdateProfilePayload = {
