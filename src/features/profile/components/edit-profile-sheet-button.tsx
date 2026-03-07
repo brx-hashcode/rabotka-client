@@ -202,7 +202,7 @@ export function EditProfileSheetButton({
                         <Textarea
                           placeholder={content.fields.description.placeholder}
                           rows={8}
-                          className="min-h-[140px] pr-16 resize-none overflow-hidden"
+                          className="min-h-[140px] pr-16 resize-none overflow-hidden text-base"
                           {...field}
                         />
                         <div
