@@ -19,7 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [step, setStep] = useQueryState(
     "step",
-    parseAsStringLiteral(STEPS).withDefault("1"),
+    parseAsStringLiteral(STEPS).withDefault(STEPS[0]),
   );
   const [emailOrPhone, setEmailOrPhone] = useQueryState("id", {
     defaultValue: "",
