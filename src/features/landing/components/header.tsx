@@ -1,6 +1,4 @@
-import { useCallback, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { Grip, LayoutGrid } from "lucide-react";
+import { useCallback } from "react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
@@ -10,7 +8,6 @@ import { LoginButton } from "@/features/landing/components/login-button";
 import { MobileLoginButton } from "@/features/landing/components/mobile-login-button";
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScroll(50);
   const location = useLocation();
   const navigate = useNavigate();
@@ -33,7 +30,6 @@ export function Header() {
   ) => {
     if (href.startsWith("#")) {
       e.preventDefault();
-      setIsMenuOpen(false);
       const id = href.slice(1);
 
       if (location.pathname === "/") {
@@ -43,7 +39,7 @@ export function Header() {
         setTimeout(() => scrollToElement(id), 150);
       }
     } else {
-      setIsMenuOpen(false);
+      navigate(href);
     }
   };
 
@@ -85,7 +81,9 @@ export function Header() {
             <LoginButton />
           </div>
 
-          <MobileLoginButton />
+          <div className="md:hidden">
+            <MobileLoginButton />
+          </div>
         </div>
       </nav>
     </header>

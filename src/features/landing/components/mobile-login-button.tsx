@@ -22,7 +22,7 @@ export const MobileLoginButton = () => {
       <button
         type="button"
         onClick={() => navigate("/profile")}
-        className="w-fit md:hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         <Avatar className="h-8 w-8 border-2 border-whatsapp">
           <AvatarImage
