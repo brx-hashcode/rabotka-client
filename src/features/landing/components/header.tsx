@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Grip, LayoutGrid } from "lucide-react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
@@ -85,48 +85,9 @@ export function Header() {
             <LoginButton />
           </div>
 
-          <button
-            className="md:hidden p-2 text-foreground"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={headerContent.menu.openLabel}
-          >
-            {isMenuOpen ? (
-              <Grip className="w-6 h-6" />
-            ) : (
-              <LayoutGrid className="w-6 h-6" />
-            )}
-          </button>
+          <MobileLoginButton />
         </div>
       </nav>
-
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className={`md:hidden border-b ${
-              isScrolled
-                ? "bg-background border-border"
-                : "bg-background/95 backdrop-blur-lg border-border/50"
-            }`}
-          >
-            <div className="section-container py-4 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-foreground font-medium py-2"
-                  onClick={(e) => handleNavClick(e, link.href)}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <MobileLoginButton />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   );
 }
