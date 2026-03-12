@@ -277,8 +277,8 @@ const AccountStatusBadge = ({
 }: Readonly<{ status: ProfileMeResponse["status"] }>) => {
   const config = {
     ACTIVE: { label: "Actif", className: "bg-green-100 text-green-700 border-0" },
-    PENDING_PAYMENT: {
-      label: "Paiement en attente",
+    PENDING_ACTIVATION: {
+      label: "Activation en attente",
       className: "bg-yellow-100 text-yellow-700 border-0",
     },
     SUSPENDED: { label: "Suspendu", className: "bg-orange-100 text-orange-700 border-0" },
