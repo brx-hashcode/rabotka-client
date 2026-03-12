@@ -34,7 +34,7 @@ export type ProfileMeResponse = {
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER";
-  status: "PENDING_PAYMENT" | "ACTIVE" | "SUSPENDED" | "BANNED";
+  status: "PENDING_ACTIVATION" | "ACTIVE" | "SUSPENDED" | "BANNED";
   verificationStatus: "PENDING" | "VERIFIED" | "REJECTED";
   reliabilityScore: number | null;
   whatsappConnected: boolean;
