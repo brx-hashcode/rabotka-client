@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +12,10 @@ export default function Claims() {
   const [page] = useState(1);
   const limit = 10;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const { data, isLoading } = useProfileClaims({ page, limit, enabled: true });
 
   const claims = data?.data ?? [];
@@ -24,25 +28,23 @@ export default function Claims() {
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{content.title}</h1>
+            <h1 className="md:text-3xl text-xl font-bold">{content.title}</h1>
             <p className="text-muted-foreground mt-1">{content.description}</p>
           </div>
-          <Button
-            onClick={() => navigate("/claims/new")}
-            className="gap-2"
-          >
+          <Button onClick={() => navigate("/claims/new")} className="gap-2">
             <Plus className="h-4 w-4" />
             {content.createButton}
           </Button>
         </div>
 
-        {isLoading ? (
+        {isLoading && (
           <div className="space-y-4">
             <Skeleton className="h-32 w-full rounded-lg" />
             <Skeleton className="h-32 w-full rounded-lg" />
             <Skeleton className="h-32 w-full rounded-lg" />
           </div>
-        ) : !hasClaims ? (
+        )}
+        {!isLoading && !hasClaims && (
           <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted rounded-full p-6 mb-4">
               <Inbox className="h-12 w-12 text-muted-foreground" />
@@ -56,7 +58,8 @@ export default function Claims() {
               {content.createButton}
             </Button>
           </div>
-        ) : (
+        )}
+        {!isLoading && hasClaims && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {claims.map((claim) => (
               <ClaimCard key={claim.id} claim={claim} />
