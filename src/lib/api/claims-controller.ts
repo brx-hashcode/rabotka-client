@@ -25,6 +25,7 @@ export type ClaimCommentItem = {
   userName: string | null;
   profileId: string | null;
   profileName: string | null;
+  createdByType: 'user' | 'profile';
   createdAt: string;
 };
 
@@ -117,7 +118,17 @@ export class ClaimsController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  async deleteComment(claimId: string, commentId: string): Promise<void> {
+    try {
+      return await this.delete<void>(
+        `/profile/claims/${claimId}/comments/${commentId}`,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { listClaims, getClaim, createClaim, listComments, addComment, uploadFiles } =
+export const { listClaims, getClaim, createClaim, listComments, addComment, deleteComment, uploadFiles } =
   new ClaimsController();

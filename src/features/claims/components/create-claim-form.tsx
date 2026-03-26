@@ -201,7 +201,7 @@ export const CreateClaimForm = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {files.map((fp, idx) => (
                   <div
-                    key={idx}
+                    key={`${fp.file.name}-${idx}`}
                     className="relative rounded-lg overflow-hidden border border-border bg-muted"
                   >
                     {fp.file.type.startsWith("image/") ? (
