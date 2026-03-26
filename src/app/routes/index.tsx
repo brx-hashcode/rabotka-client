@@ -4,6 +4,9 @@ import Onboarding from "@/pages/onboarding";
 import Profile from "@/pages/profile";
 import Login from "@/pages/login";
 import VerifyWhatsApp from "@/pages/verify-whatsapp";
+import Claims from "@/pages/claims";
+import Claim from "@/pages/claim";
+import CreateClaim from "@/pages/create-claim";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout } from "@/features/landing/layouts/landing-layout";
 import Index from "@/pages/Index";
@@ -33,6 +36,36 @@ export function AppRoutes() {
           <AuthGuard>
             <LandingLayout>
               <Profile />
+            </LandingLayout>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/claims"
+        element={
+          <AuthGuard>
+            <LandingLayout>
+              <Claims />
+            </LandingLayout>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/claims/new"
+        element={
+          <AuthGuard>
+            <LandingLayout>
+              <CreateClaim />
+            </LandingLayout>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/claims/:id"
+        element={
+          <AuthGuard>
+            <LandingLayout>
+              <Claim />
             </LandingLayout>
           </AuthGuard>
         }
