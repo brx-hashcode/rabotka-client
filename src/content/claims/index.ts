@@ -4,7 +4,7 @@ export const claimsContent = {
     description: "Gérez et suivez vos réclamations",
     emptyTitle: "Aucune réclamation",
     emptyDescription: "Créez votre première réclamation pour commencer",
-    createButton: "Nouvelle Réclamation",
+    createButton: "Nouveau",
   },
   detail: {
     title: "Détails de la Réclamation",

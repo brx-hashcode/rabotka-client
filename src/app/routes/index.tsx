@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router";
+  import { Routes, Route } from "react-router";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/onboarding";
 import Profile from "@/pages/profile";
