@@ -14,10 +14,6 @@ export default function Claim() {
     return (
       <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto w-full flex-1 space-y-4">
-          <Button variant="outline" size="sm" disabled>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </Button>
           <Skeleton className="h-96 w-full rounded-lg" />
         </div>
       </div>
@@ -39,7 +35,9 @@ export default function Claim() {
           <div className="flex gap-3 p-4 rounded-lg bg-red-50 border border-red-200">
             <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-red-700">Réclamation non trouvée</p>
+              <p className="font-medium text-red-700">
+                Réclamation non trouvée
+              </p>
               <p className="text-sm text-red-600">
                 {error instanceof Error
                   ? error.message
@@ -55,10 +53,6 @@ export default function Claim() {
   return (
     <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
       <div className="max-w-4xl mx-auto w-full flex-1 space-y-6">
-        <Button variant="outline" size="sm" onClick={() => navigate("/claims")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour aux Réclamations
-        </Button>
         <ClaimChat claim={claim} />
       </div>
     </div>
