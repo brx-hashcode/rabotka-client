@@ -157,7 +157,7 @@ export const CreateClaimForm = () => {
           />
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">
+            <label htmlFor="files" className="block text-sm font-medium">
               Pièces Jointes (Optionnel)
             </label>
             <p className="text-xs text-muted-foreground">
@@ -187,6 +187,7 @@ export const CreateClaimForm = () => {
                   </span>
                 </div>
                 <input
+                  id="files"
                   type="file"
                   multiple
                   accept="image/*,.pdf,.doc,.docx"
