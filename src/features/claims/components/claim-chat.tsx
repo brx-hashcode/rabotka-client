@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -162,8 +162,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
     }
   };
 
-  const isClaimClosed =
-    claim.status === "COMPLETED" || claim.status === "REJECTED";
+  const isClaimClosed = useMemo(() => {
+    return claim.status === "COMPLETED" || claim.status === "REJECTED";
+  }, [claim.status]);
 
   return (
     <div className="space-y-4">
@@ -171,13 +172,19 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1">
             <div className="space-y-2">
-              <Button
-                size="icon"
-                onClick={() => navigate("/claims")}
-                className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center justify-between">
+                <Button
+                  size="icon"
+                  onClick={() => navigate("/claims")}
+                  className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+
+                <span className={cn("text-sm font-medium", getStatusColor(claim.status))}>
+                  {getStatusLabel(claim.status)}
+                </span>
+              </div>
               <h2 className="md:text-2xl text-lg font-medium">{claim.title}</h2>
             </div>
             <div>
@@ -254,7 +261,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
                   comment={comment}
                   currentUserId={currentUser?.id}
                   onDelete={deleteComment}
-                  isDeletingComment={isDeletingComment}
+                  isDeletingComment={isDeletingComment || isClaimClosed}
                 />
               ))}
             </>

@@ -8,7 +8,7 @@ import Claims from "@/pages/claims";
 import Claim from "@/pages/claim";
 import CreateClaim from "@/pages/create-claim";
 import { AuthGuard } from "@/components/auth";
-import { LandingLayout } from "@/features/landing/layouts/landing-layout";
+import { LandingLayout, AppLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
 
 export function AppRoutes() {
@@ -34,9 +34,9 @@ export function AppRoutes() {
         path="/profile"
         element={
           <AuthGuard>
-            <LandingLayout>
+            <AppLayout>
               <Profile />
-            </LandingLayout>
+            </AppLayout>
           </AuthGuard>
         }
       />
@@ -44,9 +44,9 @@ export function AppRoutes() {
         path="/claims"
         element={
           <AuthGuard>
-            <LandingLayout>
+            <AppLayout>
               <Claims />
-            </LandingLayout>
+            </AppLayout>
           </AuthGuard>
         }
       />
@@ -54,9 +54,9 @@ export function AppRoutes() {
         path="/claims/new"
         element={
           <AuthGuard>
-            <LandingLayout>
+            <AppLayout>
               <CreateClaim />
-            </LandingLayout>
+            </AppLayout>
           </AuthGuard>
         }
       />
@@ -64,9 +64,9 @@ export function AppRoutes() {
         path="/claims/:id"
         element={
           <AuthGuard>
-            <LandingLayout>
+            <AppLayout>
               <Claim />
-            </LandingLayout>
+            </AppLayout>
           </AuthGuard>
         }
       />
