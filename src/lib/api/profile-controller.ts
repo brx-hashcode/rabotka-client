@@ -44,6 +44,7 @@ export type ProfileMeResponse = {
   applicationsCount: number;
   penaltiesCount: number;
   unpaidPenaltiesCount: number;
+  walletBalance: number;
 };
 
 export type UpdateProfilePayload = {
