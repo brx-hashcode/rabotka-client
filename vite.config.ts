@@ -16,6 +16,16 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_BACKEND_URL,
           changeOrigin: true,
         },
+        "/payment-status": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
+        "/socket.io": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
       },
     },
     plugins: [react(), tailwindcss()].filter(Boolean),

@@ -20,6 +20,7 @@ import {
   Star,
   MessageCircle,
   AlertCircle,
+  Wallet,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
@@ -114,10 +115,12 @@ export default function Profile() {
         </div>
 
         {/* Stats cards */}
-        <div className={cn(
-          "grid gap-3",
-          isEmployer ? "grid-cols-2" : "grid-cols-3",
-        )}>
+        <div
+          className={cn(
+            "grid gap-3",
+            isEmployer ? "grid-cols-2" : "grid-cols-3",
+          )}
+        >
           {isEmployer ? (
             <StatCard
               icon={<Briefcase className="h-5 w-5 text-whatsapp" />}
@@ -127,15 +130,15 @@ export default function Profile() {
           ) : (
             <>
               <StatCard
+                icon={<Wallet className="h-5 w-5 text-whatsapp" />}
+                value={profile.walletBalance.toLocaleString("fr-FR")}
+                label="Solde (FCFA)"
+              />
+
+              <StatCard
                 icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
                 value={profile.applicationsCount}
                 label="Candidatures"
-              />
-              <StatCard
-                icon={<FileWarning className="h-5 w-5 text-amber-500" />}
-                value={profile.penaltiesCount}
-                label="Penalites"
-                alert={profile.unpaidPenaltiesCount > 0}
               />
             </>
           )}
@@ -150,7 +153,6 @@ export default function Profile() {
           />
         </div>
 
-        {/* Description - WhatsApp "About" style */}
         {profile.description && (
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-muted/30">
@@ -166,7 +168,6 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Contact info - WhatsApp-style list */}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -204,6 +205,13 @@ export default function Profile() {
               label="WhatsApp"
               value={profile.whatsappConnected ? "Connecte" : "Non connecte"}
             />
+            {!isEmployer && (
+              <InfoRow
+                icon={<FileWarning className="h-4 w-4 text-amber-500" />}
+                label="Penalites"
+                value={`${profile.penaltiesCount} penalite${profile.penaltiesCount !== 1 ? "s" : ""}${profile.unpaidPenaltiesCount > 0 ? ` (${profile.unpaidPenaltiesCount} impayee${profile.unpaidPenaltiesCount !== 1 ? "s" : ""})` : ""}`}
+              />
+            )}
           </div>
         </div>
 
@@ -288,18 +296,23 @@ const AccountStatusBadge = ({
   status,
 }: Readonly<{ status: ProfileMeResponse["status"] }>) => {
   const config = {
-    ACTIVE: { label: "Actif", className: "bg-green-100 text-green-700 border-0" },
+    ACTIVE: {
+      label: "Actif",
+      className: "bg-green-100 text-green-700 border-0",
+    },
     PENDING_ACTIVATION: {
       label: "Activation en attente",
       className: "bg-yellow-100 text-yellow-700 border-0",
     },
-    SUSPENDED: { label: "Suspendu", className: "bg-orange-100 text-orange-700 border-0" },
+    SUSPENDED: {
+      label: "Suspendu",
+      className: "bg-orange-100 text-orange-700 border-0",
+    },
     BANNED: { label: "Banni", className: "bg-red-100 text-red-700 border-0" },
   };
   const { label, className } = config[status];
   return <Badge className={cn("text-xs", className)}>{label}</Badge>;
 };
-
 
 const ProfileSkeleton = () => {
   return (
