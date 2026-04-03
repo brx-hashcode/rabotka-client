@@ -1,15 +1,20 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router";
 import { MapPin, ArrowRight } from "lucide-react";
 import citySunsetImage from "@/assets/city-sunset.png";
 import { visionContent } from "@/content/landing/vision";
 
 export function VisionSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" className="relative py-20 lg:py-32 overflow-hidden" ref={ref}>
+    <section
+      id="about"
+      className="relative py-20 lg:py-32 overflow-hidden"
+      ref={ref}
+    >
       <div className="absolute inset-0">
         <img
           src={citySunsetImage}
@@ -31,11 +36,11 @@ export function VisionSection() {
               <MapPin className="w-4 h-4" />
               {visionContent.badge}
             </div>
-            
+
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight">
               {visionContent.title}
             </h2>
-            
+
             <p className="text-xl text-primary-foreground/80">
               {visionContent.description}
             </p>
@@ -44,10 +49,12 @@ export function VisionSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-2 text-whatsapp font-medium pt-4"
+              className="flex items-center gap-2 text-whatsapp font-medium pt-4 group"
             >
-              <span>{visionContent.cta}</span>
-              <ArrowRight className="w-5 h-5" />
+              <Link to="/onboarding" className="group-hover:underline">
+                {visionContent.cta}
+              </Link>
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </motion.div>
           </div>
         </motion.div>
