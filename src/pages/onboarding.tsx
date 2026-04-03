@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
+import { useSearchParams } from "react-router";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import {
   PersonalInfoForm,
@@ -23,16 +25,24 @@ export default function Onboarding() {
     serialize: (value) => value,
   });
 
+  const [searchParams] = useSearchParams();
   const hydrateFromStorage = useOnboardingStore(
     (state) => state.hydrateFromStorage,
   );
+  const setKycData = useOnboardingStore((state) => state.setKycData);
+  const profileTypeParam = searchParams.get("profileType");
+
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   useEffect(() => {
-    hydrateFromStorage();
-  }, [hydrateFromStorage]);
+    void hydrateFromStorage().then(() => {
+      if (profileTypeParam === "WORKER" || profileTypeParam === "EMPLOYER") {
+        setKycData({ profileType: profileTypeParam });
+      }
+    });
+  }, [hydrateFromStorage, profileTypeParam, setKycData]);
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
@@ -82,6 +92,13 @@ export default function Onboarding() {
   }, [step, setStep]);
 
   return (
+    <>
+      <Seo
+        title="Créer un compte - Rabotka"
+        description="Rejoignez Rabotka et créez votre profil vérifié en quelques étapes. Travailleurs et employeurs, connectez-vous via WhatsApp sans télécharger d'application."
+        canonical="/onboarding"
+        noIndex={false}
+      />
     <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
       <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
         <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
@@ -94,5 +111,6 @@ export default function Onboarding() {
       />
       <ErrorModal open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen} />
     </div>
+    </>
   );
 }
