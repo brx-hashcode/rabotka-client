@@ -177,10 +177,10 @@ export function KycDocumentsForm({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="WORKER">
-                        {content.profileType.options.worker}
+                        {content.profileType.options.worker.toUpperCase()}
                       </SelectItem>
                       <SelectItem value="EMPLOYER">
-                        {content.profileType.options.employer}
+                        {content.profileType.options.employer.toUpperCase()}
                       </SelectItem>
                     </SelectContent>
                   </Select>
