@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,7 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: Readonly<ProvidersProps>) {
   return (
+    <HelmetProvider>
     <CsrfProvider>
       <NuqsAdapter>
         <QueryClientProvider client={queryClient}>
@@ -36,5 +38,6 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
         </QueryClientProvider>
       </NuqsAdapter>
     </CsrfProvider>
+    </HelmetProvider>
   );
 }

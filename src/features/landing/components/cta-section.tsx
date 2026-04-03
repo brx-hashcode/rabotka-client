@@ -1,8 +1,10 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users, ArrowRight } from "lucide-react";
 import { ctaContent } from "@/content/landing/cta";
+import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
 
 export function CTASection() {
@@ -33,15 +35,19 @@ export function CTASection() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button variant="hero" size="lg" className="group">
-              <MessageCircle className="w-5 h-5 transition-transform group-hover:scale-110" />
-              {ctaContent.buttons.primary}
-              <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+            <Button variant="hero" size="lg" className="group" asChild>
+              <Link to={onboardingPathWithProfile("WORKER")}>
+                <MessageCircle className="w-5 h-5 transition-transform group-hover:scale-110" />
+                {ctaContent.buttons.primary}
+                <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
-            <Button variant="hero-outline" size="lg" className="group">
-              <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
-              {ctaContent.buttons.secondary}
-              <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+            <Button variant="hero-outline" size="lg" className="group" asChild>
+              <Link to={onboardingPathWithProfile("EMPLOYER")}>
+                <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
+                {ctaContent.buttons.secondary}
+                <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
           </div>
         </motion.div>
