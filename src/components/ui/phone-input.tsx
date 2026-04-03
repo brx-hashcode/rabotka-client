@@ -62,7 +62,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
         <PhoneNumberInputRoot
           ref={ref}
           className={cn(
-            "flex border border-input rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+            "flex border border-input rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
             className,
           )}
           countries={countries}

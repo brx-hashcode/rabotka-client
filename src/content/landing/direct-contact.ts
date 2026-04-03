@@ -1,8 +1,8 @@
 export const directContactContent = {
   badge: "Connexion Directe",
-  title: "Pas d'intermédiaires. Pas de barrières.",
+  title: "Pas d'intermédiaires. Un accès direct.",
   description:
-    "Une fois le match trouvé, vous vous connectez directement. Rabotka élimine les frictions et construit la confiance.",
+    "Une fois le match trouvé, un simple déblocage de contact vous met directement en relation. Pas de commission, pas d'abonnement — juste un accès transparent.",
   methods: [
     {
       title: "Appelez directement",

@@ -12,7 +12,7 @@ export const faqContent = {
     {
       question: "Rabotka est-il gratuit?",
       answer:
-        "Oui, Rabotka est entièrement gratuit pour les travailleurs et les employeurs. Il n'y a pas de frais d'inscription, de commission ou d'abonnement. Notre objectif est de rendre l'accès à l'emploi et aux services accessible à tous.",
+        "L'inscription est gratuite, et chaque nouveau membre reçoit un crédit de bienvenue suffisant pour débloquer un premier contact sans rien payer. Par la suite, débloquer les coordonnées d'un contact nécessite un petit frais, payable via votre crédit wallet ou Mobile Money (MTN / AIRTEL).",
     },
     {
       question: "Comment puis-je vérifier mon profil?",
@@ -27,7 +27,7 @@ export const faqContent = {
     {
       question: "Comment puis-je contacter un travailleur ou un employeur?",
       answer:
-        "Une fois que vous avez trouvé un profil qui vous intéresse, vous pouvez le contacter directement via WhatsApp ou par téléphone. Les coordonnées de contact sont disponibles sur chaque profil vérifié.",
+        "Lorsqu'un employeur accepte la candidature d'un travailleur, les deux parties reçoivent une notification WhatsApp. Il suffit alors de débloquer les coordonnées de l'autre partie via votre wallet ou Mobile Money. Le contact doit être débloqué dans les 48 heures. Votre crédit de bienvenue couvre entièrement ce premier déblocage.",
     },
     {
       question: "Quels types de services puis-je trouver sur Rabotka?",

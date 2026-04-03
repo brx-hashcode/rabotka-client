@@ -1,4 +1,4 @@
-import { UserPlus, ShieldCheck, Link, MessageCircle } from "lucide-react";
+import { UserPlus, ShieldCheck, Link, MessageCircle, Unlock } from "lucide-react";
 import type { Step } from "@/types";
 
 export const howItWorksContent = {
@@ -10,7 +10,7 @@ export const howItWorksContent = {
         icon: UserPlus,
         title: "Créez votre profil",
         description:
-          "Renseignez vos informations personnelles, choisissez Travailleur et ajoutez pièce d'identité + selfie",
+          "Renseignez vos informations personnelles, choisissez Travailleur et ajoutez pièce d'identité + selfie. Vous recevez un crédit de bienvenue à l'inscription.",
       },
       {
         icon: ShieldCheck,
@@ -25,8 +25,15 @@ export const howItWorksContent = {
       },
       {
         icon: MessageCircle,
-        title: "Recevez des opportunités d'emploi",
-        description: "Recevez des offres correspondantes directement par chat",
+        title: "Postulez aux offres d'emploi",
+        description:
+          "Recevez des offres correspondant à votre profil et postulez directement via le chat WhatsApp",
+      },
+      {
+        icon: Unlock,
+        title: "Débloquez le contact de l'employeur",
+        description:
+          "Si votre candidature est acceptée, déverrouillez les coordonnées de l'employeur — gratuit avec votre crédit de bienvenue",
       },
     ] as Step[],
   },
@@ -39,7 +46,7 @@ export const howItWorksContent = {
         icon: UserPlus,
         title: "Créez votre profil",
         description:
-          "Renseignez vos informations personnelles, choisissez Employeur et ajoutez pièce d'identité + selfie",
+          "Renseignez vos informations personnelles, choisissez Employeur et ajoutez pièce d'identité + selfie. Vous recevez un crédit de bienvenue à l'inscription.",
       },
       {
         icon: ShieldCheck,
@@ -54,9 +61,15 @@ export const howItWorksContent = {
       },
       {
         icon: MessageCircle,
-        title: "Recevez des profils correspondants",
+        title: "Consultez les candidatures",
         description:
-          "Contactez les travailleurs directement via WhatsApp ou téléphone",
+          "Recevez et examinez les candidatures de travailleurs vérifiés, puis acceptez le meilleur profil",
+      },
+      {
+        icon: Unlock,
+        title: "Débloquez le contact du travailleur",
+        description:
+          "Après avoir accepté une candidature, déverrouillez les coordonnées du travailleur — gratuit avec votre crédit de bienvenue",
       },
     ] as Step[],
   },

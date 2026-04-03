@@ -78,7 +78,6 @@ export default function Profile() {
   return (
     <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header section - WhatsApp-style */}
         <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
           <div className="absolute top-4 right-4">
             <EditProfileSheetButton profile={profile} />
@@ -114,13 +113,13 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Stats cards */}
-        <div
-          className={cn(
-            "grid gap-3",
-            isEmployer ? "grid-cols-2" : "grid-cols-3",
-          )}
-        >
+        <div className={cn("grid gap-3 grid-cols-3")}>
+          <StatCard
+            icon={<Wallet className="h-5 w-5 text-whatsapp" />}
+            value={profile.walletBalance.toLocaleString("fr-FR")}
+            label="Solde (FCFA)"
+          />
+
           {isEmployer ? (
             <StatCard
               icon={<Briefcase className="h-5 w-5 text-whatsapp" />}
@@ -142,12 +141,13 @@ export default function Profile() {
               />
             </>
           )}
+
           <StatCard
             icon={<Star className="h-5 w-5 text-yellow-500" />}
             value={
-              profile.reliabilityScore !== null
-                ? `${profile.reliabilityScore}%`
-                : "N/A"
+              profile.reliabilityScore === null
+                ? "N/A"
+                : `${profile.reliabilityScore}%`
             }
             label="Fiabilite"
           />
