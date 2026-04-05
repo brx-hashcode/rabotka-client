@@ -127,19 +127,11 @@ export default function Profile() {
               label="Offres publiees"
             />
           ) : (
-            <>
-              <StatCard
-                icon={<Wallet className="h-5 w-5 text-whatsapp" />}
-                value={profile.walletBalance.toLocaleString("fr-FR")}
-                label="Solde (FCFA)"
-              />
-
-              <StatCard
-                icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
-                value={profile.applicationsCount}
-                label="Candidatures"
-              />
-            </>
+            <StatCard
+              icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
+              value={profile.applicationsCount}
+              label="Candidatures"
+            />
           )}
 
           <StatCard

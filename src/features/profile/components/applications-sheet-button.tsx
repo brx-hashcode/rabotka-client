@@ -18,7 +18,7 @@ const content = applicationsContent;
 
 const getStatusBadg = (status: string) => {
   return cn(
-    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
     {
       "bg-yellow-100 text-yellow-800": status === "PENDING",
       "bg-green-100 text-green-800": status === "ACCEPTED",
@@ -86,36 +86,38 @@ export const ApplicationsSheetButton = () => {
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md">
+        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
           <SheetHeader>
             <SheetTitle>{content.sheet.title}</SheetTitle>
             <SheetDescription>{content.sheet.description}</SheetDescription>
           </SheetHeader>
 
-          {isLoading && (
-            <div className="space-y-4 py-6">
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-            </div>
-          )}
-          {!isLoading && !hasApplications && (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="bg-muted rounded-full p-6">
-                <ClipboardList className="h-12 w-12 text-muted-foreground" />
+          <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {isLoading && (
+              <div className="space-y-4 py-6">
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-24 w-full rounded-lg" />
               </div>
-              <p className="text-muted-foreground text-center">
-                {content.empty}
-              </p>
-            </div>
-          )}
-          {!isLoading && hasApplications && (
-            <ul className="space-y-3 py-3">
-              {applications.map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </ul>
-          )}
+            )}
+            {!isLoading && !hasApplications && (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <div className="bg-muted rounded-full p-6">
+                  <ClipboardList className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-center">
+                  {content.empty}
+                </p>
+              </div>
+            )}
+            {!isLoading && hasApplications && (
+              <ul className="space-y-3 py-3">
+                {applications.map((app) => (
+                  <ApplicationCard key={app.id} application={app} />
+                ))}
+              </ul>
+            )}
+          </div>
         </SheetContent>
       </Sheet>
     </>
