@@ -7,12 +7,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, FileDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 import { applicationsContent } from "@/content/profile";
 import { useProfileApplications } from "@/hooks/use-profile-applications";
 import type { ProfileApplicationItem } from "@/lib/api/profile-controller";
+import { downloadContract } from "@/lib/api/profile-controller";
 
 const content = applicationsContent;
 
@@ -37,6 +39,24 @@ type ApplicationCardProps = {
 
 const ApplicationCard = ({ application }: ApplicationCardProps) => {
   const app = application;
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  async function handleDownloadContract(contractId: string) {
+    setIsDownloading(true);
+    try {
+      const blob = await downloadContract(contractId);
+      const objectUrl = URL.createObjectURL(blob);
+      const a = globalThis.document.createElement("a");
+      a.href = objectUrl;
+      a.download = "contrat.pdf";
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Impossible de télécharger le contrat");
+    } finally {
+      setIsDownloading(false);
+    }
+  }
 
   return (
     <li className="rounded-lg border border-border bg-card p-4 space-y-1">
@@ -55,6 +75,17 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
       <p className="text-sm text-muted-foreground truncate">
         {app.jobOffer.address}
       </p>
+      {app.status === "ACCEPTED" && app.contractId && (
+        <button
+          type="button"
+          disabled={isDownloading}
+          onClick={() => handleDownloadContract(app.contractId!)}
+          className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50 pt-1"
+        >
+          <FileDown className="h-3 w-3" />
+          {isDownloading ? "Téléchargement..." : "Télécharger le contrat"}
+        </button>
+      )}
     </li>
   );
 };

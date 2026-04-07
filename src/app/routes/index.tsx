@@ -11,6 +11,7 @@ import CreateClaim from "@/pages/create-claim";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout, AppLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
+import Terms from "@/pages/terms";
 
 export function AppRoutes() {
   return (
@@ -69,6 +70,14 @@ export function AppRoutes() {
               <Claim />
             </AppLayout>
           </AuthGuard>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <LandingLayout>
+            <Terms />
+          </LandingLayout>
         }
       />
       <Route path="/login" element={<Login />} />

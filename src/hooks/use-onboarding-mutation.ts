@@ -27,6 +27,7 @@ export function useOnboardingMutation() {
         documentType: kycData.documentType,
         kycDocument: kycData.kycDocument,
         kycSelfie: kycData.kycSelfie,
+        readAndApprovedPolicies: true,
       });
     },
     onMutate: () => {
