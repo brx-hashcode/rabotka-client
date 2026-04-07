@@ -2,16 +2,25 @@ import type { FooterLinkGroup, ContactInfo } from "@/types";
 
 export const footerLinks: FooterLinkGroup = {
   Produit: [
-    "Comment ça marche",
-    "Trouver un emploi",
-    "Trouver un travailleur",
-    "Profils vérifiés",
+    { label: "Comment ça marche", href: "#how-it-works" },
+    { label: "Trouver un emploi", href: "/onboarding?profileType=WORKER" },
+    {
+      label: "Trouver un travailleur",
+      href: "/onboarding?profileType=EMPLOYER",
+    },
+    { label: "Profils vérifiés", href: "#trust" },
   ],
-  Entreprise: ["À propos", "Carrières", "Presse", "Blog"],
+  Entreprise: [
+    { label: "À propos", href: "#about" },
+    { label: "Carrières", href: "/" },
+    { label: "Presse", href: "/" },
+    { label: "Blog", href: "/" },
+  ],
   Légal: [
-    "Politique de confidentialité",
-    "Conditions d'utilisation",
-    "Politique des cookies",
+    // Until dedicated pages/endpoints exist, route to Terms.
+    { label: "Politique de confidentialité", href: "/terms" },
+    { label: "Conditions d'utilisation", href: "/terms" },
+    { label: "Politique des cookies", href: "/terms" },
   ],
 } as const;
 
@@ -24,5 +33,10 @@ export const contactInfo: ContactInfo = {
 export const footerContent = {
   brandDescription:
     "Connecter les travailleurs informels et les employeurs grâce à WhatsApp. Simple, accessible, sans application.",
-  socialLinks: ["Twitter", "LinkedIn", "Facebook", "Instagram"],
+  socialLinks: [
+    { label: "Twitter", href: "https://twitter.com/Rabotka" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/company/rabotka" },
+    { label: "Facebook", href: "https://www.facebook.com/rabotka" },
+    { label: "Instagram", href: "https://www.instagram.com/rabotka" },
+  ],
 } as const;
