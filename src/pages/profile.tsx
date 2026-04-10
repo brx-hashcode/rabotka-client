@@ -26,11 +26,10 @@ import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sh
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FileDown } from "lucide-react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
-import { getDocuments, downloadDocument } from "@/lib/api/profile-controller";
+import { downloadAgreement } from "@/lib/api/profile-controller";
 import { cn, formatDate } from "@/lib/utils";
 
 const WHATSAPP_PLACEHOLDER =
@@ -42,18 +41,10 @@ export default function Profile() {
   const { mutate: handleLogout, isPending: isLoggingOut } = useLogout();
   const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
 
-  const { data: profileDocuments } = useQuery({
-    queryKey: ["profile", "documents"],
-    queryFn: getDocuments,
-    enabled: !!profile,
-  });
-
-  const agreementDoc = profileDocuments?.find((d) => d.category === "AGREEMENT");
-
-  async function handleDownloadAgreement(documentId: string) {
+  async function handleDownloadAgreement() {
     setIsDownloadingDoc(true);
     try {
-      const blob = await downloadDocument(documentId);
+      const blob = await downloadAgreement();
       const objectUrl = URL.createObjectURL(blob);
       const a = globalThis.document.createElement("a");
       a.href = objectUrl;
@@ -227,24 +218,22 @@ export default function Profile() {
               label="WhatsApp"
               value={profile.whatsappConnected ? "Connecte" : "Non connecte"}
             />
-            {agreementDoc && (
-              <div className="flex items-center gap-3 px-4 py-3">
-                <div className="shrink-0">
-                  <FileDown className="h-4 w-4 text-whatsapp" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Documents</p>
-                  <button
-                    type="button"
-                    disabled={isDownloadingDoc}
-                    onClick={() => handleDownloadAgreement(agreementDoc.id)}
-                    className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
-                  >
-                    {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
-                  </button>
-                </div>
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="shrink-0">
+                <FileDown className="h-4 w-4 text-whatsapp" />
               </div>
-            )}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground">Documents</p>
+                <button
+                  type="button"
+                  disabled={isDownloadingDoc}
+                  onClick={handleDownloadAgreement}
+                  className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                >
+                  {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
+                </button>
+              </div>
+            </div>
             {!isEmployer && (
               <InfoRow
                 icon={<FileWarning className="h-4 w-4 text-amber-500" />}
