@@ -39,4 +39,8 @@ export const confirmationContent = {
     confirm: "Confirmer",
     submitting: "Envoi en cours...",
   },
+  policyCheckbox: {
+    label: "J'ai lu et j'accepte les conditions d'utilisation et la politique de confidentialité de la plateforme.",
+    helper: "Vous devez accepter les conditions pour continuer.",
+  },
 } as const;

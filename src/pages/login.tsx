@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { Seo } from "@/hooks/use-seo";
 import { useNavigate } from "react-router";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import { Loader } from "lucide-react";
@@ -85,6 +86,13 @@ export default function Login() {
   }, [emailOrPhone, resendOtpMutation]);
 
   return (
+    <>
+      <Seo
+        title="Connexion - Rabotka"
+        description="Connectez-vous à votre compte Rabotka pour accéder à vos offres d'emploi et gérer votre profil."
+        canonical="/login"
+        noIndex={true}
+      />
     <div className="min-h-dvh flex flex-col bg-background">
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-6">
         <img
@@ -141,5 +149,6 @@ export default function Login() {
         </div>
       )}
     </div>
+    </>
   );
 }

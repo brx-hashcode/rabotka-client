@@ -1,8 +1,10 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from "react-router";
 import {
   Loader2,
   User,
@@ -40,6 +42,7 @@ export function ConfirmationView({
   const { personalInfo, kycData, isSubmitting } = useOnboardingStore();
 
   const mutation = useOnboardingMutation();
+  const [policyAccepted, setPolicyAccepted] = useState(false);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -129,7 +132,7 @@ export function ConfirmationView({
                   "text-white font-semibold px-3 py-1",
                   kycData.profileType === "WORKER"
                     ? "bg-green-500 hover:bg-green-600"
-                    : "bg-red-500 hover:bg-red-600"
+                    : "bg-red-500 hover:bg-red-600",
                 )}
               >
                 {kycData.profileType === "WORKER"
@@ -204,6 +207,30 @@ export function ConfirmationView({
         </section>
       </div>
 
+      <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <Checkbox
+          id="policy-accept"
+          checked={policyAccepted}
+          onCheckedChange={(checked) => setPolicyAccepted(checked === true)}
+          className="mt-0.5"
+        />
+        <label
+          htmlFor="policy-accept"
+          className="text-sm text-gray-700 leading-snug cursor-pointer"
+        >
+          J'ai lu et j'accepte les{" "}
+          <Link
+            to="/terms"
+            rel="noopener noreferrer"
+            className="text-green-600 underline underline-offset-2 hover:text-green-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            conditions d'utilisation et la politique de confidentialité
+          </Link>{" "}
+          de la plateforme.
+        </label>
+      </div>
+
       <div className="flex gap-4 pt-4">
         <Button
           type="button"
@@ -217,7 +244,7 @@ export function ConfirmationView({
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting || mutation.isPending}
+          disabled={!policyAccepted || isSubmitting || mutation.isPending}
           className="flex-1 bg-green-500 hover:bg-green-600 text-white"
         >
           {isSubmitting || mutation.isPending ? (

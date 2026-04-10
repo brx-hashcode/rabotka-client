@@ -1,4 +1,6 @@
 import { RabotkaBaseController } from "./base-controller";
+import { useCsrfStore } from "@/stores/csrf-store";
+import { config } from "@/config";
 
 export type CreateProfilePayload = {
   firstName: string;
@@ -19,6 +21,7 @@ export type CreateProfilePayload = {
     | "";
   kycDocument: File;
   kycSelfie: File;
+  readAndApprovedPolicies: boolean;
 };
 
 export type CreateProfileResponse = {
@@ -71,6 +74,7 @@ export type ProfileApplicationItem = {
   id: string;
   status: string;
   createdAt: string;
+  contractId: string | null;
   jobOffer: {
     id: string;
     title: string;
@@ -104,6 +108,7 @@ export class ProfileController extends RabotkaBaseController {
       formData.append("documentType", data.documentType);
       formData.append("kycDocument", data.kycDocument);
       formData.append("kycSelfie", data.kycSelfie);
+      formData.append("readAndApprovedPolicies", String(data.readAndApprovedPolicies));
 
       return await this.post<CreateProfileResponse>("/profile", formData);
     } catch (error) {
@@ -165,6 +170,28 @@ export class ProfileController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  async downloadAgreement(): Promise<Blob> {
+    const token = useCsrfStore.getState().getToken();
+    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
+    const response = await fetch(`${config.apiUrl}/profile/agreement/download`, {
+      credentials: "include",
+      headers,
+    });
+    if (!response.ok) throw new Error("Download failed");
+    return response.blob();
+  }
+
+  async downloadContract(contractId: string): Promise<Blob> {
+    const token = useCsrfStore.getState().getToken();
+    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
+    const response = await fetch(`${config.apiUrl}/contracts/${contractId}/download`, {
+      credentials: "include",
+      headers,
+    });
+    if (!response.ok) throw new Error("Download failed");
+    return response.blob();
+  }
 }
 
 export const {
@@ -174,4 +201,6 @@ export const {
   updateProfile,
   createProfile,
   getApplications,
+  downloadAgreement,
+  downloadContract,
 } = new ProfileController();

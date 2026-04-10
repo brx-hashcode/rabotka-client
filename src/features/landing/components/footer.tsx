@@ -1,8 +1,46 @@
 import { MapPin, Mail, Phone } from "lucide-react";
 import { footerLinks, contactInfo, footerContent } from "@/content/landing/footer";
 import rabotkaLogo from "@/assets/rabotka-logo.png";
+import { useCallback } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 export function Footer() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const scrollToElement = useCallback((id: string, retries = 5) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    } else if (retries > 0) {
+      setTimeout(() => scrollToElement(id, retries - 1), 100);
+    }
+  }, []);
+
+  const handleFooterNav = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      if (href.startsWith("#")) {
+        e.preventDefault();
+        const id = href.slice(1);
+        if (location.pathname === "/") {
+          scrollToElement(id);
+        } else {
+          navigate("/");
+          setTimeout(() => scrollToElement(id), 150);
+        }
+      } else if (href.startsWith("/")) {
+        // Internal route
+        e.preventDefault();
+        navigate(href);
+      }
+      // External: allow default
+    },
+    [location.pathname, navigate, scrollToElement],
+  );
+
   return (
     <footer className="bg-foreground text-background py-16">
       <div className="section-container">
@@ -42,9 +80,13 @@ export function Footer() {
               <h4 className="font-semibold mb-4">{title}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-background/70 hover:text-background transition-colors text-sm">
-                      {link}
+                  <li key={`${title}-${link.label}`}>
+                    <a
+                      href={link.href}
+                      onClick={(e) => handleFooterNav(e, link.href)}
+                      className="text-background/70 hover:text-background transition-colors text-sm"
+                    >
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -61,11 +103,13 @@ export function Footer() {
           <div className="flex gap-6">
             {footerContent.socialLinks.map((social) => (
               <a
-                key={social}
-                href="#"
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-background/50 hover:text-background transition-colors"
               >
-                {social}
+                {social.label}
               </a>
             ))}
           </div>

@@ -25,7 +25,7 @@ export const whatIsRabotkaContent = {
     {
       icon: Phone,
       title: "Permet le contact direct",
-      description: "Via WhatsApp ou téléphone",
+      description: "Déblocage simple après acceptation — premier contact offert",
     },
   ] as Feature[],
 } as const;

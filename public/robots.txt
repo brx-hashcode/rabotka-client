@@ -12,3 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /profile
+Disallow: /claims
+Disallow: /pay/
+
+Sitemap: https://rabotka.africa/sitemap.xml

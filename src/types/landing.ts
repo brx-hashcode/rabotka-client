@@ -29,7 +29,7 @@ export interface Impact {
 }
 
 export interface FooterLinkGroup {
-  [category: string]: string[];
+  [category: string]: Array<{ label: string; href: string }>;
 }
 
 export interface ContactInfo {

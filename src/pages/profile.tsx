@@ -25,8 +25,11 @@ import {
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { FileDown } from "lucide-react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import { downloadAgreement } from "@/lib/api/profile-controller";
 import { cn, formatDate } from "@/lib/utils";
 
 const WHATSAPP_PLACEHOLDER =
@@ -36,6 +39,24 @@ export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
   const { mutate: handleLogout, isPending: isLoggingOut } = useLogout();
+  const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
+
+  async function handleDownloadAgreement() {
+    setIsDownloadingDoc(true);
+    try {
+      const blob = await downloadAgreement();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = globalThis.document.createElement("a");
+      a.href = objectUrl;
+      a.download = "accord-plateforme.pdf";
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Impossible de télécharger le document");
+    } finally {
+      setIsDownloadingDoc(false);
+    }
+  }
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
@@ -78,7 +99,6 @@ export default function Profile() {
   return (
     <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header section - WhatsApp-style */}
         <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
           <div className="absolute top-4 right-4">
             <EditProfileSheetButton profile={profile} />
@@ -114,13 +134,13 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Stats cards */}
-        <div
-          className={cn(
-            "grid gap-3",
-            isEmployer ? "grid-cols-2" : "grid-cols-3",
-          )}
-        >
+        <div className={cn("grid gap-3 grid-cols-3")}>
+          <StatCard
+            icon={<Wallet className="h-5 w-5 text-whatsapp" />}
+            value={profile.walletBalance.toLocaleString("fr-FR")}
+            label="Solde (FCFA)"
+          />
+
           {isEmployer ? (
             <StatCard
               icon={<Briefcase className="h-5 w-5 text-whatsapp" />}
@@ -128,26 +148,19 @@ export default function Profile() {
               label="Offres publiees"
             />
           ) : (
-            <>
-              <StatCard
-                icon={<Wallet className="h-5 w-5 text-whatsapp" />}
-                value={profile.walletBalance.toLocaleString("fr-FR")}
-                label="Solde (FCFA)"
-              />
-
-              <StatCard
-                icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
-                value={profile.applicationsCount}
-                label="Candidatures"
-              />
-            </>
+            <StatCard
+              icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
+              value={profile.applicationsCount}
+              label="Candidatures"
+            />
           )}
+
           <StatCard
             icon={<Star className="h-5 w-5 text-yellow-500" />}
             value={
-              profile.reliabilityScore !== null
-                ? `${profile.reliabilityScore}%`
-                : "N/A"
+              profile.reliabilityScore === null
+                ? "N/A"
+                : `${profile.reliabilityScore}%`
             }
             label="Fiabilite"
           />
@@ -205,6 +218,22 @@ export default function Profile() {
               label="WhatsApp"
               value={profile.whatsappConnected ? "Connecte" : "Non connecte"}
             />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="shrink-0">
+                <FileDown className="h-4 w-4 text-whatsapp" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground">Documents</p>
+                <button
+                  type="button"
+                  disabled={isDownloadingDoc}
+                  onClick={handleDownloadAgreement}
+                  className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                >
+                  {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
+                </button>
+              </div>
+            </div>
             {!isEmployer && (
               <InfoRow
                 icon={<FileWarning className="h-4 w-4 text-amber-500" />}
