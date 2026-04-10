@@ -7,18 +7,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, FileDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 import { applicationsContent } from "@/content/profile";
 import { useProfileApplications } from "@/hooks/use-profile-applications";
 import type { ProfileApplicationItem } from "@/lib/api/profile-controller";
+import { downloadContract } from "@/lib/api/profile-controller";
 
 const content = applicationsContent;
 
 const getStatusBadg = (status: string) => {
   return cn(
-    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
     {
       "bg-yellow-100 text-yellow-800": status === "PENDING",
       "bg-green-100 text-green-800": status === "ACCEPTED",
@@ -37,6 +39,24 @@ type ApplicationCardProps = {
 
 const ApplicationCard = ({ application }: ApplicationCardProps) => {
   const app = application;
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  async function handleDownloadContract(contractId: string) {
+    setIsDownloading(true);
+    try {
+      const blob = await downloadContract(contractId);
+      const objectUrl = URL.createObjectURL(blob);
+      const a = globalThis.document.createElement("a");
+      a.href = objectUrl;
+      a.download = "contrat.pdf";
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Impossible de télécharger le contrat");
+    } finally {
+      setIsDownloading(false);
+    }
+  }
 
   return (
     <li className="rounded-lg border border-border bg-card p-4 space-y-1">
@@ -55,6 +75,17 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
       <p className="text-sm text-muted-foreground truncate">
         {app.jobOffer.address}
       </p>
+      {app.status === "ACCEPTED" && app.contractId && (
+        <button
+          type="button"
+          disabled={isDownloading}
+          onClick={() => handleDownloadContract(app.contractId!)}
+          className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50 pt-1"
+        >
+          <FileDown className="h-3 w-3" />
+          {isDownloading ? "Téléchargement..." : "Télécharger le contrat"}
+        </button>
+      )}
     </li>
   );
 };
@@ -86,36 +117,38 @@ export const ApplicationsSheetButton = () => {
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md">
+        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
           <SheetHeader>
             <SheetTitle>{content.sheet.title}</SheetTitle>
             <SheetDescription>{content.sheet.description}</SheetDescription>
           </SheetHeader>
 
-          {isLoading && (
-            <div className="space-y-4 py-6">
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-            </div>
-          )}
-          {!isLoading && !hasApplications && (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="bg-muted rounded-full p-6">
-                <ClipboardList className="h-12 w-12 text-muted-foreground" />
+          <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {isLoading && (
+              <div className="space-y-4 py-6">
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-24 w-full rounded-lg" />
               </div>
-              <p className="text-muted-foreground text-center">
-                {content.empty}
-              </p>
-            </div>
-          )}
-          {!isLoading && hasApplications && (
-            <ul className="space-y-3 py-3">
-              {applications.map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </ul>
-          )}
+            )}
+            {!isLoading && !hasApplications && (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <div className="bg-muted rounded-full p-6">
+                  <ClipboardList className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-center">
+                  {content.empty}
+                </p>
+              </div>
+            )}
+            {!isLoading && hasApplications && (
+              <ul className="space-y-3 py-3">
+                {applications.map((app) => (
+                  <ApplicationCard key={app.id} application={app} />
+                ))}
+              </ul>
+            )}
+          </div>
         </SheetContent>
       </Sheet>
     </>

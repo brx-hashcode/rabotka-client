@@ -17,8 +17,8 @@ export const trustContent = {
     },
     {
       icon: Users,
-      title: "Confiance communautaire",
-      description: "Avis et évaluations de vrais utilisateurs",
+      title: "Score de fiabilité",
+      description: "Les annulations tardives sont pénalisées — chaque profil reflète un historique réel",
     },
   ] as Feature[],
 } as const;

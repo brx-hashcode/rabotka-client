@@ -19,7 +19,7 @@ export const heroContent: HeroContent = {
   },
   stats: [
     {
-      label: "Gratuit",
+      label: "1er contact offert",
       value: "",
     },
     {

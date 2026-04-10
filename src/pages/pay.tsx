@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useParams } from "react-router";
+import type { Value as PhoneValue } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import mtnLogo from "@/assets/MTN-logo.jpg";
+import airtelLogo from "@/assets/airtel-new-logo.jpg";
+import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
@@ -17,23 +22,18 @@ export default function Pay() {
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
 
-  const [phone, setPhone] = useState("");
-  const [operator, setOperator] = useState<Operator | null>(null);
+  const [phone, setPhone] = useState<PhoneValue | null>(null);
+  const [operator, setOperator] = useState<Operator | null>("MTN");
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
 
-  usePaymentSocket(
-    token ?? "",
-    localStatus === "processing",
-    (status) => {
-      setLocalStatus(status === "APPROVED" ? "approved" : "rejected");
-    },
-  );
+  usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
+    setLocalStatus(status === "APPROVED" ? "approved" : "rejected");
+  });
 
   const handlePay = () => {
-    const cleaned = phone.replace(/\s/g, "");
-    if (!cleaned) {
-      setPhoneError("Veuillez entrer votre numéro de téléphone.");
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setPhoneError("Veuillez entrer un numéro de téléphone valide.");
       return;
     }
     if (!operator) {
@@ -42,7 +42,7 @@ export default function Pay() {
     }
     setPhoneError("");
     initiate(
-      { phone: cleaned, operator },
+      { phone, operator },
       {
         onSuccess: () => setLocalStatus("processing"),
         onError: () => setLocalStatus("rejected"),
@@ -54,7 +54,10 @@ export default function Pay() {
     return (
       <PageWrapper>
         <div className="w-full max-w-sm space-y-4">
-          <Skeleton className="h-8 w-40 mx-auto" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-40" />
+          </div>
           <Skeleton className="h-20 rounded-xl" />
           <Skeleton className="h-12 rounded-xl" />
           <Skeleton className="h-12 rounded-xl" />
@@ -135,8 +138,9 @@ export default function Pay() {
   return (
     <PageWrapper>
       <div className="w-full max-w-sm space-y-5">
-        {/* Header */}
-        <div className="text-center space-y-1">
+        <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
+
+        <div className="space-y-0.5">
           <h1 className="text-2xl font-bold text-foreground">Paiement</h1>
           <p className="text-sm text-muted-foreground">
             Pour{" "}
@@ -146,86 +150,93 @@ export default function Pay() {
           </p>
         </div>
 
-        {/* Amount card */}
-        <div className="bg-card border border-border rounded-xl px-5 py-4 space-y-1">
+        <div className="bg-card border border-border rounded-xl px-5 py-4 space-y-3">
           {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">
+              <span>{description}</span>
+            </div>
           )}
-          <p className="text-3xl font-bold text-foreground">
-            {amount !== null ? amount.toLocaleString("fr-FR") : "—"}
-            <span className="text-base font-medium text-muted-foreground ml-2">
-              FCFA
-            </span>
-          </p>
-        </div>
-
-        {/* Phone input */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">
-            Numéro de téléphone
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="px-3 h-10 flex items-center border border-border rounded-md bg-muted text-sm text-muted-foreground select-none">
-              +237
-            </span>
-            <Input
-              type="tel"
-              placeholder="6XXXXXXXX"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                if (phoneError) setPhoneError("");
-              }}
-              className="flex-1"
-            />
+          <div>
+            <p className="text-3xl font-bold text-foreground">
+              {amount === null ? "—" : amount.toLocaleString("fr-FR")}
+              <span className="text-base font-medium text-muted-foreground ml-2">
+                FCFA
+              </span>
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Paiement sécurisé via mobile money
+            </p>
           </div>
-          {phoneError && (
-            <p className="text-xs text-destructive">{phoneError}</p>
-          )}
         </div>
 
-        {/* Operator selection */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            Opérateur
+          <label
+            htmlFor="operator"
+            className="text-sm font-medium text-foreground"
+          >
+            Opérateur mobile
           </label>
           <div className="grid grid-cols-2 gap-3">
             <OperatorCard
               label="MTN Mobile Money"
               selected={operator === "MTN"}
-              color="bg-yellow-400"
-              textColor="text-yellow-900"
+              logo={mtnLogo}
               onClick={() => setOperator("MTN")}
             />
             <OperatorCard
               label="Airtel Money"
               selected={operator === "AIRTEL"}
-              color="bg-red-500"
-              textColor="text-white"
+              logo={airtelLogo}
               onClick={() => setOperator("AIRTEL")}
             />
           </div>
         </div>
 
-        {/* Pay button */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="phone-input"
+            className="text-sm font-medium text-foreground"
+          >
+            Numéro de téléphone
+          </label>
+          <PhoneInput
+            defaultCountry="CG"
+            value={phone}
+            onChange={(value) => {
+              setPhone(value);
+              if (phoneError) setPhoneError("");
+            }}
+            placeholder="06 000 0000"
+          />
+          {phoneError && (
+            <p className="text-xs text-destructive">{phoneError}</p>
+          )}
+        </div>
+
         <Button
-          className="w-full h-12 text-base font-semibold"
+          className="w-full h-12 text-base font-semibold rounded-md"
           onClick={handlePay}
           disabled={isPending}
         >
-          {isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-          ) : null}
+          {isPending ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
           {isPending ? "Envoi en cours..." : "Payer"}
         </Button>
+
+        <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+          <span>🔒</span>
+          <span>
+            Paiement sécurisé avec{" "}
+            <span className="font-semibold text-foreground">CashLock</span>
+          </span>
+        </p>
       </div>
     </PageWrapper>
   );
 }
 
-function PageWrapper({ children }: { children: React.ReactNode }) {
+function PageWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 overflow-hidden">
       {children}
     </div>
   );
@@ -234,16 +245,14 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 function OperatorCard({
   label,
   selected,
-  color,
-  textColor,
+  logo,
   onClick,
-}: {
+}: Readonly<{
   label: string;
   selected: boolean;
-  color: string;
-  textColor: string;
+  logo: string;
   onClick: () => void;
-}) {
+}>) {
   return (
     <button
       type="button"
@@ -255,16 +264,11 @@ function OperatorCard({
           : "border-border hover:border-muted-foreground/40",
       )}
     >
-      <div
-        className={cn(
-          "h-7 w-7 rounded-full mb-2 flex items-center justify-center",
-          color,
-        )}
-      >
-        <span className={cn("text-xs font-bold", textColor)}>
-          {label.charAt(0)}
-        </span>
-      </div>
+      <img
+        src={logo}
+        alt={label}
+        className="h-8 w-8 rounded-full mb-2 object-cover"
+      />
       <p className="text-sm font-semibold text-foreground leading-tight">
         {label}
       </p>
