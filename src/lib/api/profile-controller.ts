@@ -70,14 +70,6 @@ export type ProfilePenaltyItem = {
   jobOfferTitle?: string;
 };
 
-export type ProfileDocumentItem = {
-  id: string;
-  title: string;
-  category: string;
-  mimeType: string;
-  linkedAt: string;
-};
-
 export type ProfileApplicationItem = {
   id: string;
   status: string;
@@ -179,18 +171,10 @@ export class ProfileController extends RabotkaBaseController {
     }
   }
 
-  async getDocuments(): Promise<ProfileDocumentItem[]> {
-    try {
-      return await this.get<ProfileDocumentItem[]>("/profile/documents");
-    } catch (error) {
-      this.handleError(error);
-    }
-  }
-
-  async downloadDocument(documentId: string): Promise<Blob> {
+  async downloadAgreement(): Promise<Blob> {
     const token = useCsrfStore.getState().getToken();
     const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
-    const response = await fetch(`${config.apiUrl}/profile/documents/${documentId}/download`, {
+    const response = await fetch(`${config.apiUrl}/profile/agreement/download`, {
       credentials: "include",
       headers,
     });
@@ -217,7 +201,6 @@ export const {
   updateProfile,
   createProfile,
   getApplications,
-  getDocuments,
-  downloadDocument,
+  downloadAgreement,
   downloadContract,
 } = new ProfileController();

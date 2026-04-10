@@ -132,7 +132,7 @@ export function ConfirmationView({
                   "text-white font-semibold px-3 py-1",
                   kycData.profileType === "WORKER"
                     ? "bg-green-500 hover:bg-green-600"
-                    : "bg-red-500 hover:bg-red-600"
+                    : "bg-red-500 hover:bg-red-600",
                 )}
               >
                 {kycData.profileType === "WORKER"
@@ -221,7 +221,6 @@ export function ConfirmationView({
           J'ai lu et j'accepte les{" "}
           <Link
             to="/terms"
-            target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 underline underline-offset-2 hover:text-green-700"
             onClick={(e) => e.stopPropagation()}

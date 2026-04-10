@@ -51,12 +51,6 @@ export default function Onboarding() {
     }
   }, []);
 
-  useEffect(() => {
-    return () => {
-      useOnboardingStore.getState().resetStore();
-    };
-  }, []);
-
   const renderStep = useCallback(() => {
     switch (step) {
       case "personal-informations":
