@@ -1,0 +1,16 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: rabotka_client
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - rabotka_network
+
+networks:
+  rabotka_network:
+    external: true
