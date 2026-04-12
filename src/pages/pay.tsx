@@ -11,10 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
-import { CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  XCircle,
+  Loader,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Operator = "MTN" | "AIRTEL";
+type Operator = "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 type LocalStatus = "form" | "processing" | "approved" | "rejected";
 
 export default function Pay() {
@@ -23,7 +29,9 @@ export default function Pay() {
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
 
   const [phone, setPhone] = useState<PhoneValue | null>(null);
-  const [operator, setOperator] = useState<Operator | null>("MTN");
+  const [operator, setOperator] = useState<Operator | null>(
+    "CG_MTNMOBILEMONEY",
+  );
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
 
@@ -41,8 +49,9 @@ export default function Pay() {
       return;
     }
     setPhoneError("");
+    const localPhone = phone.replace(/^\+242/, "");
     initiate(
-      { phone, operator },
+      { phone: localPhone, operator },
       {
         onSuccess: () => setLocalStatus("processing"),
         onError: () => setLocalStatus("rejected"),
@@ -121,7 +130,7 @@ export default function Pay() {
     return (
       <PageWrapper>
         <div className="text-center space-y-4">
-          <Loader2 className="h-14 w-14 text-primary mx-auto animate-spin" />
+          <Loader className="h-14 w-14 text-primary mx-auto animate-spin" />
           <h1 className="text-xl font-bold">En attente de confirmation</h1>
           <p className="text-sm text-muted-foreground max-w-xs">
             Une demande de paiement a été envoyée sur votre téléphone. Veuillez
@@ -179,15 +188,15 @@ export default function Pay() {
           <div className="grid grid-cols-2 gap-3">
             <OperatorCard
               label="MTN Mobile Money"
-              selected={operator === "MTN"}
+              selected={operator === "CG_MTNMOBILEMONEY"}
               logo={mtnLogo}
-              onClick={() => setOperator("MTN")}
+              onClick={() => setOperator("CG_MTNMOBILEMONEY")}
             />
             <OperatorCard
               label="Airtel Money"
-              selected={operator === "AIRTEL"}
+              selected={operator === "CG_AIRTELMONEY"}
               logo={airtelLogo}
-              onClick={() => setOperator("AIRTEL")}
+              onClick={() => setOperator("CG_AIRTELMONEY")}
             />
           </div>
         </div>

@@ -2,6 +2,7 @@ import { stepIndicatorContent } from "@/content/onboarding";
 
 type OnboardingStep =
   | "personal-informations"
+  | "profile-type"
   | "kyc-documents"
   | "confirmation";
 
@@ -12,8 +13,9 @@ type StepIndicatorProps = {
 
 const stepMap: Record<OnboardingStep, number> = {
   "personal-informations": 1,
-  "kyc-documents": 2,
-  confirmation: 3,
+  "profile-type": 2,
+  "kyc-documents": 3,
+  confirmation: 4,
 };
 
 export function StepIndicator({

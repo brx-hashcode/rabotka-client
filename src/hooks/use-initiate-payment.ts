@@ -3,7 +3,7 @@ import { initiatePayment } from "@/lib/api/payment-controller";
 
 export function useInitiatePayment(token: string) {
   return useMutation({
-    mutationFn: (data: { phone: string; operator: "MTN" | "AIRTEL" }) =>
+    mutationFn: (data: { phone: string; operator: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY" }) =>
       initiatePayment(token, data),
   });
 }

@@ -24,6 +24,7 @@ export function useOnboardingMutation() {
         address: personalInfo.address,
         description: personalInfo.description,
         profileType: kycData.profileType,
+        categoryId: kycData.categoryId || undefined,
         documentType: kycData.documentType,
         kycDocument: kycData.kycDocument,
         kycSelfie: kycData.kycSelfie,

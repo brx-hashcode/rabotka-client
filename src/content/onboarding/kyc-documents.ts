@@ -1,6 +1,6 @@
 export const kycDocumentsContent = {
-  title: "Type de profil et documents KYC",
-  subtitle: "Sélectionnez votre type de profil et téléchargez vos documents",
+  title: "Documents KYC",
+  subtitle: "Téléchargez vos documents d'identité pour la vérification",
   profileType: {
     label: "Type de profil",
     placeholder: "Sélectionnez un type",

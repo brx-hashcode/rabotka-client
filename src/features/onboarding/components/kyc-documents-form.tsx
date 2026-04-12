@@ -2,9 +2,9 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  step2Schema,
-  step2SchemaBase,
-  type Step2FormData,
+  step3Schema,
+  step3SchemaBase,
+  type Step3FormData,
 } from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ const kycExampleImages: Record<"document" | "selfie", string> = {
 
 type OnboardingStep =
   | "personal-informations"
+  | "profile-type"
   | "kyc-documents"
   | "confirmation";
 
@@ -53,10 +54,9 @@ export function KycDocumentsForm({
   const kycData = useOnboardingStore((state) => state.kycData);
   const setKycData = useOnboardingStore((state) => state.setKycData);
 
-  const form = useForm<Step2FormData>({
-    resolver: zodResolver(step2Schema),
+  const form = useForm<Step3FormData>({
+    resolver: zodResolver(step3Schema),
     defaultValues: {
-      profileType: kycData.profileType || "WORKER",
       documentType: kycData.documentType || "",
     },
     mode: "onChange",
@@ -98,7 +98,7 @@ export function KycDocumentsForm({
     file: File,
     fieldName: "kycDocument" | "kycSelfie",
   ) => {
-    const fieldSchema = step2SchemaBase.shape[fieldName];
+    const fieldSchema = step3SchemaBase.shape[fieldName];
     const result = fieldSchema.safeParse(file);
 
     if (result.success) {
@@ -132,7 +132,7 @@ export function KycDocumentsForm({
   };
 
   const onSubmit = useCallback(
-    (data: Step2FormData) => {
+    (data: Step3FormData) => {
       const fullData = {
         ...data,
         kycDocument: kycData.kycDocument,
@@ -160,78 +160,48 @@ export function KycDocumentsForm({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="profileType"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.profileType.label}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={content.profileType.placeholder}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="WORKER">
-                        {content.profileType.options.worker.toUpperCase()}
-                      </SelectItem>
-                      <SelectItem value="EMPLOYER">
-                        {content.profileType.options.employer.toUpperCase()}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="documentType"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.documentType.label}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={content.documentType.placeholder}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="IDENTITY_CARD">
-                        {content.documentType.options.identityCard}
-                      </SelectItem>
-                      <SelectItem value="PASSPORT">
-                        {content.documentType.options.passport}
-                      </SelectItem>
-                      <SelectItem value="DRIVER_LICENSE">
-                        {content.documentType.options.driverLicense}
-                      </SelectItem>
-                      <SelectItem value="BIRTH_CERTIFICATE">
-                        {content.documentType.options.birthCertificate}
-                      </SelectItem>
-                      <SelectItem value="STUDENT_CARD">
-                        {content.documentType.options.studentCard}
-                      </SelectItem>
-                      <SelectItem value="NIU_CARD">
-                        {content.documentType.options.niuCard}
-                      </SelectItem>
-                      <SelectItem value="OTHER">
-                        {content.documentType.options.other}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="documentType"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1">
+                <FormLabel>{content.documentType.label}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={content.documentType.placeholder}
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="IDENTITY_CARD">
+                      {content.documentType.options.identityCard}
+                    </SelectItem>
+                    <SelectItem value="PASSPORT">
+                      {content.documentType.options.passport}
+                    </SelectItem>
+                    <SelectItem value="DRIVER_LICENSE">
+                      {content.documentType.options.driverLicense}
+                    </SelectItem>
+                    <SelectItem value="BIRTH_CERTIFICATE">
+                      {content.documentType.options.birthCertificate}
+                    </SelectItem>
+                    <SelectItem value="STUDENT_CARD">
+                      {content.documentType.options.studentCard}
+                    </SelectItem>
+                    <SelectItem value="NIU_CARD">
+                      {content.documentType.options.niuCard}
+                    </SelectItem>
+                    <SelectItem value="OTHER">
+                      {content.documentType.options.other}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

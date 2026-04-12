@@ -25,6 +25,9 @@ export const validationMessages = {
   profileType: {
     required: "Sélectionnez un type de profil",
   },
+  categoryId: {
+    required: "Sélectionnez un domaine d'activité",
+  },
   documentType: {
     required: "Sélectionnez un type de document",
   },

@@ -1,4 +1,5 @@
 export { personalInfoContent } from "./personal-info";
+export { profileTypeContent } from "./profile-type";
 export { kycDocumentsContent } from "./kyc-documents";
 export { confirmationContent } from "./confirmation";
 export { fileUploadContent } from "./file-upload";

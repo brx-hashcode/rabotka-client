@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 type OnboardingStep =
   | "personal-informations"
+  | "profile-type"
   | "kyc-documents"
   | "confirmation";
 
@@ -140,6 +141,13 @@ export function ConfirmationView({
                   : content.profileTypes.employer}
               </Badge>
             </InfoCard>
+            {kycData.profileType === "WORKER" && kycData.categoryName && (
+              <InfoCard
+                label={content.personalInfo.fields.category}
+                icon={Briefcase}
+                value={kycData.categoryName}
+              />
+            )}
             <InfoCard
               label={content.personalInfo.fields.documentType}
               icon={CreditCard}

@@ -10,7 +10,7 @@ export type PaymentByTokenResponse = {
 
 export type InitiatePaymentPayload = {
   phone: string;
-  operator: "MTN" | "AIRTEL";
+  operator: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 };
 
 export type InitiatePaymentResponse = {
