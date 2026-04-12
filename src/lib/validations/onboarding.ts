@@ -26,10 +26,26 @@ export const step1Schema = z.object({
     .max(500, validationMessages.description.max),
 });
 
+/** Step 2 — profile type + domain (for WORKER) */
 const step2SchemaBase = z.object({
   profileType: z.enum(["WORKER", "EMPLOYER"], {
     errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
+  categoryId: z.string().optional(),
+});
+
+export const step2Schema = step2SchemaBase.refine(
+  (data) => data.profileType === "EMPLOYER" || !!data.categoryId,
+  {
+    message: validationMessages.categoryId.required,
+    path: ["categoryId"],
+  }
+);
+
+export { step2SchemaBase };
+
+/** Step 3 — KYC documents */
+const step3SchemaBase = z.object({
   documentType: z.union([
     z.enum([
       "IDENTITY_CARD",
@@ -66,7 +82,7 @@ const step2SchemaBase = z.object({
   ),
 });
 
-export const step2Schema = step2SchemaBase.refine(
+export const step3Schema = step3SchemaBase.refine(
   (data) => data.documentType !== "",
   {
     message: validationMessages.documentType.required,
@@ -74,8 +90,8 @@ export const step2Schema = step2SchemaBase.refine(
   }
 );
 
-/** Base schema for step 2 (use .shape for field-level validation). */
-export { step2SchemaBase };
+export { step3SchemaBase };
 
 export type Step1FormData = z.infer<typeof step1Schema>;
 export type Step2FormData = z.infer<typeof step2Schema>;
+export type Step3FormData = z.infer<typeof step3Schema>;

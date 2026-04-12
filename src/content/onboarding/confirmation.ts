@@ -10,6 +10,7 @@ export const confirmationContent = {
       address: "Adresse",
       description: "Description",
       profileType: "Type de profil",
+      category: "Domaine d'activité",
       documentType: "Type de document",
     },
     defaultDescription: "Aucune description",

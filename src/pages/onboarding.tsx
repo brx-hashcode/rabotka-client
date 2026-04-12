@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
-import { useSearchParams } from "react-router";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import {
   PersonalInfoForm,
+  ProfileTypeForm,
   KycDocumentsForm,
   ConfirmationView,
   SuccessModal,
@@ -13,6 +13,7 @@ import {
 
 type OnboardingStep =
   | "personal-informations"
+  | "profile-type"
   | "kyc-documents"
   | "confirmation"
   | "success"
@@ -25,31 +26,24 @@ export default function Onboarding() {
     serialize: (value) => value,
   });
 
-  const [searchParams] = useSearchParams();
   const hydrateFromStorage = useOnboardingStore(
     (state) => state.hydrateFromStorage,
   );
-  const setKycData = useOnboardingStore((state) => state.setKycData);
-  const profileTypeParam = searchParams.get("profileType");
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   useEffect(() => {
-    void hydrateFromStorage().then(() => {
-      if (profileTypeParam === "WORKER" || profileTypeParam === "EMPLOYER") {
-        setKycData({ profileType: profileTypeParam });
-      }
-    });
-  }, [hydrateFromStorage, profileTypeParam, setKycData]);
+    void hydrateFromStorage();
+  }, [hydrateFromStorage]);
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
       globalThis.history.scrollRestoration = "manual";
       globalThis.scrollTo(0, 0);
     }
-  }, []);
+  }, [step]);
 
   const renderStep = useCallback(() => {
     switch (step) {
@@ -57,6 +51,14 @@ export default function Onboarding() {
         return (
           <PersonalInfoForm
             currentStep="personal-informations"
+            onNext={() => setStep("profile-type")}
+          />
+        );
+      case "profile-type":
+        return (
+          <ProfileTypeForm
+            currentStep="profile-type"
+            onBack={() => setStep("personal-informations")}
             onNext={() => setStep("kyc-documents")}
           />
         );
@@ -64,7 +66,7 @@ export default function Onboarding() {
         return (
           <KycDocumentsForm
             currentStep="kyc-documents"
-            onBack={() => setStep("personal-informations")}
+            onBack={() => setStep("profile-type")}
             onNext={() => setStep("confirmation")}
           />
         );

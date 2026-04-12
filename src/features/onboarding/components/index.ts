@@ -1,5 +1,6 @@
 export { StepIndicator } from "./step-indicator";
 export { PersonalInfoForm } from "./personal-info-form";
+export { ProfileTypeForm } from "./profile-type-form";
 export { KycDocumentsForm } from "./kyc-documents-form";
 export { ConfirmationView } from "./confirmation-view";
 export { SuccessModal } from "./success-modal";
