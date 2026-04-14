@@ -67,13 +67,14 @@ export type ProfilePenaltyItem = {
   amount: number;
   reason: string | null;
   appliedAt: string;
+  paidAt: string | null;
   applicationId: string;
   jobOfferTitle?: string;
 };
 
 export type ProfileApplicationItem = {
   id: string;
-  status: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
   createdAt: string;
   contractId: string | null;
   jobOffer: {
@@ -91,6 +92,16 @@ export type ProfileApplicationsResponse = {
   total: number;
   page: number;
   limit: number;
+};
+
+export type InvoiceItem = {
+  id: string;
+  amount: string;
+  reason: "CONTACT_UNLOCK" | "PENALTY" | "OTHER";
+  status: "PENDING_DOWNLOAD" | "DOWNLOADED";
+  createdAt: string;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
 };
 
 export class ProfileController extends RabotkaBaseController {
@@ -196,6 +207,25 @@ export class ProfileController extends RabotkaBaseController {
     if (!response.ok) throw new Error("Download failed");
     return response.blob();
   }
+
+  async getInvoices(): Promise<InvoiceItem[]> {
+    try {
+      return await this.get<InvoiceItem[]>("/invoices");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async downloadInvoice(invoiceId: string): Promise<Blob> {
+    const token = useCsrfStore.getState().getToken();
+    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
+    const response = await fetch(`${config.apiUrl}/invoices/${invoiceId}/download`, {
+      credentials: "include",
+      headers,
+    });
+    if (!response.ok) throw new Error("Download failed");
+    return response.blob();
+  }
 }
 
 export const {
@@ -207,4 +237,6 @@ export const {
   getApplications,
   downloadAgreement,
   downloadContract,
+  getInvoices,
+  downloadInvoice,
 } = new ProfileController();

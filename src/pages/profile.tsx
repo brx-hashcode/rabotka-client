@@ -25,6 +25,7 @@ import {
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
+import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FileDown } from "lucide-react";
@@ -252,6 +253,8 @@ export default function Profile() {
               <ApplicationsSheetButton />
             </div>
           )}
+
+          <InvoicesSheetButton />
 
           <Button
             variant="outline"
