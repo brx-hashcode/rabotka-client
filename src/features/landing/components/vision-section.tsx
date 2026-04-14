@@ -16,10 +16,10 @@ export function VisionSection() {
       ref={ref}
     >
       <div className="absolute inset-0">
-        <img
-          src={citySunsetImage}
-          alt="Horizon d'une ville africaine au coucher du soleil"
-          className="w-full h-full object-cover"
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+          style={{ backgroundImage: `url(${citySunsetImage})` }}
         />
         <div className="absolute inset-0 bg-linear-to-r from-foreground/90 via-foreground/80 to-foreground/60" />
       </div>

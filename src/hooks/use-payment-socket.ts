@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
 export function usePaymentSocket(
@@ -6,6 +6,9 @@ export function usePaymentSocket(
   active: boolean,
   onStatus: (status: "APPROVED" | "REJECTED") => void,
 ) {
+  const onStatusRef = useRef(onStatus);
+  onStatusRef.current = onStatus;
+
   useEffect(() => {
     if (!active) return;
 
@@ -18,13 +21,12 @@ export function usePaymentSocket(
     });
 
     socket.on("payment-status", (data: { status: "APPROVED" | "REJECTED" }) => {
-      onStatus(data.status);
+      onStatusRef.current(data.status);
       socket.disconnect();
     });
 
     return () => {
       socket.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, token]);
 }
