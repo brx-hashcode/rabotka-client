@@ -5,6 +5,7 @@ import Profile from "@/pages/profile";
 import Login from "@/pages/login";
 import VerifyWhatsApp from "@/pages/verify-whatsapp";
 import Pay from "@/pages/pay";
+import AdRedirect from "@/pages/ad-redirect";
 import Claims from "@/pages/claims";
 import Claim from "@/pages/claim";
 import CreateClaim from "@/pages/create-claim";
@@ -83,6 +84,7 @@ export function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/verify/whatsapp" element={<VerifyWhatsApp />} />
       <Route path="/pay/:token" element={<Pay />} />
+      <Route path="/r/:hash" element={<AdRedirect />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
