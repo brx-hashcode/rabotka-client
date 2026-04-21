@@ -141,11 +141,11 @@ export function ConfirmationView({
                   : content.profileTypes.employer}
               </Badge>
             </InfoCard>
-            {kycData.profileType === "WORKER" && kycData.categoryName && (
+            {kycData.categoryNames.length > 0 && (
               <InfoCard
                 label={content.personalInfo.fields.category}
                 icon={Briefcase}
-                value={kycData.categoryName}
+                value={kycData.categoryNames.join(", ")}
               />
             )}
             <InfoCard
@@ -239,7 +239,7 @@ export function ConfirmationView({
         </label>
       </div>
 
-      <div className="flex gap-4 pt-4">
+      <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
         <Button
           type="button"
           variant="outline"

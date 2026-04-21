@@ -9,9 +9,9 @@ export const profileTypeContent = {
       employer: "Employeur",
     },
   },
-  categoryId: {
-    label: "Domaine d'activité",
-    placeholder: "Sélectionnez un domaine",
+  categories: {
+    label: "Domaines d'activité",
+    hint: "Choisissez jusqu'à 5 domaines",
   },
   buttons: {
     back: "Retour",

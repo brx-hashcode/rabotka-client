@@ -259,7 +259,7 @@ export function KycDocumentsForm({
             )}
           />
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
             <Button
               type="button"
               variant="outline"

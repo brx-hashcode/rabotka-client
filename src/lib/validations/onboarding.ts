@@ -26,21 +26,15 @@ export const step1Schema = z.object({
     .max(500, validationMessages.description.max),
 });
 
-/** Step 2 — profile type + domain (for WORKER) */
+/** Step 2 — profile type + categories (for all profile types) */
 const step2SchemaBase = z.object({
   profileType: z.enum(["WORKER", "EMPLOYER"], {
     errorMap: () => ({ message: validationMessages.profileType.required }),
   }),
-  categoryId: z.string().optional(),
+  categoryIds: z.array(z.string()).min(1, validationMessages.categoryId.required).max(5),
 });
 
-export const step2Schema = step2SchemaBase.refine(
-  (data) => data.profileType === "EMPLOYER" || !!data.categoryId,
-  {
-    message: validationMessages.categoryId.required,
-    path: ["categoryId"],
-  }
-);
+export const step2Schema = step2SchemaBase;
 
 export { step2SchemaBase };
 
