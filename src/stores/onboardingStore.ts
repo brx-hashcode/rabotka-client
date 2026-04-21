@@ -19,8 +19,8 @@ export type PersonalInfo = {
 
 export type KycData = {
   profileType: "WORKER" | "EMPLOYER" | "";
-  categoryId: string;
-  categoryName: string;
+  categoryIds: string[];
+  categoryNames: string[];
   documentType: DocumentType | "";
   kycDocument: File | null;
   kycDocumentPreview: string | null;
@@ -56,8 +56,8 @@ const initialState = {
   },
   kycData: {
     profileType: "" as const,
-    categoryId: "",
-    categoryName: "",
+    categoryIds: [] as string[],
+    categoryNames: [] as string[],
     documentType: "" as const,
     kycDocument: null,
     kycDocumentPreview: null,
@@ -126,8 +126,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           kycData: {
             ...initialState.kycData,
             profileType: data.kycData?.profileType || "",
-            categoryId: data.kycData?.categoryId || "",
-            categoryName: data.kycData?.categoryName || "",
+            categoryIds: data.kycData?.categoryIds || [],
+            categoryNames: data.kycData?.categoryNames || [],
             documentType: data.kycData?.documentType || "",
           },
         });
@@ -163,8 +163,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         personalInfo,
         kycData: {
           profileType: kycData.profileType,
-          categoryId: kycData.categoryId,
-          categoryName: kycData.categoryName,
+          categoryIds: kycData.categoryIds,
+          categoryNames: kycData.categoryNames,
           documentType: kycData.documentType,
           kycDocumentPreview: kycData.kycDocumentPreview,
           kycSelfiePreview: kycData.kycSelfiePreview,

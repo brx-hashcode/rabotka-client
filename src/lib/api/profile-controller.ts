@@ -10,7 +10,7 @@ export type CreateProfilePayload = {
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
-  categoryId?: string;
+  categoryIds?: string[];
   documentType:
     | "IDENTITY_CARD"
     | "PASSPORT"
@@ -117,8 +117,8 @@ export class ProfileController extends RabotkaBaseController {
       formData.append("address", data.address);
       formData.append("description", data.description);
       formData.append("profileType", data.profileType);
-      if (data.categoryId) {
-        formData.append("categoryId", data.categoryId);
+      if (data.categoryIds && data.categoryIds.length > 0) {
+        data.categoryIds.forEach((id) => formData.append("categoryIds", id));
       }
       formData.append("documentType", data.documentType);
       formData.append("kycDocument", data.kycDocument);

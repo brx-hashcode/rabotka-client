@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
-import {
-  step2Schema,
-  type Step2FormData,
-} from "@/lib/validations/onboarding";
+import { step2Schema, type Step2FormData } from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -25,7 +21,12 @@ import {
 } from "@/components/ui/select";
 import { profileTypeContent } from "@/content/onboarding";
 import { StepIndicator } from "./step-indicator";
-import { getCategories, type JobCategory } from "@/lib/api/job-category-controller";
+import {
+  getCategories,
+  type JobCategory,
+} from "@/lib/api/job-category-controller";
+
+const MAX_CATEGORIES = 5;
 
 type OnboardingStep =
   | "personal-informations"
@@ -48,15 +49,13 @@ export function ProfileTypeForm({
   const setKycData = useOnboardingStore((state) => state.setKycData);
   const [categories, setCategories] = useState<JobCategory[]>([]);
 
-  // profileType lives in the URL — survives navigation and pre-fills from landing CTA
-  const [profileTypeParam, setProfileTypeParam] = useQueryState<"WORKER" | "EMPLOYER" | "">(
-    "profileType",
-    {
-      defaultValue: "",
-      parse: (v) => (v === "WORKER" || v === "EMPLOYER" ? v : ""),
-      serialize: (v) => v,
-    },
-  );
+  const [profileTypeParam, setProfileTypeParam] = useQueryState<
+    "WORKER" | "EMPLOYER" | ""
+  >("profileType", {
+    defaultValue: "",
+    parse: (v) => (v === "WORKER" || v === "EMPLOYER" ? v : ""),
+    serialize: (v) => v,
+  });
 
   useEffect(() => {
     getCategories()
@@ -68,30 +67,26 @@ export function ProfileTypeForm({
     resolver: zodResolver(step2Schema),
     defaultValues: {
       profileType: profileTypeParam || undefined,
-      categoryId: kycData.categoryId || undefined,
+      categoryIds: kycData.categoryIds.length > 0 ? kycData.categoryIds : [],
     },
     mode: "onChange",
   });
 
-  // Keep form in sync with URL param (e.g. user navigates back/forward)
   useEffect(() => {
     if (profileTypeParam) {
       form.setValue("profileType", profileTypeParam, { shouldValidate: true });
-      if (profileTypeParam === "EMPLOYER") {
-        form.setValue("categoryId", undefined);
-      }
     }
   }, [profileTypeParam, form]);
 
-  const profileType = form.watch("profileType");
-
   const onSubmit = useCallback(
     (data: Step2FormData) => {
-      const selectedCategory = categories.find((c) => c.id === data.categoryId);
+      const selectedCategories = categories.filter((c) =>
+        data.categoryIds.includes(c.id),
+      );
       setKycData({
         profileType: data.profileType,
-        categoryId: data.profileType === "EMPLOYER" ? "" : (data.categoryId ?? ""),
-        categoryName: data.profileType === "EMPLOYER" ? "" : (selectedCategory?.name ?? ""),
+        categoryIds: data.categoryIds,
+        categoryNames: selectedCategories.map((c) => c.name),
       });
       onNext();
     },
@@ -121,19 +116,15 @@ export function ProfileTypeForm({
                 <Select
                   onValueChange={(value: "WORKER" | "EMPLOYER") => {
                     field.onChange(value);
-                    // Persist selection in URL
                     void setProfileTypeParam(value);
-                    if (value === "EMPLOYER") {
-                      form.setValue("categoryId", undefined);
-                    }
                   }}
                   value={field.value}
                 >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={content.profileType.placeholder} />
-                    </SelectTrigger>
-                  </FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={content.profileType.placeholder}
+                    />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="WORKER">
                       {content.profileType.options.worker.toUpperCase()}
@@ -148,34 +139,69 @@ export function ProfileTypeForm({
             )}
           />
 
-          {profileType === "WORKER" && (
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.categoryId.label}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={content.categoryId.placeholder} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.icon ? `${category.icon} ` : ""}{category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          <Controller
+            control={form.control}
+            name="categoryIds"
+            render={({ field, fieldState }) => {
+              const selected: string[] = field.value ?? [];
+              const atMax = selected.length >= MAX_CATEGORIES;
 
-          <div className="flex gap-4 pt-4">
+              const toggle = (id: string) => {
+                if (selected.includes(id)) {
+                  field.onChange(selected.filter((s) => s !== id));
+                } else if (!atMax) {
+                  field.onChange([...selected, id]);
+                }
+              };
+
+              return (
+                <FormItem className="flex flex-col gap-2">
+                  <div className="flex items-baseline flex-wrap gap-2 justify-between">
+                    <FormLabel>{content.categories.label}</FormLabel>
+                    <span className="text-xs text-gray-400">
+                      {selected.length}/{MAX_CATEGORIES} —{" "}
+                      {content.categories.hint}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => {
+                      const isSelected = selected.includes(cat.id);
+                      const isDisabled = !isSelected && atMax;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => toggle(cat.id)}
+                          className={[
+                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                            isSelected
+                              ? "border-green-500 bg-green-50 text-green-700"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
+                            isDisabled
+                              ? "cursor-not-allowed opacity-40"
+                              : "cursor-pointer",
+                          ].join(" ")}
+                        >
+                          {cat.icon && (
+                            <span aria-hidden="true">{cat.icon}</span>
+                          )}
+                          {cat.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {fieldState.error && (
+                    <p className="text-sm font-medium text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </FormItem>
+              );
+            }}
+          />
+
+          <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
             <Button
               type="button"
               variant="outline"
