@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/job-category-controller";
 
 const MAX_CATEGORIES = 5;
+const INITIAL_VISIBLE = 10;
 
 type OnboardingStep =
   | "personal-informations"
@@ -48,6 +49,7 @@ export function ProfileTypeForm({
   const kycData = useOnboardingStore((state) => state.kycData);
   const setKycData = useOnboardingStore((state) => state.setKycData);
   const [categories, setCategories] = useState<JobCategory[]>([]);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
   const [profileTypeParam, setProfileTypeParam] = useQueryState<
     "WORKER" | "EMPLOYER" | ""
@@ -59,7 +61,21 @@ export function ProfileTypeForm({
 
   useEffect(() => {
     getCategories()
-      .then(setCategories)
+      .then((cats) => {
+        setCategories(cats);
+        // If user has pre-selected categories beyond the initial slice, expand to show them
+        const preSelected = kycData.categoryIds;
+        if (preSelected.length > 0) {
+          const lastSelectedIndex = Math.max(
+            ...preSelected.map((id) => cats.findIndex((c) => c.id === id)),
+          );
+          if (lastSelectedIndex >= INITIAL_VISIBLE) {
+            setVisibleCount(
+              Math.min(lastSelectedIndex + 1, cats.length),
+            );
+          }
+        }
+      })
       .catch(() => setCategories([]));
   }, []);
 
@@ -164,33 +180,57 @@ export function ProfileTypeForm({
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => {
-                      const isSelected = selected.includes(cat.id);
-                      const isDisabled = !isSelected && atMax;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => toggle(cat.id)}
-                          className={[
-                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                            isSelected
-                              ? "border-green-500 bg-green-50 text-green-700"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
-                            isDisabled
-                              ? "cursor-not-allowed opacity-40"
-                              : "cursor-pointer",
-                          ].join(" ")}
-                        >
-                          {cat.icon && (
-                            <span aria-hidden="true">{cat.icon}</span>
-                          )}
-                          {cat.name}
-                        </button>
-                      );
-                    })}
+                    {categories
+                      .slice(0, visibleCount)
+                      .map((cat) => {
+                        const isSelected = selected.includes(cat.id);
+                        const isDisabled = !isSelected && atMax;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => toggle(cat.id)}
+                            className={[
+                              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                              isSelected
+                                ? "border-green-500 bg-green-50 text-green-700"
+                                : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
+                              isDisabled
+                                ? "cursor-not-allowed opacity-40"
+                                : "cursor-pointer",
+                            ].join(" ")}
+                          >
+                            {cat.icon && (
+                              <span aria-hidden="true">{cat.icon}</span>
+                            )}
+                            {cat.name}
+                          </button>
+                        );
+                      })}
                   </div>
+                  {visibleCount < categories.length && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setVisibleCount((v) =>
+                          Math.min(v + INITIAL_VISIBLE, categories.length),
+                        )
+                      }
+                      className="mt-1 text-xs text-green-600 font-medium hover:underline self-start"
+                    >
+                      Voir plus ({categories.length - visibleCount} restants)
+                    </button>
+                  )}
+                  {visibleCount > INITIAL_VISIBLE && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount(INITIAL_VISIBLE)}
+                      className="mt-1 text-xs text-gray-400 font-medium hover:underline self-start"
+                    >
+                      Voir moins
+                    </button>
+                  )}
                   {fieldState.error && (
                     <p className="text-sm font-medium text-destructive">
                       {fieldState.error.message}
