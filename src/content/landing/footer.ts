@@ -1,4 +1,4 @@
-import type { FooterLinkGroup, ContactInfo } from "@/types";
+import type { FooterLinkGroup } from "@/types";
 
 export const footerLinks: FooterLinkGroup = {
   Produit: [
@@ -22,12 +22,6 @@ export const footerLinks: FooterLinkGroup = {
     { label: "Conditions d'utilisation", href: "/terms" },
     { label: "Politique des cookies", href: "/terms" },
   ],
-} as const;
-
-export const contactInfo: ContactInfo = {
-  address: "Brazzaville, République du Congo",
-  email: "contact@rabotka.africa",
-  phone: "+242 06 000 0000",
 } as const;
 
 export const footerContent = {
