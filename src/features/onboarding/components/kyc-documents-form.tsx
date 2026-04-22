@@ -147,6 +147,24 @@ export function KycDocumentsForm({
   const kycDocumentError = form.formState.errors.kycDocument?.message;
   const kycSelfieError = form.formState.errors.kycSelfie?.message;
   const content = kycDocumentsContent;
+  const documentTypeOptions = [
+    {
+      value: "IDENTITY_CARD",
+      label: content.documentType.options.identityCard,
+    },
+    { value: "PASSPORT", label: content.documentType.options.passport },
+    {
+      value: "DRIVER_LICENSE",
+      label: content.documentType.options.driverLicense,
+    },
+    {
+      value: "BIRTH_CERTIFICATE",
+      label: content.documentType.options.birthCertificate,
+    },
+    { value: "STUDENT_CARD", label: content.documentType.options.studentCard },
+    { value: "NIU_CARD", label: content.documentType.options.niuCard },
+    { value: "OTHER", label: content.documentType.options.other },
+  ] as const;
 
   return (
     <div className="space-y-6">
@@ -175,27 +193,11 @@ export function KycDocumentsForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="IDENTITY_CARD">
-                      {content.documentType.options.identityCard}
-                    </SelectItem>
-                    <SelectItem value="PASSPORT">
-                      {content.documentType.options.passport}
-                    </SelectItem>
-                    <SelectItem value="DRIVER_LICENSE">
-                      {content.documentType.options.driverLicense}
-                    </SelectItem>
-                    <SelectItem value="BIRTH_CERTIFICATE">
-                      {content.documentType.options.birthCertificate}
-                    </SelectItem>
-                    <SelectItem value="STUDENT_CARD">
-                      {content.documentType.options.studentCard}
-                    </SelectItem>
-                    <SelectItem value="NIU_CARD">
-                      {content.documentType.options.niuCard}
-                    </SelectItem>
-                    <SelectItem value="OTHER">
-                      {content.documentType.options.other}
-                    </SelectItem>
+                    {documentTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label.toLocaleUpperCase("fr-FR")}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

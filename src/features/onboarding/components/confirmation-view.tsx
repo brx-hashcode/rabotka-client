@@ -121,6 +121,14 @@ export function ConfirmationView({
               }
               colSpan={2}
             />
+            {kycData.categoryNames.length > 0 && (
+              <InfoCard
+                label={content.personalInfo.fields.category}
+                icon={Briefcase}
+                value={kycData.categoryNames.join(", ")}
+                colSpan={2}
+              />
+            )}
             <InfoCard
               label={content.personalInfo.fields.profileType}
               icon={Briefcase}
@@ -141,13 +149,6 @@ export function ConfirmationView({
                   : content.profileTypes.employer}
               </Badge>
             </InfoCard>
-            {kycData.categoryNames.length > 0 && (
-              <InfoCard
-                label={content.personalInfo.fields.category}
-                icon={Briefcase}
-                value={kycData.categoryNames.join(", ")}
-              />
-            )}
             <InfoCard
               label={content.personalInfo.fields.documentType}
               icon={CreditCard}
