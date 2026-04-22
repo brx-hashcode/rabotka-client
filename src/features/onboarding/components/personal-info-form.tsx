@@ -66,13 +66,13 @@ export function PersonalInfoForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="firstName"
+              name="lastName"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.fields.firstName.label}</FormLabel>
+                  <FormLabel>{content.fields.lastName.label}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={content.fields.firstName.placeholder}
+                      placeholder={content.fields.lastName.placeholder}
                       {...field}
                     />
                   </FormControl>
@@ -83,13 +83,13 @@ export function PersonalInfoForm({
 
             <FormField
               control={form.control}
-              name="lastName"
+              name="firstName"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.fields.lastName.label}</FormLabel>
+                  <FormLabel>{content.fields.firstName.label}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={content.fields.lastName.placeholder}
+                      placeholder={content.fields.firstName.placeholder}
                       {...field}
                     />
                   </FormControl>
