@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type Operator = "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
-type LocalStatus = "form" | "processing" | "approved" | "rejected";
+type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
 
 export default function Pay() {
   const { token } = useParams<{ token: string }>();
@@ -36,7 +36,9 @@ export default function Pay() {
   const [phoneError, setPhoneError] = useState("");
 
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
-    setLocalStatus(status === "APPROVED" ? "approved" : "rejected");
+    if (status === "APPROVED") setLocalStatus("approved");
+    else if (status === "TIMEOUT") setLocalStatus("timeout");
+    else setLocalStatus("rejected");
   });
 
   const handlePay = () => {
@@ -121,6 +123,21 @@ export default function Pay() {
           >
             Réessayer
           </Button>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  if (localStatus === "timeout") {
+    return (
+      <PageWrapper>
+        <div className="text-center space-y-4">
+          <Loader className="h-14 w-14 text-yellow-500 mx-auto animate-spin" />
+          <h1 className="text-xl font-bold">Paiement en cours de traitement</h1>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            La confirmation prend plus de temps que prévu. Ne fermez pas cette page —
+            votre paiement sera confirmé dès réception de la confirmation de l'opérateur.
+          </p>
         </div>
       </PageWrapper>
     );
