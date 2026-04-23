@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 export function usePaymentSocket(
   token: string,
   active: boolean,
-  onStatus: (status: "APPROVED" | "REJECTED") => void,
+  onStatus: (status: "APPROVED" | "REJECTED" | "TIMEOUT") => void,
 ) {
   const onStatusRef = useRef(onStatus);
   onStatusRef.current = onStatus;
@@ -20,9 +20,10 @@ export function usePaymentSocket(
       socket.emit("join-payment", { token });
     });
 
-    socket.on("payment-status", (data: { status: "APPROVED" | "REJECTED" }) => {
+    socket.on("payment-status", (data: { status: "APPROVED" | "REJECTED" | "TIMEOUT" }) => {
       onStatusRef.current(data.status);
-      socket.disconnect();
+      // Keep socket open on TIMEOUT so webhook result can still arrive
+      if (data.status !== "TIMEOUT") socket.disconnect();
     });
 
     return () => {
