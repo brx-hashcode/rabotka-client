@@ -7,6 +7,7 @@ import VerifyWhatsApp from "@/pages/verify-whatsapp";
 import Pay from "@/pages/pay";
 import AdRedirect from "@/pages/ad-redirect";
 import Claims from "@/pages/claims";
+import EmployerDashboard from "@/pages/employer-dashboard";
 import Claim from "@/pages/claim";
 import CreateClaim from "@/pages/create-claim";
 import { AuthGuard } from "@/components/auth";
@@ -79,6 +80,16 @@ export function AppRoutes() {
           <LandingLayout>
             <Terms />
           </LandingLayout>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <AuthGuard>
+            <AppLayout>
+              <EmployerDashboard />
+            </AppLayout>
+          </AuthGuard>
         }
       />
       <Route path="/login" element={<Login />} />
