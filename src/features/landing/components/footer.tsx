@@ -130,7 +130,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="pt-8 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-background/50">
-            © {new Date().getFullYear()} Rabotka (РАБОТКА). Tous droits
+            © {new Date().getFullYear()} Rabotka (Работка). Tous droits
             réservés.
           </p>
           <div className="flex gap-6">
