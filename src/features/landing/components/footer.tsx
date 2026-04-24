@@ -4,12 +4,19 @@ import rabotkaLogo from "@/assets/rabotka-logo.png";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { usePublicContact } from "@/hooks/use-public-contact";
+import type { PublicContactInfo } from "@/lib/api/system-config-controller";
 
 function ContactSkeleton() {
+  const contactIcons = [
+    { key: "address", Icon: MapPin },
+    { key: "email", Icon: Mail },
+    { key: "phone", Icon: Phone },
+  ] as const;
+
   return (
     <div className="space-y-3">
-      {[MapPin, Mail, Phone].map((Icon, i) => (
-        <div key={i} className="flex items-center gap-3">
+      {contactIcons.map(({ key, Icon }) => (
+        <div key={key} className="flex items-center gap-3">
           <Icon size={16} className="text-background/30 shrink-0" />
           <div className="h-3.5 w-40 rounded bg-background/15 animate-pulse" />
         </div>
@@ -22,6 +29,7 @@ export function Footer() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: contact, isLoading } = usePublicContact();
+  const contactInfo = contact as PublicContactInfo | undefined;
 
   const scrollToElement = useCallback((id: string, retries = 5) => {
     const element = document.getElementById(id);
@@ -76,22 +84,22 @@ export function Footer() {
               <ContactSkeleton />
             ) : (
               <div className="space-y-3">
-                {contact?.address && (
+                {contactInfo?.address && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
                     <MapPin size={16} className="shrink-0" />
-                    <span>{contact.address}</span>
+                    <span>{contactInfo.address}</span>
                   </div>
                 )}
-                {contact?.email && (
+                {contactInfo?.email && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
                     <Mail size={16} className="shrink-0" />
-                    <span>{contact.email}</span>
+                    <span>{contactInfo.email}</span>
                   </div>
                 )}
-                {contact?.phone && (
+                {contactInfo?.phone && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
                     <Phone size={16} className="shrink-0" />
-                    <span>{contact.phone}</span>
+                    <span>{contactInfo.phone}</span>
                   </div>
                 )}
               </div>
@@ -122,7 +130,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="pt-8 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-background/50">
-            © {new Date().getFullYear()} Rabotka (Padrabotka). Tous droits
+            © {new Date().getFullYear()} Rabotka (РАБОТКА). Tous droits
             réservés.
           </p>
           <div className="flex gap-6">
