@@ -19,6 +19,7 @@ import {
   Loader,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { PaymentGateway } from "@/lib/api/payment-controller";
 
 type Operator = "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
@@ -35,6 +36,7 @@ export default function Pay() {
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
 
+
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
     if (status === "APPROVED") setLocalStatus("approved");
     else if (status === "TIMEOUT") setLocalStatus("timeout");
@@ -46,14 +48,15 @@ export default function Pay() {
       setPhoneError("Veuillez entrer un numéro de téléphone valide.");
       return;
     }
-    if (!operator) {
+    const isMtnMomo = payment?.gateway === "MTN_MOMO";
+    if (!isMtnMomo && !operator) {
       setPhoneError("Veuillez sélectionner un opérateur.");
       return;
     }
     setPhoneError("");
     const localPhone = phone.replace(/^\+242/, "");
     initiate(
-      { phone: localPhone, operator },
+      { phone: localPhone, ...(isMtnMomo ? {} : { operator: operator! }) },
       {
         onSuccess: () => setLocalStatus("processing"),
         onError: () => setLocalStatus("rejected"),
@@ -160,6 +163,7 @@ export default function Pay() {
 
   const amount = payment.amount;
   const description = payment.description;
+  const isMtnMomo = payment.gateway === "MTN_MOMO";
 
   return (
     <PageWrapper>
@@ -195,35 +199,44 @@ export default function Pay() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="operator"
-            className="text-sm font-medium text-foreground"
-          >
-            Opérateur mobile
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <OperatorCard
-              label="MTN Mobile Money"
-              selected={operator === "CG_MTNMOBILEMONEY"}
-              logo={mtnLogo}
-              onClick={() => setOperator("CG_MTNMOBILEMONEY")}
-            />
-            <OperatorCard
-              label="Airtel Money"
-              selected={operator === "CG_AIRTELMONEY"}
-              logo={airtelLogo}
-              onClick={() => setOperator("CG_AIRTELMONEY")}
-            />
+        {!isMtnMomo && (
+          <div className="space-y-2">
+            <label
+              htmlFor="operator"
+              className="text-sm font-medium text-foreground"
+            >
+              Opérateur mobile
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <OperatorCard
+                label="MTN Mobile Money"
+                selected={operator === "CG_MTNMOBILEMONEY"}
+                logo={mtnLogo}
+                onClick={() => setOperator("CG_MTNMOBILEMONEY")}
+              />
+              <OperatorCard
+                label="Airtel Money"
+                selected={operator === "CG_AIRTELMONEY"}
+                logo={airtelLogo}
+                onClick={() => setOperator("CG_AIRTELMONEY")}
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {isMtnMomo && (
+          <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+            <img src={mtnLogo} alt="MTN" className="h-8 w-8 rounded-full object-cover shrink-0" />
+            <p className="text-sm font-medium text-foreground">MTN Mobile Money</p>
+          </div>
+        )}
 
         <div className="space-y-1.5">
           <label
             htmlFor="phone-input"
             className="text-sm font-medium text-foreground"
           >
-            Numéro de téléphone
+            {isMtnMomo ? "Numéro MTN Mobile Money" : "Numéro de téléphone"}
           </label>
           <PhoneInput
             defaultCountry="CG"
