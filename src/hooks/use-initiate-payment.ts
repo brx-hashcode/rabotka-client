@@ -6,7 +6,7 @@ export function useInitiatePayment(token: string) {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (data: { phone: string; operator: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY" }) =>
+    mutationFn: (data: { phone: string; operator?: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY" }) =>
       initiatePayment(token, data),
     onError: () => {
       toast({ variant: "destructive", description: "Échec de l'initiation du paiement." });

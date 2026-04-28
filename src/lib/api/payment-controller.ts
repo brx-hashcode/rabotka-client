@@ -1,8 +1,11 @@
 import { RabotkaBaseController } from "./base-controller";
 
+export type PaymentGateway = "MONETBIL" | "MTN_MOMO";
+
 export type PaymentByTokenResponse = {
   id: string;
   status: "PENDING" | "PROCESSING" | "APPROVED" | "REJECTED";
+  gateway: PaymentGateway | null;
   profileName: string;
   amount: number | null;
   description: string | null;
@@ -10,7 +13,7 @@ export type PaymentByTokenResponse = {
 
 export type InitiatePaymentPayload = {
   phone: string;
-  operator: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
+  operator?: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 };
 
 export type InitiatePaymentResponse = {
