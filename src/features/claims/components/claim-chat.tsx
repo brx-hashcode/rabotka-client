@@ -12,6 +12,7 @@ import {
   useAddClaimComment,
   useDeleteClaimComment,
 } from "@/hooks/use-claim-comments";
+import { useClaimCommentsSocket } from "@/hooks/use-claim-comments-socket";
 import type { ClaimItem, ClaimCommentItem } from "@/lib/api/claims-controller";
 
 const getStatusColor = (status: string) => {
@@ -109,6 +110,7 @@ function CommentItem({
 export const ClaimChat = ({ claim }: ClaimChatProps) => {
   const navigate = useNavigate();
   const { data: currentUser } = useProfileMe();
+  useClaimCommentsSocket(claim.id);
   const { data: comments, isLoading: commentsLoading } = useClaimComments(
     claim.id,
   );
