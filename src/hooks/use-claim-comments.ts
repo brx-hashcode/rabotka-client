@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listComments, addComment, deleteComment, type CreateCommentPayload } from "@/lib/api/claims-controller";
+import { listComments, addComment, deleteComment, type CreateCommentPayload, type ClaimCommentItem } from "@/lib/api/claims-controller";
 import { useToast } from "@/hooks/use-toast";
 
 export const useClaimComments = (
   claimId: string | undefined,
-  { refetchInterval = 10000, enabled = true }: { refetchInterval?: number; enabled?: boolean } = {},
+  { enabled = true }: { enabled?: boolean } = {},
 ) => {
   return useQuery({
     queryKey: ["profile", "claims", claimId, "comments"],
     queryFn: () => listComments(claimId!),
     enabled: !!claimId && enabled,
-    refetchInterval,
+    refetchOnMount: true,
   });
 };
 
@@ -21,10 +21,14 @@ export const useAddClaimComment = (claimId: string | undefined) => {
   return useMutation({
     mutationFn: (data: CreateCommentPayload) =>
       claimId ? addComment(claimId, data) : Promise.reject("No claim ID"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["profile", "claims", claimId, "comments"],
-      });
+    onSuccess: (newComment) => {
+      queryClient.setQueryData<ClaimCommentItem[]>(
+        ["profile", "claims", claimId, "comments"],
+        (prev = []) => {
+          if (prev.some((c) => c.id === newComment.id)) return prev;
+          return [...prev, newComment];
+        },
+      );
     },
     onError: () => {
       toast({
@@ -43,10 +47,11 @@ export const useDeleteClaimComment = (claimId: string | undefined) => {
   return useMutation({
     mutationFn: (commentId: string) =>
       claimId ? deleteComment(claimId, commentId) : Promise.reject("No claim ID"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["profile", "claims", claimId, "comments"],
-      });
+    onSuccess: (_, commentId) => {
+      queryClient.setQueryData<ClaimCommentItem[]>(
+        ["profile", "claims", claimId, "comments"],
+        (prev = []) => prev.filter((c) => c.id !== commentId),
+      );
       toast({
         title: "Success",
         description: "Comment deleted successfully",
