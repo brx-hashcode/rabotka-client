@@ -19,7 +19,6 @@ import {
   Loader,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { PaymentGateway } from "@/lib/api/payment-controller";
 
 type Operator = "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
@@ -35,7 +34,6 @@ export default function Pay() {
   );
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
-
 
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
     if (status === "APPROVED") setLocalStatus("approved");
@@ -138,8 +136,9 @@ export default function Pay() {
           <Loader className="h-14 w-14 text-yellow-500 mx-auto animate-spin" />
           <h1 className="text-xl font-bold">Paiement en cours de traitement</h1>
           <p className="text-sm text-muted-foreground max-w-xs">
-            La confirmation prend plus de temps que prévu. Ne fermez pas cette page —
-            votre paiement sera confirmé dès réception de la confirmation de l'opérateur.
+            La confirmation prend plus de temps que prévu. Ne fermez pas cette
+            page — votre paiement sera confirmé dès réception de la confirmation
+            de l'opérateur.
           </p>
         </div>
       </PageWrapper>
@@ -182,7 +181,7 @@ export default function Pay() {
 
         <div className="bg-card border border-border rounded-xl px-5 py-4 space-y-3">
           {description && (
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">
+            <div className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full">
               <span>{description}</span>
             </div>
           )}
@@ -192,9 +191,6 @@ export default function Pay() {
               <span className="text-base font-medium text-muted-foreground ml-2">
                 FCFA
               </span>
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Paiement sécurisé via mobile money
             </p>
           </div>
         </div>
@@ -226,8 +222,14 @@ export default function Pay() {
 
         {isMtnMomo && (
           <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-            <img src={mtnLogo} alt="MTN" className="h-8 w-8 rounded-full object-cover shrink-0" />
-            <p className="text-sm font-medium text-foreground">MTN Mobile Money</p>
+            <img
+              src={mtnLogo}
+              alt="MTN"
+              className="h-8 w-8 rounded-full object-cover shrink-0"
+            />
+            <p className="text-sm font-medium text-foreground">
+              MTN Mobile Money
+            </p>
           </div>
         )}
 
