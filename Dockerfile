@@ -16,11 +16,13 @@ ENV VITE_BACKEND_URL=$VITE_BACKEND_URL \
     VITE_SITE_URL=$VITE_SITE_URL
 RUN pnpm run build
 
-FROM base AS runner
+FROM base AS production
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY src ./src
 
 ENV VITE_PORT=3000
 EXPOSE 3000
