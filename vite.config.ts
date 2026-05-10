@@ -38,6 +38,27 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    preview: {
+      host: "0.0.0.0",
+      port: Number.parseInt(env.VITE_PORT) || 3000,
+      allowedHosts: true,
+      proxy: {
+        "/api": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+        },
+        "/payment-status": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
+        "/socket.io": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
+      },
+    },
     plugins: [
       react(),
       tailwindcss(),
