@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       imageOptimizer,
       sitemap({
-        hostname: env.VITE_SITE_URL,
+        hostname: env.VITE_SITE_URL || "https://rabotka.africa",
         dynamicRoutes: ["/onboarding", "/login"],
         exclude: ["/profile", "/claims", "/claims/new", "/pay/*"],
       }),
