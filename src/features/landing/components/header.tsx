@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useScroll } from "@/hooks/use-scroll";
 import { navLinks } from "@/content/landing/navigation";
 import { headerContent } from "@/content/landing/header";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LoginButton } from "@/features/landing/components/login-button";
 import { MobileLoginButton } from "@/features/landing/components/mobile-login-button";

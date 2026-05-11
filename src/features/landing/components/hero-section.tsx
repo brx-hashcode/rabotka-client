@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users } from "lucide-react";
-import heroImage from "@/assets/hero-image.png";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import heroImage from "@/assets/hero-image.png?format=webp";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";

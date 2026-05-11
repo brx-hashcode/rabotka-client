@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import communitySceneImage from "@/assets/community-scene.jpg";
+import communitySceneImage from "@/assets/community-scene.jpg?format=webp";
 import { accessibilityContent } from "@/content/landing/accessibility";
 
 export function AccessibilitySection() {
@@ -44,7 +44,7 @@ export function AccessibilitySection() {
                   transition={{ delay: 0.3 + index * 0.1 }}
                   className="flex items-start gap-4 p-4 rounded-2xl bg-card shadow-soft"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-whatsapp-light flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-whatsapp-light flex items-center justify-center shrink-0">
                     <feature.icon className="w-6 h-6 text-whatsapp-dark" />
                   </div>
                   <div>
@@ -70,7 +70,7 @@ export function AccessibilitySection() {
             <img
               src={communitySceneImage}
               alt="Quartier communautaire africain vibrant"
-              className="w-full h-auto object-cover aspect-[16/10]"
+              className="w-full h-auto object-cover aspect-16/10"
             />
           </motion.div>
         </div>

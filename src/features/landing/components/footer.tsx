@@ -1,6 +1,6 @@
 import { MapPin, Mail, Phone } from "lucide-react";
 import { footerLinks, footerContent } from "@/content/landing/footer";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { usePublicContact } from "@/hooks/use-public-contact";

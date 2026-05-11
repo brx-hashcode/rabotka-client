@@ -26,8 +26,8 @@ import {
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent } from "@/content/onboarding";
 import { StepIndicator } from "./step-indicator";
-import kycDocumentExample from "@/assets/kyc_document.png";
-import kycSelfieExample from "@/assets/kyc_selfie.png";
+import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
+import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
 
 const kycExampleImages: Record<"document" | "selfie", string> = {
   document: kycDocumentExample,
