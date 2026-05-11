@@ -32,10 +32,10 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="space-y-4"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
+              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
                 <badge.icon className="w-4 h-4" />
                 {badge.text}
-              </span>
+              </span> */}
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
                 {title.main}{" "}
