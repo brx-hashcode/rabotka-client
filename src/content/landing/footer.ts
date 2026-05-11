@@ -17,7 +17,6 @@ export const footerLinks: FooterLinkGroup = {
     { label: "Blog", href: "/" },
   ],
   Légal: [
-    // Until dedicated pages/endpoints exist, route to Terms.
     { label: "Politique de confidentialité", href: "/terms" },
     { label: "Conditions d'utilisation", href: "/terms" },
     { label: "Politique des cookies", href: "/terms" },
@@ -28,9 +27,11 @@ export const footerContent = {
   brandDescription:
     "Connecter les travailleurs informels et les employeurs grâce à WhatsApp. Simple, accessible, sans application.",
   socialLinks: [
-    { label: "Twitter", href: "https://twitter.com/Rabotka" },
     { label: "LinkedIn", href: "https://www.linkedin.com/company/rabotka" },
-    { label: "Facebook", href: "https://www.facebook.com/rabotka" },
-    { label: "Instagram", href: "https://www.instagram.com/rabotka" },
+    { label: "Facebook", href: "https://www.facebook.com/share/18pxQBc8nD" },
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/rabotka__",
+    },
   ],
 } as const;

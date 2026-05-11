@@ -1,4 +1,4 @@
-import { Wifi, Sparkles, Globe } from "lucide-react";
+import { Wifi, Globe, MousePointerClick } from "lucide-react";
 import type { Feature } from "@/types";
 
 export const accessibilityContent = {
@@ -13,7 +13,7 @@ export const accessibilityContent = {
       description: "Optimisé pour les connexions lentes",
     },
     {
-      icon: Sparkles,
+      icon: MousePointerClick,
       title: "Aucune compétence technique requise",
       description: "Simple et intuitif pour tous",
     },
