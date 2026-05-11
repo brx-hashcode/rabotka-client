@@ -3,7 +3,7 @@ import { Seo } from "@/hooks/use-seo";
 import { useNavigate } from "react-router";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import { Loader } from "lucide-react";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { loginContent } from "@/content/landing/login";
 import { useSendOtpMutation } from "@/hooks/use-send-otp-mutation";
 import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";

@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import { imagetools } from "vite-imagetools";
 import sitemap from "vite-plugin-sitemap";
 import path from "node:path";
 
@@ -62,6 +63,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      imagetools(),
       imageOptimizer,
       sitemap({
         hostname: env.VITE_SITE_URL || "https://rabotka.africa",

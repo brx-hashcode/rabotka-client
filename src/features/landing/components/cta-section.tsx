@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Users, ArrowRight } from "lucide-react";
 import { ctaContent } from "@/content/landing/cta";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 
 export function CTASection() {
   const ref = useRef(null);

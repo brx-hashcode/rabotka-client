@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
-import notFoundImage from "@/assets/not-found.png";
+import notFoundImage from "@/assets/not-found.png?format=webp";
 
 export default function NotFound() {
   return (
