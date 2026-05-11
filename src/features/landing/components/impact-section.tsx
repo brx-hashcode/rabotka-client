@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import workersTogetherImage from "@/assets/workers-together.png";
+import workersTogetherImage from "@/assets/workers-together.png?format=webp";
 import { impactContent } from "@/content/landing/impact";
 
 export function ImpactSection() {

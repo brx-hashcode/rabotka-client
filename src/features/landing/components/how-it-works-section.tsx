@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import workerSmilingImage from "@/assets/worker-smiling.jpg";
-import familyHomeImage from "@/assets/family-home.jpg";
+import workerSmilingImage from "@/assets/worker-smiling.jpg?format=webp";
+import familyHomeImage from "@/assets/family-home.jpg?format=webp";
 import { howItWorksContent } from "@/content/landing/how-it-works";
 
 type FlowProps = {

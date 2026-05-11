@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Phone, MessageCircle, ArrowRight } from "lucide-react";
-import phoneConversationImage from "@/assets/phone-conversation.jpg";
+import phoneConversationImage from "@/assets/phone-conversation.jpg?format=webp";
 import { directContactContent } from "@/content/landing/direct-contact";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 import { Link } from "react-router";
