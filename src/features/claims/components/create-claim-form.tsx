@@ -232,7 +232,7 @@ export const CreateClaimForm = () => {
             )}
           </div>
 
-          <div className="space-y-2 pt-4">
+          <div className="flex flex-col gap-3">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Création..." : "Créer la Réclamation"}
             </Button>
