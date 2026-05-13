@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Users } from "lucide-react";
 import heroImage from "@/assets/hero-image.png?format=webp";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
@@ -50,13 +49,11 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="lg" asChild>
                 <Link to={onboardingPathWithProfile("WORKER")}>
-                  <MessageCircle className="w-5 h-5" />
                   {cta.primary}
                 </Link>
               </Button>
               <Button variant="hero-outline" size="lg" asChild>
                 <Link to={onboardingPathWithProfile("EMPLOYER")}>
-                  <Users className="w-5 h-5" />
                   {cta.secondary}
                 </Link>
               </Button>
