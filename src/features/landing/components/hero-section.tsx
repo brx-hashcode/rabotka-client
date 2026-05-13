@@ -18,7 +18,7 @@ export function HeroSection() {
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
       </div>
 
-      <div className="section-container relative z-10 py-20 lg:py-0">
+      <div className="section-container relative z-10 pt-32 pb-20 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
