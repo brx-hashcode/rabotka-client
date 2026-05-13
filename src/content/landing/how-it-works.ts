@@ -10,30 +10,30 @@ export const howItWorksContent = {
         icon: UserPlus,
         title: "Créez votre profil",
         description:
-          "Renseignez vos informations personnelles, choisissez Travailleur et ajoutez pièce d'identité + selfie. Vous recevez un crédit de bienvenue à l'inscription.",
+          "Renseignez vos informations, sélectionnez le rôle Travailleur et ajoutez votre pièce d'identité. Un crédit de bienvenue vous est offert.",
       },
       {
         icon: ShieldCheck,
         title: "Vérification d'identité (KYC)",
-        description: "Nous vérifions votre identité pour la confiance",
+        description: "Votre identité est vérifiée pour garantir la confiance sur la plateforme.",
       },
       {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Une fois votre identité vérifiée, vous recevez un message WhatsApp de bienvenue. Tapez Menu pour accéder à toutes les fonctionnalités du bot.",
+          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
       },
       {
         icon: MessageCircle,
         title: "Postulez aux offres d'emploi",
         description:
-          "Recevez des offres correspondant à votre profil et postulez directement via le chat WhatsApp",
+          "Recevez des offres adaptées à votre profil et postulez directement via WhatsApp.",
       },
       {
         icon: Unlock,
         title: "Débloquez le contact de l'employeur",
         description:
-          "Si votre candidature est acceptée, déverrouillez les coordonnées de l'employeur — gratuit avec votre crédit de bienvenue",
+          "Candidature acceptée ? Déverrouillez les coordonnées de l'employeur, offert avec votre crédit de bienvenue.",
       },
     ] as Step[],
   },
@@ -46,30 +46,30 @@ export const howItWorksContent = {
         icon: UserPlus,
         title: "Créez votre profil",
         description:
-          "Renseignez vos informations personnelles, choisissez Employeur et ajoutez pièce d'identité + selfie. Vous recevez un crédit de bienvenue à l'inscription.",
+          "Renseignez vos informations, sélectionnez le rôle Employeur et ajoutez votre pièce d'identité. Un crédit de bienvenue vous est offert.",
       },
       {
         icon: ShieldCheck,
         title: "Vérification d'identité (KYC)",
-        description: "Nous vérifions votre identité pour la sécurité",
+        description: "Votre identité est vérifiée pour garantir la sécurité sur la plateforme.",
       },
       {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Une fois votre identité vérifiée, vous recevez un message WhatsApp de bienvenue. Tapez Menu pour accéder à toutes les fonctionnalités de l'assistant.",
+          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
       },
       {
         icon: MessageCircle,
         title: "Consultez les candidatures",
         description:
-          "Recevez et examinez les candidatures de travailleurs vérifiés, puis acceptez le meilleur profil",
+          "Recevez et examinez les candidatures de travailleurs vérifiés, puis sélectionnez le meilleur profil.",
       },
       {
         icon: Unlock,
         title: "Débloquez le contact du travailleur",
         description:
-          "Après avoir accepté une candidature, déverrouillez les coordonnées du travailleur — gratuit avec votre crédit de bienvenue",
+          "Candidature acceptée ? Déverrouillez les coordonnées du travailleur, offert avec votre crédit de bienvenue.",
       },
     ] as Step[],
   },
