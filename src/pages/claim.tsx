@@ -51,8 +51,8 @@ export default function Claim() {
   }
 
   return (
-    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
-      <div className="max-w-4xl mx-auto w-full flex-1 space-y-6">
+    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen">
+      <div className="max-w-2xl mx-auto w-full">
         <ClaimChat claim={claim} />
       </div>
     </div>
