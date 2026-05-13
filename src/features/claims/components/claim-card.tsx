@@ -54,7 +54,7 @@ export const ClaimCard = ({ claim }: ClaimCardProps) => {
         <div className="mb-3 flex gap-1">
           {claim.attachmentUrls.map((url, idx) => (
             <div
-              key={idx}
+              key={`${url}-${idx + 1}`}
               className="h-8 w-8 rounded border border-border bg-muted overflow-hidden"
             >
               <img
