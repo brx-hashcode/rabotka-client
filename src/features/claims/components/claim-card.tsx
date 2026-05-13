@@ -1,16 +1,18 @@
 import { useNavigate } from "react-router";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { ClaimItem } from "@/lib/api/claims-controller";
 
 const getStatusColor = (status: string) => {
-  return cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", {
-    "bg-yellow-100 text-yellow-800": status === "CREATED",
-    "bg-blue-100 text-blue-800": status === "IN_PROGRESS",
-    "bg-green-100 text-green-800": status === "COMPLETED",
-    "bg-red-100 text-red-800": status === "REJECTED",
-  });
+  return cn(
+    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+    {
+      "bg-yellow-100 text-yellow-800": status === "CREATED",
+      "bg-blue-100 text-blue-800": status === "IN_PROGRESS",
+      "bg-green-100 text-green-800": status === "COMPLETED",
+      "bg-red-100 text-red-800": status === "REJECTED",
+    },
+  );
 };
 
 const getStatusLabel = (status: string) => {
@@ -33,7 +35,7 @@ export const ClaimCard = ({ claim }: ClaimCardProps) => {
   return (
     <Card
       onClick={() => navigate(`/claims/${claim.id}`)}
-      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+      className="p-4 cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="font-semibold text-foreground line-clamp-2 flex-1">
