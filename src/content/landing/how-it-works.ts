@@ -19,9 +19,9 @@ export const howItWorksContent = {
       },
       {
         icon: Link,
-        title: "Rejoignez Rabotka sur WhatsApp",
+        title: "Activez votre accès WhatsApp",
         description:
-          "Recevez un lien envoyé sur votre téléphone pour vous connecter à notre bot",
+          "Une fois votre identité vérifiée, vous recevez un message WhatsApp de bienvenue. Tapez Menu pour accéder à toutes les fonctionnalités du bot.",
       },
       {
         icon: MessageCircle,
@@ -55,9 +55,9 @@ export const howItWorksContent = {
       },
       {
         icon: Link,
-        title: "Rejoignez Rabotka sur WhatsApp",
+        title: "Activez votre accès WhatsApp",
         description:
-          "Recevez un lien envoyé sur votre téléphone pour vous connecter à notre assistant",
+          "Une fois votre identité vérifiée, vous recevez un message WhatsApp de bienvenue. Tapez Menu pour accéder à toutes les fonctionnalités de l'assistant.",
       },
       {
         icon: MessageCircle,
