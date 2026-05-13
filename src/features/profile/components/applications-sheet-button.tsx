@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ClipboardList, FileDown } from "lucide-react";
+import { ClipboardList, FileDown, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
@@ -90,7 +90,7 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
   );
 };
 
-export const ApplicationsSheetButton = () => {
+export const ApplicationsSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
   const page = 1;
   const limit = 10;
@@ -107,14 +107,26 @@ export const ApplicationsSheetButton = () => {
 
   return (
     <>
-      <Button
-        variant="outline"
-        className="w-full gap-2"
-        onClick={() => setIsOpen(true)}
-      >
-        <ClipboardList className="h-4 w-4" />
-        {content.button}
-      </Button>
+      {asRow ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted text-foreground"
+        >
+          <ClipboardList className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="flex-1 text-sm font-medium">{content.button}</span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      ) : (
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={() => setIsOpen(true)}
+        >
+          <ClipboardList className="h-4 w-4" />
+          {content.button}
+        </Button>
+      )}
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
