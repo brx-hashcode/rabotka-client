@@ -20,10 +20,7 @@ import {
 import { useClaimCommentsSocket } from "@/hooks/use-claim-comments-socket";
 import type { ClaimItem, ClaimCommentItem } from "@/lib/api/claims-controller";
 
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; className: string }
-> = {
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   CREATED: {
     label: "Créée",
     className: "bg-yellow-100 text-yellow-800",
@@ -42,7 +39,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: Readonly<{ status: string }>) {
   const cfg = STATUS_CONFIG[status] ?? {
     label: status,
     className: "bg-muted text-muted-foreground",
@@ -75,7 +72,8 @@ function getCommentAuthorName(
   isFromCurrentProfile: boolean,
 ): string {
   if (isFromCurrentProfile) return "Vous";
-  if (comment.createdByType === "profile") return comment.profileName || "Profile";
+  if (comment.createdByType === "profile")
+    return comment.profileName || "Profile";
   return "Support";
 }
 
@@ -97,7 +95,7 @@ function CommentItem({
     >
       <div
         className={cn(
-          "max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm",
+          "max-w-[75%] rounded-2xl px-4 py-2.5 text-sm",
           isFromCurrentProfile
             ? "bg-whatsapp/15 text-foreground rounded-br-sm"
             : "bg-muted text-foreground rounded-bl-sm",
@@ -129,16 +127,22 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   const navigate = useNavigate();
   const { data: currentUser } = useProfileMe();
   useClaimCommentsSocket(claim.id);
-  const { data: comments, isLoading: commentsLoading } = useClaimComments(claim.id);
-  const { mutate: addComment, isPending: isAddingComment } = useAddClaimComment(claim.id);
-  const { mutate: deleteComment, isPending: isDeletingComment } = useDeleteClaimComment(claim.id);
+  const { data: comments, isLoading: commentsLoading } = useClaimComments(
+    claim.id,
+  );
+  const { mutate: addComment, isPending: isAddingComment } = useAddClaimComment(
+    claim.id,
+  );
+  const { mutate: deleteComment, isPending: isDeletingComment } =
+    useDeleteClaimComment(claim.id);
 
   const [message, setMessage] = useState("");
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const MAX_DESCRIPTION_LENGTH = 120;
-  const isDescriptionTruncated = claim.description.length > MAX_DESCRIPTION_LENGTH;
+  const isDescriptionTruncated =
+    claim.description.length > MAX_DESCRIPTION_LENGTH;
 
   const isClaimClosed = useMemo(
     () => claim.status === "COMPLETED" || claim.status === "REJECTED",
@@ -147,16 +151,22 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   };
 
-  useEffect(() => { scrollToBottom(); }, [comments]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [comments]);
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
-    addComment({ content: message.trim() }, { onSuccess: () => setMessage("") });
+    addComment(
+      { content: message.trim() },
+      { onSuccess: () => setMessage("") },
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -167,10 +177,8 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-0 rounded-2xl border border-border overflow-hidden bg-card shadow-sm">
-
-      {/* ── Sticky top bar ── */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-card">
+    <div className="flex flex-col gap-0 rounded-md border border-border overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
         <button
           type="button"
           onClick={() => navigate("/claims")}
@@ -182,7 +190,6 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         <StatusBadge status={claim.status} />
       </div>
 
-      {/* ── Claim header ── */}
       <div className="px-5 pt-5 pb-4 border-b border-border space-y-3">
         <h2 className="text-lg font-semibold text-foreground leading-snug">
           {claim.title}
@@ -223,7 +230,8 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
                     alt={`Pièce jointe ${idx + 1}`}
                     className="h-full w-full object-cover"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      (e.currentTarget as HTMLImageElement).style.display =
+                        "none";
                     }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
@@ -243,10 +251,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         </p>
       </div>
 
-      {/* ── Chat messages ── */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 min-h-64 max-h-96 overflow-y-auto px-4 py-4 space-y-3"
+        className="flex-1 min-h-64 max-h-96 overflow-y-auto px-4 py-4 space-y-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none" }}
       >
         {commentsLoading && (
@@ -262,7 +269,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             <p className="text-xs">Commencez la conversation !</p>
           </div>
         )}
-        {!commentsLoading && comments && comments.length > 0 &&
+        {!commentsLoading &&
+          comments &&
+          comments.length > 0 &&
           comments.map((comment) => (
             <CommentItem
               key={comment.id}
@@ -271,11 +280,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
               onDelete={deleteComment}
               isDeletingComment={isDeletingComment || isClaimClosed}
             />
-          ))
-        }
+          ))}
       </div>
 
-      {/* ── Closed banner ── */}
       {isClaimClosed && (
         <div className="mx-4 mb-3 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
@@ -287,12 +294,8 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         </div>
       )}
 
-      {/* ── Input bar ── */}
-      <form
-        onSubmit={handleSubmit}
-        className="px-4 pb-4"
-      >
-        <div className="flex items-end gap-2 rounded-2xl border border-border bg-background px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-whatsapp/30 transition-shadow">
+      <form onSubmit={handleSubmit} className="px-4 pb-4">
+        <div className="flex items-end gap-2 rounded-2xl border border-border bg-background px-3 py-2 focus-within:ring-2 focus-within:ring-whatsapp/30 transition-shadow">
           <Textarea
             placeholder={
               isClaimClosed
