@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { FileWarning } from "lucide-react";
+import { FileWarning, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount, formatDate } from "@/lib/utils";
 import { penaltiesContent } from "@/content/profile";
@@ -15,7 +15,7 @@ import { useProfilePenalties } from "@/hooks/use-profile-penalties";
 
 const content = penaltiesContent;
 
-export const PenaltiesSheetButton = () => {
+export const PenaltiesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: penalties, isLoading } = useProfilePenalties({
@@ -27,14 +27,26 @@ export const PenaltiesSheetButton = () => {
 
   return (
     <>
-      <Button
-        variant="outline"
-        className="w-full gap-2"
-        onClick={() => setIsOpen(true)}
-      >
-        <FileWarning className="h-4 w-4" />
-        {content.button}
-      </Button>
+      {asRow ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted text-foreground"
+        >
+          <FileWarning className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="flex-1 text-sm font-medium">{content.button}</span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      ) : (
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={() => setIsOpen(true)}
+        >
+          <FileWarning className="h-4 w-4" />
+          {content.button}
+        </Button>
+      )}
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
