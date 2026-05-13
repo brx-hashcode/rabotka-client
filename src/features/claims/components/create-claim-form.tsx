@@ -232,7 +232,11 @@ export const CreateClaimForm = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-4">
+          <div className="space-y-2 pt-4">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Création..." : "Créer la Réclamation"}
+            </Button>
+
             <Button
               type="button"
               variant="outline"
@@ -240,9 +244,6 @@ export const CreateClaimForm = () => {
               onClick={() => navigate("/claims")}
             >
               Annuler
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Création..." : "Créer la Réclamation"}
             </Button>
           </div>
         </form>
