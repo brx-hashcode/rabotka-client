@@ -8,17 +8,17 @@ import { Link } from "react-router";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 
 export function HeroSection() {
-  const { badge, title, description, cta, stats, floatingCard, imageAlt } =
+  const { title, description, cta, stats, floatingCard, imageAlt } =
     heroContent;
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light pt-16 lg:pt-20">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-whatsapp/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
       </div>
 
-      <div className="section-container relative z-10 pt-32 pb-20 lg:py-0">
+      <div className="section-container relative z-10 py-12 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
