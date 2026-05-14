@@ -14,6 +14,7 @@ import { AuthGuard } from "@/components/auth";
 import { LandingLayout, AppLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
 import Terms from "@/pages/terms";
+import OnboardingAvatar from "@/pages/onboarding-avatar";
 
 export function AppRoutes() {
   return (
@@ -93,6 +94,14 @@ export function AppRoutes() {
         }
       />
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/onboarding/avatar"
+        element={
+          <AuthGuard>
+            <OnboardingAvatar />
+          </AuthGuard>
+        }
+      />
       <Route path="/verify/whatsapp" element={<VerifyWhatsApp />} />
       <Route path="/pay/:token" element={<Pay />} />
       <Route path="/r/:hash" element={<AdRedirect />} />
