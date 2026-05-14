@@ -40,9 +40,16 @@ export async function compressImage(file: File): Promise<File> {
             return;
           }
           // Produce a new File independent of the original input element
+          // Use a unique name per compression call so that two camera captures
+          // (which the browser often assigns the same generic filename, e.g.
+          // "image.jpg") produce distinct File objects and don't collide in
+          // state, IndexedDB, or FormData when submitted.
+          const baseName = file.name
+            .replace(/\.[^.]+$/, "")
+            .replace(/[^a-zA-Z0-9_-]/g, "_") || "photo";
           const compressed = new File(
             [blob],
-            file.name.replace(/\.[^.]+$/, ".jpg"),
+            `${baseName}_${Date.now()}.jpg`,
             { type: "image/jpeg", lastModified: Date.now() },
           );
           resolve(compressed);
