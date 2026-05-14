@@ -25,7 +25,11 @@ export default function Login() {
   const [emailOrPhone, setEmailOrPhone] = useQueryState("id", {
     defaultValue: "",
   });
-  const [redirectTo] = useQueryState("redirect", { defaultValue: "/profile" });
+  // When no explicit redirect is set, always pass through /onboarding/avatar
+  // so users without a profile picture are prompted to add one.
+  const [redirectTo] = useQueryState("redirect", {
+    defaultValue: "/onboarding/avatar",
+  });
   const [apiError, setApiError] = useState<string | null>(null);
 
   const sendOtpMutation = useSendOtpMutation();

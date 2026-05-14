@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Seo } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
@@ -6,9 +7,19 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 
 export default function OnboardingAvatar() {
   const navigate = useNavigate();
-  const { data: profile } = useProfileMe();
+  const { data: profile, isLoading } = useProfileMe();
+
+  // If the user already has an avatar, skip this step silently.
+  useEffect(() => {
+    if (!isLoading && profile?.avatarUrl) {
+      navigate("/profile", { replace: true });
+    }
+  }, [isLoading, profile?.avatarUrl, navigate]);
 
   const afterDone = () => navigate("/profile");
+
+  // Don't flash the upload UI while checking or if we're about to redirect.
+  if (isLoading || profile?.avatarUrl) return null;
 
   return (
     <>
