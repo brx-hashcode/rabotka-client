@@ -10,10 +10,20 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=hashcode-public"
+      # Apex domain router
       - "traefik.http.routers.rabotka-client-${APP_ENV:-prod}.rule=Host(`${CLIENT_DOMAIN}`)"
       - "traefik.http.routers.rabotka-client-${APP_ENV:-prod}.entrypoints=websecure"
       - "traefik.http.routers.rabotka-client-${APP_ENV:-prod}.tls.certresolver=letsencrypt"
       - "traefik.http.services.rabotka-client-${APP_ENV:-prod}.loadbalancer.server.port=${VITE_PORT:-3000}"
+      # www redirect router — catches www.CLIENT_DOMAIN and 301s to apex
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.rule=Host(`www.${CLIENT_DOMAIN}`)"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.entrypoints=websecure"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.middlewares=www-redirect-${APP_ENV:-prod}"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.service=rabotka-client-${APP_ENV:-prod}"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.regex=^https://www\\.${CLIENT_DOMAIN}/(.*)"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.replacement=https://${CLIENT_DOMAIN}/$${1}"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.permanent=true"
 
 networks:
   public:
