@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Seo } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
@@ -8,17 +8,10 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 export default function OnboardingAvatar() {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfileMe();
+  const [uploaded, setUploaded] = useState(false);
 
-  // If the user already has an avatar, skip this step silently.
-  useEffect(() => {
-    if (!isLoading && profile?.avatarUrl) {
-      navigate("/profile", { replace: true });
-    }
-  }, [isLoading, profile?.avatarUrl, navigate]);
+  const goToProfile = () => navigate("/profile");
 
-  const afterDone = () => navigate("/profile");
-
-  // Don't flash the upload UI while checking or if we're about to redirect.
   if (isLoading || profile?.avatarUrl) return null;
 
   return (
@@ -28,7 +21,7 @@ export default function OnboardingAvatar() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-6">
           <AvatarUpload
             defaultAvatar={profile?.avatarUrl}
-            onAvatarChange={afterDone}
+            onAvatarChange={() => setUploaded(true)}
           />
           <h1 className="text-2xl font-bold text-foreground mt-6 mb-1">
             Photo de profil
@@ -40,8 +33,11 @@ export default function OnboardingAvatar() {
         </div>
 
         <div className="px-6 pb-10 w-full max-w-sm mx-auto flex flex-col gap-3">
-          <Button variant="outline" onClick={afterDone}>
-            Passer cette étape
+          <Button
+            variant={uploaded ? "default" : "outline"}
+            onClick={goToProfile}
+          >
+            {uploaded ? "Continuer" : "Passer cette étape"}
           </Button>
         </div>
       </div>
