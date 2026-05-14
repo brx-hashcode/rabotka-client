@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import { imagetools } from "vite-imagetools";
 import sitemap from "vite-plugin-sitemap";
 import path from "node:path";
 
@@ -38,12 +39,34 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    preview: {
+      host: "0.0.0.0",
+      port: Number.parseInt(env.VITE_PORT) || 3000,
+      allowedHosts: true,
+      proxy: {
+        "/api": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+        },
+        "/payment-status": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
+        "/socket.io": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          ws: true,
+        },
+      },
+    },
     plugins: [
       react(),
       tailwindcss(),
+      imagetools(),
       imageOptimizer,
       sitemap({
-        hostname: env.VITE_SITE_URL,
+        hostname: env.VITE_SITE_URL || "https://rabotka.africa",
         dynamicRoutes: ["/onboarding", "/login"],
         exclude: ["/profile", "/claims", "/claims/new", "/pay/*"],
       }),

@@ -1,24 +1,23 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Users } from "lucide-react";
-import heroImage from "@/assets/hero-image.png";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import heroImage from "@/assets/hero-image.png?format=webp";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 
 export function HeroSection() {
-  const { badge, title, description, cta, stats, floatingCard, imageAlt } =
+  const { title, description, cta, stats, floatingCard, imageAlt } =
     heroContent;
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light pt-16 lg:pt-20">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-whatsapp/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
       </div>
 
-      <div className="section-container relative z-10 py-20 lg:py-0">
+      <div className="section-container relative z-10 py-12 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -32,10 +31,10 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="space-y-4"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
+              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
                 <badge.icon className="w-4 h-4" />
                 {badge.text}
-              </span>
+              </span> */}
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
                 {title.main}{" "}
@@ -50,13 +49,11 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="lg" asChild>
                 <Link to={onboardingPathWithProfile("WORKER")}>
-                  <MessageCircle className="w-5 h-5" />
                   {cta.primary}
                 </Link>
               </Button>
               <Button variant="hero-outline" size="lg" asChild>
                 <Link to={onboardingPathWithProfile("EMPLOYER")}>
-                  <Users className="w-5 h-5" />
                   {cta.secondary}
                 </Link>
               </Button>
