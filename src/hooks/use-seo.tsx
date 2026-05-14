@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { env } from "@/env";
 
 const SITE_URL = env.VITE_SITE_URL ?? "https://rabotka.africa";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 type SeoProps = {
   title?: string;
