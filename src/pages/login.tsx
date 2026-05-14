@@ -25,6 +25,7 @@ export default function Login() {
   const [emailOrPhone, setEmailOrPhone] = useQueryState("id", {
     defaultValue: "",
   });
+  const [redirectTo] = useQueryState("redirect", { defaultValue: "/profile" });
   const [apiError, setApiError] = useState<string | null>(null);
 
   const sendOtpMutation = useSendOtpMutation();
@@ -34,11 +35,11 @@ export default function Login() {
   useEffect(() => {
     if (step === "3") {
       const timer = setTimeout(() => {
-        navigate("/profile");
+        navigate(redirectTo);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [step, navigate]);
+  }, [step, navigate, redirectTo]);
 
   useEffect(() => {
     if (step === "2" && !emailOrPhone) {
