@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import whatsappPhoneImage from "@/assets/whatsapp-phone.png";
+import whatsappPhoneImage from "@/assets/whatsapp-phone.png?format=webp";
 import { whyWhatsAppContent } from "@/content/landing/why-whatsapp";
 
 export function WhyWhatsAppSection() {

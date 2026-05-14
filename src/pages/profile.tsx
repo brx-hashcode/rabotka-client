@@ -21,6 +21,7 @@ import {
   MessageCircle,
   AlertCircle,
   Wallet,
+  ChevronRight,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
@@ -245,38 +246,32 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action list */}
         <div className="space-y-3">
-          {!isEmployer && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <PenaltiesSheetButton />
-              <ApplicationsSheetButton />
-            </div>
-          )}
+          <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+            {!isEmployer && (
+              <>
+                <ApplicationsSheetButton asRow />
+                <PenaltiesSheetButton asRow />
+              </>
+            )}
+            <InvoicesSheetButton asRow />
+            <ActionRow
+              icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
+              label="Mes Réclamations"
+              onClick={() => navigate("/claims")}
+            />
+          </div>
 
-          <InvoicesSheetButton />
-
-          <Button
-            variant="outline"
-            className="w-full gap-2"
-            onClick={() => navigate("/claims")}
-          >
-            <AlertCircle className="h-4 w-4" />
-            Mes Reclamations
-          </Button>
-
-          <Button
-            variant="ghost"
-            className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={(e) => {
-              e.preventDefault();
-              handleLogout();
-            }}
-            disabled={isLoggingOut}
-          >
-            <LogOut className="h-4 w-4" />
-            {isLoggingOut ? "Deconnexion..." : "Se deconnecter"}
-          </Button>
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <ActionRow
+              icon={<LogOut className="h-4 w-4" />}
+              label={isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+              onClick={() => handleLogout()}
+              disabled={isLoggingOut}
+              destructive
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -304,6 +299,35 @@ const StatCard = ({
     <span className="text-lg font-bold text-foreground">{value}</span>
     <span className="text-xs text-muted-foreground">{label}</span>
   </div>
+);
+
+const ActionRow = ({
+  icon,
+  label,
+  onClick,
+  destructive = false,
+  disabled = false,
+}: Readonly<{
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+  disabled?: boolean;
+}>) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={cn(
+      "flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors",
+      "hover:bg-muted/50 active:bg-muted disabled:opacity-50",
+      destructive ? "text-destructive" : "text-foreground",
+    )}
+  >
+    <div className="shrink-0">{icon}</div>
+    <span className="flex-1 text-sm font-medium">{label}</span>
+    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+  </button>
 );
 
 const InfoRow = ({

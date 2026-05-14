@@ -1,4 +1,4 @@
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { Link } from "react-router";
 import { layoutContent } from "@/content/onboarding";
 

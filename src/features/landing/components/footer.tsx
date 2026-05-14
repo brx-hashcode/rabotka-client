@@ -1,6 +1,6 @@
 import { MapPin, Mail, Phone } from "lucide-react";
 import { footerLinks, footerContent } from "@/content/landing/footer";
-import rabotkaLogo from "@/assets/rabotka-logo.png";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { usePublicContact } from "@/hooks/use-public-contact";
@@ -84,22 +84,42 @@ export function Footer() {
               <ContactSkeleton />
             ) : (
               <div className="space-y-3">
-                {contactInfo?.address && (
+                {contactInfo?.phone && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
-                    <MapPin size={16} className="shrink-0" />
-                    <span>{contactInfo.address}</span>
+                    <Phone size={16} className="shrink-0" />
+                    <a
+                      href={`tel:${contactInfo.phone}`}
+                      rel="noopener noreferrer"
+                      className="hover:text-background transition-colors hover:underline"
+                    >
+                      {contactInfo.phone}
+                    </a>
                   </div>
                 )}
                 {contactInfo?.email && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
                     <Mail size={16} className="shrink-0" />
-                    <span>{contactInfo.email}</span>
+                    <a
+                      href={`mailto:${contactInfo.email}`}
+                      rel="noopener noreferrer"
+                      className="hover:text-background transition-colors hover:underline"
+                    >
+                      {contactInfo.email}
+                    </a>
                   </div>
                 )}
-                {contactInfo?.phone && (
+
+                {contactInfo?.address && (
                   <div className="flex items-center gap-3 text-sm text-background/70">
-                    <Phone size={16} className="shrink-0" />
-                    <span>{contactInfo.phone}</span>
+                    <MapPin size={16} className="shrink-0" />
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactInfo.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-background transition-colors hover:underline"
+                    >
+                      {contactInfo.address}
+                    </a>
                   </div>
                 )}
               </div>

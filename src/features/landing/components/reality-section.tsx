@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import streetWorkersImage from "@/assets/street-workers.png";
+import streetWorkersImage from "@/assets/street-workers.png?format=webp";
 import { realityContent } from "@/content/landing/reality";
 import { getCategories } from "@/lib/api/job-category-controller";
 

@@ -25,9 +25,10 @@ import {
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent } from "@/content/onboarding";
+import { compressImage } from "@/lib/image-compress";
 import { StepIndicator } from "./step-indicator";
-import kycDocumentExample from "@/assets/kyc_document.png";
-import kycSelfieExample from "@/assets/kyc_selfie.png";
+import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
+import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
 
 const kycExampleImages: Record<"document" | "selfie", string> = {
   document: kycDocumentExample,
@@ -94,26 +95,27 @@ export function KycDocumentsForm({
     setKycData,
   ]);
 
-  const handleFileSelect = (
-    file: File,
-    fieldName: "kycDocument" | "kycSelfie",
-  ) => {
-    const fieldSchema = step3SchemaBase.shape[fieldName];
-    const result = fieldSchema.safeParse(file);
+  const handleFileSelect = useCallback(
+    async (file: File, fieldName: "kycDocument" | "kycSelfie") => {
+      // Validate the raw file first (type + size check)
+      const fieldSchema = step3SchemaBase.shape[fieldName];
+      const result = fieldSchema.safeParse(file);
+      if (!result.success) {
+        form.setError(fieldName, {
+          message: result.error.errors[0]?.message || "Fichier invalide",
+        });
+        return;
+      }
 
-    if (result.success) {
-      form.setValue(fieldName, file, { shouldValidate: true });
-      const preview = URL.createObjectURL(file);
-      setKycData({
-        [fieldName]: file,
-        [`${fieldName}Preview`]: preview,
-      });
-    } else {
-      form.setError(fieldName, {
-        message: result.error.errors[0]?.message || "Fichier invalide",
-      });
-    }
-  };
+      // Compress and re-encode via Canvas so the stored File is independent
+      // of the original <input> element (prevents iOS Safari GC issues).
+      const compressed = await compressImage(file);
+      const preview = URL.createObjectURL(compressed);
+      form.setValue(fieldName, compressed, { shouldValidate: true });
+      setKycData({ [fieldName]: compressed, [`${fieldName}Preview`]: preview });
+    },
+    [form, setKycData],
+  );
 
   const handleRemoveFile = (fieldName: "kycDocument" | "kycSelfie") => {
     form.setValue(fieldName, null as unknown as File, { shouldValidate: true });
