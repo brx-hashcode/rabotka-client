@@ -166,8 +166,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           categoryIds: kycData.categoryIds,
           categoryNames: kycData.categoryNames,
           documentType: kycData.documentType,
-          kycDocumentPreview: kycData.kycDocumentPreview,
-          kycSelfiePreview: kycData.kycSelfiePreview,
+          // Blob URLs are session-scoped and invalid after reload — omit them
+          // so hydrateFromStorage always regenerates fresh previews from IndexedDB.
         },
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
