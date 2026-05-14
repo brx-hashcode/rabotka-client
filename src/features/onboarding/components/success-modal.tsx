@@ -19,7 +19,7 @@ export function SuccessModal({
 
   const handleClose = useCallback(() => {
     onOpenChange(false);
-    navigate("/");
+    navigate("/login?redirect=/onboarding/avatar");
   }, [onOpenChange, navigate]);
 
   const icon = useMemo(

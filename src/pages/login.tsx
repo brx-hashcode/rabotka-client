@@ -25,6 +25,11 @@ export default function Login() {
   const [emailOrPhone, setEmailOrPhone] = useQueryState("id", {
     defaultValue: "",
   });
+  // When no explicit redirect is set, always pass through /onboarding/avatar
+  // so users without a profile picture are prompted to add one.
+  const [redirectTo] = useQueryState("redirect", {
+    defaultValue: "/onboarding/avatar",
+  });
   const [apiError, setApiError] = useState<string | null>(null);
 
   const sendOtpMutation = useSendOtpMutation();
@@ -34,11 +39,11 @@ export default function Login() {
   useEffect(() => {
     if (step === "3") {
       const timer = setTimeout(() => {
-        navigate("/profile");
+        navigate(redirectTo);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [step, navigate]);
+  }, [step, navigate, redirectTo]);
 
   useEffect(() => {
     if (step === "2" && !emailOrPhone) {
