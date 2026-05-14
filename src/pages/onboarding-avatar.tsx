@@ -12,7 +12,11 @@ export default function OnboardingAvatar() {
 
   const goToProfile = () => navigate("/profile");
 
-  if (isLoading || profile?.avatarUrl) return null;
+  // Only auto-skip when the user *arrived* with an existing avatar.
+  // After they upload (uploaded=true) we stay on the page so they can
+  // click "Continuer" — the invalidated query would otherwise trigger this
+  // guard and redirect them immediately.
+  if (!uploaded && (isLoading || profile?.avatarUrl)) return null;
 
   return (
     <>
