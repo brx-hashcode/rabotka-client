@@ -33,10 +33,7 @@ export default function OnboardingAvatar() {
         </div>
 
         <div className="px-6 pb-10 w-full max-w-sm mx-auto flex flex-col gap-3">
-          <Button
-            variant={uploaded ? "default" : "outline"}
-            onClick={goToProfile}
-          >
+          <Button variant="outline" onClick={goToProfile}>
             {uploaded ? "Continuer" : "Passer cette étape"}
           </Button>
         </div>
