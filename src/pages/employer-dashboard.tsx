@@ -99,7 +99,7 @@ function JobOfferRow({ offer }: { offer: EmployerJobOfferItem }) {
         </p>
         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
           <Clock className="h-3 w-3" />
-          {formatDate(offer.scheduledAt)} — {offer.address}
+          {formatDate(offer.scheduledAt)} , {offer.address}
         </p>
         <div className="mt-1.5 flex items-center gap-2">
           <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden max-w-[80px]">
