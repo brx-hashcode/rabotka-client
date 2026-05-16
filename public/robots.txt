@@ -16,4 +16,4 @@ Disallow: /profile
 Disallow: /claims
 Disallow: /pay/
 
-Sitemap: https://rabotka.africa/sitemap.xml
+Sitemap: https://rabotka.work/sitemap.xml
