@@ -18,8 +18,8 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Rabotka",
-  url: "https://rabotka.africa",
-  logo: "https://rabotka.africa/og-image.png",
+  url: "https://rabotka.work",
+  logo: "https://rabotka.work/og-image.png",
   description:
     "Rabotka connecte les travailleurs informels et les employeurs grâce à un assistant WhatsApp simple en Afrique centrale.",
   address: {
@@ -43,10 +43,10 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Rabotka",
-  url: "https://rabotka.africa",
+  url: "https://rabotka.work",
   potentialAction: {
     "@type": "SearchAction",
-    target: "https://rabotka.africa/onboarding",
+    target: "https://rabotka.work/onboarding",
   },
 };
 
