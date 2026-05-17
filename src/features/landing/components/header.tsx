@@ -59,9 +59,14 @@ export function Header() {
               alt={headerContent.logo.alt}
               className="w-10 h-10 object-contain mix-blend-multiply"
             />
-            <span className="font-display text-xl font-bold text-foreground">
-              {headerContent.logo.brandName}
-            </span>
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-xl font-bold text-foreground">
+                {headerContent.logo.brandName}
+              </span>
+              <span className="text-[10px] text-muted-foreground leading-none">
+                {headerContent.logo.slogan}
+              </span>
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
