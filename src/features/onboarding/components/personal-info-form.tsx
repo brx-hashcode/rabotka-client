@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryState } from "nuqs";
 import { step1Schema, type Step1FormData } from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,16 @@ export function PersonalInfoForm({
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
   const setPersonalInfo = useOnboardingStore((state) => state.setPersonalInfo);
 
+  const [profileTypeParam] = useQueryState<"WORKER" | "EMPLOYER" | "">(
+    "profileType",
+    {
+      defaultValue: "",
+      parse: (v) => (v === "WORKER" || v === "EMPLOYER" ? v : ""),
+      serialize: (v) => v,
+    },
+  );
+  const profileType = profileTypeParam || "WORKER";
+
   const form = useForm<Step1FormData>({
     resolver: zodResolver(step1Schema),
     defaultValues: personalInfo,
@@ -66,36 +77,44 @@ export function PersonalInfoForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.fields.lastName.label}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={content.fields.lastName.placeholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="firstName"
+              render={({ field }) => {
+                const pt = profileType.toLowerCase() as "worker" | "employer";
+                const f = content.fields.firstName[pt];
+                return (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{f.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={f.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
               control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.fields.firstName.label}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={content.fields.firstName.placeholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="lastName"
+              render={({ field }) => {
+                const pt = profileType.toLowerCase() as "worker" | "employer";
+                const f = content.fields.lastName[pt];
+                return (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{f.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={f.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
 
@@ -103,19 +122,23 @@ export function PersonalInfoForm({
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1">
-                  <FormLabel>{content.fields.email.label}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder={content.fields.email.placeholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const pt = profileType.toLowerCase() as "worker" | "employer";
+                const f = content.fields.email[pt];
+                return (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{f.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder={f.placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
@@ -164,7 +187,11 @@ export function PersonalInfoForm({
                 <FormControl>
                   <div className="relative">
                     <Textarea
-                      placeholder={content.fields.description.placeholder}
+                      placeholder={
+                        content.fields.description.placeholder[
+                          profileType.toLowerCase() as "worker" | "employer"
+                        ]
+                      }
                       className="min-h-[140px] pr-16 resize-none"
                       {...field}
                     />

@@ -3,16 +3,34 @@ export const personalInfoContent = {
   subtitle: "Remplissez vos informations personnelles",
   fields: {
     firstName: {
-      label: "Prénom",
-      placeholder: "John",
+      worker: {
+        label: "Prénom",
+        placeholder: "Jean",
+      },
+      employer: {
+        label: "Prénom / Nom de l'entreprise",
+        placeholder: "ex: EBTS Transports",
+      },
     },
     lastName: {
-      label: "Nom",
-      placeholder: "Doe",
+      worker: {
+        label: "Nom",
+        placeholder: "Mabiala",
+      },
+      employer: {
+        label: "Nom / Pays",
+        placeholder: "ex: Congo",
+      },
     },
     email: {
-      label: "Email",
-      placeholder: "john.doe@gmail.com",
+      worker: {
+        label: "Email",
+        placeholder: "john.doe@gmail.com",
+      },
+      employer: {
+        label: "Email",
+        placeholder: "contact@entreprise.com",
+      },
     },
     phone: {
       label: "Téléphone",
@@ -23,8 +41,13 @@ export const personalInfoContent = {
       placeholder: "19 rue de la joie Brazzaville",
     },
     description: {
-      label: "À propos de vous",
-      placeholder: "Présentez-vous en quelques phrases...",
+      label: "Décrivez votre profil et ce que vous recherchez",
+      placeholder: {
+        worker:
+          "Exemple : Je suis maçon avec 5 ans d'expérience dans les travaux de finition. Je recherche des missions ponctuelles ou à long terme à Pointe-Noire.",
+        employer:
+          "Exemple : Entreprise de logistique basée à Brazzaville. Nous recrutons régulièrement des manutentionnaires, chauffeurs et agents de terrain.",
+      },
       charCount: "/500",
     },
   },
