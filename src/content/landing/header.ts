@@ -2,6 +2,7 @@ export const headerContent = {
   logo: {
     alt: "Logo Rabotka",
     brandName: "Rabotka",
+    slogan:"Job Matching"
   },
   cta: {
     button: "Se connecter",
