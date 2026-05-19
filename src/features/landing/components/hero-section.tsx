@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-image.png?format=webp";
+import heroImage from "@/assets/hero-image-1.avif?format=webp";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
