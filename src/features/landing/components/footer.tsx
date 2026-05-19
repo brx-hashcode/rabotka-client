@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { usePublicContact } from "@/hooks/use-public-contact";
 import type { PublicContactInfo } from "@/lib/api/system-config-controller";
+import { headerContent } from "@/content/landing/header";
 
 function ContactSkeleton() {
   const contactIcons = [
@@ -74,7 +75,14 @@ export function Footer() {
                 alt="Logo Rabotka"
                 className="w-10 h-10 object-contain"
               />
-              <span className="font-display font-bold text-xl">Rabotka</span>
+              <div className="flex flex-col leading-none">
+                <span className="font-display font-bold text-xl">
+                  {headerContent.logo.brandName}
+                </span>
+                <span className="text-[10px] text-background/70 leading-none">
+                  {headerContent.logo.slogan}
+                </span>
+              </div>
             </div>
             <p className="text-background/70 mb-6 max-w-sm">
               {footerContent.brandDescription}

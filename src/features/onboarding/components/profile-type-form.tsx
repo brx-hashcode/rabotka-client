@@ -70,9 +70,7 @@ export function ProfileTypeForm({
             ...preSelected.map((id) => cats.findIndex((c) => c.id === id)),
           );
           if (lastSelectedIndex >= INITIAL_VISIBLE) {
-            setVisibleCount(
-              Math.min(lastSelectedIndex + 1, cats.length),
-            );
+            setVisibleCount(Math.min(lastSelectedIndex + 1, cats.length));
           }
         }
       })
@@ -180,34 +178,32 @@ export function ProfileTypeForm({
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {categories
-                      .slice(0, visibleCount)
-                      .map((cat) => {
-                        const isSelected = selected.includes(cat.id);
-                        const isDisabled = !isSelected && atMax;
-                        return (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            disabled={isDisabled}
-                            onClick={() => toggle(cat.id)}
-                            className={[
-                              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                              isSelected
-                                ? "border-green-500 bg-green-50 text-green-700"
-                                : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
-                              isDisabled
-                                ? "cursor-not-allowed opacity-40"
-                                : "cursor-pointer",
-                            ].join(" ")}
-                          >
-                            {cat.icon && (
-                              <span aria-hidden="true">{cat.icon}</span>
-                            )}
-                            {cat.name}
-                          </button>
-                        );
-                      })}
+                    {categories.slice(0, visibleCount).map((cat) => {
+                      const isSelected = selected.includes(cat.id);
+                      const isDisabled = !isSelected && atMax;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => toggle(cat.id)}
+                          className={[
+                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                            isSelected
+                              ? "border-green-500 bg-green-50 text-green-700"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
+                            isDisabled
+                              ? "cursor-not-allowed opacity-40"
+                              : "cursor-pointer",
+                          ].join(" ")}
+                        >
+                          {cat.icon && (
+                            <span aria-hidden="true">{cat.icon}</span>
+                          )}
+                          {cat.name}
+                        </button>
+                      );
+                    })}
                   </div>
                   {visibleCount < categories.length && (
                     <button
