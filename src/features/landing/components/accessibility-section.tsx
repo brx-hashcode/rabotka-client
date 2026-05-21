@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import communitySceneImage from "@/assets/community-scene.avif?format=webp";
+import communitySceneImage from "@/assets/community-scene.jpg?format=webp";
 import { accessibilityContent } from "@/content/landing/accessibility";
 
 export function AccessibilitySection() {
