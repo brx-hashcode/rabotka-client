@@ -1,14 +1,17 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import workersTogetherImage from "@/assets/workers-together.png?format=webp";
+import workersTogetherImage from "@/assets/workers-together.jpg?format=webp";
 import { impactContent } from "@/content/landing/impact";
 
 export function ImpactSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-20 lg:py-32 bg-background overflow-x-hidden" ref={ref}>
+    <section
+      className="py-20 lg:py-32 bg-background overflow-x-hidden"
+      ref={ref}
+    >
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
@@ -34,7 +37,7 @@ export function ImpactSection() {
               <span className="inline-block px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
                 {impactContent.badge}
               </span>
-              
+
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight text-balance">
                 {impactContent.title}
               </h2>
