@@ -33,6 +33,10 @@ export const editProfileContent = {
       charCount: "/500",
     },
   },
+  categories: {
+    label: "Domaines d'activité",
+    hint: "Choisissez jusqu'à 5 domaines",
+  },
   buttons: {
     edit: "Modifier",
     save: "Enregistrer",

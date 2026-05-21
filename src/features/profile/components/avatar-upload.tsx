@@ -121,12 +121,12 @@ export function AvatarUpload({
           <Button
             type="button"
             size="icon"
-            variant="outline"
+            variant="destructive"
             onClick={(e) => {
               e.stopPropagation();
               handleRemove();
             }}
-            className="absolute -right-1 -top-1 h-6 w-6 rounded-full"
+            className="absolute top-1 right-0.5 h-6 w-6 rounded-full"
             aria-label="Remove avatar"
           >
             <X className="h-3.5 w-3.5" />
