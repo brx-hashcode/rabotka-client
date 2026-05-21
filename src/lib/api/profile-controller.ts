@@ -49,6 +49,8 @@ export type ProfileMeResponse = {
   penaltiesCount: number;
   unpaidPenaltiesCount: number;
   walletBalance: number;
+  categoryIds: string[];
+  categoryNames: string[];
 };
 
 export type UpdateProfilePayload = {
@@ -56,6 +58,7 @@ export type UpdateProfilePayload = {
   lastName?: string;
   description?: string;
   address?: string;
+  categoryIds?: string[];
 };
 
 export type UpdateAvatarResponse = {
