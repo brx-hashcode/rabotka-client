@@ -29,6 +29,11 @@ export const useAddClaimComment = (claimId: string | undefined) => {
           return [...prev, newComment];
         },
       );
+      // Refresh list + detail so updatedAt / status / activity stay in sync.
+      queryClient.invalidateQueries({
+        queryKey: ["profile", "claims"],
+        refetchType: "all",
+      });
     },
     onError: () => {
       toast({
@@ -52,6 +57,10 @@ export const useDeleteClaimComment = (claimId: string | undefined) => {
         ["profile", "claims", claimId, "comments"],
         (prev = []) => prev.filter((c) => c.id !== commentId),
       );
+      queryClient.invalidateQueries({
+        queryKey: ["profile", "claims"],
+        refetchType: "all",
+      });
       toast({
         title: "Success",
         description: "Comment deleted successfully",
