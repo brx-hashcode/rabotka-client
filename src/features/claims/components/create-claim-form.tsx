@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -114,7 +113,7 @@ export const CreateClaimForm = () => {
   const isSubmitting = isPending || isUploading;
 
   return (
-    <Card className="p-6 max-w-2xl">
+    <div className="bg-white rounded-lg lg:p-8 p-4 max-w-2xl">
       <h2 className="text-2xl font-bold mb-6">Créer une Réclamation</h2>
 
       <Form {...form}>
@@ -248,6 +247,6 @@ export const CreateClaimForm = () => {
           </div>
         </form>
       </Form>
-    </Card>
+    </div>
   );
 };

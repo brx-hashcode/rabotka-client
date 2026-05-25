@@ -240,13 +240,13 @@ export function ConfirmationView({
         </label>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
+      <div className="flex flex-col-reverse gap-3 pt-4">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="flex-1 hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
+          className="w-full hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
         >
           {content.buttons.back}
         </Button>
@@ -254,7 +254,7 @@ export function ConfirmationView({
           type="button"
           onClick={handleSubmit}
           disabled={!policyAccepted || isSubmitting || mutation.isPending}
-          className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+          className="w-full bg-green-500 hover:bg-green-600 text-white"
         >
           {isSubmitting || mutation.isPending ? (
             <>
