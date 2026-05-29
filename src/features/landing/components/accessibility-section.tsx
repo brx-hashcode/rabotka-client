@@ -71,6 +71,9 @@ export function AccessibilitySection() {
               src={communitySceneImage}
               alt="Quartier communautaire africain vibrant"
               className="w-full h-auto object-cover aspect-16/10"
+              loading="lazy"
+              width={1600}
+              height={1000}
             />
           </motion.div>
         </div>

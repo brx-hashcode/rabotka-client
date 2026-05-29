@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-image-1.avif?format=webp";
+import heroImageAvif from "@/assets/hero-image-1.avif";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
@@ -81,11 +82,18 @@ export function HeroSection() {
             className="relative"
           >
             <div className="relative rounded-3xl overflow-hidden">
-              <img
-                src={heroImage}
-                alt={imageAlt}
-                className="w-full h-auto object-cover aspect-4/3"
-              />
+              <picture>
+                <source srcSet={heroImageAvif} type="image/avif" />
+                <source srcSet={heroImage} type="image/webp" />
+                <img
+                  src={heroImage}
+                  alt={imageAlt}
+                  className="w-full h-auto object-cover aspect-4/3"
+                  fetchPriority="high"
+                  width={1200}
+                  height={900}
+                />
+              </picture>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

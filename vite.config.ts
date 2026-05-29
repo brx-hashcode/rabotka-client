@@ -7,11 +7,11 @@ import sitemap from "vite-plugin-sitemap";
 import path from "node:path";
 
 const imageOptimizer = ViteImageOptimizer({
-  png: { quality: 90, compressionLevel: 9 },
-  jpeg: { quality: 85 },
-  jpg: { quality: 85 },
-  webp: { quality: 85 },
-  avif: { quality: 70 },
+  png: { quality: 80, compressionLevel: 9 },
+  jpeg: { quality: 75 },
+  jpg: { quality: 75 },
+  webp: { quality: 78 },
+  avif: { quality: 60 },
 });
 
 export default defineConfig(({ mode }) => {
