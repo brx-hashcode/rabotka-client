@@ -1,20 +1,33 @@
-  import { Routes, Route } from "react-router";
-import NotFound from "@/pages/not-found";
-import Onboarding from "@/pages/onboarding";
-import Profile from "@/pages/profile";
-import Login from "@/pages/login";
-import VerifyWhatsApp from "@/pages/verify-whatsapp";
-import Pay from "@/pages/pay";
-import AdRedirect from "@/pages/ad-redirect";
-import Claims from "@/pages/claims";
-import EmployerDashboard from "@/pages/employer-dashboard";
-import Claim from "@/pages/claim";
-import CreateClaim from "@/pages/create-claim";
+import { Routes, Route } from "react-router";
+import { lazy, Suspense } from "react";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout, AppLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
-import Terms from "@/pages/terms";
-import OnboardingAvatar from "@/pages/onboarding-avatar";
+
+// Critical path — bundled with landing
+import Onboarding from "@/pages/onboarding";
+import NotFound from "@/pages/not-found";
+
+// Non-critical — lazy loaded
+const Profile = lazy(() => import("@/pages/profile"));
+const Login = lazy(() => import("@/pages/login"));
+const Terms = lazy(() => import("@/pages/terms"));
+const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
+const Pay = lazy(() => import("@/pages/pay"));
+const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
+const Claims = lazy(() => import("@/pages/claims"));
+const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
+const Claim = lazy(() => import("@/pages/claim"));
+const CreateClaim = lazy(() => import("@/pages/create-claim"));
+const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  );
+}
 
 export function AppRoutes() {
   return (
@@ -38,73 +51,115 @@ export function AppRoutes() {
       <Route
         path="/profile"
         element={
-          <AuthGuard>
-            <AppLayout>
-              <Profile />
-            </AppLayout>
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
         }
       />
       <Route
         path="/claims"
         element={
-          <AuthGuard>
-            <AppLayout>
-              <Claims />
-            </AppLayout>
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <Claims />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
         }
       />
       <Route
         path="/claims/new"
         element={
-          <AuthGuard>
-            <AppLayout>
-              <CreateClaim />
-            </AppLayout>
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <CreateClaim />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
         }
       />
       <Route
         path="/claims/:id"
         element={
-          <AuthGuard>
-            <AppLayout>
-              <Claim />
-            </AppLayout>
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <Claim />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
         }
       />
       <Route
         path="/terms"
         element={
-          <LandingLayout>
-            <Terms />
-          </LandingLayout>
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <Terms />
+            </LandingLayout>
+          </Suspense>
         }
       />
       <Route
         path="/dashboard"
         element={
-          <AuthGuard>
-            <AppLayout>
-              <EmployerDashboard />
-            </AppLayout>
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <EmployerDashboard />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
         }
       />
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <Login />
+          </Suspense>
+        }
+      />
       <Route
         path="/onboarding/avatar"
         element={
-          <AuthGuard>
-            <OnboardingAvatar />
-          </AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <OnboardingAvatar />
+            </AuthGuard>
+          </Suspense>
         }
       />
-      <Route path="/verify/whatsapp" element={<VerifyWhatsApp />} />
-      <Route path="/pay/:token" element={<Pay />} />
-      <Route path="/r/:hash" element={<AdRedirect />} />
+      <Route
+        path="/verify/whatsapp"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <VerifyWhatsApp />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/pay/:token"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <Pay />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/r/:hash"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AdRedirect />
+          </Suspense>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

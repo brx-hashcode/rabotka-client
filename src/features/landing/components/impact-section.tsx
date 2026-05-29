@@ -24,6 +24,9 @@ export function ImpactSection() {
               src={workersTogetherImage}
               alt="Groupe de travailleurs africains divers souriant ensemble"
               className="w-full h-auto object-cover aspect-16/10"
+              loading="lazy"
+              width={1600}
+              height={1000}
             />
           </motion.div>
 
@@ -52,7 +55,7 @@ export function ImpactSection() {
                   transition={{ delay: 0.3 + index * 0.1 }}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-whatsapp-light"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-whatsapp flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-whatsapp flex items-center justify-center shrink-0">
                     <impact.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <p className="font-semibold text-foreground">{impact.text}</p>
