@@ -17,9 +17,17 @@ import { Seo } from "@/hooks/use-seo";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://rabotka.work/#organization",
   name: "Rabotka",
   url: "https://rabotka.work",
-  logo: "https://rabotka.work/og-image.png",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://rabotka.work/rabotka-logo.png",
+    width: 512,
+    height: 512,
+    caption: "Rabotka",
+  },
+  image: "https://rabotka.work/rabotka-logo.png",
   description:
     "Rabotka connecte les travailleurs informels et les employeurs grâce à un assistant WhatsApp simple en Afrique centrale.",
   address: {
@@ -42,11 +50,17 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": "https://rabotka.work/#website",
   name: "Rabotka",
   url: "https://rabotka.work",
+  publisher: { "@id": "https://rabotka.work/#organization" },
   potentialAction: {
     "@type": "SearchAction",
-    target: "https://rabotka.work/onboarding",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://rabotka.work/?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
   },
 };
 
