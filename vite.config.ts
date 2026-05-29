@@ -67,8 +67,18 @@ export default defineConfig(({ mode }) => {
       imageOptimizer,
       sitemap({
         hostname: env.VITE_SITE_URL || "https://rabotka.work",
-        dynamicRoutes: ["/onboarding", "/login"],
-        exclude: ["/profile", "/claims", "/claims/new", "/pay/*"],
+        dynamicRoutes: ["/onboarding", "/terms"],
+        exclude: [
+          "/login",
+          "/profile",
+          "/claims",
+          "/claims/new",
+          "/dashboard",
+          "/onboarding/avatar",
+          "/pay/*",
+          "/verify/*",
+          "/r/*",
+        ],
       }),
     ].filter(Boolean),
     resolve: {
