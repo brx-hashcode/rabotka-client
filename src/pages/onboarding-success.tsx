@@ -23,7 +23,7 @@ export default function OnboardingSuccess() {
       : credits?.workerCreditFcfa;
 
   const handleStart = () => {
-    navigate("/login?redirect=/onboarding/avatar");
+    navigate("/onboarding/avatar");
   };
 
   return (
