@@ -13,25 +13,18 @@ on:
       - closed
 
 jobs:
-  build-and-push:
-    name: Build and Push Image
+  promote:
+    name: Promote Develop Image to Production
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      actions: write
 
     outputs:
       image-digest: ${{ steps.push.outputs.digest }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -39,40 +32,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=sha,prefix=sha-,format=short
-
-      - name: Build and push
+      - name: Promote image
         id: push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: production
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=buildkit-main
-          cache-to: type=gha,mode=max,scope=buildkit-main
-
-      - name: Delete stale GHA caches
         run: |
-          gh cache list --ref refs/heads/main --json id --limit 100 \
-            | jq -r '.[].id' \
-            | tail -n +2 \
-            | xargs -r -I{} gh cache delete {}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          SOURCE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${SHORT_SHA}"
+          TARGET_LATEST="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          TARGET_SHA="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-sha-${SHORT_SHA}"
+
+          docker pull "$SOURCE"
+          docker tag "$SOURCE" "$TARGET_LATEST"
+          docker tag "$SOURCE" "$TARGET_SHA"
+          docker push "$TARGET_LATEST"
+          DIGEST=$(docker push "$TARGET_SHA" | grep -oP '(?<=digest: )sha256:[a-f0-9]+')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy to VPS (production)
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: promote
     permissions:
       contents: read
 
