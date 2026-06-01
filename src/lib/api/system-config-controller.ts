@@ -9,8 +9,7 @@ export type PublicContactInfo = {
 };
 
 export type WelcomeCredits = {
-  workerCreditFcfa: number;
-  employerCreditFcfa: number;
+  creditFcfa: number;
 };
 
 class SystemConfigController extends RabotkaBaseController {
@@ -18,8 +17,10 @@ class SystemConfigController extends RabotkaBaseController {
     return this.get<PublicContactInfo>("/public/config/contact");
   }
 
-  getWelcomeCredits(): Promise<WelcomeCredits> {
-    return this.get<WelcomeCredits>("/public/config/welcome-credits");
+  getWelcomeCredits(profileType: "WORKER" | "EMPLOYER"): Promise<WelcomeCredits> {
+    return this.get<WelcomeCredits>(
+      `/public/config/welcome-credits?profileType=${profileType}`,
+    );
   }
 }
 
