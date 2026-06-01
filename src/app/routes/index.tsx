@@ -20,6 +20,8 @@ const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const Claim = lazy(() => import("@/pages/claim"));
 const CreateClaim = lazy(() => import("@/pages/create-claim"));
 const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
+const OnboardingSuccess = lazy(() => import("@/pages/onboarding-success"));
+const OnboardingError = lazy(() => import("@/pages/onboarding-error"));
 
 function PageLoader() {
   return (
@@ -133,6 +135,22 @@ export function AppRoutes() {
             <AuthGuard>
               <OnboardingAvatar />
             </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/onboarding/success"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OnboardingSuccess />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/onboarding/error"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OnboardingError />
           </Suspense>
         }
       />
