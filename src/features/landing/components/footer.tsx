@@ -141,13 +141,19 @@ export function Footer() {
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={`${title}-${link.label}`}>
-                    <a
-                      href={link.href}
-                      onClick={(e) => handleFooterNav(e, link.href)}
-                      className="text-background/70 hover:text-background transition-colors text-sm"
-                    >
-                      {link.label}
-                    </a>
+                    {link.disabled ? (
+                      <span className="text-background/30 text-sm cursor-not-allowed">
+                        {link.label}
+                      </span>
+                    ) : (
+                      <a
+                        href={link.href}
+                        onClick={(e) => handleFooterNav(e, link.href)}
+                        className="text-background/70 hover:text-background transition-colors text-sm"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
