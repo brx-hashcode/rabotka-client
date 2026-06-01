@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Seo } from "@/hooks/use-seo";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,11 @@ export default function Terms() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pt-28">
+      <Seo
+        title="Conditions d'utilisation – Rabotka"
+        description="Consultez les conditions générales d'utilisation de Rabotka, la plateforme WhatsApp de mise en relation entre travailleurs informels et employeurs au Congo."
+        canonical="/terms"
+      />
       <div className="mb-5 flex items-center justify-between">
         <Button
           type="button"

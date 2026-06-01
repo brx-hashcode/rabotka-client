@@ -7,11 +7,11 @@ import sitemap from "vite-plugin-sitemap";
 import path from "node:path";
 
 const imageOptimizer = ViteImageOptimizer({
-  png: { quality: 90, compressionLevel: 9 },
-  jpeg: { quality: 85 },
-  jpg: { quality: 85 },
-  webp: { quality: 85 },
-  avif: { quality: 70 },
+  png: { quality: 80, compressionLevel: 9 },
+  jpeg: { quality: 75 },
+  jpg: { quality: 75 },
+  webp: { quality: 78 },
+  avif: { quality: 60 },
 });
 
 export default defineConfig(({ mode }) => {
@@ -67,8 +67,18 @@ export default defineConfig(({ mode }) => {
       imageOptimizer,
       sitemap({
         hostname: env.VITE_SITE_URL || "https://rabotka.work",
-        dynamicRoutes: ["/onboarding", "/login"],
-        exclude: ["/profile", "/claims", "/claims/new", "/pay/*"],
+        dynamicRoutes: ["/onboarding", "/terms"],
+        exclude: [
+          "/login",
+          "/profile",
+          "/claims",
+          "/claims/new",
+          "/dashboard",
+          "/onboarding/avatar",
+          "/pay/*",
+          "/verify/*",
+          "/r/*",
+        ],
       }),
     ].filter(Boolean),
     resolve: {

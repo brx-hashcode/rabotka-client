@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import streetWorkersImage from "@/assets/street-workers.avif?format=webp";
+import streetWorkersImage from "@/assets/street-workers.jpg?format=webp";
 import { realityContent } from "@/content/landing/reality";
 import { getCategories } from "@/lib/api/job-category-controller";
 
@@ -58,6 +58,9 @@ export function RealitySection() {
               src={streetWorkersImage}
               alt="Scène de rue africaine animée avec des travailleurs informels"
               className="w-full h-auto object-cover aspect-5/4"
+              loading="lazy"
+              width={1000}
+              height={800}
             />
           </motion.div>
 
@@ -79,21 +82,23 @@ export function RealitySection() {
               {realityContent.description}
             </p>
 
-            {isLoading ? (
-              <WorkerListSkeleton />
-            ) : (
-              <ul className="grid grid-cols-2 gap-3">
-                {workerNames.map((name) => (
-                  <li
-                    key={name}
-                    className="flex items-center gap-2 text-foreground"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-whatsapp shrink-0" />
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="min-h-[120px]">
+              {isLoading ? (
+                <WorkerListSkeleton />
+              ) : (
+                <ul className="grid grid-cols-2 gap-3">
+                  {workerNames.map((name) => (
+                    <li
+                      key={name}
+                      className="flex items-center gap-2 text-foreground"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-whatsapp shrink-0" />
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
             <p className="text-lg text-muted-foreground pt-4">
               {realityContent.conclusion}

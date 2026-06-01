@@ -9,7 +9,10 @@ export const useCreateClaim = () => {
   return useMutation({
     mutationFn: (data: CreateClaimPayload) => createClaim(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile", "claims"] });
+      queryClient.invalidateQueries({
+        queryKey: ["profile", "claims"],
+        refetchType: "all",
+      });
       toast({
         title: "Success",
         description: "Claim created successfully",

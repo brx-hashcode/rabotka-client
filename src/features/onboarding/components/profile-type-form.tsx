@@ -50,6 +50,7 @@ export function ProfileTypeForm({
   const setKycData = useOnboardingStore((state) => state.setKycData);
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const [categorySearch, setCategorySearch] = useState("");
 
   const [profileTypeParam, setProfileTypeParam] = useQueryState<
     "WORKER" | "EMPLOYER" | ""
@@ -159,6 +160,10 @@ export function ProfileTypeForm({
             render={({ field, fieldState }) => {
               const selected: string[] = field.value ?? [];
               const atMax = selected.length >= MAX_CATEGORIES;
+              const query = categorySearch.trim().toLowerCase();
+              const filteredCategories = query
+                ? categories.filter((c) => c.name.toLowerCase().includes(query))
+                : categories;
 
               const toggle = (id: string) => {
                 if (selected.includes(id)) {
@@ -177,8 +182,20 @@ export function ProfileTypeForm({
                       {content.categories.hint}
                     </span>
                   </div>
+                  <input
+                    type="search"
+                    value={categorySearch}
+                    onChange={(e) => setCategorySearch(e.target.value)}
+                    placeholder="Rechercher un domaine..."
+                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  />
                   <div className="flex flex-wrap gap-2">
-                    {categories.slice(0, visibleCount).map((cat) => {
+                    {filteredCategories.length === 0 && (
+                      <p className="text-xs text-gray-400">
+                        Aucune domaine trouvée.
+                      </p>
+                    )}
+                    {filteredCategories.slice(0, visibleCount).map((cat) => {
                       const isSelected = selected.includes(cat.id);
                       const isDisabled = !isSelected && atMax;
                       return (
@@ -205,17 +222,21 @@ export function ProfileTypeForm({
                       );
                     })}
                   </div>
-                  {visibleCount < categories.length && (
+                  {visibleCount < filteredCategories.length && (
                     <button
                       type="button"
                       onClick={() =>
                         setVisibleCount((v) =>
-                          Math.min(v + INITIAL_VISIBLE, categories.length),
+                          Math.min(
+                            v + INITIAL_VISIBLE,
+                            filteredCategories.length,
+                          ),
                         )
                       }
                       className="mt-1 text-xs text-green-600 font-medium hover:underline self-start"
                     >
-                      Voir plus ({categories.length - visibleCount} restants)
+                      Voir plus ({filteredCategories.length - visibleCount}{" "}
+                      restants)
                     </button>
                   )}
                   {visibleCount > INITIAL_VISIBLE && (
@@ -237,19 +258,19 @@ export function ProfileTypeForm({
             }}
           />
 
-          <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
+          <div className="flex flex-col-reverse gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={onBack}
-              className="flex-1 hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
+              className="w-full hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
             >
               {content.buttons.back}
             </Button>
             <Button
               type="submit"
               disabled={!form.formState.isValid}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+              className="w-full bg-green-500 hover:bg-green-600 text-white"
             >
               {content.buttons.next}
             </Button>

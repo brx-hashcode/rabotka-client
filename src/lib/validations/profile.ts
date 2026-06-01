@@ -19,6 +19,7 @@ export const editProfileSchema = z.object({
     .max(500, validationMessages.description.max)
     .optional()
     .default(""),
+  categoryIds: z.array(z.string().uuid()).min(1).max(5).optional(),
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;
