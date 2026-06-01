@@ -4,13 +4,18 @@ import { Seo } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
 import { AvatarUpload } from "@/features/profile/components/avatar-upload";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { useFirstLoginDone } from "@/hooks/use-first-login-done";
 
 export default function OnboardingAvatar() {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfileMe();
+  const firstLoginDone = useFirstLoginDone();
   const [uploaded, setUploaded] = useState(false);
 
-  const goToProfile = () => navigate("/profile");
+  const goToProfile = async () => {
+    await firstLoginDone.mutateAsync();
+    navigate("/profile");
+  };
 
   if (!uploaded && (isLoading || profile?.avatarUrl)) return null;
 
@@ -36,6 +41,7 @@ export default function OnboardingAvatar() {
           <Button
             variant={uploaded ? "default" : "outline"}
             onClick={goToProfile}
+            disabled={firstLoginDone.isPending}
           >
             {uploaded ? "Continuer" : "Passer cette étape"}
           </Button>
