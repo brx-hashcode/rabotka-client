@@ -3,7 +3,7 @@ export { profileTypeContent } from "./profile-type";
 export { kycDocumentsContent } from "./kyc-documents";
 export { confirmationContent } from "./confirmation";
 export { fileUploadContent } from "./file-upload";
-export { modalsContent } from "./modals";
+export { statusPagesContent } from "./modals";
 export { stepIndicatorContent } from "./step-indicator";
 export { layoutContent } from "./layout";
 export { validationMessages } from "./validation";

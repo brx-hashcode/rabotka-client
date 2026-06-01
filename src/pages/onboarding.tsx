@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
@@ -7,19 +8,16 @@ import {
   ProfileTypeForm,
   KycDocumentsForm,
   ConfirmationView,
-  SuccessModal,
-  ErrorModal,
 } from "@/features/onboarding/components";
 
 type OnboardingStep =
   | "personal-informations"
   | "profile-type"
   | "kyc-documents"
-  | "confirmation"
-  | "success"
-  | "error";
+  | "confirmation";
 
 export default function Onboarding() {
+  const navigate = useNavigate();
   const [step, setStep] = useQueryState<OnboardingStep>("step", {
     defaultValue: "personal-informations",
     parse: (value) => value as OnboardingStep,
@@ -29,10 +27,6 @@ export default function Onboarding() {
   const hydrateFromStorage = useOnboardingStore(
     (state) => state.hydrateFromStorage,
   );
-
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   useEffect(() => {
     void hydrateFromStorage();
@@ -44,6 +38,26 @@ export default function Onboarding() {
       globalThis.scrollTo(0, 0);
     }
   }, [step]);
+
+  const handleSuccess = useCallback(
+    (email: string) => {
+      const { kycData } = useOnboardingStore.getState();
+      const params = new URLSearchParams({
+        email,
+        profileType: kycData.profileType || "WORKER",
+      });
+      navigate(`/onboarding/success?${params.toString()}`);
+    },
+    [navigate],
+  );
+
+  const handleError = useCallback(() => {
+    const { error } = useOnboardingStore.getState();
+    const params = new URLSearchParams({
+      message: error ?? "",
+    });
+    navigate(`/onboarding/error?${params.toString()}`);
+  }, [navigate]);
 
   const renderStep = useCallback(() => {
     switch (step) {
@@ -75,17 +89,14 @@ export default function Onboarding() {
           <ConfirmationView
             currentStep="confirmation"
             onBack={() => setStep("kyc-documents")}
-            onSuccess={(email) => {
-              setSubmittedEmail(email);
-              setIsSuccessModalOpen(true);
-            }}
-            onError={() => setIsErrorModalOpen(true)}
+            onSuccess={handleSuccess}
+            onError={handleError}
           />
         );
       default:
         return null;
     }
-  }, [step, setStep]);
+  }, [step, setStep, handleSuccess, handleError]);
 
   return (
     <>
@@ -95,18 +106,11 @@ export default function Onboarding() {
         canonical="/onboarding"
         noIndex={false}
       />
-    <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
-      <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
-        <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
+      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
+        <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
+          <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
+        </div>
       </div>
-
-      <SuccessModal
-        open={isSuccessModalOpen}
-        onOpenChange={setIsSuccessModalOpen}
-        email={submittedEmail}
-      />
-      <ErrorModal open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen} />
-    </div>
     </>
   );
 }

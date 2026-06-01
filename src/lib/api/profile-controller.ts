@@ -43,6 +43,7 @@ export type ProfileMeResponse = {
   reliabilityScore: number | null;
   whatsappConnected: boolean;
   avatarUrl: string | null;
+  firstLogin: boolean;
   createdAt: string;
   jobOffersCount: number;
   applicationsCount: number;
@@ -211,6 +212,17 @@ export class ProfileController extends RabotkaBaseController {
     return response.blob();
   }
 
+  async markFirstLoginDone(): Promise<{ success: boolean }> {
+    try {
+      return await this.patch<{ success: boolean }>(
+        "/profile/me/first-login-done",
+        {},
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async getInvoices(): Promise<InvoiceItem[]> {
     try {
       return await this.get<InvoiceItem[]>("/invoices");
@@ -242,4 +254,5 @@ export const {
   downloadContract,
   getInvoices,
   downloadInvoice,
+  markFirstLoginDone,
 } = new ProfileController();
