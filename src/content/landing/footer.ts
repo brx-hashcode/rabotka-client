@@ -12,9 +12,9 @@ export const footerLinks: FooterLinkGroup = {
   ],
   Entreprise: [
     { label: "À propos", href: "#about" },
-    { label: "Carrières", href: "/" },
-    { label: "Presse", href: "/" },
-    { label: "Blog", href: "/" },
+    { label: "Carrières", href: "/", disabled: true },
+    { label: "Presse", href: "/", disabled: true },
+    { label: "Blog", href: "/", disabled: true },
   ],
   Légal: [
     { label: "Politique de confidentialité", href: "/terms" },

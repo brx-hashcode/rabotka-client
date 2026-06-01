@@ -1,19 +1,21 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
-Allow: /
+# Public pages — crawl freely
+Allow: /$
+Allow: /onboarding$
+Allow: /terms$
+Allow: /og-image.jpg
+Allow: /rabotka-logo.png
+Allow: /sitemap.xml
+
+# Auth-protected pages — always redirect unauthenticated users, never index
 Disallow: /profile
 Disallow: /claims
+Disallow: /claims/
+Disallow: /dashboard
+Disallow: /onboarding/avatar
 Disallow: /pay/
+Disallow: /verify/
+Disallow: /r/
+Disallow: /login
 
 Sitemap: https://rabotka.work/sitemap.xml

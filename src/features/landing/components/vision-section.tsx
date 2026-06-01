@@ -13,6 +13,7 @@ export function VisionSection() {
     <section
       id="about"
       className="relative py-20 lg:py-32 overflow-hidden"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}
       ref={ref}
     >
       <div className="absolute inset-0">

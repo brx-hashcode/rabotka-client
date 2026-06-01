@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import communitySceneImage from "@/assets/community-scene.avif?format=webp";
+import communitySceneImage from "@/assets/community-scene.jpg?format=webp";
 import { accessibilityContent } from "@/content/landing/accessibility";
 
 export function AccessibilitySection() {
@@ -71,6 +71,9 @@ export function AccessibilitySection() {
               src={communitySceneImage}
               alt="Quartier communautaire africain vibrant"
               className="w-full h-auto object-cover aspect-16/10"
+              loading="lazy"
+              width={1600}
+              height={1000}
             />
           </motion.div>
         </div>

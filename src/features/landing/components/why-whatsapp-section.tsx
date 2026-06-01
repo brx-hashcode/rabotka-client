@@ -63,6 +63,9 @@ export function WhyWhatsAppSection() {
                 src={whatsappPhoneImage}
                 alt="Mains tenant un téléphone avec WhatsApp"
                 className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
+                loading="lazy"
+                width={600}
+                height={800}
               />
             </div>
           </motion.div>

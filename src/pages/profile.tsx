@@ -97,6 +97,8 @@ export default function Profile() {
     `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`.toUpperCase();
   const isVerified = profile.verificationStatus === "VERIFIED";
   const isEmployer = profile.profileType === "EMPLOYER";
+  const categoryIds = profile.categoryIds ?? [];
+  const categoryNames = profile.categoryNames ?? [];
 
   return (
     <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
@@ -182,6 +184,32 @@ export default function Profile() {
             </div>
           </div>
         )}
+
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Domaines
+            </p>
+          </div>
+          <div className="px-4 py-3">
+            {categoryNames.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {categoryNames.map((name, i) => (
+                  <span
+                    key={categoryIds[i]}
+                    className="inline-flex items-center rounded-full border border-green-500 bg-green-50 px-3 py-1 text-sm font-medium text-green-700"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Aucun domaine sélectionné
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">

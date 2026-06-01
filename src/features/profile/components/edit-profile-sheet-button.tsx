@@ -1,6 +1,6 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -31,6 +31,13 @@ import {
   type EditProfileFormData,
 } from "@/lib/validations/profile";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import {
+  getCategories,
+  type JobCategory,
+} from "@/lib/api/job-category-controller";
+
+const MAX_CATEGORIES = 5;
+const INITIAL_VISIBLE = 10;
 
 const content = editProfileContent;
 
@@ -43,7 +50,15 @@ export function EditProfileSheetButton({
 }: EditProfileSheetButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
+  const [allCategories, setAllCategories] = useState<JobCategory[]>([]);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    getCategories()
+      .then(setAllCategories)
+      .catch(() => setAllCategories([]));
+  }, []);
 
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
   const { toast } = useToast();
@@ -55,6 +70,7 @@ export function EditProfileSheetButton({
       lastName: profile.lastName,
       address: profile.address,
       description: profile.description,
+      categoryIds: profile.categoryIds ?? [],
     },
     mode: "onChange",
   });
@@ -69,6 +85,7 @@ export function EditProfileSheetButton({
       lastName: profile.lastName,
       address: profile.address,
       description: profile.description,
+      categoryIds: profile.categoryIds ?? [],
     });
     setAvatarUrl(profile.avatarUrl);
     setIsOpen(true);
@@ -81,6 +98,7 @@ export function EditProfileSheetButton({
         lastName: data.lastName,
         address: data.address,
         description: data.description,
+        categoryIds: data.categoryIds,
       },
       {
         onSuccess: () => {
@@ -218,6 +236,92 @@ export function EditProfileSheetButton({
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              <Controller
+                control={form.control}
+                name="categoryIds"
+                render={({ field, fieldState }) => {
+                  const selected: string[] = field.value ?? [];
+                  const atMax = selected.length >= MAX_CATEGORIES;
+
+                  const toggle = (id: string) => {
+                    if (selected.includes(id)) {
+                      field.onChange(selected.filter((s) => s !== id));
+                    } else if (!atMax) {
+                      field.onChange([...selected, id]);
+                    }
+                  };
+
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-baseline flex-wrap gap-2 justify-between">
+                        <span className="text-sm font-medium">
+                          {content.categories.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {selected.length}/{MAX_CATEGORIES} —{" "}
+                          {content.categories.hint}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {allCategories.slice(0, visibleCount).map((cat) => {
+                          const isSelected = selected.includes(cat.id);
+                          const isDisabled = !isSelected && atMax;
+                          return (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              disabled={isDisabled}
+                              onClick={() => toggle(cat.id)}
+                              className={[
+                                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                                isSelected
+                                  ? "border-green-500 bg-green-50 text-green-700"
+                                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
+                                isDisabled
+                                  ? "cursor-not-allowed opacity-40"
+                                  : "cursor-pointer",
+                              ].join(" ")}
+                            >
+                              {cat.icon && (
+                                <span aria-hidden="true">{cat.icon}</span>
+                              )}
+                              {cat.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {visibleCount < allCategories.length && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVisibleCount((v) =>
+                              Math.min(v + INITIAL_VISIBLE, allCategories.length),
+                            )
+                          }
+                          className="mt-1 text-xs text-green-600 font-medium hover:underline self-start"
+                        >
+                          Voir plus ({allCategories.length - visibleCount} restants)
+                        </button>
+                      )}
+                      {visibleCount > INITIAL_VISIBLE && (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount(INITIAL_VISIBLE)}
+                          className="mt-1 text-xs text-gray-400 font-medium hover:underline self-start"
+                        >
+                          Voir moins
+                        </button>
+                      )}
+                      {fieldState.error && (
+                        <p className="text-sm font-medium text-destructive">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }}
               />
 
               <SheetFooter>

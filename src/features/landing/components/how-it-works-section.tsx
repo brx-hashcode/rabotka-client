@@ -83,6 +83,9 @@ const FlowCard = ({
             src={image}
             alt={imageAlt}
             className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
+            loading="lazy"
+            width={800}
+            height={1000}
           />
         </div>
       </motion.div>
