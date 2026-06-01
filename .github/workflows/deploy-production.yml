@@ -36,7 +36,7 @@ jobs:
         id: push
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          SOURCE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${SHORT_SHA}"
+          SOURCE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop"
           TARGET_LATEST="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           TARGET_SHA="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-sha-${SHORT_SHA}"
 
