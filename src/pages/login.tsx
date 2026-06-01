@@ -8,6 +8,7 @@ import { loginContent } from "@/content/landing/login";
 import { useSendOtpMutation } from "@/hooks/use-send-otp-mutation";
 import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
+import { getMe } from "@/lib/api/profile-controller";
 import {
   Step1EmailPhoneForm,
   Step2OTPForm,
@@ -38,8 +39,19 @@ export default function Login() {
 
   useEffect(() => {
     if (step === "3") {
-      const timer = setTimeout(() => {
-        navigate(redirectTo);
+      const timer = setTimeout(async () => {
+        // If an explicit redirect was provided (e.g. from success page), use it directly.
+        // Otherwise check firstLogin to decide whether to prompt for avatar or go to profile.
+        if (redirectTo !== "/onboarding/avatar") {
+          navigate(redirectTo);
+          return;
+        }
+        try {
+          const profile = await getMe();
+          navigate(profile.firstLogin ? "/onboarding/avatar" : "/profile");
+        } catch {
+          navigate("/onboarding/avatar");
+        }
       }, 2000);
       return () => clearTimeout(timer);
     }
