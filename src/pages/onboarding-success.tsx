@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import { CheckCircle, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/hooks/use-seo";
-import { useWelcomeCredits } from "@/hooks/use-welcome-credits";
-import { useProfileMe } from "@/hooks/use-profile-me";
 import { statusPagesContent } from "@/content/onboarding/modals";
 
 const content = statusPagesContent.success;
@@ -13,12 +11,7 @@ export default function OnboardingSuccess() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const email = params.get("email") ?? "";
-
-  const { data: profile } = useProfileMe();
-  const profileType = profile?.profileType ?? "WORKER";
-
-  const { data: credits } = useWelcomeCredits(profileType);
-  const creditAmount = credits?.creditFcfa;
+  const creditAmount = Number(params.get("credit") ?? 0);
 
   const handleStart = () => {
     navigate("/onboarding/avatar");
@@ -50,7 +43,7 @@ export default function OnboardingSuccess() {
             <p className="text-sm text-muted-foreground">{content.subtitle}</p>
           </motion.div>
 
-          {creditAmount !== undefined && (
+          {creditAmount > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
