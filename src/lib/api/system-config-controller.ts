@@ -8,22 +8,11 @@ export type PublicContactInfo = {
   airtelMoneyNumber: string;
 };
 
-export type WelcomeCredits = {
-  creditFcfa: number;
-};
-
 class SystemConfigController extends RabotkaBaseController {
   getContact(): Promise<PublicContactInfo> {
     return this.get<PublicContactInfo>("/public/config/contact");
-  }
-
-  getWelcomeCredits(profileType: "WORKER" | "EMPLOYER"): Promise<WelcomeCredits> {
-    return this.get<WelcomeCredits>(
-      `/public/config/welcome-credits?profileType=${profileType}`,
-    );
   }
 }
 
 const controller = new SystemConfigController();
 export const getPublicContact = controller.getContact.bind(controller);
-export const getWelcomeCredits = controller.getWelcomeCredits.bind(controller);

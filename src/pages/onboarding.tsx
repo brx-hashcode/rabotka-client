@@ -40,8 +40,8 @@ export default function Onboarding() {
   }, [step]);
 
   const handleSuccess = useCallback(
-    (email: string) => {
-      const params = new URLSearchParams({ email });
+    (email: string, creditedBalance: number) => {
+      const params = new URLSearchParams({ email, credit: String(creditedBalance) });
       navigate(`/onboarding/success?${params.toString()}`);
     },
     [navigate],

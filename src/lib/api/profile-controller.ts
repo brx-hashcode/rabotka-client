@@ -27,6 +27,7 @@ export type CreateProfilePayload = {
 
 export type CreateProfileResponse = {
   message: string;
+  creditedBalance: number;
 };
 
 export type ProfileMeResponse = {
