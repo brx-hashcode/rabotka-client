@@ -30,7 +30,7 @@ type OnboardingStep =
 type ConfirmationViewProps = {
   currentStep: OnboardingStep;
   onBack: () => void;
-  onSuccess: (email: string) => void;
+  onSuccess: (email: string, creditedBalance: number) => void;
   onError: () => void;
 };
 
@@ -47,8 +47,8 @@ export function ConfirmationView({
 
   const handleSubmit = useCallback(async () => {
     try {
-      await mutation.mutateAsync();
-      onSuccess(personalInfo.email);
+      const result = await mutation.mutateAsync();
+      onSuccess(personalInfo.email, result.creditedBalance);
     } catch (error) {
       console.error(error);
       onError();
