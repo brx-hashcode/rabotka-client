@@ -4,6 +4,7 @@ import { CheckCircle, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/hooks/use-seo";
 import { useWelcomeCredits } from "@/hooks/use-welcome-credits";
+import { useProfileMe } from "@/hooks/use-profile-me";
 import { statusPagesContent } from "@/content/onboarding/modals";
 
 const content = statusPagesContent.success;
@@ -12,18 +13,15 @@ export default function OnboardingSuccess() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const email = params.get("email") ?? "";
-  const profileType = (params.get("profileType") ?? "WORKER") as
-    | "WORKER"
-    | "EMPLOYER";
 
-  const { data: credits } = useWelcomeCredits();
-  const creditAmount =
-    profileType === "EMPLOYER"
-      ? credits?.employerCreditFcfa
-      : credits?.workerCreditFcfa;
+  const { data: profile } = useProfileMe();
+  const profileType = profile?.profileType ?? "WORKER";
+
+  const { data: credits } = useWelcomeCredits(profileType);
+  const creditAmount = credits?.creditFcfa;
 
   const handleStart = () => {
-    navigate("/login?redirect=/onboarding/avatar");
+    navigate("/onboarding/avatar");
   };
 
   return (

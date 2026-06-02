@@ -41,11 +41,7 @@ export default function Onboarding() {
 
   const handleSuccess = useCallback(
     (email: string) => {
-      const { kycData } = useOnboardingStore.getState();
-      const params = new URLSearchParams({
-        email,
-        profileType: kycData.profileType || "WORKER",
-      });
+      const params = new URLSearchParams({ email });
       navigate(`/onboarding/success?${params.toString()}`);
     },
     [navigate],
