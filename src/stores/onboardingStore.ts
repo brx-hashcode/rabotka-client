@@ -24,8 +24,10 @@ export type KycData = {
   documentType: DocumentType | "";
   kycDocument: File | null;
   kycDocumentPreview: string | null;
+  kycDocumentUrl: string | null;
   kycSelfie: File | null;
   kycSelfiePreview: string | null;
+  kycSelfieUrl: string | null;
 };
 
 type OnboardingStore = {
@@ -61,8 +63,10 @@ const initialState = {
     documentType: "" as const,
     kycDocument: null,
     kycDocumentPreview: null,
+    kycDocumentUrl: null,
     kycSelfie: null,
     kycSelfiePreview: null,
+    kycSelfieUrl: null,
   },
   isSubmitting: false,
   error: null,
@@ -129,6 +133,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             categoryIds: data.kycData?.categoryIds || [],
             categoryNames: data.kycData?.categoryNames || [],
             documentType: data.kycData?.documentType || "",
+            kycDocumentUrl: data.kycData?.kycDocumentUrl || null,
+            kycSelfieUrl: data.kycData?.kycSelfieUrl || null,
           },
         });
       }
@@ -166,8 +172,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           categoryIds: kycData.categoryIds,
           categoryNames: kycData.categoryNames,
           documentType: kycData.documentType,
-          // Blob URLs are session-scoped and invalid after reload — omit them
-          // so hydrateFromStorage always regenerates fresh previews from IndexedDB.
+          // Storage URLs are permanent — persist them so the uploaded files
+          // survive a reload without re-uploading.
+          kycDocumentUrl: kycData.kycDocumentUrl,
+          kycSelfieUrl: kycData.kycSelfieUrl,
+          // Blob previews are session-scoped and invalid after reload — omit them
+          // so hydrateFromStorage regenerates fresh previews from IndexedDB.
         },
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
