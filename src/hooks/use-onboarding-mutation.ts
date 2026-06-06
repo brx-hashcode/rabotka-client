@@ -12,7 +12,7 @@ export function useOnboardingMutation() {
     mutationFn: async (): Promise<CreateProfileResponse> => {
       const { personalInfo, kycData } = useOnboardingStore.getState();
 
-      if (!kycData.kycDocument || !kycData.kycSelfie) {
+      if (!kycData.kycDocumentUrl || !kycData.kycSelfieUrl) {
         throw new Error(apiErrors.kycDocumentsRequired);
       }
 
@@ -26,8 +26,8 @@ export function useOnboardingMutation() {
         profileType: kycData.profileType,
         categoryIds: kycData.categoryIds.length > 0 ? kycData.categoryIds : undefined,
         documentType: kycData.documentType,
-        kycDocument: kycData.kycDocument,
-        kycSelfie: kycData.kycSelfie,
+        kycDocumentUrl: kycData.kycDocumentUrl,
+        kycSelfieUrl: kycData.kycSelfieUrl,
         readAndApprovedPolicies: true,
       });
     },
