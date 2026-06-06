@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { X, FileText, User, Camera, Upload } from "lucide-react";
+import { X, FileText, User, Camera, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fileUploadContent } from "@/content/onboarding";
@@ -21,6 +21,7 @@ type FileUploadZoneProps = {
   readonly infoTooltip?: string;
   readonly infoImage?: string;
   readonly infoImageAlt?: string;
+  readonly uploading?: boolean;
 };
 
 export function FileUploadZone({
@@ -38,6 +39,7 @@ export function FileUploadZone({
   infoTooltip,
   infoImage,
   infoImageAlt,
+  uploading = false,
 }: Readonly<FileUploadZoneProps>) {
   const isImage = preview && /\.(jpg|jpeg|png)$/i.test(fileName || "");
   const isPDF = fileName && /\.pdf$/i.test(fileName);
@@ -107,6 +109,12 @@ export function FileUploadZone({
         {...(hasPreview ? {} : getRootProps())}
       >
         <input {...getInputProps()} className="sr-only" />
+
+        {uploading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+            <Loader2 className="size-8 animate-spin text-green-600" />
+          </div>
+        )}
 
         {hasPreview ? (
           <div className="relative h-[200px] w-full">
