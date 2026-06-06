@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -26,6 +26,7 @@ import {
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent } from "@/content/onboarding";
 import { compressImage } from "@/lib/image-compress";
+import { useUploadKycFile } from "@/hooks/use-upload-kyc-file";
 import { StepIndicator } from "./step-indicator";
 import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
 import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
@@ -54,6 +55,12 @@ export function KycDocumentsForm({
 }: Readonly<KycDocumentsFormProps>) {
   const kycData = useOnboardingStore((state) => state.kycData);
   const setKycData = useOnboardingStore((state) => state.setKycData);
+  const uploadKyc = useUploadKycFile();
+
+  const [uploading, setUploading] = useState<{
+    kycDocument: boolean;
+    kycSelfie: boolean;
+  }>({ kycDocument: false, kycSelfie: false });
 
   const form = useForm<Step3FormData>({
     resolver: zodResolver(step3Schema),
@@ -111,10 +118,29 @@ export function KycDocumentsForm({
       // of the original <input> element (prevents iOS Safari GC issues).
       const compressed = await compressImage(file);
       const preview = URL.createObjectURL(compressed);
+      form.clearErrors(fieldName);
       form.setValue(fieldName, compressed, { shouldValidate: true });
-      setKycData({ [fieldName]: compressed, [`${fieldName}Preview`]: preview });
+      // Show the local preview immediately, clear any prior URL while uploading.
+      setKycData({
+        [fieldName]: compressed,
+        [`${fieldName}Preview`]: preview,
+        [`${fieldName}Url`]: null,
+      });
+
+      // Upload to storage right away so the final create call carries only URLs.
+      setUploading((prev) => ({ ...prev, [fieldName]: true }));
+      try {
+        const { url } = await uploadKyc.mutateAsync(compressed);
+        setKycData({ [`${fieldName}Url`]: url });
+      } catch {
+        form.setError(fieldName, {
+          message: "Échec de l'envoi du fichier. Veuillez réessayer.",
+        });
+      } finally {
+        setUploading((prev) => ({ ...prev, [fieldName]: false }));
+      }
     },
-    [form, setKycData],
+    [form, setKycData, uploadKyc],
   );
 
   const handleRemoveFile = (fieldName: "kycDocument" | "kycSelfie") => {
@@ -130,6 +156,7 @@ export function KycDocumentsForm({
     setKycData({
       [fieldName]: null,
       [`${fieldName}Preview`]: null,
+      [`${fieldName}Url`]: null,
     });
   };
 
@@ -224,6 +251,7 @@ export function KycDocumentsForm({
                   helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
+                  uploading={uploading.kycDocument}
                   infoTooltip={content.documents.kycDocument.infoTooltip}
                   infoImage={
                     kycExampleImages[content.documents.kycDocument.infoImageKey]
@@ -252,6 +280,7 @@ export function KycDocumentsForm({
                   helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"
+                  uploading={uploading.kycSelfie}
                   infoTooltip={content.documents.kycSelfie.infoTooltip}
                   infoImage={
                     kycExampleImages[content.documents.kycSelfie.infoImageKey]
@@ -274,7 +303,13 @@ export function KycDocumentsForm({
             </Button>
             <Button
               type="submit"
-              disabled={!form.formState.isValid}
+              disabled={
+                !form.formState.isValid ||
+                uploading.kycDocument ||
+                uploading.kycSelfie ||
+                !kycData.kycDocumentUrl ||
+                !kycData.kycSelfieUrl
+              }
               className="w-full bg-green-500 hover:bg-green-600 text-white"
             >
               {content.buttons.next}

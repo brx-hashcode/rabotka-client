@@ -20,8 +20,8 @@ export type CreateProfilePayload = {
     | "NIU_CARD"
     | "OTHER"
     | "";
-  kycDocument: File;
-  kycSelfie: File;
+  kycDocumentUrl: string;
+  kycSelfieUrl: string;
   readAndApprovedPolicies: boolean;
 };
 
@@ -110,27 +110,33 @@ export type InvoiceItem = {
 };
 
 export class ProfileController extends RabotkaBaseController {
+  /**
+   * Pre-uploads a single KYC file (document or selfie) and returns its public
+   * URL. Called per-file during onboarding step 3 so the final createProfile
+   * request carries only URLs, not file bytes.
+   */
+  async uploadKycFile(file: File): Promise<{ url: string }> {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return await this.post<{ url: string }>(
+        "/profile/kyc-upload",
+        formData as unknown as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async createProfile(
     data: CreateProfilePayload,
   ): Promise<CreateProfileResponse> {
     try {
-      const formData = new FormData();
-      formData.append("firstName", data.firstName);
-      formData.append("lastName", data.lastName);
-      formData.append("email", data.email);
-      formData.append("phone", data.phone);
-      formData.append("address", data.address);
-      formData.append("description", data.description);
-      formData.append("profileType", data.profileType);
-      if (data.categoryIds && data.categoryIds.length > 0) {
-        data.categoryIds.forEach((id) => formData.append("categoryIds", id));
-      }
-      formData.append("documentType", data.documentType);
-      formData.append("kycDocument", data.kycDocument);
-      formData.append("kycSelfie", data.kycSelfie);
-      formData.append("readAndApprovedPolicies", String(data.readAndApprovedPolicies));
-
-      return await this.post<CreateProfileResponse>("/profile", formData);
+      return await this.post<CreateProfileResponse>(
+        "/profile",
+        data as unknown as Record<string, unknown>,
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -250,6 +256,7 @@ export const {
   updateAvatar,
   updateProfile,
   createProfile,
+  uploadKycFile,
   getApplications,
   downloadAgreement,
   downloadContract,
