@@ -9,6 +9,7 @@ type CsrfActions = {
   setToken: (token: string | null) => void;
   getToken: () => string | null;
   fetchAndSetToken: () => Promise<void>;
+  ensureFetch: () => Promise<void>;
 };
 
 type CsrfStore = CsrfState & CsrfActions;
@@ -28,5 +29,10 @@ export const useCsrfStore = create<CsrfStore>((set, get) => ({
       console.error("Failed to fetch CSRF token:", error);
       set({ token: null });
     }
+  },
+
+  ensureFetch: async () => {
+    if (get().token !== null) return;
+    await get().fetchAndSetToken();
   },
 }));
