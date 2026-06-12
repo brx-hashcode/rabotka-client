@@ -18,9 +18,10 @@ type ProvidersProps = {
   children: ReactNode;
 };
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
@@ -28,6 +29,10 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+export function getQueryClient(): QueryClient {
+  return queryClient;
+}
 
 export function Providers({ children }: Readonly<ProvidersProps>) {
   useEffect(() => {

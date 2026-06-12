@@ -7,7 +7,7 @@ type CsrfProviderProps = {
 
 export function CsrfProvider({ children }: Readonly<CsrfProviderProps>) {
   useEffect(() => {
-    useCsrfStore.getState().fetchAndSetToken();
+    useCsrfStore.getState().ensureFetch();
   }, []);
 
   return <>{children}</>;
