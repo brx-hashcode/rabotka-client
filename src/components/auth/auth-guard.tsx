@@ -25,7 +25,7 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
   }
 
   if (isError || !data) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

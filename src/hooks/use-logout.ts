@@ -13,7 +13,7 @@ export function useLogout() {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ["profile", "me"] });
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     },
     onError: () => {
       toast({ variant: "destructive", description: "Échec de la déconnexion. Veuillez réessayer." });
