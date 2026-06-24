@@ -74,3 +74,37 @@ export const howItWorksContent = {
     ] as Step[],
   },
 } as const;
+
+type FlowContent = {
+  title: string;
+  steps: ReadonlyArray<{ title: string; description: string }>;
+};
+
+/**
+ * Builds a schema.org HowTo object from a flow's on-page content so the
+ * structured data can never drift from the steps shown to users.
+ */
+export function buildHowToSchema(flow: FlowContent, id: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": id,
+    name: flow.title,
+    step: flow.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.title,
+      text: step.description,
+    })),
+  };
+}
+
+export const howToWorkerSchema = buildHowToSchema(
+  howItWorksContent.worker,
+  "https://rabotka.work/#how-to-worker",
+);
+
+export const howToEmployerSchema = buildHowToSchema(
+  howItWorksContent.employer,
+  "https://rabotka.work/#how-to-employer",
+);
