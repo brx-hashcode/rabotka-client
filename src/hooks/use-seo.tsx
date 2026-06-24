@@ -65,11 +65,17 @@ export function Seo({
 
       {/* JSON-LD */}
       {jsonLd &&
-        (Array.isArray(jsonLd) ? jsonLd : [jsonLd]).map((schema) => (
-          <script key={(schema as Record<string, string>)["@type"]} type="application/ld+json">
-            {JSON.stringify(schema)}
-          </script>
-        ))}
+        (Array.isArray(jsonLd) ? jsonLd : [jsonLd]).map((schema, index) => {
+          const entry = schema as Record<string, string>;
+          return (
+            <script
+              key={entry["@id"] ?? entry["@type"] ?? index}
+              type="application/ld+json"
+            >
+              {JSON.stringify(schema)}
+            </script>
+          );
+        })}
     </Helmet>
   );
 }
