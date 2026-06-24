@@ -12,6 +12,8 @@ import NotFound from "@/pages/not-found";
 const Profile = lazy(() => import("@/pages/profile"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
@@ -104,6 +106,26 @@ export function AppRoutes() {
           <Suspense fallback={<PageLoader />}>
             <LandingLayout>
               <Terms />
+            </LandingLayout>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <Privacy />
+            </LandingLayout>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/cookies"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <Cookies />
             </LandingLayout>
           </Suspense>
         }

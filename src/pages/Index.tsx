@@ -13,6 +13,10 @@ import {
   CTASection,
 } from "@/features/landing/components";
 import { Seo } from "@/hooks/use-seo";
+import {
+  howToWorkerSchema,
+  howToEmployerSchema,
+} from "@/content/landing/how-it-works";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -100,7 +104,13 @@ export default function Index() {
     <>
       <Seo
         canonical="/"
-        jsonLd={[organizationSchema, websiteSchema, faqSchema]}
+        jsonLd={[
+          organizationSchema,
+          websiteSchema,
+          faqSchema,
+          howToWorkerSchema,
+          howToEmployerSchema,
+        ]}
       />
       <HeroSection />
       <RealitySection />

@@ -17,9 +17,9 @@ export const footerLinks: FooterLinkGroup = {
     { label: "Blog", href: "/", disabled: true },
   ],
   Légal: [
-    { label: "Politique de confidentialité", href: "/terms" },
+    { label: "Politique de confidentialité", href: "/privacy" },
     { label: "Conditions d'utilisation", href: "/terms" },
-    { label: "Politique des cookies", href: "/terms" },
+    { label: "Politique des cookies", href: "/cookies" },
   ],
 } as const;
 
