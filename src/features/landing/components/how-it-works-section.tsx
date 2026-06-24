@@ -5,6 +5,7 @@ import familyHomeImage from "@/assets/family-home-1.jpg?format=webp";
 import { howItWorksContent } from "@/content/landing/how-it-works";
 
 type FlowProps = {
+  id: string;
   title: string;
   subtitle: string;
   steps: Array<{
@@ -19,6 +20,7 @@ type FlowProps = {
 };
 
 const FlowCard = ({
+  id,
   title,
   subtitle,
   steps,
@@ -29,7 +31,8 @@ const FlowCard = ({
 }: FlowProps) => {
   return (
     <div
-      className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? "lg:flex-row-reverse" : ""}`}
+      id={id}
+      className={`scroll-mt-24 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? "lg:flex-row-reverse" : ""}`}
     >
       <motion.div
         initial={{ opacity: 0, x: reversed ? 50 : -50 }}
@@ -47,9 +50,9 @@ const FlowCard = ({
           </h2>
         </div>
 
-        <div className="space-y-4">
+        <ol className="space-y-4">
           {steps.map((step, index) => (
-            <motion.div
+            <motion.li
               key={step.title}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -67,9 +70,9 @@ const FlowCard = ({
                   {step.description}
                 </p>
               </div>
-            </motion.div>
+            </motion.li>
           ))}
-        </div>
+        </ol>
       </motion.div>
 
       <motion.div
@@ -105,6 +108,7 @@ export function HowItWorksSection() {
     >
       <div className="section-container space-y-24 lg:space-y-32">
         <FlowCard
+          id="flow-travailleurs"
           subtitle={howItWorksContent.worker.subtitle}
           title={howItWorksContent.worker.title}
           steps={howItWorksContent.worker.steps}
@@ -114,6 +118,7 @@ export function HowItWorksSection() {
         />
 
         <FlowCard
+          id="flow-employeurs"
           subtitle={howItWorksContent.employer.subtitle}
           title={howItWorksContent.employer.title}
           steps={howItWorksContent.employer.steps}

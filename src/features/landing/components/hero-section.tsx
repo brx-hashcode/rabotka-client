@@ -7,9 +7,27 @@ import { heroContent } from "@/content/landing/hero";
 import { Link } from "react-router";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 
+const flowGuides = [
+  { label: "Guide travailleurs", href: "#flow-travailleurs" },
+  { label: "Guide employeurs", href: "#flow-employeurs" },
+] as const;
+
 export function HeroSection() {
   const { title, description, cta, stats, floatingCard, imageAlt } =
     heroContent;
+
+  const handleGuideClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    e.preventDefault();
+    const element = document.getElementById(href.slice(1));
+    if (element) {
+      const offsetPosition =
+        element.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-background via-background to-whatsapp-light pt-16 lg:pt-20">
@@ -58,6 +76,22 @@ export function HeroSection() {
                   {cta.secondary}
                 </Link>
               </Button>
+            </div>
+
+            {/* Visually hidden: "Comment ça marche" in the header already
+                links here. Kept in the DOM so search engines still see the
+                internal deep-links to each flow (#flow-travailleurs / #flow-employeurs). */}
+            <div className="sr-only">
+              {flowGuides.map((guide) => (
+                <a
+                  key={guide.href}
+                  href={guide.href}
+                  onClick={(e) => handleGuideClick(e, guide.href)}
+                  className="text-whatsapp-dark hover:text-whatsapp font-medium underline-offset-4 hover:underline transition-colors"
+                >
+                  {guide.label}
+                </a>
+              ))}
             </div>
 
             <motion.div
