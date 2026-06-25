@@ -208,6 +208,17 @@ export class ProfileController extends RabotkaBaseController {
     return response.blob();
   }
 
+  async downloadResume(): Promise<Blob> {
+    const token = useCsrfStore.getState().getToken();
+    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
+    const response = await fetch(`${config.apiUrl}/profile/resume/download`, {
+      credentials: "include",
+      headers,
+    });
+    if (!response.ok) throw new Error("Download failed");
+    return response.blob();
+  }
+
   async downloadContract(contractId: string): Promise<Blob> {
     const token = useCsrfStore.getState().getToken();
     const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
@@ -259,6 +270,7 @@ export const {
   uploadKycFile,
   getApplications,
   downloadAgreement,
+  downloadResume,
   downloadContract,
   getInvoices,
   downloadInvoice,

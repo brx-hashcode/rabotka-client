@@ -31,7 +31,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FileDown } from "lucide-react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
-import { downloadAgreement } from "@/lib/api/profile-controller";
+import { downloadAgreement, downloadResume } from "@/lib/api/profile-controller";
 import { cn, formatDate } from "@/lib/utils";
 
 const WHATSAPP_PLACEHOLDER =
@@ -42,6 +42,7 @@ export default function Profile() {
   const { data: profile, isLoading, error } = useProfileMe();
   const { mutate: handleLogout, isPending: isLoggingOut } = useLogout();
   const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
+  const [isDownloadingResume, setIsDownloadingResume] = useState(false);
 
   async function handleDownloadAgreement() {
     setIsDownloadingDoc(true);
@@ -57,6 +58,23 @@ export default function Profile() {
       toast.error("Impossible de télécharger le document");
     } finally {
       setIsDownloadingDoc(false);
+    }
+  }
+
+  async function handleDownloadResume() {
+    setIsDownloadingResume(true);
+    try {
+      const blob = await downloadResume();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = globalThis.document.createElement("a");
+      a.href = objectUrl;
+      a.download = "cv.pdf";
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Impossible de télécharger le CV");
+    } finally {
+      setIsDownloadingResume(false);
     }
   }
 
@@ -262,6 +280,19 @@ export default function Profile() {
                 >
                   {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
                 </button>
+                {!isEmployer && (
+                  <>
+                    <span className="mx-2 text-muted-foreground">·</span>
+                    <button
+                      type="button"
+                      disabled={isDownloadingResume}
+                      onClick={handleDownloadResume}
+                      className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                    >
+                      {isDownloadingResume ? "Téléchargement..." : "Télécharger mon CV"}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
             {!isEmployer && (
