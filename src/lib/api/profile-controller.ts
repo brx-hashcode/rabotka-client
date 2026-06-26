@@ -208,7 +208,7 @@ export class ProfileController extends RabotkaBaseController {
     return response.blob();
   }
 
-  async downloadResume(): Promise<Blob> {
+  async downloadResume(): Promise<{ blob: Blob; filename: string }> {
     const token = useCsrfStore.getState().getToken();
     const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
     const response = await fetch(`${config.apiUrl}/profile/resume/download`, {
@@ -216,7 +216,12 @@ export class ProfileController extends RabotkaBaseController {
       headers,
     });
     if (!response.ok) throw new Error("Download failed");
-    return response.blob();
+
+    const disposition = response.headers.get("Content-Disposition") ?? "";
+    const match = /filename="?([^"]+)"?/.exec(disposition);
+    const filename = match?.[1] ?? "resume.pdf";
+
+    return { blob: await response.blob(), filename };
   }
 
   async downloadContract(contractId: string): Promise<Blob> {
