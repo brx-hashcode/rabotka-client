@@ -64,11 +64,11 @@ export default function Profile() {
   async function handleDownloadResume() {
     setIsDownloadingResume(true);
     try {
-      const blob = await downloadResume();
+      const { blob, filename } = await downloadResume();
       const objectUrl = URL.createObjectURL(blob);
       const a = globalThis.document.createElement("a");
       a.href = objectUrl;
-      a.download = "cv.pdf";
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {
@@ -280,21 +280,26 @@ export default function Profile() {
                 >
                   {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
                 </button>
-                {!isEmployer && (
-                  <>
-                    <span className="mx-2 text-muted-foreground">·</span>
-                    <button
-                      type="button"
-                      disabled={isDownloadingResume}
-                      onClick={handleDownloadResume}
-                      className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
-                    >
-                      {isDownloadingResume ? "Téléchargement..." : "Télécharger mon CV"}
-                    </button>
-                  </>
-                )}
               </div>
             </div>
+            {!isEmployer && (
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="shrink-0">
+                  <FileDown className="h-4 w-4 text-whatsapp" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground">Mon CV</p>
+                  <button
+                    type="button"
+                    disabled={isDownloadingResume}
+                    onClick={handleDownloadResume}
+                    className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                  >
+                    {isDownloadingResume ? "Téléchargement..." : "Télécharger mon CV"}
+                  </button>
+                </div>
+              </div>
+            )}
             {!isEmployer && (
               <InfoRow
                 icon={<FileWarning className="h-4 w-4 text-amber-500" />}
