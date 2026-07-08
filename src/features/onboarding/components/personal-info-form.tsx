@@ -213,7 +213,7 @@ export function PersonalInfoForm({
           <Button
             type="submit"
             disabled={!form.formState.isValid}
-            className="w-full bg-green-500 hover:bg-green-600 text-white"
+            className="w-full"
           >
             {content.button.continue}
           </Button>
