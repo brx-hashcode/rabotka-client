@@ -297,7 +297,7 @@ export function KycDocumentsForm({
               type="button"
               variant="outline"
               onClick={onBack}
-              className="w-full hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
+              className="w-full"
             >
               {content.buttons.back}
             </Button>
@@ -310,7 +310,7 @@ export function KycDocumentsForm({
                 !kycData.kycDocumentUrl ||
                 !kycData.kycSelfieUrl
               }
-              className="w-full bg-green-500 hover:bg-green-600 text-white"
+              className="w-full"
             >
               {content.buttons.next}
             </Button>

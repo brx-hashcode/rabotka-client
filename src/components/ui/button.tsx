@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-whatsapp-dark shadow-soft",
+        default: "bg-linear-to-b from-whatsapp to-whatsapp-dark text-primary-foreground shadow-nav-selected hover:brightness-95",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground",
+        outline: "border-2 border-primary bg-transparent text-primary transition-[background-color,color] hover:bg-linear-to-b hover:from-whatsapp hover:to-whatsapp-dark hover:text-primary-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        whatsapp: "bg-whatsapp text-primary-foreground hover:bg-whatsapp-dark shadow-soft",
-        "whatsapp-outline": "border-2 border-whatsapp bg-transparent text-whatsapp hover:bg-whatsapp hover:text-primary-foreground",
-        hero: "bg-whatsapp text-primary-foreground hover:bg-whatsapp-dark shadow-medium text-base",
-        "hero-outline": "border-2 border-whatsapp bg-card/80 text-whatsapp hover:bg-whatsapp hover:text-primary-foreground backdrop-blur-sm text-base",
+        whatsapp: "bg-linear-to-b from-whatsapp to-whatsapp-dark text-primary-foreground shadow-nav-selected hover:brightness-95",
+        "whatsapp-outline": "border-2 border-whatsapp bg-transparent text-whatsapp transition-[background-color,color] hover:bg-linear-to-b hover:from-whatsapp hover:to-whatsapp-dark hover:text-primary-foreground",
+        hero: "bg-linear-to-b from-whatsapp to-whatsapp-dark text-primary-foreground shadow-nav-selected hover:brightness-95 text-base",
+        "hero-outline": "border-2 border-whatsapp bg-card/80 text-whatsapp backdrop-blur-sm text-base transition-[background-color,color] hover:bg-linear-to-b hover:from-whatsapp hover:to-whatsapp-dark hover:text-primary-foreground",
       },
       size: {
         default: "h-11 px-6 py-2",
