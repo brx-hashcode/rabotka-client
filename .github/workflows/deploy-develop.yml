@@ -59,6 +59,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=buildkit-develop
+
+      - name: Warm build cache (best-effort)
+        # The GHA cache backend occasionally fails to reserve cache space
+        # ("failed to reserve cache"). This is only a speed optimization for
+        # future builds, so it must never block a successful image push.
+        continue-on-error: true
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: production
+          push: false
+          cache-from: type=gha,scope=buildkit-develop
           cache-to: type=gha,mode=max,scope=buildkit-develop
 
       - name: Delete stale GHA caches
