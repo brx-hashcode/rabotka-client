@@ -29,6 +29,7 @@
 
   --radius: 1rem;
   --radius-lg: var(--radius);
+  --radius-2lg: calc(var(--radius) + 2px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-2xl: 1.5rem;
@@ -37,6 +38,7 @@
   --shadow-soft: 0 4px 20px -4px hsl(25 35% 15% / 0.08);
   --shadow-medium: 0 8px 30px -6px hsl(25 35% 15% / 0.12);
   --shadow-glow: 0 0 40px -10px hsl(142 70% 49% / 0.3);
+  --shadow-nav-selected: 0 4px 14px -2px hsl(var(--whatsapp) / 0.32);
 }
 
 @theme inline {

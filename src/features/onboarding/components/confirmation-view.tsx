@@ -246,7 +246,7 @@ export function ConfirmationView({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="w-full hover:bg-transparent hover:text-primary/70 hover:border-primary/70"
+          className="w-full"
         >
           {content.buttons.back}
         </Button>
@@ -254,7 +254,7 @@ export function ConfirmationView({
           type="button"
           onClick={handleSubmit}
           disabled={!policyAccepted || isSubmitting || mutation.isPending}
-          className="w-full bg-green-500 hover:bg-green-600 text-white"
+          className="w-full"
         >
           {isSubmitting || mutation.isPending ? (
             <>
