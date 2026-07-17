@@ -6,5 +6,4 @@ export const invoicesContent = {
   },
   empty: "Vous n'avez aucune facture pour le moment.",
   download: "Télécharger",
-  downloading: "Téléchargement...",
 } as const;
