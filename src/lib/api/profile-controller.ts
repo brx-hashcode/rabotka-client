@@ -1,5 +1,4 @@
 import { RabotkaBaseController } from "./base-controller";
-import { useCsrfStore } from "@/stores/csrf-store";
 import { config } from "@/config";
 
 export type CreateProfilePayload = {
@@ -197,42 +196,32 @@ export class ProfileController extends RabotkaBaseController {
     }
   }
 
-  async downloadAgreement(): Promise<Blob> {
-    const token = useCsrfStore.getState().getToken();
-    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
-    const response = await fetch(`${config.apiUrl}/profile/agreement/download`, {
-      credentials: "include",
-      headers,
-    });
-    if (!response.ok) throw new Error("Download failed");
-    return response.blob();
+  /**
+   * Absolute URL of the platform agreement PDF.
+   *
+   * These download endpoints return a URL rather than a Blob on purpose.
+   * Android WebView — which is what WhatsApp's in-app browser uses — cannot
+   * resolve `blob:` URLs for download at all: its DownloadManager only gets
+   * the placeholder URL, never the bytes, so the save silently fails. Handing
+   * the browser a real HTTP URL (ideally via a genuine <a href> click) is the
+   * only thing that can work there.
+   *
+   * No auth plumbing is needed: the endpoint is a GET, the CSRF guard ignores
+   * GET/HEAD/OPTIONS, and the session cookie is SameSite=None in production —
+   * so it rides along on a plain top-level navigation.
+   */
+  agreementDownloadUrl(): string {
+    return `${config.apiUrl}/profile/agreement/download`;
   }
 
-  async downloadResume(): Promise<{ blob: Blob; filename: string }> {
-    const token = useCsrfStore.getState().getToken();
-    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
-    const response = await fetch(`${config.apiUrl}/profile/resume/download`, {
-      credentials: "include",
-      headers,
-    });
-    if (!response.ok) throw new Error("Download failed");
-
-    const disposition = response.headers.get("Content-Disposition") ?? "";
-    const match = /filename="?([^"]+)"?/.exec(disposition);
-    const filename = match?.[1] ?? "resume.pdf";
-
-    return { blob: await response.blob(), filename };
+  /** Absolute URL of the profile's resume/CV PDF. See agreementDownloadUrl(). */
+  resumeDownloadUrl(): string {
+    return `${config.apiUrl}/profile/resume/download`;
   }
 
-  async downloadContract(contractId: string): Promise<Blob> {
-    const token = useCsrfStore.getState().getToken();
-    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
-    const response = await fetch(`${config.apiUrl}/contracts/${contractId}/download`, {
-      credentials: "include",
-      headers,
-    });
-    if (!response.ok) throw new Error("Download failed");
-    return response.blob();
+  /** Absolute URL of a signed work contract PDF. See agreementDownloadUrl(). */
+  contractDownloadUrl(contractId: string): string {
+    return `${config.apiUrl}/contracts/${encodeURIComponent(contractId)}/download`;
   }
 
   async markFirstLoginDone(): Promise<{ success: boolean }> {
@@ -254,15 +243,9 @@ export class ProfileController extends RabotkaBaseController {
     }
   }
 
-  async downloadInvoice(invoiceId: string): Promise<Blob> {
-    const token = useCsrfStore.getState().getToken();
-    const headers: Record<string, string> = token ? { "x-csrf-token": token } : {};
-    const response = await fetch(`${config.apiUrl}/invoices/${invoiceId}/download`, {
-      credentials: "include",
-      headers,
-    });
-    if (!response.ok) throw new Error("Download failed");
-    return response.blob();
+  /** Absolute URL of an invoice PDF. See agreementDownloadUrl(). */
+  invoiceDownloadUrl(invoiceId: string): string {
+    return `${config.apiUrl}/invoices/${encodeURIComponent(invoiceId)}/download`;
   }
 }
 
@@ -274,10 +257,10 @@ export const {
   createProfile,
   uploadKycFile,
   getApplications,
-  downloadAgreement,
-  downloadResume,
-  downloadContract,
+  agreementDownloadUrl,
+  resumeDownloadUrl,
+  contractDownloadUrl,
   getInvoices,
-  downloadInvoice,
+  invoiceDownloadUrl,
   markFirstLoginDone,
 } = new ProfileController();
