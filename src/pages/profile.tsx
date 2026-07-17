@@ -27,11 +27,14 @@ import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sh
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useEffect } from "react";
 import { FileDown } from "lucide-react";
+import { DownloadLink } from "@/components/common/download-link";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
-import { downloadAgreement, downloadResume } from "@/lib/api/profile-controller";
+import {
+  agreementDownloadUrl,
+  resumeDownloadUrl,
+} from "@/lib/api/profile-controller";
 import { cn, formatDate } from "@/lib/utils";
 
 const WHATSAPP_PLACEHOLDER =
@@ -41,42 +44,6 @@ export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
   const { mutate: handleLogout, isPending: isLoggingOut } = useLogout();
-  const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
-  const [isDownloadingResume, setIsDownloadingResume] = useState(false);
-
-  async function handleDownloadAgreement() {
-    setIsDownloadingDoc(true);
-    try {
-      const blob = await downloadAgreement();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = globalThis.document.createElement("a");
-      a.href = objectUrl;
-      a.download = "accord-plateforme.pdf";
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      toast.error("Impossible de télécharger le document");
-    } finally {
-      setIsDownloadingDoc(false);
-    }
-  }
-
-  async function handleDownloadResume() {
-    setIsDownloadingResume(true);
-    try {
-      const { blob, filename } = await downloadResume();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = globalThis.document.createElement("a");
-      a.href = objectUrl;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      toast.error("Impossible de télécharger le CV");
-    } finally {
-      setIsDownloadingResume(false);
-    }
-  }
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
@@ -272,14 +239,9 @@ export default function Profile() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-muted-foreground">Documents</p>
-                <button
-                  type="button"
-                  disabled={isDownloadingDoc}
-                  onClick={handleDownloadAgreement}
-                  className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
-                >
-                  {isDownloadingDoc ? "Téléchargement..." : "Télécharger mon accord"}
-                </button>
+                <DownloadLink href={agreementDownloadUrl()}>
+                  Télécharger mon accord
+                </DownloadLink>
               </div>
             </div>
             {!isEmployer && (
@@ -289,14 +251,9 @@ export default function Profile() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Mon CV</p>
-                  <button
-                    type="button"
-                    disabled={isDownloadingResume}
-                    onClick={handleDownloadResume}
-                    className="text-sm font-medium text-primary underline underline-offset-2 hover:no-underline disabled:opacity-50"
-                  >
-                    {isDownloadingResume ? "Téléchargement..." : "Télécharger mon CV"}
-                  </button>
+                  <DownloadLink href={resumeDownloadUrl()}>
+                    Télécharger mon CV
+                  </DownloadLink>
                 </div>
               </div>
             )}
