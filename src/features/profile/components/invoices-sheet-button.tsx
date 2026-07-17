@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount, formatDate } from "@/lib/utils";
 import { invoicesContent } from "@/content/profile";
 import { useProfileInvoices } from "@/hooks/use-profile-invoices";
-import { downloadInvoice } from "@/lib/api/profile-controller";
+import { useDownloadHint } from "@/hooks/use-download-hint";
+import { invoiceDownloadUrl } from "@/lib/api/profile-controller";
 
 const content = invoicesContent;
 
@@ -25,7 +25,7 @@ const REASON_LABELS: Record<string, string> = {
 
 export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const handleDownloadClick = useDownloadHint();
 
   const { data: invoices, isLoading } = useProfileInvoices({
     enabled: isOpen,
@@ -33,23 +33,6 @@ export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
 
   const hasInvoices = Boolean(Array.isArray(invoices) && invoices.length > 0);
   const list = hasInvoices ? invoices : [];
-
-  const handleDownload = async (invoiceId: string) => {
-    setDownloadingId(invoiceId);
-    try {
-      const blob = await downloadInvoice(invoiceId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `facture_${invoiceId.slice(0, 8)}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      toast.error("Impossible de télécharger la facture");
-    } finally {
-      setDownloadingId(null);
-    }
-  };
 
   return (
     <>
@@ -118,16 +101,21 @@ export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
                       {REASON_LABELS[invoice.reason] ?? invoice.reason}
                     </p>
                     <Button
+                      asChild
                       size="sm"
                       variant="outline"
                       className="w-full gap-2"
-                      disabled={downloadingId === invoice.id}
-                      onClick={() => handleDownload(invoice.id)}
                     >
-                      <Download className="h-3.5 w-3.5" />
-                      {downloadingId === invoice.id
-                        ? content.downloading
-                        : content.download}
+                      <a
+                        href={invoiceDownloadUrl(invoice.id)}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleDownloadClick}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {content.download}
+                      </a>
                     </Button>
                   </li>
                 ))}
