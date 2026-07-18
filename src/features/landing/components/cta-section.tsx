@@ -1,9 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ctaContent } from "@/content/landing/cta";
-import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
+import { config, whatsappLink } from "@/config";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 
 export function CTASection() {
@@ -35,14 +34,22 @@ export function CTASection() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button variant="hero" size="lg" className="group" asChild>
-              <Link to={onboardingPathWithProfile("WORKER")}>
+              <a
+                href={whatsappLink(config.whatsapp.messages.worker)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {ctaContent.buttons.primary}
-              </Link>
+              </a>
             </Button>
             <Button variant="hero-outline" size="lg" className="group" asChild>
-              <Link to={onboardingPathWithProfile("EMPLOYER")}>
+              <a
+                href={whatsappLink(config.whatsapp.messages.employer)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {ctaContent.buttons.secondary}
-              </Link>
+              </a>
             </Button>
           </div>
         </motion.div>
