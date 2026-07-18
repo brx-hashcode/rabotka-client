@@ -135,6 +135,13 @@ jobs:
 
       - name: Slack notify success
         if: success()
+        env:
+          MESSAGE: |
+            Deployment Succeeded (client production)
+            ${{ github.event.pull_request.title }}
+            Branch: ${{ github.ref_name }}
+            Author: ${{ github.actor }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -144,13 +151,20 @@ jobs:
               "attachments": [
                 {
                   "color": "#00B32C",
-                  "text": "Deployment Succeeded (client production)\n${{ github.event.pull_request.title }}\nBranch: ${{ github.ref_name }}\nAuthor: ${{ github.actor }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  "text": ${{ toJSON(env.MESSAGE) }}
                 }
               ]
             }
 
       - name: Slack notify failure
         if: failure()
+        env:
+          MESSAGE: |
+            Deployment Failed (client production)
+            ${{ github.event.pull_request.title }}
+            Branch: ${{ github.ref_name }}
+            Author: ${{ github.actor }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -160,7 +174,7 @@ jobs:
               "attachments": [
                 {
                   "color": "#B3000C",
-                  "text": "Deployment Failed (client production)\n${{ github.event.pull_request.title }}\nBranch: ${{ github.ref_name }}\nAuthor: ${{ github.actor }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  "text": ${{ toJSON(env.MESSAGE) }}
                 }
               ]
             }
