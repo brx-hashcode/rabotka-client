@@ -5,7 +5,7 @@ export const headerContent = {
     slogan:"Job Matching"
   },
   cta: {
-    button: "Se connecter",
+    button: "Commencer",
     profile: "Mon Profil",
   },
   menu: {
