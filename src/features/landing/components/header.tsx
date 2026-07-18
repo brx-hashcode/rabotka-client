@@ -11,6 +11,7 @@ export function Header() {
   const isScrolled = useScroll(50);
   const location = useLocation();
   const navigate = useNavigate();
+  const isOnboarding = location.pathname === "/onboarding";
 
   const scrollToElement = useCallback((id: string, retries = 5) => {
     const element = document.getElementById(id);
@@ -82,13 +83,19 @@ export function Header() {
             ))}
           </div>
 
-          <div className="hidden md:block">
-            <LoginButton />
-          </div>
+          {/* Hide the "Commencer" CTA on the onboarding screen — the user is
+              already starting, so it would be redundant. */}
+          {!isOnboarding && (
+            <>
+              <div className="hidden md:block">
+                <LoginButton />
+              </div>
 
-          <div className="md:hidden">
-            <MobileLoginButton />
-          </div>
+              <div className="md:hidden">
+                <MobileLoginButton />
+              </div>
+            </>
+          )}
         </div>
       </nav>
     </header>
