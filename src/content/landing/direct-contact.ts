@@ -2,7 +2,7 @@ export const directContactContent = {
   badge: "Connexion Directe",
   title: "Pas d'intermédiaires. Un accès direct.",
   description:
-    "Une fois le match trouvé, un simple déblocage de contact vous met directement en relation. Pas de commission, pas d'abonnement, juste un accès transparent.",
+    "Une fois la candidature acceptée, chaque partie débloque le contact de l'autre et vous échangez directement. Pas de commission sur vos missions, pas d'abonnement : seul le déblocage du contact est payant.",
   methods: [
     {
       title: "Appelez directement",

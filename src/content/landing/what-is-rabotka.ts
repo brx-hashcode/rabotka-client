@@ -20,13 +20,13 @@ export const whatIsRabotkaContent = {
     {
       icon: MessageSquare,
       title: "Suggère des profils de confiance",
-      description: "Recommandations vérifiées",
+      description: "Recommandations vérifiées, présentées en cartes WhatsApp",
     },
     {
       icon: Phone,
       title: "Permet le contact direct",
       description:
-        "Déblocage simple après acceptation , premier contact offert",
+        "Déblocage mutuel après acceptation, premier contact couvert par votre crédit de bienvenue",
     },
   ] as Feature[],
 } as const;
