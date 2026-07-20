@@ -19,7 +19,7 @@ export const heroContent: HeroContent = {
   },
   stats: [
     {
-      label: "1er contact offert",
+      label: "1er contact couvert",
       value: "",
     },
     {
@@ -27,7 +27,7 @@ export const heroContent: HeroContent = {
       value: "",
     },
     {
-      label: "Profils vérifiés",
+      label: "Profils vérifiés et notés",
       value: "",
     },
   ],

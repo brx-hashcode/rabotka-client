@@ -7,27 +7,22 @@ export const faqContent = {
     {
       question: "Comment fonctionne Rabotka?",
       answer:
-        "Rabotka connecte les travailleurs et les employeurs via WhatsApp. Les travailleurs créent un profil vérifié, et les employeurs peuvent rechercher et contacter directement les travailleurs qui correspondent à leurs besoins. Tout se fait via WhatsApp, sans besoin d'application supplémentaire.",
+        "Tout se passe sur WhatsApp, sans application supplémentaire. Les employeurs publient une mission et reçoivent des candidatures. Les travailleurs parcourent les offres, en reçoivent qui correspondent à leur profil, et postulent. Quand l'employeur accepte une candidature, les deux parties débloquent leurs coordonnées et s'organisent directement.",
     },
     {
       question: "Rabotka est-il gratuit?",
       answer:
-        "L'inscription est gratuite, et chaque nouveau membre reçoit un crédit de bienvenue suffisant pour débloquer un premier contact sans rien payer. Par la suite, débloquer les coordonnées d'un contact nécessite un petit frais, payable via votre crédit wallet ou Mobile Money (MTN / AIRTEL).",
-    },
-    {
-      question: "Comment puis-je vérifier mon profil?",
-      answer:
-        "Pour vérifier votre profil, vous devez fournir une pièce d'identité valide et une photo de vous-même (selfie). Notre équipe examine chaque demande de vérification pour garantir la sécurité et la confiance sur la plateforme. Une fois vérifié, votre profil affichera un badge de vérification.",
-    },
-    {
-      question: "Puis-je utiliser Rabotka sans smartphone?",
-      answer:
-        "Rabotka fonctionne via WhatsApp, donc vous avez besoin d'un smartphone avec WhatsApp installé. Cependant, Rabotka fonctionne même avec une connexion internet limitée et ne nécessite pas de télécharger une application supplémentaire.",
+        "L'inscription, la publication d'une offre, la consultation des missions et les candidatures sont gratuites. Rabotka ne prend aucune commission sur le montant de la mission. Seul le déblocage des coordonnées est payant, et chaque nouveau membre reçoit un crédit de bienvenue qui couvre son premier contact.",
     },
     {
       question: "Comment puis-je contacter un travailleur ou un employeur?",
       answer:
-        "Lorsqu'un employeur accepte la candidature d'un travailleur, les deux parties reçoivent une notification WhatsApp. Il suffit alors de débloquer les coordonnées de l'autre partie via votre wallet ou Mobile Money. Le contact doit être débloqué dans les 48 heures. Votre crédit de bienvenue couvre entièrement ce premier déblocage.",
+        "Lorsqu'un employeur accepte la candidature d'un travailleur, les deux parties reçoivent une notification WhatsApp. Chacune débloque alors le contact de l'autre, via son portefeuille ou par Mobile Money (MTN ou Airtel). Si l'une des parties ne confirme pas, le paiement de l'autre est automatiquement recrédité sur son portefeuille. Votre crédit de bienvenue couvre entièrement ce premier déblocage.",
+    },
+    {
+      question: "Comment Rabotka garantit-il la confiance?",
+      answer:
+        "Chaque profil est vérifié à partir d'une pièce d'identité valide et d'une photo de vous-même (selfie), examinées par notre équipe, et affiche ensuite un badge de vérification. Chaque profil porte aussi un score de fiabilité, visible avant tout engagement : il évolue avec les missions terminées et les évaluations mutuelles de 1 à 5 étoiles échangées après chaque mission.",
     },
     {
       question: "Quels types de services puis-je trouver sur Rabotka?",
@@ -36,3 +31,30 @@ export const faqContent = {
     },
   ],
 } as const;
+
+type FaqContent = {
+  items: ReadonlyArray<{ question: string; answer: string }>;
+};
+
+/**
+ * Builds a schema.org FAQPage object from the on-page questions so the
+ * structured data can never drift from what visitors actually read. Mirrors
+ * buildHowToSchema in ./how-it-works.ts.
+ */
+export function buildFaqSchema(faq: FaqContent, id: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": id,
+    mainEntity: faq.items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export const faqSchema = buildFaqSchema(faqContent, "https://rabotka.work/#faq");
