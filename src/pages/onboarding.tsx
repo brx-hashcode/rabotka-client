@@ -102,7 +102,7 @@ export default function Onboarding() {
         canonical="/onboarding"
         noIndex={false}
       />
-      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center py-8">
         <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
           <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
         </div>
