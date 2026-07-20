@@ -46,11 +46,7 @@ export function AppRoutes() {
       />
       <Route
         path="/onboarding"
-        element={
-          <LandingLayout>
-            <Onboarding />
-          </LandingLayout>
-        }
+        element={<Onboarding />}
       />
       <Route
         path="/profile"
