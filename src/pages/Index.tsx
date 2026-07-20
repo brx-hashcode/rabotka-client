@@ -17,6 +17,7 @@ import {
   howToWorkerSchema,
   howToEmployerSchema,
 } from "@/content/landing/how-it-works";
+import { faqSchema } from "@/content/landing/faq";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -66,37 +67,6 @@ const websiteSchema = {
     },
     "query-input": "required name=search_term_string",
   },
-};
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Comment fonctionne Rabotka?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Rabotka connecte les travailleurs et les employeurs via WhatsApp. Les travailleurs créent un profil vérifié et postuulent aux offres d'emploi. Les employeurs publient des offres et acceptent les candidatures. Tout se fait via WhatsApp, sans besoin d'application supplémentaire.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Rabotka est-il gratuit?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "L'inscription est gratuite, et chaque nouveau membre reçoit un crédit de bienvenue suffisant pour débloquer un premier contact sans rien payer. Par la suite, débloquer les coordonnées d'un contact nécessite un petit frais, payable via wallet ou Mobile Money.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Comment puis-je vérifier mon profil?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Pour vérifier votre profil, vous devez fournir une pièce d'identité valide et une photo de vous-même (selfie). Notre équipe examine chaque demande de vérification pour garantir la sécurité et la confiance sur la plateforme.",
-      },
-    },
-  ],
 };
 
 export default function Index() {

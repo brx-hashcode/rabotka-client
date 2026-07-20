@@ -27,13 +27,13 @@ export const howItWorksContent = {
         icon: MessageCircle,
         title: "Postulez aux offres d'emploi",
         description:
-          "Recevez des offres adaptées à votre profil et postulez directement via WhatsApp.",
+          "Parcourez les missions disponibles, recevez des offres recommandées selon votre profil, ou retrouvez une offre précise grâce à sa référence.",
       },
       {
         icon: Unlock,
         title: "Débloquez le contact de l'employeur",
         description:
-          "Candidature acceptée ? Déverrouillez les coordonnées de l'employeur, offert avec votre crédit de bienvenue.",
+          "Candidature acceptée ? Chacun débloque le contact de l'autre. Sans confirmation, vous êtes remboursé.",
       },
     ] as Step[],
   },
@@ -63,13 +63,13 @@ export const howItWorksContent = {
         icon: MessageCircle,
         title: "Consultez les candidatures",
         description:
-          "Recevez et examinez les candidatures de travailleurs vérifiés, puis sélectionnez le meilleur profil.",
+          "Publiez votre offre et recevez les candidatures de travailleurs vérifiés, avec leur score de fiabilité, puis acceptez le meilleur profil.",
       },
       {
         icon: Unlock,
         title: "Débloquez le contact du travailleur",
         description:
-          "Candidature acceptée ? Déverrouillez les coordonnées du travailleur, offert avec votre crédit de bienvenue.",
+          "Candidature acceptée ? Chacun débloque le contact de l'autre. Une offre à plusieurs postes ne se paie qu'une fois.",
       },
     ] as Step[],
   },
