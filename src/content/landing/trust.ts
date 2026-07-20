@@ -18,7 +18,7 @@ export const trustContent = {
     {
       icon: Users,
       title: "Score de fiabilité",
-      description: "Les annulations tardives sont pénalisées , chaque profil reflète un historique réel",
+      description: "Missions terminées, évaluations mutuelles de 1 à 5 étoiles, annulations tardives pénalisées : chaque profil reflète un historique réel",
     },
   ] as Feature[],
 } as const;
