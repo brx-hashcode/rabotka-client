@@ -105,11 +105,13 @@ function ViewerImage({
     );
   }
   return (
-    <img
-      src={url}
-      alt={`Réalisation ${index + 1}`}
-      className="max-h-[70vh] w-full object-contain"
-      onError={() => setBroken(true)}
-    />
+    <div className="aspect-square w-full">
+      <img
+        src={url}
+        alt={`Réalisation ${index + 1}`}
+        className="h-full w-full object-cover"
+        onError={() => setBroken(true)}
+      />
+    </div>
   );
 }
