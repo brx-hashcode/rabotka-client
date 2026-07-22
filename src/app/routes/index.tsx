@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 
 // Non-critical — lazy loaded
 const Profile = lazy(() => import("@/pages/profile"));
+const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
 const Privacy = lazy(() => import("@/pages/privacy"));
@@ -17,6 +18,7 @@ const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
+const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const Claims = lazy(() => import("@/pages/claims"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const Claim = lazy(() => import("@/pages/claim"));
@@ -55,6 +57,18 @@ export function AppRoutes() {
             <AuthGuard>
               <AppLayout>
                 <Profile />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/profile/portfolio"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <MyPortfolio />
               </AppLayout>
             </AuthGuard>
           </Suspense>
@@ -193,6 +207,14 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AdRedirect />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/p/:slug"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <PublicPortfolio />
           </Suspense>
         }
       />
