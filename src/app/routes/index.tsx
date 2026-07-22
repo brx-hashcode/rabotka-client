@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 
 // Non-critical — lazy loaded
 const Profile = lazy(() => import("@/pages/profile"));
+const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
 const Privacy = lazy(() => import("@/pages/privacy"));
@@ -56,6 +57,18 @@ export function AppRoutes() {
             <AuthGuard>
               <AppLayout>
                 <Profile />
+              </AppLayout>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/profile/portfolio"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppLayout>
+                <MyPortfolio />
               </AppLayout>
             </AuthGuard>
           </Suspense>

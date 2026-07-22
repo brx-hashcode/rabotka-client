@@ -47,10 +47,12 @@ export function PortfolioHeader({
 
         <div className="flex flex-1 items-center justify-around">
           <Stat value={String(realizationsCount)} label="Réalisations" />
-          <Stat
-            value={String(profile.completedMissionsCount)}
-            label="Missions"
-          />
+          {profile.completedMissionsCount != null && (
+            <Stat
+              value={String(profile.completedMissionsCount)}
+              label="Missions"
+            />
+          )}
           <Stat
             value={
               profile.reliabilityScore != null
