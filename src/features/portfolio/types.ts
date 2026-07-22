@@ -21,5 +21,6 @@ export type PortfolioProfile = {
   reliabilityScore: number | null;
   ratingAvg: number | null;
   ratingCount: number;
-  completedMissionsCount: number;
+  /** null hides the "Missions" stat (e.g. owner view where it isn't available). */
+  completedMissionsCount: number | null;
 };
