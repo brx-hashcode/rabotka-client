@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Wallet,
   ChevronRight,
+  Images,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
@@ -272,6 +273,11 @@ export default function Profile() {
           <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
             {!isEmployer && (
               <>
+                <ActionRow
+                  icon={<Images className="h-4 w-4 text-muted-foreground" />}
+                  label="Mes réalisations"
+                  onClick={() => navigate("/profile/portfolio")}
+                />
                 <ApplicationsSheetButton asRow />
                 <PenaltiesSheetButton asRow />
               </>
