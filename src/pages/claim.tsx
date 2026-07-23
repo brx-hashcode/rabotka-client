@@ -12,7 +12,7 @@ export default function Claim() {
 
   if (isLoading) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
+      <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto w-full flex-1 space-y-4">
           <Skeleton className="h-96 w-full rounded-lg" />
         </div>
@@ -22,7 +22,7 @@ export default function Claim() {
 
   if (error || !claim) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
+      <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto w-full flex-1 space-y-6">
           <Button
             variant="outline"
@@ -51,7 +51,7 @@ export default function Claim() {
   }
 
   return (
-    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 min-h-screen">
+    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8 min-h-screen">
       <div className="max-w-2xl mx-auto w-full">
         <ClaimChat claim={claim} />
       </div>
