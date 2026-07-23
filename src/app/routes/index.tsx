@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router";
 import { lazy, Suspense } from "react";
 import { AuthGuard } from "@/components/auth";
-import { LandingLayout, AppLayout } from "@/features/landing/layouts";
+import { LandingLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
 
 // Critical path — bundled with landing
@@ -66,9 +66,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <MyPortfolio />
-              </AppLayout>
+              <MyPortfolio />
             </AuthGuard>
           </Suspense>
         }
@@ -78,9 +76,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <Claims />
-              </AppLayout>
+              <Claims />
             </AuthGuard>
           </Suspense>
         }
@@ -90,9 +86,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <CreateClaim />
-              </AppLayout>
+              <CreateClaim />
             </AuthGuard>
           </Suspense>
         }
@@ -102,9 +96,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <Claim />
-              </AppLayout>
+              <Claim />
             </AuthGuard>
           </Suspense>
         }

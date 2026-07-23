@@ -19,7 +19,7 @@ import { RealizationFormSheet } from "@/features/portfolio/components/realizatio
 import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
 import type { PortfolioItem } from "@/features/portfolio/types";
 
-const CONTAINER = "mx-auto w-full max-w-xl px-4 pt-20 pb-10 sm:pt-24";
+const CONTAINER = "mx-auto w-full max-w-xl px-4 pt-8 pb-10 sm:pt-10";
 
 export default function MyPortfolio() {
   const { data: profile, isLoading: profileLoading } = useProfileMe();
