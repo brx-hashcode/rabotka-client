@@ -69,15 +69,6 @@ jobs:
           # a warning instead of failing the build (image is already pushed).
           cache-to: type=gha,mode=max,scope=buildkit-develop,ignore-error=true
 
-      - name: Delete stale GHA caches
-        run: |
-          gh cache list --ref refs/heads/develop --json id --limit 100 \
-            | jq -r '.[].id' \
-            | tail -n +2 \
-            | xargs -r -I{} gh cache delete {}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy:
     name: Deploy to VPS (develop)
     runs-on: ubuntu-latest
