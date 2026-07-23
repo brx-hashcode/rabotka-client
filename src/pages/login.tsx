@@ -10,7 +10,7 @@ import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
 import { getMe } from "@/lib/api/profile-controller";
 import {
-  Step1EmailPhoneForm,
+  Step1PhoneForm,
   Step2OTPForm,
 } from "@/features/landing/components/login-steps";
 
@@ -23,7 +23,7 @@ export default function Login() {
     "step",
     parseAsStringLiteral(STEPS).withDefault(STEPS[0]),
   );
-  const [emailOrPhone, setEmailOrPhone] = useQueryState("id", {
+  const [phone, setPhone] = useQueryState("id", {
     defaultValue: "",
   });
   // When no explicit redirect is set, always pass through /onboarding/avatar
@@ -58,23 +58,23 @@ export default function Login() {
   }, [step, navigate, redirectTo]);
 
   useEffect(() => {
-    if (step === "2" && !emailOrPhone) {
+    if (step === "2" && !phone) {
       setStep("1");
     }
-  }, [step, emailOrPhone, setStep]);
+  }, [step, phone, setStep]);
 
   const handleStep1Submit = useCallback(
-    async (data: { emailOrPhone: string }) => {
+    async (data: { phone: string }) => {
       setApiError(null);
       try {
-        await sendOtpMutation.mutateAsync(data.emailOrPhone);
-        setEmailOrPhone(data.emailOrPhone);
+        await sendOtpMutation.mutateAsync(data.phone);
+        setPhone(data.phone);
         setStep("2");
       } catch (error) {
         setApiError((error as Error).message);
       }
     },
-    [sendOtpMutation, setEmailOrPhone, setStep],
+    [sendOtpMutation, setPhone, setStep],
   );
 
   const handleStep2Submit = useCallback(
@@ -82,7 +82,7 @@ export default function Login() {
       setApiError(null);
       try {
         await verifyOtpMutation.mutateAsync({
-          emailOrPhone,
+          emailOrPhone: phone,
           otp: data.otp,
         });
         setStep("3");
@@ -90,17 +90,17 @@ export default function Login() {
         setApiError((error as Error).message);
       }
     },
-    [emailOrPhone, verifyOtpMutation, setStep],
+    [phone, verifyOtpMutation, setStep],
   );
 
   const handleResendOTP = useCallback(async () => {
     setApiError(null);
     try {
-      await resendOtpMutation.mutateAsync(emailOrPhone);
+      await resendOtpMutation.mutateAsync(phone);
     } catch (error) {
       setApiError((error as Error).message);
     }
-  }, [emailOrPhone, resendOtpMutation]);
+  }, [phone, resendOtpMutation]);
 
   return (
     <>
@@ -147,7 +147,7 @@ export default function Login() {
       {step !== "3" && (
         <div className="px-6 pb-10 w-full max-w-sm mx-auto">
           {step === "1" && (
-            <Step1EmailPhoneForm
+            <Step1PhoneForm
               onSubmit={handleStep1Submit}
               isLoading={sendOtpMutation.isPending}
               serverError={apiError}
