@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -49,6 +50,16 @@ import {
   PAYMENT_FLOW_VALUES,
   PAYMENT_FLOW_LABELS,
 } from "@/lib/validations/job-offer";
+
+// Earliest selectable value for the datetime-local picker, in local time
+// (YYYY-MM-DDTHH:mm). Mirrors the "at least 4h ahead" validation so the native
+// picker itself blocks invalid dates.
+const MIN_HOURS_AHEAD = 4;
+function minScheduledAt(): string {
+  const d = new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 type Props = {
   onCreated: (offer: CreatedJobOffer, recap: CreateJobOfferFormData) => void;
@@ -152,11 +163,16 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 <FormControl>
                   <Input
                     type="datetime-local"
+                    min={minScheduledAt()}
                     className="w-full min-w-0 max-w-full"
                     disabled={isPending}
                     {...field}
                   />
                 </FormControl>
+                <FormDescription>
+                  Appuyez pour choisir la date et l'heure de début (au moins 4
+                  heures à l'avance).
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -258,7 +274,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 const selected = categories.find((c) => c.id === field.value);
                 return (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Catégorie (optionnel)</FormLabel>
+                    <FormLabel>Domaine (optionnel)</FormLabel>
                     <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -275,7 +291,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                               !selected && "text-muted-foreground",
                             )}
                           >
-                            {selected ? selected.name : "Choisir une catégorie…"}
+                            {selected ? selected.name : "Choisir un domaine…"}
                             <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
@@ -286,9 +302,9 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                         className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] p-0"
                       >
                         <Command>
-                          <CommandInput placeholder="Rechercher une catégorie…" />
+                          <CommandInput placeholder="Rechercher un domaine…" />
                           <CommandList>
-                            <CommandEmpty>Aucune catégorie trouvée.</CommandEmpty>
+                            <CommandEmpty>Aucun domaine trouvé.</CommandEmpty>
                             <CommandGroup>
                               {categories.map((category) => (
                                 <CommandItem
