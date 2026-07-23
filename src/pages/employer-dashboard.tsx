@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronRight,
+  Plus,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
 
@@ -149,15 +151,21 @@ export default function EmployerDashboard() {
   const invoiceCount = invoices?.length ?? 0;
 
   return (
-    <div className="pt-24 lg:pt-28 pb-12 px-4 md:px-8 max-w-2xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Bonjour,{" "}
-          <span className="font-medium text-foreground">
-            {profile?.firstName ?? "…"}
-          </span>
-        </p>
+    <div className="pt-8 lg:pt-10 pb-12 px-4 md:px-8 max-w-2xl mx-auto space-y-8">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Bonjour,{" "}
+            <span className="font-medium text-foreground">
+              {profile?.firstName ?? "…"}
+            </span>
+          </p>
+        </div>
+        <Button className="shrink-0" onClick={() => navigate("/job-offers/new")}>
+          <Plus className="size-4" />
+          Créer une offre
+        </Button>
       </div>
 
       {/* KPIs */}

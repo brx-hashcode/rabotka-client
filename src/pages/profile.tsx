@@ -282,6 +282,13 @@ export default function Profile() {
                 <PenaltiesSheetButton asRow />
               </>
             )}
+            {isEmployer && (
+              <ActionRow
+                icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
+                label="Créer une offre"
+                onClick={() => navigate("/job-offers/new")}
+              />
+            )}
             <InvoicesSheetButton asRow />
             <ActionRow
               icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
