@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router";
-import { CheckCircle2, Copy, Plus } from "lucide-react";
+import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   type CreateJobOfferFormData,
@@ -49,9 +48,11 @@ export function JobOfferSuccess({
   };
 
   return (
-    <div className="bg-white rounded-lg lg:p-8 p-4">
-      <div className="flex flex-col items-center text-center gap-2">
-        <CheckCircle2 className="size-12 text-green-600" />
+    <div className="flex w-full flex-col">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex size-16 items-center justify-center rounded-full bg-green-100">
+          <Check className="size-8 text-green-600" strokeWidth={3} />
+        </div>
         <h2 className="text-2xl font-bold">Votre offre est publiée !</h2>
         <p className="text-sm text-muted-foreground">
           Un message WhatsApp de confirmation vous a été envoyé. Partagez la
@@ -60,18 +61,16 @@ export function JobOfferSuccess({
         </p>
       </div>
 
-      <Card className="mt-6">
-        <CardContent className="flex items-center justify-between gap-3 p-4">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">Référence de l'offre</p>
-            <p className="font-mono text-lg font-semibold">{reference}</p>
-          </div>
-          <Button variant="outline" onClick={copyReference}>
-            <Copy className="size-4" />
-            Copier
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="mt-6 flex items-center justify-between gap-3 rounded-xl border bg-muted/40 p-4">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">Référence de l'offre</p>
+          <p className="font-mono text-lg font-semibold">{reference}</p>
+        </div>
+        <Button variant="outline" onClick={copyReference}>
+          <Copy className="size-4" />
+          Copier
+        </Button>
+      </div>
 
       <dl className="mt-6 space-y-3 text-sm">
         <RecapRow label="Offre" value={recap.title} />

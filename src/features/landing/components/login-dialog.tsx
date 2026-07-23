@@ -12,7 +12,7 @@ import { useSendOtpMutation } from "@/hooks/use-send-otp-mutation";
 import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
 import {
-  Step1EmailPhoneForm,
+  Step1PhoneForm,
   Step2OTPForm,
   Step3Redirecting,
 } from "./login-steps";
@@ -30,7 +30,7 @@ export const LoginDialog = ({
 }: Readonly<LoginDialogProps>) => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
-  const [emailOrPhone, setEmailOrPhone] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [apiError, setApiError] = useState<string | null>(null);
 
   const sendOtpMutation = useSendOtpMutation();
@@ -44,7 +44,7 @@ export const LoginDialog = ({
   useEffect(() => {
     if (!isOpen) {
       setStep(1);
-      setEmailOrPhone("");
+      setPhone("");
       setApiError(null);
     }
   }, [isOpen]);
@@ -60,11 +60,11 @@ export const LoginDialog = ({
   }, [step, navigate, setIsOpen]);
 
   const handleStep1Submit = useCallback(
-    async (data: { emailOrPhone: string }) => {
+    async (data: { phone: string }) => {
       setApiError(null);
       try {
-        await sendOtpMutation.mutateAsync(data.emailOrPhone);
-        setEmailOrPhone(data.emailOrPhone);
+        await sendOtpMutation.mutateAsync(data.phone);
+        setPhone(data.phone);
         setStep(2);
       } catch (error) {
         setApiError((error as Error).message);
@@ -78,7 +78,7 @@ export const LoginDialog = ({
       setApiError(null);
       try {
         await verifyOtpMutation.mutateAsync({
-          emailOrPhone,
+          emailOrPhone: phone,
           otp: data.otp,
         });
         setStep(3);
@@ -86,17 +86,17 @@ export const LoginDialog = ({
         setApiError((error as Error).message);
       }
     },
-    [emailOrPhone, verifyOtpMutation],
+    [phone, verifyOtpMutation],
   );
 
   const handleResendOTP = useCallback(async () => {
     setApiError(null);
     try {
-      await resendOtpMutation.mutateAsync(emailOrPhone);
+      await resendOtpMutation.mutateAsync(phone);
     } catch (error) {
       setApiError((error as Error).message);
     }
-  }, [emailOrPhone, resendOtpMutation]);
+  }, [phone, resendOtpMutation]);
 
   const handleDialogClose = useCallback(
     (open: boolean) => {
@@ -132,7 +132,7 @@ export const LoginDialog = ({
         </DialogHeader>
 
         {step === 1 && (
-          <Step1EmailPhoneForm
+          <Step1PhoneForm
             onSubmit={handleStep1Submit}
             isLoading={isSendingOtp}
             serverError={apiError}
