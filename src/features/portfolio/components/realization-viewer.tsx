@@ -47,7 +47,7 @@ export function RealizationViewer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent className="max-w-md gap-0 overflow-hidden rounded-none p-0 sm:max-w-lg">
         <div className="bg-muted overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {item.images.map((img, index) => (
