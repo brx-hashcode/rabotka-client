@@ -150,7 +150,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               <FormItem>
                 <FormLabel>Date et heure *</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" disabled={isPending} {...field} />
+                  <Input
+                    type="datetime-local"
+                    className="w-full min-w-0 max-w-full"
+                    disabled={isPending}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -264,7 +269,9 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                             aria-expanded={categoryOpen}
                             disabled={isPending}
                             className={cn(
-                              "w-full justify-between font-normal",
+                              // Neutralise the app's green "outline" button style
+                              // so this reads as a form field like the others.
+                              "h-10 w-full justify-between rounded-md border border-input bg-background font-normal text-foreground hover:border-input hover:bg-background hover:text-foreground",
                               !selected && "text-muted-foreground",
                             )}
                           >
@@ -275,7 +282,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                       </PopoverTrigger>
                       <PopoverContent
                         align="start"
-                        className="w-(--radix-popover-trigger-width) p-0"
+                        collisionPadding={8}
+                        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] p-0"
                       >
                         <Command>
                           <CommandInput placeholder="Rechercher une catégorie…" />
@@ -286,6 +294,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                                 <CommandItem
                                   key={category.id}
                                   value={category.name}
+                                  className="-mx-2 rounded-none px-4 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground"
                                   onSelect={() => {
                                     field.onChange(
                                       category.id === field.value

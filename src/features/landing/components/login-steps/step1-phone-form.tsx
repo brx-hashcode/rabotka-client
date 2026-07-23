@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Form,
   FormControl,
@@ -13,31 +13,31 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { emailOrPhoneSchema } from "@/lib/validations/auth";
+import { phoneSchema } from "@/lib/validations/auth";
 import { loginContent } from "@/content/landing/login";
 
-type Step1EmailPhoneFormProps = {
-  onSubmit: (data: { emailOrPhone: string }) => Promise<void>;
+type Step1PhoneFormProps = {
+  onSubmit: (data: { phone: string }) => Promise<void>;
   isLoading: boolean;
   serverError: string | null;
 };
 
-export function Step1EmailPhoneForm({
+export function Step1PhoneForm({
   onSubmit,
   isLoading,
   serverError,
-}: Readonly<Step1EmailPhoneFormProps>) {
-  const form = useForm<{ emailOrPhone: string }>({
-    resolver: zodResolver(z.object({ emailOrPhone: emailOrPhoneSchema })),
+}: Readonly<Step1PhoneFormProps>) {
+  const form = useForm<{ phone: string }>({
+    resolver: zodResolver(z.object({ phone: phoneSchema })),
     defaultValues: {
-      emailOrPhone: "",
+      phone: "",
     },
     mode: "onSubmit",
   });
 
   useEffect(() => {
     if (serverError) {
-      form.setError("emailOrPhone", {
+      form.setError("phone", {
         type: "server",
         message: serverError,
       });
@@ -55,15 +55,17 @@ export function Step1EmailPhoneForm({
       >
         <FormField
           control={form.control}
-          name="emailOrPhone"
+          name="phone"
           render={({ field }) => (
             <FormItem className="flex flex-col gap-1">
               <FormLabel>{loginContent.step1.label}</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
+                <PhoneInput
+                  defaultCountry="CG"
                   disabled={isLoading}
                   placeholder={loginContent.step1.placeholder}
+                  value={field.value}
+                  onChange={field.onChange}
                   className="text-base"
                 />
               </FormControl>

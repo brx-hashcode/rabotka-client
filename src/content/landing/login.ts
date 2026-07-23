@@ -2,11 +2,11 @@ export const loginContent = {
   step1: {
     title: "Connexion",
     description:
-      "Veuillez renseigner votre adresse e-mail ou votre numéro de téléphone pour recevoir un code de vérification sécurisé.",
+      "Veuillez renseigner votre numéro de téléphone pour recevoir un code de vérification sécurisé.",
 
-    placeholder: "Email ou numéro de téléphone",
+    placeholder: "Numéro de téléphone",
     submitButton: "Continuer",
-    label: "Email ou téléphone",
+    label: "Numéro de téléphone",
   },
   step2: {
     title: "Vérification",
@@ -32,10 +32,9 @@ export const loginContent = {
 } as const;
 
 export const validationMessages = {
-  emailOrPhone: {
-    required: "Email ou numéro de téléphone requis",
-    invalid:
-      "Format invalide. Utilisez un email valide ou un numéro au format +242XXXXXXXXX",
+  phone: {
+    required: "Numéro de téléphone requis",
+    invalid: "Numéro de téléphone invalide",
   },
   otp: {
     length: "Le code doit contenir 6 caractères",
@@ -48,7 +47,7 @@ export const toastMessages = {
     success: {
       title: "Code de vérification envoyé",
       description:
-        "Un code de vérification sécurisé a été envoyé à votre adresse e-mail ou à votre numéro de téléphone.",
+        "Un code de vérification sécurisé a été envoyé à votre numéro de téléphone.",
     },
     error: {
       title: "Échec de l'envoi",
