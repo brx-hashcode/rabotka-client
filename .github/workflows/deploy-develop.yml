@@ -69,15 +69,6 @@ jobs:
           # a warning instead of failing the build (image is already pushed).
           cache-to: type=gha,mode=max,scope=buildkit-develop,ignore-error=true
 
-      - name: Delete stale GHA caches
-        run: |
-          gh cache list --ref refs/heads/develop --json id --limit 100 \
-            | jq -r '.[].id' \
-            | tail -n +2 \
-            | xargs -r -I{} gh cache delete {}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy:
     name: Deploy to VPS (develop)
     runs-on: ubuntu-latest
@@ -148,20 +139,21 @@ jobs:
       contents: read
 
     steps:
-      - name: Wait for container to stabilize
-        run: sleep 45
-
       - name: Check client is reachable
         run: |
-          for i in $(seq 1 12); do
+          # Short initial wait, then poll tightly so a healthy container is
+          # detected in ~10-16s while still tolerating a slow start:
+          # 10s + 24×6s ≈ 2.5 min ceiling. Exits on first 200.
+          sleep 10
+          for i in $(seq 1 24); do
             STATUS=$(curl -o /dev/null -s -w "%{http_code}" \
               --max-time 20 \
               "https://rabotka.${{ secrets.INFRA_DOMAIN }}")
             echo "Attempt $i — HTTP status: $STATUS"
             [ "$STATUS" = "200" ] && exit 0
-            sleep 15
+            sleep 6
           done
-          echo "Client did not return 200 after 12 attempts"
+          echo "Client did not return 200 after 24 attempts"
           exit 1
 
       - name: Slack notify success
