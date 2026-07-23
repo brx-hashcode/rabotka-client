@@ -33,7 +33,10 @@ export function useCreatePortfolioItem() {
     mutationFn: (data: { title: string; description: string; images: File[] }) =>
       createPortfolioItem(data.title, data.description, data.images),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PORTFOLIO_KEY });
+      queryClient.invalidateQueries({
+        queryKey: PORTFOLIO_KEY,
+        refetchType: "all",
+      });
       toast({ description: "Réalisation ajoutée." });
     },
     onError: (error) => {
@@ -52,7 +55,10 @@ export function useUpdatePortfolioItem() {
     mutationFn: (data: { id: string; payload: UpdatePortfolioItemPayload }) =>
       updatePortfolioItem(data.id, data.payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PORTFOLIO_KEY });
+      queryClient.invalidateQueries({
+        queryKey: PORTFOLIO_KEY,
+        refetchType: "all",
+      });
       toast({ description: "Réalisation mise à jour." });
     },
     onError: (error) => {
@@ -70,7 +76,10 @@ export function useDeletePortfolioItem() {
   return useMutation({
     mutationFn: (id: string) => removePortfolioItem(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PORTFOLIO_KEY });
+      queryClient.invalidateQueries({
+        queryKey: PORTFOLIO_KEY,
+        refetchType: "all",
+      });
       toast({ description: "Réalisation supprimée." });
     },
     onError: (error) => {
@@ -89,7 +98,10 @@ export function useAddPortfolioImages() {
     mutationFn: (data: { id: string; images: File[] }) =>
       addPortfolioImages(data.id, data.images),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PORTFOLIO_KEY });
+      queryClient.invalidateQueries({
+        queryKey: PORTFOLIO_KEY,
+        refetchType: "all",
+      });
       toast({ description: "Images ajoutées." });
     },
     onError: (error) => {
@@ -108,7 +120,10 @@ export function useRemovePortfolioImage() {
     mutationFn: (data: { id: string; imageId: string }) =>
       removePortfolioImage(data.id, data.imageId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PORTFOLIO_KEY });
+      queryClient.invalidateQueries({
+        queryKey: PORTFOLIO_KEY,
+        refetchType: "all",
+      });
       toast({ description: "Image supprimée." });
     },
     onError: (error) => {
