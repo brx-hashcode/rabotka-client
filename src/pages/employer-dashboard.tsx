@@ -13,7 +13,6 @@ import {
   FileText,
   Clock,
   CheckCircle2,
-  AlertCircle,
   ArrowLeft,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -303,11 +302,13 @@ export default function EmployerDashboard() {
                   <span className="text-sm font-semibold text-foreground">
                     {Number(inv.amount).toLocaleString("fr-FR")} FCFA
                   </span>
-                  {inv.status === "DOWNLOADED" ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {/* Every invoice is a receipt of a completed payment, so the
+                      indicator is uniform ("Payée"). Invoice.status only tracks
+                      whether the PDF was downloaded, not payment. */}
+                  <span className="flex items-center gap-1 text-xs font-medium text-green-600 shrink-0">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Payée
+                  </span>
                 </div>
               </div>
             ))}
