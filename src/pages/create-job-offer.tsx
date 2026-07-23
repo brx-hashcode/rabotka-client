@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Seo } from "@/hooks/use-seo";
@@ -13,6 +13,10 @@ export default function CreateJobOffer() {
   const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useProfileMe();
   const [created, setCreated] = useState<Created | null>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [created]);
 
   if (!profileLoading && profile && profile.profileType !== "EMPLOYER") {
     navigate("/profile");

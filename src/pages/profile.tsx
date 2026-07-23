@@ -56,7 +56,7 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
+      <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
         <ProfileSkeleton />
       </div>
     );
@@ -64,7 +64,7 @@ export default function Profile() {
 
   if (error) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
+      <div className="pt-8 lg:pt-10 pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-foreground">Erreur</h1>
           <p className="text-muted-foreground">
@@ -88,7 +88,7 @@ export default function Profile() {
   const categoryNames = profile.categoryNames ?? [];
 
   return (
-    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
+    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
           <div className="absolute top-4 right-4">
