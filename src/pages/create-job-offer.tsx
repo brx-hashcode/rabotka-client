@@ -20,7 +20,7 @@ export default function CreateJobOffer() {
   }
 
   return (
-    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8 flex flex-col max-w-2xl mx-auto w-full">
+    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8 flex flex-col max-w-2xl mx-auto w-full">
       <Seo title="Créer une offre — Rabotka" noIndex />
 
       {created ? (
