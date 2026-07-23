@@ -13,10 +13,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  ChevronRight,
-  Plus,
+  ArrowLeft,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
 
@@ -65,24 +63,28 @@ function KpiCard({
   value,
   icon: Icon,
   loading,
-}: {
+}: Readonly<{
   label: string;
   value: string | number;
   icon: React.ElementType;
   loading?: boolean;
-}) {
+}>) {
   return (
-    <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-      <div className="p-2.5 bg-primary/10 rounded-lg">
-        <Icon className="h-5 w-5 text-primary" />
+    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="size-4 text-primary" />
       </div>
-      <div>
+      <div className="min-w-0">
         {loading ? (
-          <Skeleton className="h-6 w-16 mb-1" />
+          <Skeleton className="h-5 w-14 mb-1" />
         ) : (
-          <p className="text-xl font-bold text-foreground">{value}</p>
+          <p className="text-lg font-bold leading-tight text-foreground break-words">
+            {value}
+          </p>
         )}
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-[11px] text-muted-foreground leading-tight">
+          {label}
+        </p>
       </div>
     </div>
   );
@@ -152,21 +154,7 @@ export default function EmployerDashboard() {
 
   return (
     <div className="pt-8 lg:pt-10 pb-12 px-4 md:px-8 max-w-2xl mx-auto space-y-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Bonjour,{" "}
-            <span className="font-medium text-foreground">
-              {profile?.firstName ?? "…"}
-            </span>
-          </p>
-        </div>
-        <Button className="shrink-0" onClick={() => navigate("/job-offers/new")}>
-          <Plus className="size-4" />
-          Créer une offre
-        </Button>
-      </div>
+      <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-3">
@@ -198,15 +186,8 @@ export default function EmployerDashboard() {
 
       {/* Active job offers */}
       <section>
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3">
           <h2 className="font-semibold text-foreground">Mes offres d'emploi</h2>
-          <button
-            type="button"
-            className="text-xs text-primary flex items-center gap-0.5"
-            onClick={() => navigate("/profile")}
-          >
-            Voir tout <ChevronRight className="h-3 w-3" />
-          </button>
         </div>
 
         {jobsLoading ? (
@@ -328,6 +309,15 @@ export default function EmployerDashboard() {
           </div>
         )}
       </section>
+
+      <button
+        type="button"
+        onClick={() => navigate("/profile")}
+        className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-foreground hover:bg-muted"
+      >
+        <ArrowLeft className="size-4" />
+        Retour au profil
+      </button>
     </div>
   );
 }

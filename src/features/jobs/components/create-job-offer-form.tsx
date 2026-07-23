@@ -347,7 +347,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/profile")}
             >
               Annuler
             </Button>

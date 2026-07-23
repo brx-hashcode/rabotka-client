@@ -23,6 +23,7 @@ import {
   Wallet,
   ChevronRight,
   Images,
+  LayoutDashboard,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
@@ -283,11 +284,20 @@ export default function Profile() {
               </>
             )}
             {isEmployer && (
-              <ActionRow
-                icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
-                label="Créer une offre"
-                onClick={() => navigate("/job-offers/new")}
-              />
+              <>
+                <ActionRow
+                  icon={
+                    <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                  }
+                  label="Tableau de bord"
+                  onClick={() => navigate("/dashboard")}
+                />
+                <ActionRow
+                  icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
+                  label="Créer une offre"
+                  onClick={() => navigate("/job-offers/new")}
+                />
+              </>
             )}
             <InvoicesSheetButton asRow />
             <ActionRow
