@@ -14,15 +14,13 @@ import {
   MapPin,
   Calendar,
   Briefcase,
-  ClipboardList,
   FileWarning,
   Shield,
-  Star,
   MessageCircle,
   AlertCircle,
-  Wallet,
   ChevronRight,
   Images,
+  LayoutDashboard,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
@@ -55,7 +53,7 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
+      <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
         <ProfileSkeleton />
       </div>
     );
@@ -63,7 +61,7 @@ export default function Profile() {
 
   if (error) {
     return (
-      <div className="pt-24 lg:pt-28 pb-8 flex items-center justify-center">
+      <div className="pt-8 lg:pt-10 pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-foreground">Erreur</h1>
           <p className="text-muted-foreground">
@@ -87,7 +85,7 @@ export default function Profile() {
   const categoryNames = profile.categoryNames ?? [];
 
   return (
-    <div className="pt-24 lg:pt-28 pb-8 px-4 md:px-8">
+    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
           <div className="absolute top-4 right-4">
@@ -124,29 +122,22 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className={cn("grid gap-3 grid-cols-3")}>
-          <StatCard
-            icon={<Wallet className="h-5 w-5 text-whatsapp" />}
+        <div className="bg-card border border-border rounded-xl flex divide-x divide-border">
+          <StatItem
             value={profile.walletBalance.toLocaleString("fr-FR")}
             label="Solde (FCFA)"
           />
 
           {isEmployer ? (
-            <StatCard
-              icon={<Briefcase className="h-5 w-5 text-whatsapp" />}
-              value={profile.jobOffersCount}
-              label="Offres publiees"
-            />
+            <StatItem value={profile.jobOffersCount} label="Offres publiees" />
           ) : (
-            <StatCard
-              icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
+            <StatItem
               value={profile.applicationsCount}
               label="Candidatures"
             />
           )}
 
-          <StatCard
-            icon={<Star className="h-5 w-5 text-yellow-500" />}
+          <StatItem
             value={
               profile.reliabilityScore === null
                 ? "N/A"
@@ -282,6 +273,22 @@ export default function Profile() {
                 <PenaltiesSheetButton asRow />
               </>
             )}
+            {isEmployer && (
+              <>
+                <ActionRow
+                  icon={
+                    <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                  }
+                  label="Tableau de bord"
+                  onClick={() => navigate("/dashboard")}
+                />
+                <ActionRow
+                  icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
+                  label="Créer une offre"
+                  onClick={() => navigate("/job-offers/new")}
+                />
+              </>
+            )}
             <InvoicesSheetButton asRow />
             <ActionRow
               icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
@@ -305,24 +312,14 @@ export default function Profile() {
   );
 }
 
-const StatCard = ({
-  icon,
+const StatItem = ({
   value,
   label,
-  alert,
 }: Readonly<{
-  icon: React.ReactNode;
   value: number | string;
   label: string;
-  alert?: boolean;
 }>) => (
-  <div
-    className={cn(
-      "bg-card rounded-xl border p-4 flex flex-col items-center gap-1.5 text-center",
-      alert ? "border-amber-300 bg-amber-50/50" : "border-border",
-    )}
-  >
-    {icon}
+  <div className="flex-1 flex flex-col items-center justify-center gap-1 py-4 px-2 text-center">
     <span className="text-lg font-bold text-foreground">{value}</span>
     <span className="text-xs text-muted-foreground">{label}</span>
   </div>

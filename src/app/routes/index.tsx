@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router";
 import { lazy, Suspense } from "react";
 import { AuthGuard } from "@/components/auth";
-import { LandingLayout, AppLayout } from "@/features/landing/layouts";
+import { LandingLayout } from "@/features/landing/layouts";
 import Index from "@/pages/Index";
 
 // Critical path — bundled with landing
@@ -21,6 +21,7 @@ const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const Claims = lazy(() => import("@/pages/claims"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
+const CreateJobOffer = lazy(() => import("@/pages/create-job-offer"));
 const Claim = lazy(() => import("@/pages/claim"));
 const CreateClaim = lazy(() => import("@/pages/create-claim"));
 const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
@@ -55,9 +56,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <Profile />
-              </AppLayout>
+              <Profile />
             </AuthGuard>
           </Suspense>
         }
@@ -67,9 +66,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <MyPortfolio />
-              </AppLayout>
+              <MyPortfolio />
             </AuthGuard>
           </Suspense>
         }
@@ -79,9 +76,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <Claims />
-              </AppLayout>
+              <Claims />
             </AuthGuard>
           </Suspense>
         }
@@ -91,9 +86,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <CreateClaim />
-              </AppLayout>
+              <CreateClaim />
             </AuthGuard>
           </Suspense>
         }
@@ -103,9 +96,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <Claim />
-              </AppLayout>
+              <Claim />
             </AuthGuard>
           </Suspense>
         }
@@ -145,9 +136,17 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <EmployerDashboard />
-              </AppLayout>
+              <EmployerDashboard />
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/job-offers/new"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <CreateJobOffer />
             </AuthGuard>
           </Suspense>
         }
