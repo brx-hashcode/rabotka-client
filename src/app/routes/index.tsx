@@ -156,9 +156,7 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <AppLayout>
-                <CreateJobOffer />
-              </AppLayout>
+              <CreateJobOffer />
             </AuthGuard>
           </Suspense>
         }
