@@ -292,7 +292,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                                 <CommandItem
                                   key={category.id}
                                   value={category.name}
-                                  className="data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground"
+                                  className="-mx-2 rounded-none px-4 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground"
                                   onSelect={() => {
                                     field.onChange(
                                       category.id === field.value
