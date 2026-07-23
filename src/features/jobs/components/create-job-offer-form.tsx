@@ -269,7 +269,9 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                             aria-expanded={categoryOpen}
                             disabled={isPending}
                             className={cn(
-                              "w-full justify-between font-normal",
+                              // Neutralise the app's green "outline" button style
+                              // so this reads as a form field like the others.
+                              "h-10 w-full justify-between rounded-md border border-input bg-background font-normal text-foreground hover:border-input hover:bg-background hover:text-foreground",
                               !selected && "text-muted-foreground",
                             )}
                           >
