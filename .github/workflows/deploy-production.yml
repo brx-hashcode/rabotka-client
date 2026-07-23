@@ -40,11 +40,11 @@ jobs:
           TARGET_LATEST="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           TARGET_SHA="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-sha-${SHORT_SHA}"
 
-          docker pull "$SOURCE"
-          docker tag "$SOURCE" "$TARGET_LATEST"
-          docker tag "$SOURCE" "$TARGET_SHA"
-          docker push "$TARGET_LATEST"
-          DIGEST=$(docker push "$TARGET_SHA" | grep -oP '(?<=digest: )sha256:[a-f0-9]+')
+          # Server-side retag: copies the manifest in-registry without pulling or
+          # pushing image layers — instant, and guarantees prod ships the exact
+          # bytes tested on develop (no rebuild).
+          docker buildx imagetools create -t "$TARGET_LATEST" -t "$TARGET_SHA" "$SOURCE"
+          DIGEST=$(docker buildx imagetools inspect "$TARGET_SHA" --format '{{.Manifest.Digest}}')
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
   deploy:
@@ -53,6 +53,7 @@ jobs:
     needs: promote
     permissions:
       contents: read
+      packages: read
 
     steps:
       - name: Fetch secrets from Vault
@@ -82,14 +83,33 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${{ secrets.VPS_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Pull image on VPS
+      # Runner→GHCR is reliable; this login is only used by the SSH-stream
+      # fallback below (runner pulls the image, then streams it to the VPS).
+      - name: Log in to GHCR (for fallback)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image on VPS (native, SSH-stream fallback)
         run: |
           IMAGE="ghcr.io/${{ github.repository_owner }}/rabotka-client:latest"
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=10 \
-            -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "for i in 1 2 3; do docker pull $IMAGE && break || (echo \"Pull attempt \$i failed, retrying in 15s...\"; sleep 15); done"
+          DEST="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          SSHOPTS="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -p ${{ secrets.VPS_PORT }}"
+          # Fast path: native pull on the VPS. Short 90s timeout × 3 so a
+          # VPS→GHCR blackhole fails fast (~5 min) instead of hanging ~30 min.
+          if ssh $SSHOPTS "$DEST" "ok=0; for i in 1 2 3; do timeout 90 docker pull '$IMAGE' && { ok=1; break; }; echo \"native pull attempt \$i stalled...\"; sleep 5; done; [ \$ok = 1 ]"; then
+            echo "✅ Native pull succeeded"
+          else
+            # Fallback: the VPS can't pull from GHCR, but the runner can. Pull
+            # here, then stream the image to the VPS over the (IPv4) SSH channel,
+            # which is unaffected by the registry blackhole.
+            echo "⚠️ Native pull stalled — streaming image to VPS over SSH"
+            docker pull "$IMAGE"
+            docker save "$IMAGE" | gzip -1 | ssh $SSHOPTS "$DEST" "gunzip | docker load"
+            echo "✅ Image loaded on VPS via SSH stream"
+          fi
 
       - name: Write .env and deploy on VPS
         run: |
@@ -107,7 +127,8 @@ jobs:
           EOF
           sed -i 's/^[[:space:]]*//' ~/rabotka-client-prod/.env
           cd ~/rabotka-client-prod && git fetch origin main && git reset --hard origin/main && \
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans"
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans && \
+          docker image prune -af"
 
   smoke-test:
     name: Smoke Test (production)
