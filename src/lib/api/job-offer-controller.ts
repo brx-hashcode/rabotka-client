@@ -56,6 +56,25 @@ export type EmployerApplicationsResponse = {
   limit: number;
 };
 
+export type CreateJobOfferPayload = {
+  title: string;
+  description: string;
+  scheduled_at: string; // ISO date-time
+  address: string;
+  quantity: number;
+  amount?: number;
+  payment_flow?: "HOURLY" | "DAILY" | "MONTHLY";
+  note?: string;
+  category_id?: string;
+};
+
+// The create endpoint returns the full offer; we only rely on id + reference
+// (both single-word, so casing-agnostic), the recap is shown from form data.
+export type CreatedJobOffer = {
+  id: string;
+  reference: string;
+};
+
 class JobOfferController extends RabotkaBaseController {
   async getEmployerJobOffers(params?: {
     limit?: number;
@@ -90,7 +109,18 @@ class JobOfferController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  async create(payload: CreateJobOfferPayload): Promise<CreatedJobOffer> {
+    try {
+      return await this.post<CreatedJobOffer>(
+        "/job-offers",
+        payload as unknown as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { getEmployerJobOffers, getEmployerApplications } =
+export const { getEmployerJobOffers, getEmployerApplications, create: createJobOffer } =
   new JobOfferController();

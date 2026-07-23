@@ -21,6 +21,7 @@ const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const Claims = lazy(() => import("@/pages/claims"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
+const CreateJobOffer = lazy(() => import("@/pages/create-job-offer"));
 const Claim = lazy(() => import("@/pages/claim"));
 const CreateClaim = lazy(() => import("@/pages/create-claim"));
 const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
@@ -145,8 +146,18 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
+              <EmployerDashboard />
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/job-offers/new"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
               <AppLayout>
-                <EmployerDashboard />
+                <CreateJobOffer />
               </AppLayout>
             </AuthGuard>
           </Suspense>
