@@ -129,7 +129,7 @@ export function EditProfileSheetButton({
         onClick={handleOpen}
         className={
           isMobile
-            ? "fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-whatsapp text-primary-foreground shadow-lg hover:bg-whatsapp-dark transition-colors duration-300 ease-in-out flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            ? "fixed bottom-24 right-6 z-50 w-12 h-12 rounded-full bg-whatsapp text-primary-foreground shadow-lg hover:bg-whatsapp-dark transition-colors duration-300 ease-in-out flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             : "gap-2 border-whatsapp text-whatsapp hover:bg-whatsapp/10 hover:text-whatsapp"
         }
         aria-label={isMobile ? content.buttons.edit : undefined}

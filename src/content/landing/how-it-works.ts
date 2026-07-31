@@ -31,7 +31,7 @@ export const howItWorksContent = {
       },
       {
         icon: Unlock,
-        title: "Débloquez le contact de l'employeur",
+        title: "Débloquez le contact du recruteur",
         description:
           "Candidature acceptée ? Chacun débloque le contact de l'autre. Sans confirmation, vous êtes remboursé.",
       },
@@ -39,14 +39,14 @@ export const howItWorksContent = {
   },
 
   employer: {
-    subtitle: "Pour les Employeurs",
-    title: "Comment ça marche pour les employeurs",
+    subtitle: "Pour les Recruteurs",
+    title: "Comment ça marche pour les recruteurs",
     steps: [
       {
         icon: UserPlus,
         title: "Créez votre profil",
         description:
-          "Renseignez vos informations, sélectionnez le rôle Employeur et ajoutez votre pièce d'identité. Un crédit de bienvenue vous est offert.",
+          "Renseignez vos informations, sélectionnez le rôle Recruteur et ajoutez votre pièce d'identité. Un crédit de bienvenue vous est offert.",
       },
       {
         icon: ShieldCheck,

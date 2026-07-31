@@ -8,7 +8,7 @@ import { config, whatsappLink } from "@/config";
 
 const flowGuides = [
   { label: "Guide travailleurs", href: "#flow-travailleurs" },
-  { label: "Guide employeurs", href: "#flow-employeurs" },
+  { label: "Guide recruteurs", href: "#flow-recruteurs" },
 ] as const;
 
 export function HeroSection() {
@@ -89,7 +89,7 @@ export function HeroSection() {
 
             {/* Visually hidden: "Comment ça marche" in the header already
                 links here. Kept in the DOM so search engines still see the
-                internal deep-links to each flow (#flow-travailleurs / #flow-employeurs). */}
+                internal deep-links to each flow (#flow-travailleurs / #flow-recruteurs). */}
             <div className="sr-only">
               {flowGuides.map((guide) => (
                 <a
