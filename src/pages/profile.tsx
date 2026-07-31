@@ -3,6 +3,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice } from "@/features/kyc";
 import { useNavigate } from "react-router";
 import {
   User,
@@ -39,6 +41,7 @@ const WHATSAPP_PLACEHOLDER =
 export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
+  const { blocked: kycBlocked, reason: kycReason } = useKycGate();
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
@@ -216,6 +219,16 @@ export default function Profile() {
               label="Verification KYC"
               value={translateVerificationStatus(profile.verificationStatus)}
             />
+            {/*
+              One findable explanation that does not depend on which screen the
+              user is on — the action screens each show their own notice, but
+              this is where someone looks when wondering why.
+            */}
+            {kycBlocked && kycReason && (
+              <div className="p-4">
+                <KycNotice reason={kycReason} />
+              </div>
+            )}
             <InfoRow
               icon={<MessageCircle className="h-4 w-4 text-whatsapp" />}
               label="WhatsApp"

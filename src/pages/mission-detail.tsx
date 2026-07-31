@@ -23,6 +23,8 @@ import { useRepublishJobOffer } from "@/hooks/use-republish-job-offer";
 import { RepublishOfferDialog } from "@/features/employer/components/republish-offer-dialog";
 import { useDeleteJobOffer } from "@/hooks/use-delete-job-offer";
 import { useCompleteMission } from "@/hooks/use-complete-mission";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice } from "@/features/kyc";
 import {
   ScreenHeader,
   StatusChip,
@@ -74,6 +76,9 @@ export default function MissionDetail() {
     !!offer && offer.status !== "COMPLETED" && activeWorkers.length > 0;
 
   // Only an expired offer can be reopened. The backend re-checks.
+  // Republishing puts a live offer back on the market, so it needs the same KYC
+  // gate as creating one — otherwise it is a way around /job-offers/new.
+  const { blocked: kycBlocked, reason: kycReason } = useKycGate();
   const republishable = !!offer && offer.status === "EXPIRED";
 
   const handleDelete = () => {
@@ -251,10 +256,14 @@ export default function MissionDetail() {
           )}
 
           {/* Republish — the expiry notification's action, now on web too */}
+          {republishable && kycBlocked && kycReason && (
+            <KycNotice reason={kycReason} />
+          )}
           {republishable && (
             <Button
               variant="outline"
               className="w-full"
+              disabled={kycBlocked}
               onClick={() => setRepublishOpen(true)}
             >
               <RefreshCw className="mr-2 h-4 w-4" />

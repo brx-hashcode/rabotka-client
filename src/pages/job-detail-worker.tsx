@@ -18,6 +18,8 @@ import {
   useToggleSaveJob,
   useCanApply,
 } from "@/hooks/use-jobs";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice, kycShortLabel } from "@/features/kyc";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 
 export default function JobDetailWorker() {
@@ -25,6 +27,7 @@ export default function JobDetailWorker() {
   const { id } = useParams<{ id: string }>();
   const { data: job, isLoading, isError } = useJobDetail(id);
   const { canApply, quota } = useCanApply();
+  const { blocked, reason } = useKycGate();
   const apply = useApplyToJob();
   const toggleSave = useToggleSaveJob();
 
@@ -32,6 +35,7 @@ export default function JobDetailWorker() {
 
   let applyLabel = "Postuler";
   if (job?.applied) applyLabel = "Déjà postulé";
+  else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (dailyExhausted) applyLabel = "Limite quotidienne atteinte";
   else if (!canApply) applyLabel = "Trop de candidatures en cours";
 
@@ -161,9 +165,11 @@ export default function JobDetailWorker() {
             </Section>
           )}
 
+          {blocked && reason && <KycNotice reason={reason} className="mb-3" />}
+
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-            disabled={job.applied || !canApply || apply.isPending}
+            disabled={job.applied || !canApply || blocked || apply.isPending}
             onClick={() => apply.mutate(job.id)}
           >
             {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
