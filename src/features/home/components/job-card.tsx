@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PAYMENT_FLOW_LABELS } from "@/features/employer";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { kycShortLabel } from "@/features/kyc";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
@@ -23,12 +25,18 @@ export function JobCard({ job, canApply }: Props) {
   const navigate = useNavigate();
   const apply = useApplyToJob();
   const toggleSave = useToggleSaveJob();
+  // Read here rather than threaded in as a prop: it is a free cache read, and a
+  // second prop would mean touching every screen that renders a JobCard.
+  // Deliberately separate from `canApply` — a daily quota and an unverified
+  // identity are different problems with different remedies.
+  const { blocked, reason } = useKycGate();
 
   const flowLabel = PAYMENT_FLOW_LABELS[job.paymentFlow] ?? "";
   const goDetail = () => navigate(`/offres/${job.id}`);
 
   let applyLabel = "Postuler";
   if (job.applied) applyLabel = "Déjà postulé";
+  else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (!canApply) applyLabel = "Limite atteinte";
 
   return (
@@ -98,7 +106,7 @@ export function JobCard({ job, canApply }: Props) {
 
       <Button
         className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-        disabled={job.applied || !canApply || apply.isPending}
+        disabled={job.applied || !canApply || blocked || apply.isPending}
         onClick={() => apply.mutate(job.id)}
       >
         {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

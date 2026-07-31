@@ -14,13 +14,32 @@ import {
   usePayUnlockWallet,
   usePayUnlockMobile,
 } from "@/hooks/use-application";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycPaymentScreen } from "@/features/kyc";
 
 type Outcome = "awaiting-worker" | "contact-sent";
 
 const BACK_TO = "/candidatures";
 const BACK_LABEL = "Retour aux candidatures";
 
+/**
+ * Gate wrapper.
+ *
+ * Split from the page body deliberately: the body accepts the application from
+ * a mount effect, and an early `return` inside a component does not stop its own
+ * effects from running. Keeping the body in a child means a blocked user never
+ * mounts it, so the acceptance cannot be committed by simply opening the URL.
+ */
 export default function ApplicationPayment() {
+  const { blocked, reason } = useKycGate();
+
+  if (blocked && reason) {
+    return <KycPaymentScreen reason={reason} backTo={BACK_TO} />;
+  }
+  return <ApplicationPaymentInner />;
+}
+
+function ApplicationPaymentInner() {
   const navigate = useNavigate();
   const { id = "" } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useApplication(id);
