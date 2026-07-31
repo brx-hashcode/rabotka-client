@@ -13,7 +13,7 @@ type Props = {
 
 function Stat({ value, label }: Readonly<{ value: string; label: string }>) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center px-6">
       <span className="text-foreground text-lg font-bold leading-none">
         {value}
       </span>
@@ -36,37 +36,17 @@ export function PortfolioHeader({
       .toUpperCase() || "?";
 
   return (
-    <header className="space-y-4">
-      <div className="flex items-center gap-5 sm:gap-8">
-        <Avatar className="size-20 shrink-0 border sm:size-24">
-          {profile.avatarUrl && (
-            <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
-          )}
-          <AvatarFallback className="text-xl">{initials}</AvatarFallback>
-        </Avatar>
-
-        <div className="flex flex-1 items-center justify-around">
-          <Stat value={String(realizationsCount)} label="Réalisations" />
-          {profile.completedMissionsCount != null && (
-            <Stat
-              value={String(profile.completedMissionsCount)}
-              label="Missions"
-            />
-          )}
-          <Stat
-            value={
-              profile.reliabilityScore != null
-                ? String(profile.reliabilityScore)
-                : "—"
-            }
-            label="Fiabilité"
-          />
-        </div>
-      </div>
+    <header className="flex flex-col items-center space-y-4 text-center">
+      <Avatar className="size-24 border">
+        {profile.avatarUrl && (
+          <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
+        )}
+        <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+      </Avatar>
 
       <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-foreground text-base font-bold">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <h1 className="text-foreground text-lg font-bold">
             {profile.fullName}
           </h1>
           {profile.ratingCount > 0 && profile.ratingAvg != null && (
@@ -76,18 +56,37 @@ export function PortfolioHeader({
             </span>
           )}
         </div>
-        {profile.description && (
-          <p className="text-foreground/80 text-sm whitespace-pre-line">
-            {profile.description}
-          </p>
-        )}
         {profile.address && (
-          <p className="text-muted-foreground flex items-center gap-1 text-xs">
+          <p className="text-muted-foreground flex items-center justify-center gap-1 text-xs">
             <MapPin className="size-3.5 shrink-0" />
             {profile.address}
           </p>
         )}
       </div>
+
+      <div className="flex items-center justify-center divide-x divide-border">
+        <Stat value={String(realizationsCount)} label="Réalisations" />
+        {profile.completedMissionsCount != null && (
+          <Stat
+            value={String(profile.completedMissionsCount)}
+            label="Missions"
+          />
+        )}
+        <Stat
+          value={
+            profile.reliabilityScore != null
+              ? String(profile.reliabilityScore)
+              : "—"
+          }
+          label="Fiabilité"
+        />
+      </div>
+
+      {profile.description && (
+        <p className="text-foreground/80 max-w-md text-sm whitespace-pre-line">
+          {profile.description}
+        </p>
+      )}
 
       {action}
     </header>

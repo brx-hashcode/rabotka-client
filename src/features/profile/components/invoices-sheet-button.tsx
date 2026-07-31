@@ -40,7 +40,7 @@ export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted text-foreground"
+          className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted text-foreground"
         >
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="flex-1 text-sm font-medium">{content.button}</span>
@@ -87,7 +87,7 @@ export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
                 {list.map((invoice) => (
                   <li
                     key={invoice.id}
-                    className="rounded-lg border border-border bg-card p-4 space-y-2"
+                    className="rounded-lg shadow-soft bg-card p-4 space-y-2"
                   >
                     <div className="flex justify-between items-start">
                       <span className="font-medium text-foreground">

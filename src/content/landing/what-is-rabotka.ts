@@ -5,7 +5,7 @@ export const whatIsRabotkaContent = {
   badge: "Qu'est-ce que Rabotka",
   title: "Votre assistant emploi personnel",
   description:
-    "Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les employeurs à une aide de confiance, le tout via WhatsApp.",
+    "Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les recruteurs à une aide de confiance, le tout via WhatsApp.",
   features: [
     {
       icon: UserCheck,

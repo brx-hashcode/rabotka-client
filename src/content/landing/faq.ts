@@ -7,7 +7,7 @@ export const faqContent = {
     {
       question: "Comment fonctionne Rabotka?",
       answer:
-        "Tout se passe sur WhatsApp, sans application supplémentaire. Les employeurs publient une mission et reçoivent des candidatures. Les travailleurs parcourent les offres, en reçoivent qui correspondent à leur profil, et postulent. Quand l'employeur accepte une candidature, les deux parties débloquent leurs coordonnées et s'organisent directement.",
+        "Tout se passe sur WhatsApp, sans application supplémentaire. Les recruteurs publient une mission et reçoivent des candidatures. Les travailleurs parcourent les offres, en reçoivent qui correspondent à leur profil, et postulent. Quand le recruteur accepte une candidature, les deux parties débloquent leurs coordonnées et s'organisent directement.",
     },
     {
       question: "Rabotka est-il gratuit?",
@@ -15,9 +15,9 @@ export const faqContent = {
         "L'inscription, la publication d'une offre, la consultation des missions et les candidatures sont gratuites. Rabotka ne prend aucune commission sur le montant de la mission. Seul le déblocage des coordonnées est payant, et chaque nouveau membre reçoit un crédit de bienvenue qui couvre son premier contact.",
     },
     {
-      question: "Comment puis-je contacter un travailleur ou un employeur?",
+      question: "Comment puis-je contacter un travailleur ou un recruteur?",
       answer:
-        "Lorsqu'un employeur accepte la candidature d'un travailleur, les deux parties reçoivent une notification WhatsApp. Chacune débloque alors le contact de l'autre, via son portefeuille ou par Mobile Money (MTN ou Airtel). Si l'une des parties ne confirme pas, le paiement de l'autre est automatiquement recrédité sur son portefeuille. Votre crédit de bienvenue couvre entièrement ce premier déblocage.",
+        "Lorsqu'un recruteur accepte la candidature d'un travailleur, les deux parties reçoivent une notification WhatsApp. Chacune débloque alors le contact de l'autre, via son portefeuille ou par Mobile Money (MTN ou Airtel). Si l'une des parties ne confirme pas, le paiement de l'autre est automatiquement recrédité sur son portefeuille. Votre crédit de bienvenue couvre entièrement ce premier déblocage.",
     },
     {
       question: "Comment Rabotka garantit-il la confiance?",

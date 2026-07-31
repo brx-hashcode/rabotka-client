@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import type { Value as PhoneValue } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import mtnLogo from "@/assets/MTN-logo.jpg?format=webp";
@@ -12,7 +12,7 @@ import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
 import {
-  CheckCircle2,
+  Check,
   AlertCircle,
   Loader2,
   XCircle,
@@ -25,6 +25,11 @@ type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
 
 export default function Pay() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Present only when the pay page was opened from inside the app (not an
+  // external WhatsApp link) — lets us offer a "Retour" button back into the app.
+  const returnTo = searchParams.get("return");
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
 
@@ -96,13 +101,48 @@ export default function Pay() {
   if (localStatus === "approved") {
     return (
       <PageWrapper>
-        <div className="text-center space-y-4">
-          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
-          <h1 className="text-2xl font-bold">Paiement effectué !</h1>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            Votre paiement a été confirmé avec succès. Vous pouvez fermer cette
-            page.
+        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+              <Check className="h-9 w-9 text-white" strokeWidth={3} />
+            </div>
+          </div>
+
+          <h1 className="mt-6 text-2xl font-bold text-foreground">
+            Paiement effectué !
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Votre paiement a bien été confirmé.
           </p>
+
+          {payment.amount !== null && (
+            <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
+              <p className="text-3xl font-bold text-foreground">
+                {payment.amount.toLocaleString("fr-FR")}
+                <span className="ml-2 text-base font-medium text-muted-foreground">
+                  FCFA
+                </span>
+              </p>
+              {payment.description && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {payment.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {returnTo ? (
+            <Button
+              className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+              onClick={() => navigate(returnTo)}
+            >
+              Retour à l'application
+            </Button>
+          ) : (
+            <p className="mt-6 text-xs text-muted-foreground">
+              Vous pouvez fermer cette page en toute sécurité.
+            </p>
+          )}
         </div>
       </PageWrapper>
     );
@@ -179,7 +219,7 @@ export default function Pay() {
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl px-5 py-4 space-y-3">
+        <div className="bg-card shadow-soft rounded-xl px-5 py-4 space-y-3">
           {description && (
             <div className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full">
               <span>{description}</span>

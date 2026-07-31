@@ -25,7 +25,7 @@ export const footerLinks: FooterLinkGroup = {
 
 export const footerContent = {
   brandDescription:
-    "Connecter les travailleurs informels et les employeurs grâce à WhatsApp. Simple, accessible, sans application.",
+    "Connecter les travailleurs informels et les recruteurs grâce à WhatsApp. Simple, accessible, sans application.",
   socialLinks: [
     { label: "LinkedIn", href: "https://www.linkedin.com/company/rabotka" },
     { label: "Facebook", href: "https://www.facebook.com/share/18pxQBc8nD" },

@@ -98,7 +98,7 @@ export default function Onboarding() {
     <>
       <Seo
         title="Créer un compte - Rabotka"
-        description="Rejoignez Rabotka et créez votre profil vérifié en quelques étapes. Travailleurs et employeurs, connectez-vous via WhatsApp sans télécharger d'application."
+        description="Rejoignez Rabotka et créez votre profil vérifié en quelques étapes. Travailleurs et recruteurs, connectez-vous via WhatsApp sans télécharger d'application."
         canonical="/onboarding"
         noIndex={false}
       />
