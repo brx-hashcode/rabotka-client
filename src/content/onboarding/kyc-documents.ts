@@ -6,7 +6,7 @@ export const kycDocumentsContent = {
     placeholder: "Sélectionnez un type",
     options: {
       worker: "Travailleur",
-      employer: "Employeur",
+      employer: "Recruteur",
     },
     helperText: "Simplifiez le travail à employer !",
   },

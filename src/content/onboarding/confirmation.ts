@@ -24,7 +24,7 @@ export const confirmationContent = {
   },
   profileTypes: {
     worker: "Travailleur",
-    employer: "Employeur",
+    employer: "Recruteur",
   },
   documentTypes: {
     identityCard: "Carte d'identité",

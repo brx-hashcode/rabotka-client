@@ -3,11 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { useLogout } from "@/hooks/use-logout";
 import { useNavigate } from "react-router";
 import {
   User,
-  LogOut,
   BadgeCheck,
   Phone,
   Mail,
@@ -17,13 +15,12 @@ import {
   FileWarning,
   Shield,
   MessageCircle,
-  AlertCircle,
   ChevronRight,
   Images,
   LayoutDashboard,
+  Wallet,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
-import { ApplicationsSheetButton } from "@/features/profile/components/applications-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
 import { useEffect } from "react";
@@ -42,7 +39,6 @@ const WHATSAPP_PLACEHOLDER =
 export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
-  const { mutate: handleLogout, isPending: isLoggingOut } = useLogout();
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
@@ -122,7 +118,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl flex divide-x divide-border">
+        <div className="bg-card shadow-soft rounded-xl flex divide-x divide-border">
           <StatItem
             value={profile.walletBalance.toLocaleString("fr-FR")}
             label="Solde (FCFA)"
@@ -148,7 +144,7 @@ export default function Profile() {
         </div>
 
         {profile.description && (
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="bg-card rounded-xl shadow-soft overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-muted/30">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 A propos
@@ -162,7 +158,7 @@ export default function Profile() {
           </div>
         )}
 
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Domaines
@@ -188,7 +184,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Informations
@@ -261,7 +257,7 @@ export default function Profile() {
 
         {/* Action list */}
         <div className="space-y-3">
-          <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-xl shadow-soft overflow-hidden divide-y divide-border">
             {!isEmployer && (
               <>
                 <ActionRow
@@ -269,7 +265,6 @@ export default function Profile() {
                   label="Mes réalisations"
                   onClick={() => navigate("/profile/portfolio")}
                 />
-                <ApplicationsSheetButton asRow />
                 <PenaltiesSheetButton asRow />
               </>
             )}
@@ -289,22 +284,12 @@ export default function Profile() {
                 />
               </>
             )}
+            <ActionRow
+              icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
+              label="Recharger mon portefeuille"
+              onClick={() => navigate("/portefeuille")}
+            />
             <InvoicesSheetButton asRow />
-            <ActionRow
-              icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
-              label="Mes Réclamations"
-              onClick={() => navigate("/claims")}
-            />
-          </div>
-
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <ActionRow
-              icon={<LogOut className="h-4 w-4" />}
-              label={isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
-              onClick={() => handleLogout()}
-              disabled={isLoggingOut}
-              destructive
-            />
           </div>
         </div>
       </div>
@@ -343,8 +328,8 @@ const ActionRow = ({
     onClick={onClick}
     disabled={disabled}
     className={cn(
-      "flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors",
-      "hover:bg-muted/50 active:bg-muted disabled:opacity-50",
+      "flex w-full items-center gap-3 px-4 py-3.5 text-left",
+      "active:bg-muted disabled:opacity-50",
       destructive ? "text-destructive" : "text-foreground",
     )}
   >
@@ -414,7 +399,7 @@ const ProfileSkeleton = () => {
         <Skeleton className="h-24 rounded-xl" />
       </div>
       <Skeleton className="h-20 rounded-xl" />
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl shadow-soft overflow-hidden">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-4 w-4 rounded" />
@@ -434,7 +419,7 @@ const translateProfileType = (
 ): string => {
   switch (profileType) {
     case "EMPLOYER":
-      return "Employeur";
+      return "Recruteur";
     case "WORKER":
       return "Travailleur";
     default:

@@ -70,7 +70,7 @@ function KpiCard({
   loading?: boolean;
 }>) {
   return (
-    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+    <div className="bg-card shadow-soft rounded-xl p-3 flex items-center gap-3">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
         <Icon className="size-4 text-primary" />
       </div>
@@ -206,7 +206,7 @@ export default function EmployerDashboard() {
             message="Aucune offre publiée pour le moment."
           />
         ) : (
-          <div className="bg-card border border-border rounded-xl px-4">
+          <div className="bg-card shadow-soft rounded-xl px-4">
             {jobOffers.data.map((offer) => (
               <JobOfferRow key={offer.id} offer={offer} />
             ))}
@@ -234,7 +234,7 @@ export default function EmployerDashboard() {
             message="Aucune candidature reçue pour le moment."
           />
         ) : (
-          <div className="bg-card border border-border rounded-xl divide-y divide-border">
+          <div className="bg-card shadow-soft rounded-xl divide-y divide-border">
             {applications.data.map((app) => (
               <div
                 key={app.id}
@@ -280,7 +280,7 @@ export default function EmployerDashboard() {
         ) : !invoices?.length ? (
           <EmptyState icon={FileText} message="Aucune facture pour le moment." />
         ) : (
-          <div className="bg-card border border-border rounded-xl divide-y divide-border">
+          <div className="bg-card shadow-soft rounded-xl divide-y divide-border">
             {invoices.slice(0, 5).map((inv) => (
               <div
                 key={inv.id}
@@ -336,7 +336,7 @@ function EmptyState({
   message: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-xl px-4 py-8 flex flex-col items-center gap-2 text-center">
+    <div className="bg-card shadow-soft rounded-xl px-4 py-8 flex flex-col items-center gap-2 text-center">
       <Icon className="h-8 w-8 text-muted-foreground/40" />
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
