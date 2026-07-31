@@ -13,6 +13,8 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice } from "@/features/kyc";
 import { cn } from "@/lib/utils";
 
 const INITIAL_LIMIT = 10;
@@ -59,6 +61,7 @@ export function WorkerHome() {
 
   const { data: jobs, isLoading, isFetching } = useJobFeed(limit, categoryId);
   const { canApply, quota } = useCanApply();
+  const { blocked, reason } = useKycGate();
 
   const list = jobs ?? [];
   const canLoadMore = isFetching || list.length >= limit;
@@ -180,6 +183,12 @@ export function WorkerHome() {
             Aucune offre pour le moment. Revenez plus tard ou essayez une autre
             catégorie.
           </p>
+        </div>
+      )}
+
+      {blocked && reason && (
+        <div className="px-4 pb-2">
+          <KycNotice reason={reason} />
         </div>
       )}
 

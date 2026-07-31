@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobCard } from "@/features/home/components/job-card";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice } from "@/features/kyc";
 import {
   JobSearchFiltersSheet,
   EMPTY_JOB_FILTERS,
@@ -111,6 +113,7 @@ export default function JobSearch() {
   const { data, isLoading, isFetching, hasNextPage, fetchNextPage } =
     useJobSearch(filters);
   const { canApply } = useCanApply();
+  const { blocked, reason } = useKycGate();
 
   const list = data?.pages.flatMap((p) => p.items) ?? [];
   const total = data?.pages[0]?.total ?? 0;
@@ -208,6 +211,12 @@ export default function JobSearch() {
               Réinitialiser les filtres
             </Button>
           )}
+        </div>
+      )}
+
+      {blocked && reason && (
+        <div className="px-4 pt-4">
+          <KycNotice reason={reason} />
         </div>
       )}
 

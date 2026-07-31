@@ -14,6 +14,8 @@ import {
   usePayWorkerUnlockWallet,
   usePayWorkerUnlockMobile,
 } from "@/hooks/use-worker-unlock";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycPaymentScreen } from "@/features/kyc";
 
 type Outcome = "awaiting-employer" | "contact-sent";
 
@@ -37,6 +39,7 @@ export default function WorkerMissionPayment() {
   const payWallet = usePayWorkerUnlockWallet(id);
   const payMobile = usePayWorkerUnlockMobile(id);
 
+  const { blocked, reason } = useKycGate();
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const goBack = () => navigate(BACK_TO);
 
@@ -58,6 +61,12 @@ export default function WorkerMissionPayment() {
       onSuccess: ({ token }) =>
         navigate(`/pay/${token}?return=${encodeURIComponent(BACK_TO)}`),
     });
+
+  // Ahead of every other branch: this route is reachable by direct URL, so the
+  // gate has to cover the page, not just the pay buttons.
+  if (blocked && reason) {
+    return <KycPaymentScreen reason={reason} backTo={BACK_TO} />;
+  }
 
   if (outcome) {
     return (
