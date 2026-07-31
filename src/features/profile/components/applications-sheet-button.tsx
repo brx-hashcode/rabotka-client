@@ -41,7 +41,7 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
   const app = application;
 
   return (
-    <li className="rounded-lg border border-border bg-card p-4 space-y-1">
+    <li className="rounded-lg shadow-soft bg-card p-4 space-y-1">
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium text-foreground">{app.jobOffer.title}</p>
         <span className={getStatusBadg(app.status)}>
@@ -91,7 +91,7 @@ export const ApplicationsSheetButton = ({ asRow = false }: { asRow?: boolean }) 
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted text-foreground"
+          className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted text-foreground"
         >
           <ClipboardList className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="flex-1 text-sm font-medium">{content.button}</span>

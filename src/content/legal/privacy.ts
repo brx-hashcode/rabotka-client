@@ -6,7 +6,7 @@ Cette politique explique quelles données personnelles Rabotka collecte, pourquo
 
 ## 1. Données que nous collectons
 
-- **Informations de profil** : nom, numéro de téléphone et type de profil (travailleur ou employeur).
+- **Informations de profil** : nom, numéro de téléphone et type de profil (travailleur ou recruteur).
 - **Pièces d'identité et vérification (KYC)** : pièce d'identité officielle et photo (selfie) fournies lors de la vérification.
 - **Données d'utilisation** : interactions avec l'assistant WhatsApp et la plateforme.
 
@@ -21,7 +21,7 @@ La confiance est au cœur de Rabotka. Voici comment nous traitons vos documents 
 
 ## 3. Utilisation de vos données
 
-Nous utilisons vos données pour vous mettre en relation avec des travailleurs ou des employeurs, sécuriser les paiements et améliorer le service.
+Nous utilisons vos données pour vous mettre en relation avec des travailleurs ou des recruteurs, sécuriser les paiements et améliorer le service.
 
 ## 4. Partage des données
 

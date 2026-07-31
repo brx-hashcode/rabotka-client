@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   Info,
   Download,
+  MessageCircle,
+  X,
 } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/utils";
 import { useProfileMe } from "@/hooks/use-profile-me";
@@ -18,25 +20,12 @@ import {
 } from "@/hooks/use-claim-comments";
 import { useClaimCommentsSocket } from "@/hooks/use-claim-comments-socket";
 import type { ClaimItem, ClaimCommentItem } from "@/lib/api/claims-controller";
-import { ChatDoodleBg } from "./chat-doodle-bg";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  CREATED: {
-    label: "Créée",
-    className: "bg-yellow-100 text-yellow-800",
-  },
-  IN_PROGRESS: {
-    label: "En cours",
-    className: "bg-blue-100 text-blue-800",
-  },
-  COMPLETED: {
-    label: "Complétée",
-    className: "bg-green-100 text-green-800",
-  },
-  REJECTED: {
-    label: "Rejetée",
-    className: "bg-red-100 text-red-800",
-  },
+  CREATED: { label: "Créée", className: "bg-yellow-100 text-yellow-800" },
+  IN_PROGRESS: { label: "En cours", className: "bg-blue-100 text-blue-800" },
+  COMPLETED: { label: "Complétée", className: "bg-green-100 text-green-800" },
+  REJECTED: { label: "Rejetée", className: "bg-red-100 text-red-800" },
 };
 
 function StatusBadge({ status }: Readonly<{ status: string }>) {
@@ -83,41 +72,42 @@ function CommentBubble({
   onDelete,
   isDeletingComment,
 }: CommentItemProps) {
-  const isFromCurrentProfile =
+  const mine =
     comment.createdByType === "profile" && comment.profileId === currentUserId;
 
   return (
     <div
       className={cn(
-        "flex gap-2 items-end group",
-        isFromCurrentProfile ? "flex-row-reverse" : "flex-row",
+        "group flex items-end gap-2",
+        mine ? "flex-row-reverse" : "flex-row",
       )}
     >
       <div
         className={cn(
-          "max-w-[78%] rounded-lg px-3 py-2 text-sm",
-          isFromCurrentProfile
-            ? "bg-[#dcf8c6] text-foreground rounded-br-sm"
-            : "bg-white text-foreground rounded-bl-sm",
+          // WhatsApp bubbles: tight radius with a squared-off corner on the
+          // sender's side, pale green outgoing / white incoming, dark text on both.
+          "max-w-[80%] rounded-xl px-2.5 py-1.5 text-sm text-foreground",
+          mine ? "rounded-br-sm bg-whatsapp-light" : "rounded-bl-sm bg-card",
         )}
       >
-        {!isFromCurrentProfile && (
-          <p className="text-[11px] font-semibold mb-0.5 text-whatsapp">
-            {getCommentAuthorName(comment, isFromCurrentProfile)}
+        {!mine && (
+          <p className="mb-0.5 text-[11px] font-semibold text-whatsapp">
+            {getCommentAuthorName(comment, mine)}
           </p>
         )}
-        <p className="leading-relaxed whitespace-pre-wrap break-words">
+        <p className="whitespace-pre-wrap break-words leading-relaxed">
           {comment.content}
         </p>
-        <p className="text-[10px] mt-1 text-right text-muted-foreground">
+        <p className="mt-0.5 text-right text-[10px] leading-none text-muted-foreground">
           {formatDateTime(comment.createdAt)}
         </p>
       </div>
-      {isFromCurrentProfile && (
+      {mine && (
         <button
+          type="button"
           onClick={() => onDelete(comment.id)}
           disabled={isDeletingComment}
-          className="shrink-0 mb-1 hidden group-hover:flex items-center justify-center h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-40 transition-colors"
+          className="mb-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-40 group-hover:flex"
           title="Supprimer"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -132,36 +122,45 @@ function ClaimInfoPanel({
   onClose,
 }: Readonly<{ claim: ClaimItem; onClose: () => void }>) {
   return (
-    <div
-      className="absolute inset-0 z-20 bg-black/40 flex items-end sm:items-center justify-center"
+    <button
+      type="button"
+      className="absolute inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
       onClick={onClose}
+      aria-label="Fermer"
     >
       <div
-        className="w-full sm:max-w-md bg-white sm:rounded-2xl rounded-t-2xl max-h-[80%] overflow-y-auto"
+        className="max-h-[82%] w-full overflow-y-auto rounded-t-2xl bg-card text-left sm:max-w-md sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <h3 className="font-semibold">Détails de la réclamation</h3>
-          <StatusBadge status={claim.status} />
+        <div className="flex items-center justify-between px-5 py-4">
+          <h3 className="font-semibold text-foreground">
+            Détails de la réclamation
+          </h3>
+          <div className="flex items-center gap-2">
+            <StatusBadge status={claim.status} />
+            <span className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted">
+              <X className="h-4 w-4" />
+            </span>
+          </div>
         </div>
-        <div className="px-5 py-4 space-y-4">
+        <div className="space-y-4 px-5 pb-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Titre
             </p>
-            <p className="text-sm font-medium">{claim.title}</p>
+            <p className="text-sm font-medium text-foreground">{claim.title}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Description
             </p>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
               {claim.description}
             </p>
           </div>
           {claim.attachmentUrls.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Pièces jointes ({claim.attachmentUrls.length})
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -171,29 +170,27 @@ function ClaimInfoPanel({
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative aspect-square rounded-lg border border-border overflow-hidden bg-muted hover:shadow-md transition-shadow"
+                    className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
                   >
                     <img
                       src={url}
                       alt={`Pièce jointe ${idx + 1}`}
                       className="h-full w-full object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
-                      <Download className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
+                      <Download className="h-5 w-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
                     </div>
                   </a>
                 ))}
               </div>
             </div>
           )}
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Créée le {formatDateTime(claim.createdAt)}
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Créée le {formatDateTime(claim.createdAt)}
+          </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -231,7 +228,6 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
     scrollToBottom();
   }, [comments]);
 
-  // Auto-grow textarea up to ~5 lines.
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -255,69 +251,63 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   };
 
   return (
-    <div className="relative flex flex-col bg-[#efeae2] h-[calc(100dvh-6rem)] lg:h-[calc(100dvh-7rem)] overflow-hidden">
+    <div className="chat-wallpaper relative flex h-dvh flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 px-3 sm:px-4 py-3 bg-white border-b border-border shrink-0">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={() => navigate("/claims")}
-            className="shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-muted text-foreground transition-colors"
-            aria-label="Retour"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-foreground truncate leading-tight">
-              {claim.title}
-            </h2>
-            <p className="text-[11px] text-muted-foreground truncate">
-              Créée le {formatDateTime(claim.createdAt)}
-            </p>
-          </div>
+      <div className="flex shrink-0 items-center gap-2 bg-background px-3 py-3">
+        <button
+          type="button"
+          onClick={() => navigate("/claims")}
+          className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary"
+          aria-label="Retour"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-bold leading-tight text-foreground">
+            {claim.title}
+          </h2>
+          <p className="truncate text-[11px] text-muted-foreground">
+            Créée le {formatDateTime(claim.createdAt)}
+          </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <StatusBadge status={claim.status} />
-          <button
-            type="button"
-            onClick={() => setShowInfo(true)}
-            className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Détails"
-          >
-            <Info className="h-5 w-5" />
-          </button>
-        </div>
+        <StatusBadge status={claim.status} />
+        <button
+          type="button"
+          onClick={() => setShowInfo(true)}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          aria-label="Détails"
+        >
+          <Info className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Messages */}
-      <div className="relative flex-1 min-h-0 overflow-hidden text-foreground">
-      <ChatDoodleBg />
       <div
         ref={messagesContainerRef}
-        className="absolute inset-0 overflow-y-auto px-3 sm:px-5 py-4 space-y-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex-1 space-y-2 overflow-y-auto px-3 py-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {commentsLoading && (
           <div className="space-y-3">
             <Skeleton className="h-12 w-3/4 rounded-2xl" />
-            <Skeleton className="h-12 w-2/3 ml-auto rounded-2xl" />
+            <Skeleton className="ml-auto h-12 w-2/3 rounded-2xl" />
             <Skeleton className="h-12 w-4/5 rounded-2xl" />
           </div>
         )}
         {!commentsLoading && (!comments || comments.length === 0) && (
-          <div className="flex flex-col items-center justify-center h-full min-h-64 gap-2 text-muted-foreground text-center px-4">
-            <div className="bg-white rounded-full p-4 shadow-sm">
-              <Send className="h-6 w-6 text-whatsapp" />
+          <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 px-4 text-center text-muted-foreground">
+            <div className="mb-1 rounded-full bg-whatsapp/10 p-4">
+              <MessageCircle className="h-7 w-7 text-whatsapp" />
             </div>
-            <p className="text-sm font-medium">Aucun message pour le moment.</p>
-            <p className="text-xs">
+            <p className="text-sm font-medium text-foreground">
+              Aucun message pour le moment
+            </p>
+            <p className="max-w-xs text-xs">
               Envoyez un message au support pour démarrer la conversation.
             </p>
           </div>
         )}
         {!commentsLoading &&
-          comments &&
-          comments.length > 0 &&
-          comments.map((comment) => (
+          comments?.map((comment) => (
             <CommentBubble
               key={comment.id}
               comment={comment}
@@ -327,13 +317,12 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             />
           ))}
       </div>
-      </div>
 
       {/* Closed banner */}
       {isClaimClosed && (
-        <div className="px-3 sm:px-4 pt-2 shrink-0">
-          <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5">
-            <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+        <div className="shrink-0 px-3 pt-2">
+          <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 px-3 py-2.5">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <p className="text-sm text-amber-700">
               Cette réclamation est{" "}
               {claim.status === "COMPLETED" ? "complétée" : "rejetée"}. Vous ne
@@ -346,7 +335,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
       {/* Composer */}
       <form
         onSubmit={handleSubmit}
-        className="shrink-0 bg-white border-t border-border px-2 sm:px-3 py-2"
+        className="shrink-0 bg-background px-3 py-2.5"
       >
         <div className="flex items-end gap-2">
           <textarea
@@ -361,12 +350,12 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             onKeyDown={handleKeyDown}
             disabled={isClaimClosed || isAddingComment}
             rows={1}
-            className="flex-1 resize-none rounded-2xl bg-muted/60 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-whatsapp/40 disabled:opacity-60 max-h-[140px] leading-snug"
+            className="max-h-[140px] flex-1 resize-none rounded-2xl bg-card px-4 py-2.5 text-sm leading-snug placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-whatsapp/40 disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={isClaimClosed || isAddingComment || !message.trim()}
-            className="shrink-0 mb-0.5 flex h-10 w-10 items-center justify-center rounded-full bg-whatsapp text-white disabled:opacity-40 hover:bg-whatsapp/90 transition-colors shadow-sm"
+            className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white transition-colors hover:bg-whatsapp-dark disabled:opacity-40"
             aria-label="Envoyer"
           >
             <Send className="h-4 w-4" />

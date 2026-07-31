@@ -12,7 +12,7 @@ export const heroContent: HeroContent = {
     rest: "",
   },
   description:
-    "Rabotka connecte les travailleurs informels et les employeurs grâce à un assistant WhatsApp simple sans application, sans complexité.",
+    "Rabotka connecte les travailleurs informels et les recruteurs grâce à un assistant WhatsApp simple sans application, sans complexité.",
   cta: {
     primary: "Trouver un emploi",
     secondary: "Trouver un travailleur",

@@ -34,7 +34,7 @@ const organizationSchema = {
   },
   image: "https://rabotka.work/rabotka-logo.png",
   description:
-    "Rabotka connecte les travailleurs informels et les employeurs grâce à un assistant WhatsApp simple en Afrique centrale.",
+    "Rabotka connecte les travailleurs informels et les recruteurs grâce à un assistant WhatsApp simple en Afrique centrale.",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Brazzaville",

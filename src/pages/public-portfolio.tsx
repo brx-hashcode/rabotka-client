@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { SearchX } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
@@ -8,6 +8,7 @@ import type { PublicWorkerResponse } from "@/lib/api/public-worker-controller";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 
+import { ScreenHeader } from "@/features/employer";
 import { PortfolioHeader } from "@/features/portfolio/components/portfolio-header";
 import { PortfolioGrid } from "@/features/portfolio/components/portfolio-grid";
 import { RealizationViewer } from "@/features/portfolio/components/realization-viewer";
@@ -18,23 +19,37 @@ const SKELETON_TILE_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
 
 export default function PublicPortfolio() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Shown only when opened from inside the app (e.g. an employer viewing a
+  // candidate) — external/shared links get the clean public page.
+  const showBack = searchParams.has("back");
   const { data: worker, isLoading, isError } = usePublicWorker(slug);
   const [selected, setSelected] = useState<PortfolioItem | null>(null);
 
+  const header = showBack ? (
+    <ScreenHeader title="Profil du candidat" onBack={() => navigate(-1)} />
+  ) : null;
+
   if (isLoading) {
     return (
-      <main className={CONTAINER}>
-        <Seo title="Portfolio — Rabotka" noIndex />
-        <PortfolioSkeleton />
-      </main>
+      <>
+        {header}
+        <main className={CONTAINER}>
+          <Seo title="Portfolio — Rabotka" noIndex />
+          <PortfolioSkeleton />
+        </main>
+      </>
     );
   }
 
   if (isError || !worker) {
     return (
-      <main className={CONTAINER}>
-        <Seo title="Portfolio introuvable — Rabotka" noIndex />
-        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+      <>
+        {header}
+        <main className={CONTAINER}>
+          <Seo title="Portfolio introuvable — Rabotka" noIndex />
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
           <div className="bg-muted flex size-14 items-center justify-center rounded-full">
             <SearchX className="text-muted-foreground size-7" />
           </div>
@@ -49,7 +64,8 @@ export default function PublicPortfolio() {
             Vérifiez le lien reçu et réessayez.
           </p>
         </div>
-      </main>
+        </main>
+      </>
     );
   }
 
@@ -57,18 +73,20 @@ export default function PublicPortfolio() {
   const firstImage = worker.portfolio.flatMap((i) => i.images).at(0)?.imageUrl;
 
   return (
-    <main className={CONTAINER}>
-      <Seo
-        title={`${fullName} — Réalisations | Rabotka`}
-        description={
-          worker.description?.slice(0, 160) ||
-          `Découvrez les réalisations de ${fullName} sur Rabotka.`
-        }
-        canonical={`/p/${worker.slug}`}
-        ogImage={firstImage ?? worker.avatarUrl ?? undefined}
-        ogImageAlt={`Réalisations de ${fullName}`}
-        jsonLd={buildJsonLd(worker, fullName)}
-      />
+    <>
+      {header}
+      <main className={CONTAINER}>
+        <Seo
+          title={`${fullName} — Réalisations | Rabotka`}
+          description={
+            worker.description?.slice(0, 160) ||
+            `Découvrez les réalisations de ${fullName} sur Rabotka.`
+          }
+          canonical={`/p/${worker.slug}`}
+          ogImage={firstImage ?? worker.avatarUrl ?? undefined}
+          ogImageAlt={`Réalisations de ${fullName}`}
+          jsonLd={buildJsonLd(worker, fullName)}
+        />
 
       <PortfolioHeader
         profile={{
@@ -105,16 +123,18 @@ export default function PublicPortfolio() {
           if (!open) setSelected(null);
         }}
       />
-    </main>
+      </main>
+    </>
   );
 }
 
 function PortfolioSkeleton() {
   return (
     <div>
-      <div className="flex items-center gap-5 sm:gap-8">
-        <Skeleton className="size-20 shrink-0 rounded-full sm:size-24" />
-        <div className="flex flex-1 items-center justify-around">
+      <div className="flex flex-col items-center gap-4">
+        <Skeleton className="size-24 rounded-full" />
+        <Skeleton className="h-5 w-40" />
+        <div className="flex items-center gap-10">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex flex-col items-center gap-1">
               <Skeleton className="h-5 w-8" />
@@ -122,11 +142,7 @@ function PortfolioSkeleton() {
             </div>
           ))}
         </div>
-      </div>
-      <div className="mt-4 space-y-2">
-        <Skeleton className="h-4 w-40" />
         <Skeleton className="h-4 w-full max-w-sm" />
-        <Skeleton className="h-3 w-32" />
       </div>
       <Separator className="my-6" />
       <div className="grid grid-cols-3 gap-0.5 sm:gap-1">

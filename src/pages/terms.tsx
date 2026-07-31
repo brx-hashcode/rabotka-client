@@ -28,7 +28,7 @@ export default function Terms() {
   return (
     <PolicyShell
       title="Conditions d'utilisation – Rabotka"
-      description="Consultez les conditions générales d'utilisation de Rabotka, la plateforme WhatsApp de mise en relation entre travailleurs informels et employeurs au Congo."
+      description="Consultez les conditions générales d'utilisation de Rabotka, la plateforme WhatsApp de mise en relation entre travailleurs informels et recruteurs au Congo."
       canonical="/terms"
     >
       {isLoading && (

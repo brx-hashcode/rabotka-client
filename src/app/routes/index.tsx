@@ -1,14 +1,13 @@
-import { Routes, Route } from "react-router";
-import { lazy, Suspense } from "react";
+import { Routes, Route, useLocation } from "react-router";
+import { lazy, Suspense, useEffect } from "react";
 import { AuthGuard } from "@/components/auth";
 import { LandingLayout } from "@/features/landing/layouts";
+import { AppShell } from "@/features/navigation";
 import Index from "@/pages/Index";
 
-// Critical path — bundled with landing
 import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
-// Non-critical — lazy loaded
 const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
@@ -19,7 +18,6 @@ const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
-const Claims = lazy(() => import("@/pages/claims"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const CreateJobOffer = lazy(() => import("@/pages/create-job-offer"));
 const Claim = lazy(() => import("@/pages/claim"));
@@ -27,6 +25,33 @@ const CreateClaim = lazy(() => import("@/pages/create-claim"));
 const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
 const OnboardingSuccess = lazy(() => import("@/pages/onboarding-success"));
 const OnboardingError = lazy(() => import("@/pages/onboarding-error"));
+
+const Home = lazy(() => import("@/pages/home"));
+const Applications = lazy(() => import("@/pages/applications"));
+const WorkerMissionDetail = lazy(() => import("@/pages/worker-mission-detail"));
+const WorkerApplications = lazy(() => import("@/pages/worker-applications"));
+const WorkerMissionPayment = lazy(
+  () => import("@/pages/worker-mission-payment"),
+);
+const JobDetailWorker = lazy(() => import("@/pages/job-detail-worker"));
+const SavedJobs = lazy(() => import("@/pages/saved-jobs"));
+const WalletTopUp = lazy(() => import("@/pages/wallet-top-up"));
+const Jobs = lazy(() => import("@/pages/jobs"));
+const Missions = lazy(() => import("@/pages/missions"));
+const MissionDetail = lazy(() => import("@/pages/mission-detail"));
+const ReceivedApplications = lazy(() => import("@/pages/received-applications"));
+const ApplicationDetail = lazy(() => import("@/pages/application-detail"));
+const ApplicationPayment = lazy(() => import("@/pages/application-payment"));
+const PenaltiesPayment = lazy(() => import("@/pages/penalties-payment"));
+const JobSearch = lazy(() => import("@/pages/job-search"));
+const RecommendedWorkerDetail = lazy(
+  () => import("@/pages/recommended-worker-detail"),
+);
+const RecommendationContact = lazy(
+  () => import("@/pages/recommendation-contact"),
+);
+const WorkerSearch = lazy(() => import("@/pages/worker-search"));
+const Claims = lazy(() => import("@/pages/claims"));
 
 function PageLoader() {
   return (
@@ -36,9 +61,19 @@ function PageLoader() {
   );
 }
 
+function ScrollToTopOnNavigate() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export function AppRoutes() {
   return (
-    <Routes>
+    <>
+      <ScrollToTopOnNavigate />
+      <Routes>
       <Route
         path="/"
         element={
@@ -52,11 +87,246 @@ export function AppRoutes() {
         element={<Onboarding />}
       />
       <Route
+        path="/home"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Home />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/applications"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Applications />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/applications/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <WorkerMissionDetail />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/mes-candidatures"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <WorkerApplications />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/offres/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <JobDetailWorker />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/favoris"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <SavedJobs />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/portefeuille"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <WalletTopUp />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/jobs"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Jobs />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/missions"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Missions />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/missions/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <MissionDetail />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/candidatures"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <ReceivedApplications />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/candidatures/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <ApplicationDetail />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/candidatures/:id/paiement"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              {/* Focused payment flow — no tab bar, like /pay/:token. */}
+              <AppShell withNav={false}>
+                <ApplicationPayment />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/applications/:id/paiement"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              {/* Focused payment flow — no tab bar, like /pay/:token. */}
+              <AppShell withNav={false}>
+                <WorkerMissionPayment />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/penalites/paiement"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              {/* Focused payment flow — no tab bar, like /pay/:token. */}
+              <AppShell withNav={false}>
+                <PenaltiesPayment />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/recommandations/:workerId"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <RecommendedWorkerDetail />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/recommandations/:workerId/contact"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              {/* Focused payment flow — no tab bar, like /pay/:token. */}
+              <AppShell withNav={false}>
+                <RecommendationContact />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/recherche"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <WorkerSearch />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      {/* Worker-side counterpart of /recherche: searches offers, not workers. */}
+      <Route
+        path="/recherche-offres"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <JobSearch />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
         path="/profile"
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <Profile />
+              <AppShell>
+                <Profile />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -76,7 +346,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <Claims />
+              <AppShell>
+                <Claims />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -86,7 +358,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <CreateClaim />
+              <AppShell>
+                <CreateClaim />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -96,7 +370,10 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <Claim />
+              {/* Full-screen conversation, like a WhatsApp chat — no tab bar. */}
+              <AppShell withNav={false}>
+                <Claim />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -147,6 +424,18 @@ export function AppRoutes() {
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
               <CreateJobOffer />
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/job-offers/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <MissionDetail />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -219,5 +508,6 @@ export function AppRoutes() {
       />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 }
