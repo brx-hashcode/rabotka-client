@@ -13,6 +13,8 @@ import {
   usePayRecommendationWallet,
   usePayRecommendationMobile,
 } from "@/hooks/use-recommendations";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycPaymentScreen } from "@/features/kyc";
 
 const BACK_TO = "/home";
 
@@ -23,6 +25,7 @@ export default function RecommendationContact() {
   const payWallet = usePayRecommendationWallet(workerId);
   const payMobile = usePayRecommendationMobile(workerId);
 
+  const { blocked, reason } = useKycGate();
   const [paid, setPaid] = useState(false);
   const goBack = () => navigate(BACK_TO);
 
@@ -39,6 +42,12 @@ export default function RecommendationContact() {
       onSuccess: ({ token }) =>
         navigate(`/pay/${token}?return=${encodeURIComponent(BACK_TO)}`),
     });
+
+  // Ahead of every other branch: this route is reachable by direct URL, so the
+  // gate has to cover the page, not just the pay buttons.
+  if (blocked && reason) {
+    return <KycPaymentScreen reason={reason} backTo={BACK_TO} />;
+  }
 
   if (paid) {
     return (
