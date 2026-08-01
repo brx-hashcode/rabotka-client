@@ -9,6 +9,7 @@ import { useSendOtpMutation } from "@/hooks/use-send-otp-mutation";
 import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
 import { getMe } from "@/lib/api/profile-controller";
+import { useProfileMe } from "@/hooks/use-profile-me";
 import {
   Step1PhoneForm,
   Step2OTPForm,
@@ -37,18 +38,31 @@ export default function Login() {
   const verifyOtpMutation = useVerifyOtpMutation();
   const resendOtpMutation = useResendOtpMutation();
 
+  // Already signed in — typically a WhatsApp link whose `?s=` code was just
+  // exchanged for a session. Showing the phone form there would ask a logged-in
+  // user to log in again, so go straight to the destination.
+  const { data: profile } = useProfileMe();
+  useEffect(() => {
+    if (step === "1" && profile) {
+      navigate(redirectTo === "/onboarding/avatar" ? "/home" : redirectTo, {
+        replace: true,
+      });
+    }
+  }, [step, profile, navigate, redirectTo]);
+
   useEffect(() => {
     if (step === "3") {
       const timer = setTimeout(async () => {
         // If an explicit redirect was provided (e.g. from success page), use it directly.
-        // Otherwise check firstLogin to decide whether to prompt for avatar or go to profile.
+        // Otherwise check firstLogin to decide whether to prompt for avatar or send
+        // the user to the app home.
         if (redirectTo !== "/onboarding/avatar") {
           navigate(redirectTo);
           return;
         }
         try {
-          const profile = await getMe();
-          navigate(profile.firstLogin ? "/onboarding/avatar" : "/profile");
+          const me = await getMe();
+          navigate(me.firstLogin ? "/onboarding/avatar" : "/home");
         } catch {
           navigate("/onboarding/avatar");
         }
