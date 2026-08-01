@@ -221,6 +221,18 @@
     clip-path: polygon(100% 0, 100% 100%, 0 100%);
   }
 
+  /* WhatsApp-like conversation wallpaper: warm beige base with a faint dot
+     texture, so message bubbles read as sitting on paper rather than on flat
+     grey. Self-contained (no image asset). */
+  .chat-wallpaper {
+    background-color: hsl(var(--muted));
+    background-image: radial-gradient(
+      hsl(var(--foreground) / 0.045) 1px,
+      transparent 1px
+    );
+    background-size: 18px 18px;
+  }
+
   .gradient-text {
     @apply bg-linear-to-r from-primary to-accent bg-clip-text text-transparent;
   }

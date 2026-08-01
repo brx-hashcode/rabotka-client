@@ -3,7 +3,7 @@ import type { Feature } from '@/types';
 
 export const trustContent = {
   title: 'Construit sur la confiance',
-  description: 'Conçu pour protéger les travailleurs et les employeurs. La sécurité est au cœur de tout ce que nous faisons.',
+  description: 'Conçu pour protéger les travailleurs et les recruteurs. La sécurité est au cœur de tout ce que nous faisons.',
   features: [
     {
       icon: UserCheck,

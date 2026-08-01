@@ -5,7 +5,7 @@ export const realityContent = {
   description:
     "Dans les villes africaines, des millions de personnes travaillent de manière informelle :",
   workers: [
-    "Employés de maison",
+    "Travailleurs domestiques",
     "Coiffeurs/Coiffeuses",
     "Répétiteurs",
     "Mécaniciens",

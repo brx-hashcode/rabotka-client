@@ -30,6 +30,31 @@ export type EmployerJobOffersResponse = {
   nextCursor: string | null;
 };
 
+export type JobOfferEmployer = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  reliabilityScore: number | null;
+};
+
+export type JobOfferDetail = {
+  id: string;
+  reference: string;
+  title: string;
+  description: string;
+  status: JobOfferStatus;
+  scheduledAt: string;
+  amount: number;
+  paymentFlow: string;
+  address: string;
+  note: string | null;
+  quantity: number;
+  acceptedCount: number;
+  createdAt: string;
+  employer?: JobOfferEmployer;
+};
+
 export type EmployerApplicationItem = {
   id: string;
   status: string;
@@ -90,6 +115,60 @@ type BackendEmployerApplication = {
   };
 };
 
+type BackendJobOfferDetail = {
+  id: string;
+  reference: string;
+  title: string;
+  description: string;
+  status: JobOfferStatus;
+  scheduled_at: string;
+  amount: number | null;
+  payment_flow: string | null;
+  address: string;
+  note: string | null;
+  quantity: number;
+  acceptedCount: number;
+  employer_id: string;
+  created_at: string;
+  employer?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    reliability_score: number | null;
+  };
+};
+
+export type JobOfferWorkerItem = {
+  applicationId: string;
+  status: string;
+  createdAt: string;
+  contractId: string | null;
+  worker: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    avatarUrl: string | null;
+    reliabilityScore: number | null;
+  };
+};
+
+type BackendOfferApplication = {
+  id: string;
+  status: string;
+  created_at: string;
+  contractId?: string | null;
+  worker?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    avatar_url?: string | null;
+    reliability_score?: number | null;
+  };
+};
+
 export type CreateJobOfferPayload = {
   title: string;
   description: string;
@@ -114,14 +193,23 @@ class JobOfferController extends RabotkaBaseController {
   // (page 0-indexed, pageSize) returning { items, total } with snake_case
   // fields — mapped here to the camelCase shape the dashboard renders.
   async getEmployerJobOffers(params?: {
+    page?: number;
     limit?: number;
+    /** Narrowed server-side, before pagination — see useEmployerJobOffersInfinite. */
+    statuses?: readonly JobOfferStatus[];
   }): Promise<EmployerJobOffersResponse> {
     const pageSize = params?.limit ?? 20;
+    const page = params?.page && params.page > 0 ? params.page : 0;
+    const qs = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    });
+    if (params?.statuses?.length) qs.set("status", params.statuses.join(","));
     try {
       const res = await this.get<{
         items: BackendEmployerOffer[];
         total: number;
-      }>(`/profile/job-offers?page=0&pageSize=${pageSize}`);
+      }>(`/profile/job-offers?${qs.toString()}`);
       return {
         data: res.items.map((o) => ({
           id: o.id,
@@ -185,6 +273,64 @@ class JobOfferController extends RabotkaBaseController {
     }
   }
 
+  // Backend: GET /job-offers/:id → full offer detail with employer info.
+  async getJobOffer(id: string): Promise<JobOfferDetail> {
+    try {
+      const o = await this.get<BackendJobOfferDetail>(`/job-offers/${id}`);
+      return {
+        id: o.id,
+        reference: o.reference,
+        title: o.title,
+        description: o.description,
+        status: o.status,
+        scheduledAt: o.scheduled_at,
+        amount: o.amount ?? 0,
+        paymentFlow: o.payment_flow ?? "",
+        address: o.address,
+        note: o.note,
+        quantity: o.quantity,
+        acceptedCount: o.acceptedCount,
+        createdAt: o.created_at,
+        employer: o.employer
+          ? {
+              id: o.employer.id,
+              firstName: o.employer.first_name,
+              lastName: o.employer.last_name,
+              phone: o.employer.phone,
+              reliabilityScore: o.employer.reliability_score,
+            }
+          : undefined,
+      };
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Backend: GET /profile/job-offers/:id/applications → workers on the offer.
+  async getJobOfferApplications(id: string): Promise<JobOfferWorkerItem[]> {
+    try {
+      const res = await this.get<BackendOfferApplication[]>(
+        `/profile/job-offers/${id}/applications`,
+      );
+      return res.map((a) => ({
+        applicationId: a.id,
+        status: a.status,
+        createdAt: a.created_at,
+        contractId: a.contractId ?? null,
+        worker: {
+          id: a.worker?.id ?? "",
+          firstName: a.worker?.first_name ?? "",
+          lastName: a.worker?.last_name ?? "",
+          phone: a.worker?.phone ?? "",
+          avatarUrl: a.worker?.avatar_url ?? null,
+          reliabilityScore: a.worker?.reliability_score ?? null,
+        },
+      }));
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async create(payload: CreateJobOfferPayload): Promise<CreatedJobOffer> {
     try {
       return await this.post<CreatedJobOffer>(
@@ -195,7 +341,36 @@ class JobOfferController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  // Backend: POST /job-offers/:id/republish → reopen an EXPIRED offer at a new
+  // date. `scheduledAt` must be ISO 8601 and at least 4 hours in the future.
+  async republish(id: string, scheduledAt: string): Promise<JobOfferDetail> {
+    try {
+      return await this.post<JobOfferDetail>(`/job-offers/${id}/republish`, {
+        scheduledAt,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Backend: DELETE /profile/job-offers/:id → soft-delete one of the employer's
+  // own offers (only allowed while ACTIVE with no candidates).
+  async remove(id: string): Promise<void> {
+    try {
+      await this.delete<{ success: boolean }>(`/profile/job-offers/${id}`);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
-export const { getEmployerJobOffers, getEmployerApplications, create: createJobOffer } =
-  new JobOfferController();
+export const {
+  republish,
+  getEmployerJobOffers,
+  getEmployerApplications,
+  getJobOffer,
+  getJobOfferApplications,
+  create: createJobOffer,
+  remove: deleteJobOffer,
+} = new JobOfferController();
