@@ -54,6 +54,15 @@ export class AuthController extends RabotkaBaseController {
     }
   }
 
+  /**
+   * Trades the one-time code carried by a WhatsApp link (`?s=`) for the session
+   * cookie, so the in-app WebView lands signed in instead of on the OTP screen.
+   * Throws on a dead code — the caller falls back to the normal login flow.
+   */
+  async exchangeWhatsAppSession(code: string): Promise<void> {
+    await this.post<void>("/auth/whatsapp/session", { code });
+  }
+
   async logout(): Promise<{ success: boolean }> {
     try {
       return await this.post<{ success: boolean }>("/auth/logout");
@@ -64,3 +73,7 @@ export class AuthController extends RabotkaBaseController {
 }
 
 export const { sendOTP, verifyOTP, resendOTP, logout } = new AuthController();
+
+const authController = new AuthController();
+export const exchangeWhatsAppSession =
+  authController.exchangeWhatsAppSession.bind(authController);
