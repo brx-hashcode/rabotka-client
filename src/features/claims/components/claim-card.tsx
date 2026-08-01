@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router";
-import { Card } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { ClaimItem } from "@/lib/api/claims-controller";
 
-const getStatusColor = (status: string) => {
-  return cn(
-    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+const statusPill = (status: string) =>
+  cn(
+    "inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
     {
       "bg-yellow-100 text-yellow-800": status === "CREATED",
       "bg-blue-100 text-blue-800": status === "IN_PROGRESS",
@@ -13,12 +13,11 @@ const getStatusColor = (status: string) => {
       "bg-red-100 text-red-800": status === "REJECTED",
     },
   );
-};
 
-const getStatusLabel = (status: string) => {
+const statusLabel = (status: string) => {
   const labels: Record<string, string> = {
     CREATED: "Créée",
-    IN_PROGRESS: "En Cours",
+    IN_PROGRESS: "En cours",
     COMPLETED: "Complétée",
     REJECTED: "Rejetée",
   };
@@ -33,43 +32,45 @@ export const ClaimCard = ({ claim }: ClaimCardProps) => {
   const navigate = useNavigate();
 
   return (
-    <Card
+    <button
+      type="button"
       onClick={() => navigate(`/claims/${claim.id}`)}
-      className="p-4 cursor-pointer"
+      className="w-full rounded-xl bg-card p-4 text-left shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="font-semibold text-foreground line-clamp-2 flex-1">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="min-w-0 flex-1 font-semibold leading-snug text-foreground line-clamp-2">
           {claim.title}
         </h3>
-        <span className={getStatusColor(claim.status)}>
-          {getStatusLabel(claim.status)}
+        <span className={statusPill(claim.status)}>
+          {statusLabel(claim.status)}
         </span>
       </div>
 
-      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+      <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">
         {claim.description}
       </p>
 
       {claim.attachmentUrls.length > 0 && (
-        <div className="mb-3 flex gap-1">
-          {claim.attachmentUrls.map((url, idx) => (
+        <div className="mt-3 flex gap-1.5">
+          {claim.attachmentUrls.slice(0, 4).map((url, idx) => (
             <div
               key={`${url}-${idx + 1}`}
-              className="h-8 w-8 rounded border border-border bg-muted overflow-hidden"
+              className="h-9 w-9 overflow-hidden rounded-lg bg-muted"
             >
               <img
                 src={url}
-                alt={`Attachment ${idx}`}
-                className="w-full h-full object-cover"
+                alt={`Pièce jointe ${idx + 1}`}
+                className="h-full w-full object-cover"
               />
             </div>
           ))}
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Calendar className="h-3.5 w-3.5" />
         {formatDateTime(claim.createdAt)}
       </p>
-    </Card>
+    </button>
   );
 };

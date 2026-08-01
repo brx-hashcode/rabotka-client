@@ -17,7 +17,9 @@ export default function OnboardingAvatar() {
     navigate("/profile");
   };
 
-  if (!uploaded && (isLoading || profile?.avatarUrl)) return null;
+  // Wait for the profile before rendering; an existing avatar is shown as the
+  // preview (via AvatarUpload's defaultAvatar) rather than blanking the page.
+  if (isLoading) return null;
 
   return (
     <>

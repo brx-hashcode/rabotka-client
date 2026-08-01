@@ -76,6 +76,12 @@ export type ProfilePenaltyItem = {
   jobOfferTitle?: string;
 };
 
+export type PenaltiesDue = {
+  count: number;
+  totalAmount: number;
+  walletBalance: number;
+};
+
 export type ProfileApplicationItem = {
   id: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
@@ -152,6 +158,45 @@ export class ProfileController extends RabotkaBaseController {
   async getPenalties(): Promise<ProfilePenaltyItem[]> {
     try {
       return await this.get<ProfilePenaltyItem[]>("/profile/penalties");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // What the payment-method chooser needs: amount owed + wallet balance.
+  async getPenaltiesDue(): Promise<PenaltiesDue> {
+    try {
+      return await this.get<PenaltiesDue>("/profile/penalties/due");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Settles all unpaid penalties from the profile's wallet balance.
+  async payPenaltiesWithWallet(): Promise<{
+    paidCount: number;
+    totalAmount: number;
+    reference: string;
+  }> {
+    try {
+      return await this.post<{
+        paidCount: number;
+        totalAmount: number;
+        reference: string;
+      }>("/profile/penalties/pay/wallet", {});
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Starts a Mobile Money payment for ALL unpaid penalties; returns the token
+  // that drives the shared /pay/:token screen (same one used for top-ups).
+  async payPenaltiesWithMobile(): Promise<{ token: string }> {
+    try {
+      return await this.post<{ token: string }>(
+        "/profile/penalties/pay/link",
+        {},
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -252,6 +297,9 @@ export class ProfileController extends RabotkaBaseController {
 export const {
   getMe,
   getPenalties,
+  getPenaltiesDue,
+  payPenaltiesWithWallet,
+  payPenaltiesWithMobile,
   updateAvatar,
   updateProfile,
   createProfile,

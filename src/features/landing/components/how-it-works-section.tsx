@@ -118,7 +118,7 @@ export function HowItWorksSection() {
         />
 
         <FlowCard
-          id="flow-employeurs"
+          id="flow-recruteurs"
           subtitle={howItWorksContent.employer.subtitle}
           title={howItWorksContent.employer.title}
           steps={howItWorksContent.employer.steps}

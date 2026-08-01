@@ -6,7 +6,7 @@ export const profileTypeContent = {
     placeholder: "Sélectionnez un type",
     options: {
       worker: "Travailleur",
-      employer: "Employeur",
+      employer: "Recruteur",
     },
   },
   categories: {

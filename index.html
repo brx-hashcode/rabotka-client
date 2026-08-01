@@ -12,17 +12,14 @@
     <meta name="apple-mobile-web-app-title" content="Rabotka" />
     <meta name="application-name" content="Rabotka" />
 
-    <!-- ── Domain verification ──────────────────────────────────────────── -->
     <meta
       name="facebook-domain-verification"
       content="b1fblr74yd08uwcb1wn1rxzem0r3lo"
     />
 
-    <!-- ── DNS prefetch ───────────────────────────────────────────────────── -->
     <link rel="dns-prefetch" href="//rabotka.work" />
     <link rel="preconnect" href="https://rabotka.work" crossorigin />
 
-    <!-- ── Primary SEO ─────────────────────────────────────────────────── -->
     <title>
       Rabotka – Trouvez du travail et de l'aide sur WhatsApp | Congo,
       Brazzaville
@@ -223,14 +220,9 @@
         "inLanguage": "fr"
       }
     </script>
-    <!-- The FAQPage JSON-LD is emitted at runtime from src/content/landing/faq.ts,
-         the same module the visible FAQ renders from, so the markup cannot drift
-         from the questions on the page. Do not re-add a static copy here. -->
 
-    <!-- ── BIMI ───────────────────────────────────────────────────────────── -->
     <link rel="bimi" type="image/svg+xml" href="/bimi-logo.svg" />
 
-    <!-- ── Favicon ───────────────────────────────────────────────────────── -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link
       rel="icon"
@@ -239,9 +231,52 @@
       href="/rabotka-logo.png"
     />
     <link rel="apple-touch-icon" href="/rabotka-logo.png" />
+
+    <link rel="preload" as="image" href="/rabotka-logo.png" />
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: hsl(40 30% 98%);
+        z-index: 9999;
+      }
+      #app-loading .logo-img {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        animation: splash-pulse 1.6s ease-in-out infinite;
+      }
+      #app-loading.is-hiding {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+      }
+      @keyframes splash-pulse {
+        0%,
+        100% {
+          opacity: 0.65;
+          transform: scale(0.97);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-loading .logo-img {
+          animation: none;
+        }
+      }
+    </style>
   </head>
 
   <body>
+    <div id="app-loading">
+      <img class="logo-img" src="/rabotka-logo.png" alt="Rabotka" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>

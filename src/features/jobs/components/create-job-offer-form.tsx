@@ -3,9 +3,8 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -25,19 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { CategoryCombobox } from "@/components/common/category-combobox";
 import { getCategories } from "@/lib/api/job-category-controller";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
@@ -68,7 +55,6 @@ type Props = {
 export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   const navigate = useNavigate();
   const { mutate: createOffer, isPending } = useCreateJobOffer();
-  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["job-categories"],
@@ -270,76 +256,21 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             <FormField
               control={form.control}
               name="categoryId"
-              render={({ field }) => {
-                const selected = categories.find((c) => c.id === field.value);
-                return (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Domaine (optionnel)</FormLabel>
-                    <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={categoryOpen}
-                            disabled={isPending}
-                            className={cn(
-                              // Neutralise the app's green "outline" button style
-                              // so this reads as a form field like the others.
-                              "h-10 w-full justify-between rounded-md border border-input bg-background font-normal text-foreground hover:border-input hover:bg-background hover:text-foreground",
-                              !selected && "text-muted-foreground",
-                            )}
-                          >
-                            {selected ? selected.name : "Choisir un domaine…"}
-                            <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        align="start"
-                        collisionPadding={8}
-                        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] p-0"
-                      >
-                        <Command>
-                          <CommandInput placeholder="Rechercher un domaine…" />
-                          <CommandList>
-                            <CommandEmpty>Aucun domaine trouvé.</CommandEmpty>
-                            <CommandGroup>
-                              {categories.map((category) => (
-                                <CommandItem
-                                  key={category.id}
-                                  value={category.name}
-                                  className="-mx-2 rounded-none px-4 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground"
-                                  onSelect={() => {
-                                    field.onChange(
-                                      category.id === field.value
-                                        ? ""
-                                        : category.id,
-                                    );
-                                    setCategoryOpen(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 size-4",
-                                      field.value === category.id
-                                        ? "opacity-100"
-                                        : "opacity-0",
-                                    )}
-                                  />
-                                  {category.name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Domaine (optionnel)</FormLabel>
+                  <FormControl>
+                    <CategoryCombobox
+                      options={categories}
+                      value={field.value || null}
+                      onChange={(id) => field.onChange(id ?? "")}
+                      placeholder="Choisir un domaine…"
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           )}
 
@@ -372,7 +303,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(-1)}
             >
               Annuler
             </Button>
