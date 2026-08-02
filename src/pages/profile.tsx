@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Images,
   LayoutDashboard,
+  UsersRound,
   Wallet,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
@@ -294,6 +295,13 @@ export default function Profile() {
                   icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
                   label="Créer une offre"
                   onClick={() => navigate("/job-offers/new")}
+                />
+                <ActionRow
+                  icon={
+                    <UsersRound className="h-4 w-4 text-muted-foreground" />
+                  }
+                  label="Profils contactés"
+                  onClick={() => navigate("/profils-contactes")}
                 />
               </>
             )}
