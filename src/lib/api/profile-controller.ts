@@ -114,7 +114,26 @@ export type InvoiceItem = {
   relatedEntityId: string | null;
 };
 
-export class ProfileController extends RabotkaBaseController {
+export type ContactedProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  description: string;
+  address: string;
+  categories: string[];
+  reliabilityScore: number | null;
+  ratingAvg: number | null;
+  ratingCount: number;
+  portfolioSlug: string | null;
+  phone: string;
+  email: string;
+  origin: "RECOMMENDATION" | "MISSION";
+  unlockedAt: string;
+  jobTitle: string | null;
+};
+
+class ProfileController extends RabotkaBaseController {
   /**
    * Pre-uploads a single KYC file (document or selfie) and returns its public
    * URL. Called per-file during onboarding step 3 so the final createProfile
@@ -288,6 +307,18 @@ export class ProfileController extends RabotkaBaseController {
     }
   }
 
+  /**
+   * Everyone this recruiter has paid to reach — with the phone and email the
+   * payment bought, which otherwise only ever existed in a WhatsApp message.
+   */
+  async getContactedProfiles(): Promise<ContactedProfile[]> {
+    try {
+      return await this.get<ContactedProfile[]>("/profile/contacts");
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   /** Absolute URL of an invoice PDF. See agreementDownloadUrl(). */
   invoiceDownloadUrl(invoiceId: string): string {
     return `${config.apiUrl}/invoices/${encodeURIComponent(invoiceId)}/download`;
@@ -309,6 +340,7 @@ export const {
   resumeDownloadUrl,
   contractDownloadUrl,
   getInvoices,
+  getContactedProfiles,
   invoiceDownloadUrl,
   markFirstLoginDone,
 } = new ProfileController();
