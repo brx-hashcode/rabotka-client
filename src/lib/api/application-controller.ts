@@ -54,9 +54,20 @@ export type ApplicationUnlock = {
   workerPaid: boolean;
 };
 
+/**
+ * What accepting *would* cost, quoted before the acceptance is committed. Only
+ * present while `unlock` is null — once the attempt exists, `unlock` carries the
+ * real amount and this is null.
+ */
+export type ApplicationQuote = {
+  employerFee: number;
+  walletBalance: number;
+};
+
 export type ApplicationDetail = {
   application: ApplicationDetailApplication;
   unlock: ApplicationUnlock | null;
+  quote: ApplicationQuote | null;
   workerSlug: string | null;
 };
 
@@ -96,6 +107,7 @@ type BackendDetail = {
     employerPaid: boolean;
     workerPaid: boolean;
   } | null;
+  quote?: { employerFee: number; walletBalance: number } | null;
   workerSlug?: string | null;
 };
 
@@ -129,6 +141,7 @@ function mapDetail(d: BackendDetail): ApplicationDetail {
   return {
     application: mapApplication(d.application),
     unlock: d.unlock,
+    quote: d.quote ?? null,
     workerSlug: d.workerSlug ?? null,
   };
 }

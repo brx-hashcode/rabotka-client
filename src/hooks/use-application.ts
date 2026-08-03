@@ -29,8 +29,14 @@ export function useAcceptApplication(id: string) {
       qc.setQueryData(detailKey(id), data);
       qc.invalidateQueries({ queryKey: ["employer", "applications"] });
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Impossible d'accepter la candidature."),
+    onError: (err: Error) => {
+      // A failed mutation does not trigger the global invalidation, so refetch
+      // the detail explicitly: losing a capacity race means the cached offer
+      // status is now wrong, and without this the Accepter button stays live on
+      // an offer that has just filled up.
+      qc.invalidateQueries({ queryKey: detailKey(id) });
+      toast.error(err.message || "Impossible d'accepter la candidature.");
+    },
   });
 }
 

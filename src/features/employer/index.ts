@@ -13,4 +13,7 @@ export {
   getApplicationStatusVariant,
   getApplicationStatusChipClass,
   isOngoing,
+  isClosedToNewCandidates,
+  isClosedToApplications,
+  closedToCandidatesReason,
 } from "./config/job-status";
