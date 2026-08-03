@@ -8,6 +8,8 @@ import {
   PaymentSuccess,
   PaymentNotice,
 } from "@/features/payments";
+import { QueryErrorState } from "@/components/common/query-error-state";
+import { isNetworkError, serverMessage } from "@/lib/api/errors";
 import {
   usePenaltiesDue,
   usePayPenaltiesWallet,
@@ -18,7 +20,14 @@ const BACK_TO = "/profile";
 
 export default function PenaltiesPayment() {
   const navigate = useNavigate();
-  const { data: due, isLoading, isError } = usePenaltiesDue();
+  const {
+    data: due,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    refetch,
+  } = usePenaltiesDue();
   const payWallet = usePayPenaltiesWallet();
   const payMobile = usePayPenaltiesMobile();
 
@@ -55,12 +64,27 @@ export default function PenaltiesPayment() {
     );
   }
 
+  if (isNetworkError(error)) {
+    return (
+      <PaymentScreen>
+        <QueryErrorState
+          message="Impossible de charger vos pénalités."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
+      </PaymentScreen>
+    );
+  }
+
   if (isError || !due) {
     return (
       <PaymentScreen>
         <PaymentNotice
           title="Paiement indisponible"
-          description="Impossible de préparer le paiement de vos pénalités."
+          description={
+            serverMessage(error) ??
+            "Impossible de préparer le paiement de vos pénalités."
+          }
           actionLabel="Retour au profil"
           onAction={goBack}
         />
