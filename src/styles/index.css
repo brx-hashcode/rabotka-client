@@ -128,9 +128,36 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Chart marks — validated, not eyeballed.
+       Checked with the data-viz validator against the white card these charts
+       sit on: lightness band, chroma floor, colourblind separation between
+       adjacent stack segments, normal-vision floor, contrast.
+       4-slot categorical: worst adjacent CVD dE 9.1 (protan), normal-vision
+       22.9. Contrast warns on stage-done (2.82:1) and stage-closed (2.17:1),
+       so those charts owe *relief* — every segment ships a visible direct
+       label plus a legend, never colour alone.
+       --chart-accent is a darker step of the brand hue: the brand green itself
+       scores 1.96:1 on white and is unusable as a mark. */
+    --chart-accent: #16a34a;
+    --chart-stage-open: #2a78d6;
+    --chart-stage-staffed: #eb6834;
+    --chart-stage-done: #1baf7a;
+    --chart-stage-closed: #eda100;
+    --chart-track: hsl(40 20% 91%);
   }
 
   .dark {
+    /* Same hues re-stepped for the dark card surface (#261d17) and re-validated
+       as a set — all checks pass there, including contrast, so no relief owed.
+       Not an automatic flip of the light values. */
+    --chart-accent: #22a95c;
+    --chart-stage-open: #3987e5;
+    --chart-stage-staffed: #d95926;
+    --chart-stage-done: #199e70;
+    --chart-stage-closed: #c98500;
+    --chart-track: hsl(25 20% 22%);
+
     --background: 25 30% 8%;
     --foreground: 40 20% 95%;
 
