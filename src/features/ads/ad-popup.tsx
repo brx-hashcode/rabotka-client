@@ -16,6 +16,7 @@ const MUTED_ROUTE_PREFIXES = [
   "/verify-whatsapp",
   "/pay",
   "/r/",
+  "/s/",
 ];
 
 export function isMutedRoute(pathname: string): boolean {
