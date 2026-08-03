@@ -71,6 +71,8 @@ export type EmployerApplicationItem = {
     id: string;
     title: string;
     scheduledAt: string;
+    /** Drives the capacity gate — a FILLED offer can take no more candidates. */
+    status: JobOfferStatus;
   };
 };
 
@@ -112,6 +114,7 @@ type BackendEmployerApplication = {
     id: string;
     title: string;
     scheduled_at: string;
+    status?: JobOfferStatus;
   };
 };
 
@@ -262,6 +265,7 @@ class JobOfferController extends RabotkaBaseController {
             id: a.job_offer?.id ?? "",
             title: a.job_offer?.title ?? "",
             scheduledAt: a.job_offer?.scheduled_at ?? "",
+            status: (a.job_offer?.status ?? "ACTIVE") as JobOfferStatus,
           },
         })),
         total: res.total,

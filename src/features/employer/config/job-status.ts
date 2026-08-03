@@ -45,6 +45,69 @@ export const ONGOING_STATUSES: readonly JobOfferStatus[] = [
 export const isOngoing = (status: JobOfferStatus): boolean =>
   ONGOING_STATUSES.includes(status);
 
+/**
+ * Offers that can take no further candidates. FILLED is the authoritative
+ * signal: the backend flips an offer to FILLED the moment its accepted count
+ * reaches `quantity`, and rejects any later accept with a 409.
+ *
+ * Deliberately narrow. PARTIALLY_FILLED still has room, and the backend also
+ * still permits accepting from an EXPIRED offer — so neither is listed here.
+ * Hiding an action the server would allow is the worse failure.
+ */
+const CLOSED_TO_NEW_CANDIDATES = new Set<JobOfferStatus>([
+  "FILLED",
+  "COMPLETED",
+  "CANCELLED",
+]);
+
+export const isClosedToNewCandidates = (status: JobOfferStatus): boolean =>
+  CLOSED_TO_NEW_CANDIDATES.has(status);
+
+/**
+ * Offers a worker may still apply to.
+ *
+ * Deliberately an allowlist, unlike `isClosedToNewCandidates`: the backend's
+ * apply guard admits only ACTIVE and PARTIALLY_FILLED and rejects everything
+ * else with "Cette offre n'est plus disponible" — a stricter rule than the one
+ * governing an employer accepting an existing candidature. The two must not be
+ * collapsed into one predicate.
+ */
+const OPEN_TO_APPLICATIONS = new Set<JobOfferStatus>([
+  "ACTIVE",
+  "PARTIALLY_FILLED",
+]);
+
+export function isClosedToApplications(offer: {
+  status: JobOfferStatus;
+  acceptedCount?: number;
+  quantity?: number;
+}): boolean {
+  if (!OPEN_TO_APPLICATIONS.has(offer.status)) return true;
+  // Secondary guard: a feed row cached just before the offer filled up still
+  // reads PARTIALLY_FILLED, but its own counts already say there is no room.
+  const { acceptedCount, quantity } = offer;
+  return (
+    typeof acceptedCount === "number" &&
+    typeof quantity === "number" &&
+    quantity > 0 &&
+    acceptedCount >= quantity
+  );
+}
+
+/**
+ * Why an offer can no longer take candidates, in the employer's words. Null when
+ * it still can. Distinct from JOB_STATUS_LABELS, which names the state rather
+ * than explaining the consequence.
+ */
+export function closedToCandidatesReason(
+  status: JobOfferStatus,
+): string | null {
+  if (status === "FILLED") return "Tous les postes de cette offre sont pourvus.";
+  if (status === "COMPLETED") return "Cette offre est terminée.";
+  if (status === "CANCELLED") return "Cette offre a été annulée.";
+  return null;
+}
+
 export const PAYMENT_FLOW_LABELS: Record<string, string> = {
   HOURLY: "par heure",
   DAILY: "par jour",

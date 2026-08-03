@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
@@ -11,13 +12,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScreenHeader, PAYMENT_FLOW_LABELS } from "@/features/employer";
+import { QueryErrorState } from "@/components/common/query-error-state";
+import {
+  ScreenHeader,
+  PAYMENT_FLOW_LABELS,
+  isClosedToApplications,
+} from "@/features/employer";
 import {
   useJobDetail,
   useApplyToJob,
   useToggleSaveJob,
   useCanApply,
 } from "@/hooks/use-jobs";
+import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
 import { cn, formatAmount, formatDateTime } from "@/lib/utils";
@@ -25,16 +32,29 @@ import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 export default function JobDetailWorker() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: job, isLoading, isError } = useJobDetail(id);
+  const {
+    data: job,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useJobDetail(id);
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
   const apply = useApplyToJob();
   const toggleSave = useToggleSaveJob();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const dailyExhausted = quota != null && quota.remaining <= 0;
 
+  // About the offer, not the worker — so it is checked first. Applying to a
+  // filled offer costs the worker one of only three concurrent slots and can
+  // never succeed.
+  const offerClosed = job ? isClosedToApplications(job) : false;
+
   let applyLabel = "Postuler";
   if (job?.applied) applyLabel = "Déjà postulé";
+  else if (offerClosed) applyLabel = "Offre pourvue";
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (dailyExhausted) applyLabel = "Limite quotidienne atteinte";
   else if (!canApply) applyLabel = "Trop de candidatures en cours";
@@ -73,11 +93,12 @@ export default function JobDetailWorker() {
       )}
 
       {!isLoading && (isError || !job) && (
-        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <p className="text-sm text-muted-foreground">
-            Impossible de charger cette offre.
-          </p>
-        </div>
+        <QueryErrorState
+          className="flex-1"
+          message="Impossible de charger cette offre."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
       )}
 
       {!isLoading && job && (
@@ -169,12 +190,31 @@ export default function JobDetailWorker() {
 
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-            disabled={job.applied || !canApply || blocked || apply.isPending}
-            onClick={() => apply.mutate(job.id)}
+            disabled={
+              job.applied ||
+              offerClosed ||
+              !canApply ||
+              blocked ||
+              apply.isPending
+            }
+            onClick={() => setConfirmOpen(true)}
           >
             {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {applyLabel}
           </Button>
+
+          <ApplyConfirmDrawer
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title={job.title}
+            scheduledAt={job.scheduledAt}
+            address={job.address}
+            amount={job.amount}
+            isPending={apply.isPending}
+            onConfirm={() =>
+              apply.mutate(job.id, { onSuccess: () => setConfirmOpen(false) })
+            }
+          />
         </div>
       )}
     </div>
