@@ -17,6 +17,7 @@ const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
+const LoginLink = lazy(() => import("@/pages/login-link"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const ContactedProfiles = lazy(() => import("@/pages/contacted-profiles"));
@@ -498,6 +499,14 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <Pay />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/s/:code"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LoginLink />
           </Suspense>
         }
       />

@@ -87,7 +87,9 @@ export function JobOfferSuccess({
       </dl>
 
       <div className="mt-8 flex flex-col gap-3">
-        <Button onClick={() => navigate("/dashboard")}>Voir mes offres</Button>
+        {/* /jobs, not /dashboard: "Mes offres" in the employer tab bar is the
+            list of their offers, which is what this button promises. */}
+        <Button onClick={() => navigate("/jobs")}>Voir mes offres</Button>
         <Button variant="outline" onClick={onCreateAnother}>
           <Plus className="size-4" />
           Créer une autre offre
