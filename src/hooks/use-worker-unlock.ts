@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
   getWorkerUnlock,
@@ -26,15 +26,13 @@ export function useWorkerUnlock(id: string | undefined) {
  * successful call here does not necessarily mean the contact was released.
  */
 export function usePayWorkerUnlockWallet(id: string) {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: () => payWorkerUnlockWallet(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["worker-mission", id] });
-      queryClient.invalidateQueries({ queryKey: ["worker-missions"] });
-      queryClient.invalidateQueries({ queryKey: ["wallet"] });
-    },
+    // No explicit invalidation: the MutationCache in app/providers invalidates
+    // the whole cache after every successful mutation. The keys listed here
+    // previously ("worker-missions", "wallet") matched no query anyway — the
+    // real ones are ["worker","missions",…] and ["profile","wallet","balance"].
     onError: (error) => {
       toast({
         variant: "destructive",

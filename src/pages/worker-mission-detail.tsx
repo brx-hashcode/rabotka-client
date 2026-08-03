@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { Calendar, Coins, MapPin, Star, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/common/query-error-state";
 import { CompleteMissionDrawer } from "@/components/common/complete-mission-drawer";
 import { PdfDownloadLink } from "@/components/common/pdf-download-link";
 import { useWorkerMission } from "@/hooks/use-worker-mission";
@@ -38,7 +39,13 @@ const CANCELLABLE_STATUSES = new Set([
 export default function WorkerMissionDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: mission, isLoading, isError } = useWorkerMission(id);
+  const {
+    data: mission,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useWorkerMission(id);
   const complete = useCompleteWorkerMission();
   const [rateOpen, setRateOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -99,11 +106,12 @@ export default function WorkerMissionDetail() {
       )}
 
       {!isLoading && (isError || !mission) && (
-        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <p className="text-sm text-muted-foreground">
-            Impossible de charger cette mission.
-          </p>
-        </div>
+        <QueryErrorState
+          className="flex-1"
+          message="Impossible de charger cette mission."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
       )}
 
       {!isLoading && mission && (

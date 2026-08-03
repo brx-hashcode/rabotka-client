@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/common/query-error-state";
 import { Seo } from "@/hooks/use-seo";
 import { ScreenHeader } from "@/features/employer";
 import { useContactedProfiles } from "@/hooks/use-contacted-profiles";
@@ -108,7 +109,13 @@ function ContactCard({ contact }: Readonly<{ contact: ContactedProfile }>) {
 
 export default function ContactedProfiles() {
   const navigate = useNavigate();
-  const { data: contacts = [], isLoading, isError } = useContactedProfiles();
+  const {
+    data: contacts = [],
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useContactedProfiles();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -133,11 +140,12 @@ export default function ContactedProfiles() {
         )}
 
         {!isLoading && isError && (
-          <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-            <p className="text-sm text-muted-foreground">
-              Impossible de charger vos contacts.
-            </p>
-          </div>
+          <QueryErrorState
+            className="flex-1"
+            message="Impossible de charger vos contacts."
+            onRetry={refetch}
+            isRetrying={isFetching}
+          />
         )}
 
         {!isLoading && !isError && contacts.length === 0 && (
