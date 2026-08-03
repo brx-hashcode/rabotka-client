@@ -36,7 +36,10 @@ export function PortfolioHeader({
       .toUpperCase() || "?";
 
   return (
-    <header className="flex flex-col items-center space-y-4 text-center">
+    // Same top wash as the profile screen (see pages/profile.tsx), so the two
+    // profile surfaces read as one. Bleeds past the page padding with -mx-4 so
+    // the colour reaches the screen edges rather than floating in a card.
+    <header className="-mx-4 flex flex-col items-center space-y-4 rounded-b-2xl bg-linear-to-b from-whatsapp/10 to-transparent px-4 pb-6 pt-8 text-center">
       <Avatar className="size-24 border">
         {profile.avatarUrl && (
           <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />

@@ -1,12 +1,22 @@
 import { Routes, Route, useLocation } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
 import { AuthGuard } from "@/components/auth";
-import { LandingLayout } from "@/features/landing/layouts";
 import { AppShell } from "@/features/navigation";
-import Index from "@/pages/Index";
 
-import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
+
+// The marketing site is lazy like every other route. Imported eagerly it pulled
+// all 22 landing sections (and framer-motion, and the layout's Header/Footer)
+// into the entry chunk, so every signed-in user paid for the whole landing page
+// before /home could render — the worst possible trade on the mobile
+// connections this app runs over.
+const LandingLayout = lazy(() =>
+  import("@/features/landing/layouts").then((m) => ({
+    default: m.LandingLayout,
+  })),
+);
+const Index = lazy(() => import("@/pages/Index"));
+const Onboarding = lazy(() => import("@/pages/onboarding"));
 
 const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
@@ -19,6 +29,7 @@ const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
+const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const ContactedProfiles = lazy(() => import("@/pages/contacted-profiles"));
 const CreateJobOffer = lazy(() => import("@/pages/create-job-offer"));
@@ -79,14 +90,20 @@ export function AppRoutes() {
       <Route
         path="/"
         element={
-          <LandingLayout>
-            <Index />
-          </LandingLayout>
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <Index />
+            </LandingLayout>
+          </Suspense>
         }
       />
       <Route
         path="/onboarding"
-        element={<Onboarding />}
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <Onboarding />
+          </Suspense>
+        }
       />
       <Route
         path="/home"
@@ -344,6 +361,16 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/profile/portfolio/:itemId"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <RealizationDetail />
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
         path="/claims"
         element={
           <Suspense fallback={<PageLoader />}>
@@ -523,6 +550,15 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <PublicPortfolio />
+          </Suspense>
+        }
+      />
+      {/* Public, like the portfolio it belongs to — no AuthGuard. */}
+      <Route
+        path="/p/:slug/r/:itemId"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <RealizationDetail />
           </Suspense>
         }
       />
