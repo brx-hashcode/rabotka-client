@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { usePortfolio, useDeletePortfolioItem } from "@/hooks/use-portfolio";
+import { usePortfolio } from "@/hooks/use-portfolio";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,46 +12,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScreenHeader } from "@/features/employer";
 import { PortfolioHeader } from "@/features/portfolio/components/portfolio-header";
 import { PortfolioGrid } from "@/features/portfolio/components/portfolio-grid";
-import { RealizationViewer } from "@/features/portfolio/components/realization-viewer";
 import { RealizationFormSheet } from "@/features/portfolio/components/realization-form-sheet";
-import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
-import type { PortfolioItem } from "@/features/portfolio/types";
 
-const CONTAINER = "mx-auto w-full max-w-xl px-4 pt-4 pb-10";
+const CONTAINER = "mx-auto w-full max-w-xl px-4 pb-10";
 
 export default function MyPortfolio() {
   const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useProfileMe();
   const isWorker = profile?.profileType === "WORKER";
   const { data: items = [], isLoading: itemsLoading } = usePortfolio(isWorker);
-  const deleteMutation = useDeletePortfolioItem();
 
-  const [viewing, setViewing] = useState<PortfolioItem | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<PortfolioItem | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PortfolioItem | null>(null);
+  // Only creation lives here now; viewing, editing and deleting an existing
+  // realization all happen on its own screen.
+  const [createOpen, setCreateOpen] = useState(false);
 
   if (!profileLoading && profile && !isWorker) {
     return <Navigate to="/profile" replace />;
   }
-
-  // Keep the viewer/edit sheet in sync with the latest server data.
-  const liveViewing = viewing
-    ? (items.find((i) => i.id === viewing.id) ?? null)
-    : null;
-  const liveEditItem = editItem
-    ? (items.find((i) => i.id === editItem.id) ?? null)
-    : null;
-
-  const openCreate = () => {
-    setEditItem(null);
-    setFormOpen(true);
-  };
-  const openEdit = (item: PortfolioItem) => {
-    setViewing(null);
-    setEditItem(item);
-    setFormOpen(true);
-  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -78,7 +55,7 @@ export default function MyPortfolio() {
             }}
             realizationsCount={items.length}
             action={
-              <Button onClick={openCreate} className="w-full">
+              <Button onClick={() => setCreateOpen(true)} className="w-full">
                 <Plus className="size-4" />
                 Ajouter une réalisation
               </Button>
@@ -94,71 +71,23 @@ export default function MyPortfolio() {
               Vous n'avez pas encore de réalisation. Montrez votre travail pour
               inspirer confiance aux recruteurs.
             </p>
-            <Button onClick={openCreate} variant="outline">
+            <Button onClick={() => setCreateOpen(true)} variant="outline">
               <Plus className="size-4" />
               Ajouter ma première réalisation
             </Button>
           </div>
         ) : (
-          <PortfolioGrid items={items} onOpen={setViewing} />
+          <PortfolioGrid
+            items={items}
+            onOpen={(item) =>
+              navigate(`/profile/portfolio/${item.id}`, {
+                state: { fromGrid: true },
+              })
+            }
+          />
         )}
 
-        <RealizationViewer
-          item={liveViewing}
-          open={liveViewing !== null}
-          onOpenChange={(open) => {
-            if (!open) setViewing(null);
-          }}
-          actions={
-            liveViewing && (
-              <div className="flex gap-2 pt-1">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => openEdit(liveViewing)}
-                >
-                  <Pencil className="size-4" />
-                  Modifier
-                </Button>
-                <Button
-                  variant="destructive-soft"
-                  className="flex-1"
-                  onClick={() => {
-                    setDeleteTarget(liveViewing);
-                    setViewing(null);
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                  Supprimer
-                </Button>
-              </div>
-            )
-          }
-        />
-
-        <RealizationFormSheet
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          item={liveEditItem}
-        />
-
-        <ConfirmDialog
-          open={deleteTarget !== null}
-          onOpenChange={(open) => {
-            if (!open) setDeleteTarget(null);
-          }}
-          title="Supprimer la réalisation"
-          description="Cette réalisation et toutes ses images seront définitivement supprimées."
-          actionLabel="Supprimer"
-          isPending={deleteMutation.isPending}
-          onConfirm={() => {
-            if (deleteTarget) {
-              deleteMutation.mutate(deleteTarget.id, {
-                onSuccess: () => setDeleteTarget(null),
-              });
-            }
-          }}
-        />
+        <RealizationFormSheet open={createOpen} onOpenChange={setCreateOpen} />
       </main>
     </div>
   );
@@ -167,7 +96,7 @@ export default function MyPortfolio() {
 /** Mirrors PortfolioHeader's centered column so nothing jumps once loaded. */
 function HeaderSkeleton() {
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-4 pt-8">
       <Skeleton className="size-24 shrink-0 rounded-full" />
 
       <div className="flex flex-col items-center space-y-1.5">

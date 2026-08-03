@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { UserRound } from "lucide-react";
 import {
@@ -10,10 +10,11 @@ import {
 } from "@/features/payments";
 import {
   useApplication,
-  useAcceptApplication,
   usePayUnlockWallet,
   usePayUnlockMobile,
 } from "@/hooks/use-application";
+import { QueryErrorState } from "@/components/common/query-error-state";
+import { isNetworkError, serverMessage } from "@/lib/api/errors";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycPaymentScreen } from "@/features/kyc";
 
@@ -23,12 +24,9 @@ const BACK_TO = "/candidatures";
 const BACK_LABEL = "Retour aux candidatures";
 
 /**
- * Gate wrapper.
- *
- * Split from the page body deliberately: the body accepts the application from
- * a mount effect, and an early `return` inside a component does not stop its own
- * effects from running. Keeping the body in a child means a blocked user never
- * mounts it, so the acceptance cannot be committed by simply opening the URL.
+ * Gate wrapper. Kept as a wrapper rather than an early return in the body so a
+ * blocked user never mounts the payment screen at all — this route is reachable
+ * by direct URL, so the gate has to cover the page, not just the pay buttons.
  */
 export default function ApplicationPayment() {
   const { blocked, reason } = useKycGate();
@@ -42,14 +40,13 @@ export default function ApplicationPayment() {
 function ApplicationPaymentInner() {
   const navigate = useNavigate();
   const { id = "" } = useParams<{ id: string }>();
-  const { data, isLoading, isError } = useApplication(id);
+  const { data, isLoading, isError, error, isFetching, refetch } =
+    useApplication(id);
 
-  const accept = useAcceptApplication(id);
   const payWallet = usePayUnlockWallet(id);
   const payMobile = usePayUnlockMobile(id);
 
   const [outcome, setOutcome] = useState<Outcome | null>(null);
-  const acceptTriggered = useRef(false);
   const goBack = () => navigate(BACK_TO);
 
   const status = data?.application.status;
@@ -57,19 +54,11 @@ function ApplicationPaymentInner() {
     ? `${data.application.worker.firstName} ${data.application.worker.lastName}`
     : "";
 
-  // Accept-on-entry: coming here from a still-pending application commits the
-  // acceptance (creating the unlock attempt) so the fee + methods can be shown.
-  useEffect(() => {
-    if (!data) return;
-    if (
-      (status === "PENDING" || status === "VIEWED") &&
-      !acceptTriggered.current &&
-      !accept.isPending
-    ) {
-      acceptTriggered.current = true;
-      accept.mutate();
-    }
-  }, [data, status, accept]);
+  // Still awaiting a decision — the acceptance is committed on the detail page,
+  // behind a confirmation. Reaching this URL directly means there is no unlock
+  // to pay for yet, so send the employer back to decide rather than accepting
+  // on their behalf.
+  const undecided = status === "PENDING" || status === "VIEWED";
 
   const handlePayWallet = () =>
     payWallet.mutate(undefined, {
@@ -89,11 +78,6 @@ function ApplicationPaymentInner() {
       onSuccess: ({ token }) =>
         navigate(`/pay/${token}?return=${encodeURIComponent(BACK_TO)}`),
     });
-
-  const preparing =
-    isLoading ||
-    accept.isPending ||
-    ((status === "PENDING" || status === "VIEWED") && !accept.isError);
 
   if (outcome) {
     return (
@@ -122,7 +106,7 @@ function ApplicationPaymentInner() {
     );
   }
 
-  if (preparing) {
+  if (isLoading) {
     return (
       <PaymentScreen>
         <PaymentScreenSkeleton />
@@ -130,12 +114,54 @@ function ApplicationPaymentInner() {
     );
   }
 
-  if (isError || accept.isError || !data?.unlock) {
+  if (undecided) {
+    return (
+      <PaymentScreen>
+        <PaymentNotice
+          title="Candidature en attente"
+          description="Acceptez d'abord cette candidature pour régler les frais de déverrouillage."
+          secondaryLabel="Voir la candidature"
+          onSecondary={() => navigate(`/candidatures/${id}`)}
+          actionLabel={BACK_LABEL}
+          onAction={goBack}
+        />
+      </PaymentScreen>
+    );
+  }
+
+  // A dropped request is not the same failure as a refused one: it says nothing
+  // about the candidature and is worth retrying, so it gets its own state
+  // rather than the server-reason notice.
+  if (isNetworkError(error)) {
+    return (
+      <PaymentScreen>
+        <QueryErrorState
+          message="Impossible de charger ce paiement."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
+      </PaymentScreen>
+    );
+  }
+
+  if (isError || !data?.unlock) {
+    // Prefer the server's own words: it distinguishes a filled offer (409) from
+    // a penalised account (403), and the generic sentence told the employer
+    // neither — the real reason only ever appeared in a transient toast.
+    const reason = serverMessage(error);
+    const penalised = reason?.toLowerCase().includes("pénalisé");
     return (
       <PaymentScreen>
         <PaymentNotice
           title="Paiement indisponible"
-          description="Impossible de préparer le paiement pour cette candidature."
+          description={
+            reason ??
+            "Impossible de préparer le paiement pour cette candidature."
+          }
+          secondaryLabel={penalised ? "Régler mes pénalités" : undefined}
+          onSecondary={
+            penalised ? () => navigate("/penalites/paiement") : undefined
+          }
           actionLabel={BACK_LABEL}
           onAction={goBack}
         />

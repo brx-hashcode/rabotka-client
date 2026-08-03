@@ -14,6 +14,8 @@ import {
   usePayWorkerUnlockWallet,
   usePayWorkerUnlockMobile,
 } from "@/hooks/use-worker-unlock";
+import { QueryErrorState } from "@/components/common/query-error-state";
+import { isNetworkError, serverMessage } from "@/lib/api/errors";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycPaymentScreen } from "@/features/kyc";
 
@@ -35,7 +37,8 @@ export default function WorkerMissionPayment() {
   const { id = "" } = useParams<{ id: string }>();
 
   const { data: mission, isLoading: missionLoading } = useWorkerMission(id);
-  const { data, isLoading, isError } = useWorkerUnlock(id);
+  const { data, isLoading, isError, error, isFetching, refetch } =
+    useWorkerUnlock(id);
   const payWallet = usePayWorkerUnlockWallet(id);
   const payMobile = usePayWorkerUnlockMobile(id);
 
@@ -107,12 +110,30 @@ export default function WorkerMissionPayment() {
     );
   }
 
+  // A dropped request says nothing about the unlock and is worth retrying.
+  if (isNetworkError(error)) {
+    return (
+      <PaymentScreen>
+        <QueryErrorState
+          message="Impossible de charger ce paiement."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
+      </PaymentScreen>
+    );
+  }
+
   if (isError || !data?.unlock) {
+    // The server distinguishes "no unlock pending" from other refusals; prefer
+    // its wording over a guess.
     return (
       <PaymentScreen>
         <PaymentNotice
           title="Paiement indisponible"
-          description="Cette candidature n'a pas de déverrouillage en attente."
+          description={
+            serverMessage(error) ??
+            "Cette candidature n'a pas de déverrouillage en attente."
+          }
           actionLabel={BACK_LABEL}
           onAction={goBack}
         />
