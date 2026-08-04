@@ -15,8 +15,15 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description: string;
+  /** ReactNode so callers can emphasise an amount or a name inline. */
+  description: React.ReactNode;
   actionLabel: string;
+  /**
+   * Most confirmations here guard a destructive act, so that stays the default.
+   * Pass "whatsapp" when the confirmed action is a commitment rather than a
+   * deletion (accepting a candidate), where a red button misreads as danger.
+   */
+  confirmVariant?: "destructive" | "whatsapp";
   onConfirm: () => void;
   isPending?: boolean;
 };
@@ -27,6 +34,7 @@ export function ConfirmDialog({
   title,
   description,
   actionLabel,
+  confirmVariant = "destructive",
   onConfirm,
   isPending,
 }: Readonly<Props>) {
@@ -40,7 +48,7 @@ export function ConfirmDialog({
           </DrawerHeader>
           <DrawerFooter>
             <Button
-              variant="destructive"
+              variant={confirmVariant}
               onClick={onConfirm}
               disabled={isPending}
             >

@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
+import { getQueryClient } from "@/app/providers";
 import {
   Check,
   AlertCircle,
@@ -41,8 +42,18 @@ export default function Pay() {
   const [phoneError, setPhoneError] = useState("");
 
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
-    if (status === "APPROVED") setLocalStatus("approved");
-    else if (status === "TIMEOUT") setLocalStatus("timeout");
+    if (status === "APPROVED") {
+      // Approval arrives over the socket, not as a mutation result, so the
+      // global MutationCache invalidation in app/providers never fires for it —
+      // the only mutation here succeeded when the STK push was *sent*, while
+      // the payment was still unpaid. Without this the user returns to a screen
+      // still reading "Paiement requis" with a stale wallet balance, and in the
+      // WhatsApp webview (no focus/reconnect refetch) it stays that way until a
+      // manual reload. Blanket invalidation: money moved, and this is a leaf
+      // screen with nothing expensive mounted.
+      getQueryClient().invalidateQueries();
+      setLocalStatus("approved");
+    } else if (status === "TIMEOUT") setLocalStatus("timeout");
     else setLocalStatus("rejected");
   });
 
@@ -87,12 +98,24 @@ export default function Pay() {
   if (error || !payment) {
     return (
       <PageWrapper>
-        <div className="text-center space-y-3">
+        <div className="flex flex-col items-center text-center space-y-3">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
           <h1 className="text-xl font-bold">Lien invalide ou expiré</h1>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Ce lien de paiement est introuvable ou a déjà été traité.
+            Ce lien de paiement est introuvable ou a déjà été traité. Si vous
+            venez de payer, votre paiement a bien été pris en compte.
           </p>
+          {/*
+            A token is consumed once its payment settles, so this is what a
+            *successful* payer sees on reloading or reopening the link — the
+            reassurance above plus a way onward, instead of a bare error.
+          */}
+          <Button
+            className="mt-2 bg-whatsapp text-white hover:bg-whatsapp-dark"
+            onClick={() => navigate(returnTo ?? "/home")}
+          >
+            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+          </Button>
         </div>
       </PageWrapper>
     );
@@ -115,7 +138,7 @@ export default function Pay() {
             Votre paiement a bien été confirmé.
           </p>
 
-          {payment.amount !== null && (
+          {typeof payment.amount === "number" && (
             <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
               <p className="text-3xl font-bold text-foreground">
                 {payment.amount.toLocaleString("fr-FR")}
@@ -131,18 +154,18 @@ export default function Pay() {
             </div>
           )}
 
-          {returnTo ? (
-            <Button
-              className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-              onClick={() => navigate(returnTo)}
-            >
-              Retour à l'application
-            </Button>
-          ) : (
-            <p className="mt-6 text-xs text-muted-foreground">
-              Vous pouvez fermer cette page en toute sécurité.
-            </p>
-          )}
+          {/*
+            Always offer a way onward. A payment opened from a WhatsApp link
+            carries no `return`, and this screen has no header and no tab bar —
+            so the old "vous pouvez fermer cette page" left the user stranded on
+            a success page with nowhere to go.
+          */}
+          <Button
+            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+            onClick={() => navigate(returnTo ?? "/home")}
+          >
+            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+          </Button>
         </div>
       </PageWrapper>
     );
@@ -157,13 +180,18 @@ export default function Pay() {
           <p className="text-sm text-muted-foreground max-w-xs">
             Le paiement n'a pas pu être traité. Veuillez réessayer.
           </p>
-          <Button
-            onClick={() => setLocalStatus("form")}
-            variant="outline"
-            className="mt-2"
-          >
-            Réessayer
-          </Button>
+          <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
+            <Button onClick={() => setLocalStatus("form")} variant="outline">
+              Réessayer
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => navigate(returnTo ?? "/home")}
+            >
+              {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+            </Button>
+          </div>
         </div>
       </PageWrapper>
     );
@@ -180,6 +208,15 @@ export default function Pay() {
             page — votre paiement sera confirmé dès réception de la confirmation
             de l'opérateur.
           </p>
+          {/* Waiting is the advice, not a requirement: the webhook settles the
+              payment server-side whether or not this page stays open. */}
+          <Button
+            variant="ghost"
+            className="text-muted-foreground"
+            onClick={() => navigate(returnTo ?? "/home")}
+          >
+            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+          </Button>
         </div>
       </PageWrapper>
     );
@@ -227,7 +264,12 @@ export default function Pay() {
           )}
           <div>
             <p className="text-3xl font-bold text-foreground">
-              {amount === null ? "—" : amount.toLocaleString("fr-FR")}
+              {/* `!== null` was not enough: a response missing `amount`
+                  entirely slipped through as undefined and took the whole
+                  payment page down with it. */}
+              {typeof amount === "number"
+                ? amount.toLocaleString("fr-FR")
+                : "—"}
               <span className="text-base font-medium text-muted-foreground ml-2">
                 FCFA
               </span>

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/common/query-error-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
 import { CompleteMissionDrawer } from "@/components/common/complete-mission-drawer";
@@ -40,7 +41,13 @@ import { cn, formatAmount, formatDateTime } from "@/lib/utils";
 export default function MissionDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: offer, isLoading, isError } = useJobOffer(id);
+  const {
+    data: offer,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useJobOffer(id);
   const { data: workers, isLoading: workersLoading } =
     useJobOfferApplications(id);
   const { mutate: deleteOffer, isPending: isDeleting } = useDeleteJobOffer();
@@ -114,11 +121,12 @@ export default function MissionDetail() {
       {isLoading && <DetailSkeleton />}
 
       {!isLoading && (isError || !offer) && (
-        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <p className="text-sm text-muted-foreground">
-            Impossible de charger cette mission.
-          </p>
-        </div>
+        <QueryErrorState
+          className="flex-1"
+          message="Impossible de charger cette mission."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
       )}
 
       {!isLoading && offer && (

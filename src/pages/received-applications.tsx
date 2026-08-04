@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { Inbox, Calendar, Loader2 } from "lucide-react";
+import { Inbox, Calendar, Loader2, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import {
   ScreenHeader,
   APPLICATION_STATUS_LABELS,
   getApplicationStatusVariant,
+  isClosedToNewCandidates,
 } from "@/features/employer";
 import type { EmployerApplicationItem } from "@/lib/api/job-offer-controller";
 import { formatDate } from "@/lib/utils";
@@ -83,6 +84,10 @@ const ApplicationRow = ({
 }: Readonly<{ app: EmployerApplicationItem; onClick: () => void }>) => {
   const initials =
     `${app.worker.firstName?.[0] ?? ""}${app.worker.lastName?.[0] ?? ""}`.toUpperCase();
+  // Worth flagging before the employer opens the row: on a closed offer this
+  // candidate can no longer be accepted, only declined.
+  const undecided = app.status === "PENDING" || app.status === "VIEWED";
+  const offerClosed = isClosedToNewCandidates(app.jobOffer.status);
   return (
     <button
       type="button"
@@ -121,6 +126,13 @@ const ApplicationRow = ({
           <Calendar className="h-3.5 w-3.5" />
           {formatDate(app.createdAt)}
         </p>
+
+        {undecided && offerClosed && (
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="h-3.5 w-3.5" />
+            Offre pourvue — acceptation impossible
+          </p>
+        )}
       </div>
     </button>
   );

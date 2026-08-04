@@ -5,12 +5,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/common/query-error-state";
 import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
-import { useApplication, useRejectApplication } from "@/hooks/use-application";
+import {
+  useApplication,
+  useAcceptApplication,
+  useRejectApplication,
+} from "@/hooks/use-application";
 import {
   ScreenHeader,
   APPLICATION_STATUS_LABELS,
   getApplicationStatusVariant,
+  isClosedToNewCandidates,
+  closedToCandidatesReason,
 } from "@/features/employer";
 import type { ApplicationDetailApplication } from "@/lib/api/application-controller";
 import { formatAmount, formatDate } from "@/lib/utils";
@@ -18,12 +25,36 @@ import { formatAmount, formatDate } from "@/lib/utils";
 export default function ApplicationDetail() {
   const navigate = useNavigate();
   const { id = "" } = useParams<{ id: string }>();
-  const { data, isLoading, isError } = useApplication(id);
+  const { data, isLoading, isError, isFetching, refetch } = useApplication(id);
 
+  const accept = useAcceptApplication(id);
   const reject = useRejectApplication(id);
   const [confirmReject, setConfirmReject] = useState(false);
+  const [confirmAccept, setConfirmAccept] = useState(false);
 
   const goToPayment = () => navigate(`/candidatures/${id}/paiement`);
+
+  // The offer, not just the candidature, decides whether accepting is possible:
+  // a FILLED offer rejects any further accept with a 409. Without this the
+  // button stayed live and the failure only surfaced on the payment screen.
+  const offerStatus = data?.application.jobOffer.status;
+  const offerClosed = offerStatus ? isClosedToNewCandidates(offerStatus) : false;
+  const closedReason = offerStatus ? closedToCandidatesReason(offerStatus) : null;
+
+  const pendingDecision =
+    data?.application.status === "PENDING" ||
+    data?.application.status === "VIEWED";
+
+  // Accepting is now committed here, behind a confirmation, rather than as a
+  // side effect of opening the payment URL — the employer sees the fee and the
+  // worker is only notified once they have actually agreed.
+  const handleAccept = () =>
+    accept.mutate(undefined, {
+      onSuccess: () => {
+        setConfirmAccept(false);
+        goToPayment();
+      },
+    });
 
   // Always open the detail scrolled to the top (window scroll persists across
   // route changes inside the app shell).
@@ -38,11 +69,12 @@ export default function ApplicationDetail() {
       {isLoading && <DetailSkeleton />}
 
       {!isLoading && (isError || !data) && (
-        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <p className="text-sm text-muted-foreground">
-            Impossible de charger cette candidature.
-          </p>
-        </div>
+        <QueryErrorState
+          className="flex-1"
+          message="Impossible de charger cette candidature."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
       )}
 
       {!isLoading && data && (
@@ -61,23 +93,37 @@ export default function ApplicationDetail() {
 
           <OfferCard app={data.application} />
 
-          {(data.application.status === "PENDING" ||
-            data.application.status === "VIEWED") && (
-            <div className="flex gap-3">
-              <Button
-                className="flex-1 bg-whatsapp text-white hover:bg-whatsapp-dark"
-                onClick={goToPayment}
-              >
-                Accepter
-              </Button>
-              <Button
-                variant="destructive-soft"
-                className="flex-1"
-                onClick={() => setConfirmReject(true)}
-              >
-                Refuser
-              </Button>
-            </div>
+          {pendingDecision && (
+            <>
+              {/* Refusing stays available on a closed offer — declining a
+                  candidate you can no longer hire is still a real decision. */}
+              {offerClosed && closedReason && (
+                <div className="rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">
+                    Vous ne pouvez plus accepter cette candidature
+                  </p>
+                  <p className="mt-1">{closedReason}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                {!offerClosed && (
+                  <Button
+                    className="flex-1 bg-whatsapp text-white hover:bg-whatsapp-dark"
+                    onClick={() => setConfirmAccept(true)}
+                  >
+                    Accepter
+                  </Button>
+                )}
+                <Button
+                  variant="destructive-soft"
+                  className="flex-1"
+                  onClick={() => setConfirmReject(true)}
+                >
+                  Refuser
+                </Button>
+              </div>
+            </>
           )}
 
           {data.application.status === "WAITING_PAYMENT" &&
@@ -116,6 +162,40 @@ export default function ApplicationDetail() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmAccept}
+        onOpenChange={setConfirmAccept}
+        title="Accepter cette candidature ?"
+        confirmVariant="whatsapp"
+        description={
+          <>
+            {data?.quote ? (
+              <>
+                Des frais de déverrouillage de{" "}
+                <span className="font-semibold text-foreground">
+                  {formatAmount(data.quote.employerFee)}
+                </span>{" "}
+                vous seront demandés à l'étape suivante pour recevoir les
+                coordonnées
+                {data.quote.walletBalance < data.quote.employerFee
+                  ? " (solde de votre portefeuille insuffisant)"
+                  : ""}
+                .{" "}
+              </>
+            ) : (
+              <>
+                Des frais de déverrouillage vous seront demandés à l'étape
+                suivante pour recevoir les coordonnées.{" "}
+              </>
+            )}
+            Le travailleur sera notifié de votre décision.
+          </>
+        }
+        actionLabel="Accepter"
+        isPending={accept.isPending}
+        onConfirm={handleAccept}
+      />
 
       <ConfirmDialog
         open={confirmReject}
