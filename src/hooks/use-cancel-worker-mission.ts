@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
   cancelWorkerMission,
@@ -33,19 +33,15 @@ export function useCancellationPreview(id: string | undefined, enabled: boolean)
  * the web had no way to withdraw at all.
  */
 export function useCancelWorkerMission() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
       cancelWorkerMission(id, reason ? { reason } : undefined),
-    onSuccess: (result, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["worker-missions"] });
-      queryClient.invalidateQueries({ queryKey: ["worker-mission", id] });
-      // The penalty is charged server-side, so the wallet/penalties views are
-      // stale too.
-      queryClient.invalidateQueries({ queryKey: ["penalties"] });
-      queryClient.invalidateQueries({ queryKey: ["wallet"] });
-
+    // A penalty may be charged server-side, so the mission, wallet and penalties
+    // views all go stale — all covered by the MutationCache in app/providers,
+    // which invalidates the whole cache after any successful mutation. The keys
+    // listed here previously matched no query at all.
+    onSuccess: (result) => {
       toast({
         description: result.penaltyApplied
           ? `Candidature annulée. Une pénalité de ${result.penaltyAmount?.toLocaleString("fr-FR")} FCFA a été appliquée.`

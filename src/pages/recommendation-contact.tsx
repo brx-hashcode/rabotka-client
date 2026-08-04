@@ -13,6 +13,8 @@ import {
   usePayRecommendationWallet,
   usePayRecommendationMobile,
 } from "@/hooks/use-recommendations";
+import { QueryErrorState } from "@/components/common/query-error-state";
+import { isNetworkError, serverMessage } from "@/lib/api/errors";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycPaymentScreen } from "@/features/kyc";
 
@@ -21,7 +23,8 @@ const BACK_TO = "/home";
 export default function RecommendationContact() {
   const navigate = useNavigate();
   const { workerId = "" } = useParams<{ workerId: string }>();
-  const { data, isLoading, isError } = useRecommendedWorker(workerId);
+  const { data, isLoading, isError, error, isFetching, refetch } =
+    useRecommendedWorker(workerId);
   const payWallet = usePayRecommendationWallet(workerId);
   const payMobile = usePayRecommendationMobile(workerId);
 
@@ -75,12 +78,26 @@ export default function RecommendationContact() {
     );
   }
 
+  if (isNetworkError(error)) {
+    return (
+      <PaymentScreen>
+        <QueryErrorState
+          message="Impossible de charger ce paiement."
+          onRetry={refetch}
+          isRetrying={isFetching}
+        />
+      </PaymentScreen>
+    );
+  }
+
   if (isError || !worker || !data) {
     return (
       <PaymentScreen>
         <PaymentNotice
           title="Paiement indisponible"
-          description="Impossible de préparer le paiement."
+          description={
+            serverMessage(error) ?? "Impossible de préparer le paiement."
+          }
           actionLabel="Retour à l'accueil"
           onAction={goBack}
         />

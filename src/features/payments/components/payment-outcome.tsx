@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 
 export function PaymentSuccess({
@@ -46,11 +47,20 @@ export function PaymentNotice({
   description,
   actionLabel,
   onAction,
+  secondaryLabel,
+  onSecondary,
 }: Readonly<{
   title: string;
   description?: React.ReactNode;
   actionLabel: string;
   onAction: () => void;
+  /**
+   * Optional way forward. Several of these notices explain a problem the user
+   * can actually resolve (settle penalties, review the offer) — without this the
+   * only option is to retreat to a list.
+   */
+  secondaryLabel?: string;
+  onSecondary?: () => void;
 }>) {
   return (
     <div className="flex w-full max-w-sm flex-col items-center text-center">
@@ -58,7 +68,16 @@ export function PaymentNotice({
       {description && (
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       )}
-      <Button variant="outline" className="mt-6 w-full" onClick={onAction}>
+      {secondaryLabel && onSecondary && (
+        <Button variant="whatsapp" className="mt-6 w-full" onClick={onSecondary}>
+          {secondaryLabel}
+        </Button>
+      )}
+      <Button
+        variant="outline"
+        className={cn("w-full", secondaryLabel ? "mt-2" : "mt-6")}
+        onClick={onAction}
+      >
         {actionLabel}
       </Button>
     </div>

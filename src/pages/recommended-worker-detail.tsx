@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Star, ShieldCheck, CheckCircle2, Briefcase } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,11 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScreenHeader } from "@/features/employer";
 import { useRecommendedWorker } from "@/hooks/use-recommendations";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { KycNotice, kycShortLabel } from "@/features/kyc";
+import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 
 export default function RecommendedWorkerDetail() {
   const navigate = useNavigate();
   const { workerId = "" } = useParams<{ workerId: string }>();
   const { data, isLoading, isError } = useRecommendedWorker(workerId);
+  const { blocked, reason } = useKycGate();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -96,12 +101,26 @@ export default function RecommendedWorkerDetail() {
             )}
           </div>
 
+          {/* Contacting costs a fee and needs a verified identity — the same
+              gate the worker's apply button carries. Without this the employer
+              tapped Contacter and was bounced to a KYC screen with no warning. */}
+          {blocked && reason && <KycNotice reason={reason} />}
+
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-            onClick={() => navigate(`/recommandations/${worker.id}/contact`)}
+            disabled={blocked}
+            onClick={() => setConfirmOpen(true)}
           >
-            Contacter
+            {blocked && reason ? kycShortLabel(reason) : "Contacter"}
           </Button>
+
+          <ContactConfirmDrawer
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            workerId={worker.id}
+            workerName={`${worker.firstName} ${worker.lastName}`.trim()}
+            onConfirm={() => navigate(`/recommandations/${worker.id}/contact`)}
+          />
 
           {worker.portfolioSlug && (
             <Button

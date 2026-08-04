@@ -16,11 +16,18 @@ export function useWorkerFeed(limit = 10) {
   });
 }
 
-export function useRecommendedWorker(id: string | undefined) {
+/**
+ * A recommended worker, with the contact fee and the employer's balance.
+ *
+ * `enabled` lets a caller defer the request until it is actually needed — the
+ * contact confirmation sheet only needs the fee once it opens, so a feed of
+ * cards must not fire one request per card on render.
+ */
+export function useRecommendedWorker(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ["recommended-worker", id],
     queryFn: () => getRecommendedWorker(id as string),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }
 
