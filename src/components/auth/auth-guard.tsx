@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useProfileMe } from "@/hooks/use-profile-me";
 
 type AuthGuardProps = {
@@ -19,13 +19,24 @@ function LoadingScreen() {
 
 export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
   const { data, isLoading, isError } = useProfileMe();
+  const location = useLocation();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   if (isError || !data) {
-    return <Navigate to="/login" replace />;
+    // Carry where they were going. Without this every guarded route sent a
+    // signed-out visitor to /login with no destination, and login's own default
+    // then landed them on /home — so a WhatsApp link to a specific page quietly
+    // became a link to the home screen. `login.tsx` already honours `redirect`.
+    const destination = `${location.pathname}${location.search}`;
+    return (
+      <Navigate
+        to={`/login?redirect=${encodeURIComponent(destination)}`}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;
