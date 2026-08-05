@@ -8,8 +8,19 @@ export type RecommendedWorker = {
   reliabilityScore: number | null;
   ratingAvg: number | null;
   ratingCount: number;
+  /** First domain — what the compact card shows. */
   categoryName: string | null;
+  /** Every domain. Absent on older backends, hence the optional. */
+  categoryNames?: string[];
   description: string | null;
+  address?: string | null;
+  /**
+   * Only ever true. PENDING and REJECTED both arrive as false, so the absence
+   * of a badge says nothing about a worker — publishing a review outcome to
+   * every employer browsing them would punish them for a queue they do not
+   * control.
+   */
+  isVerified?: boolean;
   completedMissions: number;
   portfolioSlug: string | null;
   score: number;

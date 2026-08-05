@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Star, ShieldCheck, CheckCircle2, Briefcase } from "lucide-react";
+import {
+  Star,
+  ShieldCheck,
+  CheckCircle2,
+  Briefcase,
+  BadgeCheck,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScreenHeader } from "@/features/employer";
+import { ScreenHeader, StatusChip } from "@/features/employer";
 import { useRecommendedWorker } from "@/hooks/use-recommendations";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
@@ -23,6 +30,13 @@ export default function RecommendedWorkerDetail() {
   }, [workerId]);
 
   const worker = data?.worker;
+  const aiScore = Math.round((worker?.score ?? 0) * 100);
+  // `categoryNames` is absent on an older backend; fall back to the single
+  // category rather than showing nothing.
+  const domains =
+    worker?.categoryNames?.length
+      ? worker.categoryNames
+      : [worker?.categoryName].filter((n): n is string => Boolean(n));
   const initials = worker
     ? `${worker.firstName?.[0] ?? ""}${worker.lastName?.[0] ?? ""}`.toUpperCase()
     : "";
@@ -47,9 +61,15 @@ export default function RecommendedWorkerDetail() {
       )}
 
       {!isLoading && worker && (
-        <div className="space-y-4 px-4 py-4">
+        <div className="space-y-3 px-4 py-4">
+          {/*
+            Identity and the headline numbers share one card. Split across two,
+            a worker with no AI score and no ratings left "En bref" holding two
+            items beside an empty band under their name — two sparse cards where
+            one dense one reads better.
+          */}
           <div className="rounded-xl bg-card p-4 shadow-soft">
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3">
               <Avatar className="h-16 w-16 shrink-0">
                 {worker.avatarUrl && (
                   <AvatarImage
@@ -62,48 +82,95 @@ export default function RecommendedWorkerDetail() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
+
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-bold text-foreground">
                   {worker.firstName} {worker.lastName}
                 </p>
-                {worker.categoryName && (
-                  <Badge className="mt-1 w-fit border-whatsapp/40 bg-whatsapp/10 text-whatsapp">
-                    {worker.categoryName}
-                  </Badge>
+
+                {/* Shown only when verified. A worker whose KYC is pending or
+                    rejected simply has no badge — the absence says nothing, so
+                    a review outcome is never published to employers. */}
+                {worker.isVerified && (
+                  <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-whatsapp">
+                    <BadgeCheck className="h-3.5 w-3.5" />
+                    Identité vérifiée
+                  </span>
                 )}
+
+                {worker.address && (
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{worker.address}</span>
+                  </p>
+                )}
+
+                {/* Wraps rather than a fixed grid: how many of these exist
+                    varies per worker, and a grid left holes where a missing
+                    rating or AI score used to be. */}
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {worker.reliabilityScore !== null && (
+                    <Stat
+                      icon={<ShieldCheck className="h-3.5 w-3.5 text-whatsapp" />}
+                      value={`${worker.reliabilityScore}%`}
+                      label="fiabilité"
+                    />
+                  )}
+                  {/* The card that led here shows Score IA, so dropping it on
+                      the detail reads as a loading failure. */}
+                  {aiScore > 0 && (
+                    <Stat
+                      icon={<Sparkles className="h-3.5 w-3.5 text-whatsapp" />}
+                      value={`${aiScore}%`}
+                      label="score IA"
+                    />
+                  )}
+                  <Stat
+                    icon={<CheckCircle2 className="h-3.5 w-3.5 text-whatsapp" />}
+                    value={String(worker.completedMissions)}
+                    label={`mission${worker.completedMissions > 1 ? "s" : ""}`}
+                  />
+                  {worker.ratingAvg !== null && worker.ratingCount > 0 && (
+                    <Stat
+                      icon={
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      }
+                      value={worker.ratingAvg.toFixed(1)}
+                      label={`(${worker.ratingCount})`}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              {worker.ratingAvg !== null && worker.ratingCount > 0 && (
-                <span className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  {worker.ratingAvg.toFixed(1)} ({worker.ratingCount})
-                </span>
-              )}
-              {worker.reliabilityScore !== null && (
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-whatsapp" />
-                  Fiabilité {worker.reliabilityScore}%
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-whatsapp" />
-                {worker.completedMissions} mission
-                {worker.completedMissions > 1 ? "s" : ""}
-              </span>
-            </div>
-
-            {worker.description && (
-              <p className="mt-4 text-sm leading-relaxed text-foreground">
-                {worker.description}
-              </p>
-            )}
           </div>
 
-          {/* Contacting costs a fee and needs a verified identity — the same
-              gate the worker's apply button carries. Without this the employer
-              tapped Contacter and was bounced to a KYC screen with no warning. */}
+          {/* Domains — every one, not just the first. */}
+          {domains.length > 0 && (
+            <div className="rounded-xl bg-card p-4 shadow-soft">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Domaines
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {domains.map((name) => (
+                  <StatusChip key={name} className="bg-whatsapp/10 text-whatsapp">
+                    {name}
+                  </StatusChip>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {worker.description && (
+            <div className="rounded-xl bg-card p-4 shadow-soft">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                À propos
+              </p>
+              <p className="text-sm leading-relaxed text-foreground">
+                {worker.description}
+              </p>
+            </div>
+          )}
+
           {blocked && reason && <KycNotice reason={reason} />}
 
           <Button
@@ -114,14 +181,6 @@ export default function RecommendedWorkerDetail() {
             {blocked && reason ? kycShortLabel(reason) : "Contacter"}
           </Button>
 
-          <ContactConfirmDrawer
-            open={confirmOpen}
-            onOpenChange={setConfirmOpen}
-            workerId={worker.id}
-            workerName={`${worker.firstName} ${worker.lastName}`.trim()}
-            onConfirm={() => navigate(`/recommandations/${worker.id}/contact`)}
-          />
-
           {worker.portfolioSlug && (
             <Button
               className="w-full bg-whatsapp/10 text-whatsapp shadow-none hover:bg-whatsapp/20"
@@ -131,8 +190,29 @@ export default function RecommendedWorkerDetail() {
               Voir le portfolio
             </Button>
           )}
+
+          <ContactConfirmDrawer
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            workerId={worker.id}
+            workerName={`${worker.firstName} ${worker.lastName}`.trim()}
+            onConfirm={() => navigate(`/recommandations/${worker.id}/contact`)}
+          />
+
         </div>
       )}
     </div>
   );
 }
+
+const Stat = ({
+  icon,
+  value,
+  label,
+}: Readonly<{ icon: React.ReactNode; value: string; label: string }>) => (
+  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+    {icon}
+    <span className="font-semibold text-foreground">{value}</span>
+    {label}
+  </span>
+);
