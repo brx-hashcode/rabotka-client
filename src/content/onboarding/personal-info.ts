@@ -33,12 +33,16 @@ export const personalInfoContent = {
       },
     },
     phone: {
-      label: "Téléphone",
+      // Named for what it must actually be: every login link, notification and
+      // reminder is delivered over WhatsApp, so a number without WhatsApp
+      // leaves the account unreachable.
+      label: "Numéro WhatsApp",
       placeholder: "Numéro avec indicatif pays",
+      hint: "C'est sur ce numéro que vous recevrez vos connexions et vos notifications.",
     },
     address: {
       label: "Adresse",
-      placeholder: "19 rue de la joie Brazzaville",
+      placeholder: "19 rue de la joie",
     },
     description: {
       label: "Décrivez votre profil et ce que vous recherchez",

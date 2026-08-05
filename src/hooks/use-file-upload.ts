@@ -45,12 +45,20 @@ export function formatBytes(bytes: number): string {
   );
 }
 
+/**
+ * Default ceiling for an uploaded file, matching what KYC documents and
+ * portfolio realizations already use. A phone camera photo routinely lands
+ * between 2 and 4 MB, so the previous 2 MB default rejected ordinary pictures
+ * taken on the device the app is used from.
+ */
+export const DEFAULT_MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
 export function useFileUpload(
   options: UseFileUploadOptions = {},
 ): [UseFileUploadState, UseFileUploadActions] {
   const {
     maxFiles = 1,
-    maxSize = 2 * 1024 * 1024,
+    maxSize = DEFAULT_MAX_UPLOAD_BYTES,
     accept = "image/*",
     multiple = false,
     onFilesChange,

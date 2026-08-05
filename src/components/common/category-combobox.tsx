@@ -23,6 +23,16 @@ type CategoryComboboxProps = {
   readonly disabled?: boolean;
   readonly triggerClassName?: string;
   /**
+   * Hands search back to the parent. When set, cmdk's own filtering is turned
+   * OFF and `options` is taken as already filtered — which is the only way to
+   * serve a list too long to put in the DOM (some countries have 15 000
+   * cities; rendering them all locks up the phone).
+   */
+  readonly search?: string;
+  readonly onSearchChange?: (value: string) => void;
+  /** Shown under the list when results were capped. */
+  readonly footnote?: string;
+  /**
    * Portal target for the dropdown. Pass the enclosing Sheet/Dialog content so
    * the list renders inside its scroll-lock and stays scrollable; defaults to
    * document.body (fine on a normal page).
@@ -39,7 +49,11 @@ export function CategoryCombobox({
   disabled,
   triggerClassName,
   container,
+  search,
+  onSearchChange,
+  footnote,
 }: CategoryComboboxProps) {
+  const controlledSearch = onSearchChange !== undefined;
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.id === value);
 
@@ -68,10 +82,17 @@ export function CategoryCombobox({
           align="start"
           sideOffset={4}
           collisionPadding={8}
-          className="z-50 w-[--radix-popover-trigger-width] max-w-[calc(100vw-1rem)] rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          // `w-(--var)` is Tailwind v4 syntax. This was `w-[--var]`, the v3
+          // form, which v4 does not compile — so the popover had no width at
+          // all and sat narrower than the field that opened it.
+          className="z-50 w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
-          <Command>
-            <CommandInput placeholder="Rechercher…" />
+          <Command shouldFilter={!controlledSearch}>
+            <CommandInput
+              placeholder="Rechercher…"
+              value={controlledSearch ? search : undefined}
+              onValueChange={onSearchChange}
+            />
             <CommandList className="max-h-56">
               <CommandEmpty>Aucun résultat.</CommandEmpty>
               <CommandGroup>
@@ -113,6 +134,11 @@ export function CategoryCombobox({
                   </CommandItem>
                 ))}
               </CommandGroup>
+              {footnote && (
+                <p className="text-muted-foreground px-3 py-2 text-center text-xs">
+                  {footnote}
+                </p>
+              )}
             </CommandList>
           </Command>
         </PopoverPrimitive.Content>

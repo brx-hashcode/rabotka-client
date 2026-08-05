@@ -20,7 +20,10 @@ export type JobFeedItem = {
   scheduledAt: string;
   amount: number | null;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  city?: string | null;
   quantity: number;
   acceptedCount: number;
   createdAt: string;
@@ -73,7 +76,10 @@ type BackendJobFeedItem = {
   scheduled_at: string;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  city?: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { jobLocationDetail } from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import { Ban, Calendar, MapPin, Coins, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -316,7 +317,7 @@ const OfferCard = ({ app }: Readonly<{ app: ApplicationDetailApplication }>) => 
       </p>
       <p className="flex items-center gap-2">
         <MapPin className="h-4 w-4" />
-        <span className="truncate">{app.jobOffer.address}</span>
+        <span className="truncate">{jobLocationDetail(app.jobOffer)}</span>
       </p>
     </div>
   </div>

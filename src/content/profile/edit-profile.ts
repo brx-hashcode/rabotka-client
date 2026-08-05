@@ -6,18 +6,18 @@ export const editProfileContent = {
   avatar: {
     uploaded: "Photo de profil",
     upload: "Ajouter une photo",
-    hint: "PNG, JPG jusqu'a 2Mo",
+    hint: "PNG, JPG jusqu'a 5Mo",
     uploading: "Telechargement...",
     errors: {
       uploadFailed: "Echec du telechargement de l'image",
-      fileTooLarge: "Le fichier est trop volumineux (max 2Mo)",
+      fileTooLarge: "Le fichier est trop volumineux (max 5Mo)",
       invalidType: "Format non supporte. Utilisez PNG ou JPG",
     },
   },
   fields: {
     address: {
       label: "Adresse",
-      placeholder: "Votre adresse",
+      placeholder: "Rue, quartier",
     },
     firstName: {
       label: "Prenom",

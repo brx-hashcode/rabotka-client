@@ -13,6 +13,9 @@ export type PersonalInfo = {
   lastName: string;
   email: string;
   phone: string;
+  countryCode: string;
+  countryName: string;
+  city: string;
   address: string;
   description: string;
 };
@@ -53,6 +56,9 @@ const initialState = {
     lastName: "",
     email: "",
     phone: "",
+    countryCode: "",
+    countryName: "",
+    city: "",
     address: "",
     description: "",
   },
