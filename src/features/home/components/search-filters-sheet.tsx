@@ -6,10 +6,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { CategoryCombobox } from "@/components/common/category-combobox";
+import { CityFilterCombobox } from "@/components/common/city-filter-combobox";
 import { useJobCategories } from "@/hooks/use-worker-search";
 import { cn } from "@/lib/utils";
 
@@ -124,16 +124,15 @@ export function SearchFiltersSheet({
             </div>
           </div>
 
-          {/* City */}
+          {/* City — same change as the job filters: picked from the real
+              list, so the value always matches what is stored. */}
           <div className="space-y-1.5">
-            <Label htmlFor="city" className="text-sm font-medium">
-              Ville / quartier
-            </Label>
-            <Input
-              id="city"
+            <Label className="text-sm font-medium">Ville</Label>
+            <CityFilterCombobox
               value={draft.city}
-              onChange={(e) => set("city", e.target.value)}
-              placeholder="Bacongo, Poto-Poto…"
+              onChange={(city) => set("city", city)}
+              allLabel="Toutes les villes"
+              container={container}
             />
           </div>
 
