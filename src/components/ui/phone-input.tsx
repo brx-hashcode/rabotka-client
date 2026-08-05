@@ -23,18 +23,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-const CENTRAL_AFRICAN_COUNTRIES: RPNInput.Country[] = [
-  "AO", // Angola
-  "CM", // Cameroon
-  "CF", // Central African Republic
-  "TD", // Chad
-  "CG", // Congo
-  "CD", // Democratic Republic of the Congo
-  "GQ", // Equatorial Guinea
-  "GA", // Gabon
-  "ST", // São Tomé and Príncipe
-];
-
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,
   "onChange" | "value" | "ref"
@@ -53,7 +41,12 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
         className,
         onChange,
         value,
-        countries = CENTRAL_AFRICAN_COUNTRIES,
+        // No `countries` default: react-phone-number-input offers every
+        // country when the prop is absent. It used to be pinned to Central
+        // Africa, which meant anyone outside it simply could not enter their
+        // own number — and the profile now records a country worldwide, so the
+        // two would have disagreed.
+        countries,
         ...props
       },
       ref,

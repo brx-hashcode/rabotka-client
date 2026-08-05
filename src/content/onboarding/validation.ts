@@ -14,6 +14,12 @@ export const validationMessages = {
     required: "Numéro de téléphone requis",
     invalid: "Numéro de téléphone invalide pour le pays sélectionné",
   },
+  country: {
+    required: "Sélectionnez un pays",
+  },
+  city: {
+    required: "Sélectionnez une ville",
+  },
   address: {
     min: "Adresse trop courte",
     max: "Adresse trop longue",

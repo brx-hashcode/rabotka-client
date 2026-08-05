@@ -10,9 +10,14 @@ export const editProfileSchema = z.object({
     .string()
     .min(2, validationMessages.lastName.min)
     .max(50, validationMessages.lastName.max),
+  countryCode: z.string().min(1, validationMessages.country.required),
+  countryName: z.string(),
+  city: z.string().min(1, validationMessages.city.required),
+  // Street-level only now that country and city are their own fields; matches
+  // the floor used in onboarding.
   address: z
     .string()
-    .min(10, validationMessages.address.min)
+    .min(4, validationMessages.address.min)
     .max(200, validationMessages.address.max),
   description: z
     .string()

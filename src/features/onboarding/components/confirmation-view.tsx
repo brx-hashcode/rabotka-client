@@ -15,6 +15,8 @@ import {
   Briefcase,
   ClipboardList,
   CreditCard,
+  Globe,
+  Building2,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
@@ -105,6 +107,16 @@ export function ConfirmationView({
               label={content.personalInfo.fields.phone}
               icon={Phone}
               value={personalInfo.phone}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.country}
+              icon={Globe}
+              value={personalInfo.countryName}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.city}
+              icon={Building2}
+              value={personalInfo.city}
             />
             <InfoCard
               label={content.personalInfo.fields.address}

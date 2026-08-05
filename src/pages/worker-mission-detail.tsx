@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { jobLocationDetail } from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import { Calendar, Coins, MapPin, Star, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -156,7 +157,7 @@ export default function WorkerMissionDetail() {
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"
             >
-              {mission.jobOffer.address}
+              {jobLocationDetail(mission.jobOffer)}
             </InfoRow>
           </Section>
 

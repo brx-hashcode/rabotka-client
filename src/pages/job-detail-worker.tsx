@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { jobLocationDetail, jobLocationLabel } from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
@@ -131,7 +132,7 @@ export default function JobDetailWorker() {
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"
             >
-              {job.address}
+              {jobLocationDetail(job)}
             </InfoRow>
           </Section>
 
@@ -208,7 +209,7 @@ export default function JobDetailWorker() {
             onOpenChange={setConfirmOpen}
             title={job.title}
             scheduledAt={job.scheduledAt}
-            address={job.address}
+            address={jobLocationLabel(job)}
             amount={job.amount}
             isPending={apply.isPending}
             onConfirm={() =>

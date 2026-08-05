@@ -32,10 +32,13 @@ export const createJobOfferSchema = z.object({
       (v) => Date.parse(v) >= Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000,
       "La date doit être au moins 4 heures dans le futur",
     ),
-  address: z
-    .string()
-    .trim()
-    .min(10, "L'adresse doit contenir au moins 10 caractères"),
+  isRemote: z.boolean().default(false),
+  countryCode: z.string().default(""),
+  countryName: z.string().default(""),
+  city: z.string().default(""),
+  // Validated against isRemote by the superRefine below: a remote job has no
+  // site, so requiring an address here would make it impossible to post one.
+  address: z.string().trim().default(""),
   quantity: z.coerce
     .number({ invalid_type_error: "Nombre de personnes requis" })
     .int("Nombre entier requis")
@@ -58,6 +61,39 @@ export const createJobOfferSchema = z.object({
     .max(500, "La note ne doit pas dépasser 500 caractères")
     .optional(),
   categoryId: z.string().optional(),
-});
+})
+  /**
+   * Location is required only for on-site work.
+   *
+   * As a superRefine rather than per-field rules because the requirement spans
+   * four fields and one flag — no single field can decide on its own whether it
+   * is needed, and expressing it here is what keeps a remote job from being
+   * blocked by an address it will never have.
+   */
+  .superRefine((data, ctx) => {
+    if (data.isRemote) return;
+
+    if (data.address.trim().length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["address"],
+        message: "L'adresse doit contenir au moins 10 caractères",
+      });
+    }
+    if (!data.countryCode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["countryCode"],
+        message: "Sélectionnez un pays",
+      });
+    }
+    if (!data.city) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["city"],
+        message: "Sélectionnez une ville",
+      });
+    }
+  });
 
 export type CreateJobOfferFormData = z.infer<typeof createJobOfferSchema>;
