@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { jobLocationLabel } from "@/lib/job-location";
 import { ClipboardList, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -100,7 +101,7 @@ function ApplicationCard({
         <p className="font-medium text-foreground">
           {formatAmount(app.jobOffer.amount)}
         </p>
-        <p className="truncate">{app.jobOffer.address}</p>
+        <p className="truncate">{jobLocationLabel(app.jobOffer)}</p>
       </div>
     </button>
   );
