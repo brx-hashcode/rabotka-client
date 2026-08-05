@@ -6,10 +6,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CategoryCombobox } from "@/components/common/category-combobox";
+import { CityFilterCombobox } from "@/components/common/city-filter-combobox";
 import { useJobCategories } from "@/hooks/use-worker-search";
 import type {
   JobPaymentFlow,
@@ -176,16 +176,15 @@ export function JobSearchFiltersSheet({
             />
           </div>
 
-          {/* City */}
+          {/* City — picked from the real list rather than typed. A free-text
+              box only ever matched the address by substring, so a typo or a
+              neighbourhood name returned nothing and read as "no jobs here". */}
           <div className="space-y-1.5">
-            <Label htmlFor="job-city" className="text-sm font-medium">
-              Ville / quartier
-            </Label>
-            <Input
-              id="job-city"
+            <Label className="text-sm font-medium">Ville</Label>
+            <CityFilterCombobox
               value={draft.city}
-              onChange={(e) => set("city", e.target.value)}
-              placeholder="Bacongo, Poto-Poto…"
+              onChange={(city) => set("city", city)}
+              container={container}
             />
           </div>
 
