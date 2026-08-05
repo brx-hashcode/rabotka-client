@@ -16,9 +16,15 @@ export const step1Schema = z.object({
     .string()
     .min(1, validationMessages.phone.required)
     .refine(isValidPhoneNumber, validationMessages.phone.invalid),
+  countryCode: z.string().min(1, validationMessages.country.required),
+  countryName: z.string(),
+  city: z.string().min(1, validationMessages.city.required),
+  // Only the street-level remainder now that country and city are captured
+  // separately, so the old 10-character floor no longer fits: "12 rue Foch"
+  // is a complete address once the city is beside it.
   address: z
     .string()
-    .min(10, validationMessages.address.min)
+    .min(4, validationMessages.address.min)
     .max(200, validationMessages.address.max),
   description: z
     .string()

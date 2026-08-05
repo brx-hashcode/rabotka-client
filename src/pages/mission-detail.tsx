@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { jobLocationDetail } from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
@@ -196,7 +197,7 @@ export default function MissionDetail() {
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"
             >
-              {offer.address}
+              {jobLocationDetail(offer)}
             </InfoRow>
             <InfoRow
               icon={<Hash className="h-4 w-4 text-whatsapp" />}

@@ -17,7 +17,11 @@ export type EmployerJobOfferItem = {
   scheduledAt: string;
   amount: number;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   quantity: number;
   acceptedCount: number;
   pendingApplicationsCount: number;
@@ -47,7 +51,11 @@ export type JobOfferDetail = {
   scheduledAt: string;
   amount: number;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -92,7 +100,11 @@ type BackendEmployerOffer = {
   scheduled_at: string;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   quantity: number;
   acceptedCount?: number;
   created_at: string;
@@ -127,7 +139,11 @@ type BackendJobOfferDetail = {
   scheduled_at: string;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -176,7 +192,12 @@ export type CreateJobOfferPayload = {
   title: string;
   description: string;
   scheduled_at: string; // ISO date-time
-  address: string;
+  /** Omitted for a remote job — it has no site. */
+  address?: string;
+  isRemote?: boolean;
+  countryCode?: string;
+  countryName?: string;
+  city?: string;
   quantity: number;
   amount?: number;
   payment_flow?: "HOURLY" | "DAILY" | "MONTHLY";

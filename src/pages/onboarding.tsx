@@ -59,10 +59,7 @@ export default function Onboarding() {
     switch (step) {
       case "personal-informations":
         return (
-          <PersonalInfoForm
-            currentStep="personal-informations"
-            onNext={() => setStep("profile-type")}
-          />
+          <PersonalInfoForm onNext={() => setStep("profile-type")} />
         );
       case "profile-type":
         return (

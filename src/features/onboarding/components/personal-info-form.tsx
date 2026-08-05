@@ -16,20 +16,13 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
-import { StepIndicator } from "./step-indicator";
-
-type OnboardingStep =
-  | "personal-informations"
-  | "kyc-documents"
-  | "confirmation";
+import { CountryCityFields } from "@/components/common/country-city-fields";
 
 type PersonalInfoFormProps = {
-  currentStep: OnboardingStep;
   onNext: () => void;
 };
 
 export function PersonalInfoForm({
-  currentStep,
   onNext,
 }: Readonly<PersonalInfoFormProps>) {
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
@@ -64,12 +57,11 @@ export function PersonalInfoForm({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-          <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
-        </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
+      {/* No step indicator here: it squeezed the title into two lines on a
+          phone for a count the user can already see on the surrounding flow. */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
       </div>
 
       <Form {...form}>
@@ -155,11 +147,19 @@ export function PersonalInfoForm({
                       onChange={field.onChange}
                     />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {content.fields.phone.hint}
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Country → city → address, in that order: the city list depends on
+              the country, and the street line only makes sense once both are
+              known. */}
+          <CountryCityFields form={form} />
 
           <FormField
             control={form.control}
