@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CategoryCombobox } from "@/components/common/category-combobox";
+import { CountryCityFields } from "@/components/common/country-city-fields";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getCategories } from "@/lib/api/job-category-controller";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
@@ -68,6 +70,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
       title: "",
       description: "",
       scheduledAt: "",
+      isRemote: false,
+      countryCode: "",
+      countryName: "",
+      city: "",
       address: "",
       quantity: 1,
       amount: "",
@@ -78,13 +84,26 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
     mode: "onChange",
   });
 
+  const isRemote = form.watch("isRemote");
+
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
       title: data.title.trim(),
       description: data.description.trim(),
       scheduled_at: new Date(data.scheduledAt).toISOString(),
-      address: data.address.trim(),
       quantity: data.quantity,
+      // A remote job sends no location at all. Sending empty strings would
+      // store a country the server then has to reject, and sending the fields
+      // for an on-site job is what puts it in the right city.
+      ...(data.isRemote
+        ? { isRemote: true }
+        : {
+            isRemote: false,
+            address: data.address.trim(),
+            countryCode: data.countryCode,
+            countryName: data.countryName,
+            city: data.city,
+          }),
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
       ...(data.note?.trim() ? { note: data.note.trim() } : {}),
@@ -166,21 +185,67 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
           <FormField
             control={form.control}
-            name="address"
+            name="isRemote"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse *</FormLabel>
+              <FormItem className="flex flex-row items-start gap-3 rounded-md bg-muted/40 p-3">
                 <FormControl>
-                  <Input
-                    placeholder="Ex : 123 Avenue de la Paix, Poto-Poto, Brazzaville"
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      const isRemote = checked === true;
+                      field.onChange(isRemote);
+                      // Clear the location rather than hide it: a stale address
+                      // left in the form would be submitted the moment someone
+                      // unticked and reticked the box.
+                      if (isRemote) {
+                        form.setValue("address", "");
+                        form.setValue("countryCode", "");
+                        form.setValue("countryName", "");
+                        form.setValue("city", "");
+                      }
+                    }}
                     disabled={isPending}
-                    {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <div className="space-y-0.5 leading-none">
+                  <FormLabel className="cursor-pointer">
+                    Mission en ligne
+                  </FormLabel>
+                  <FormDescription>
+                    Le travail se fait à distance : aucune adresse n'est
+                    demandée.
+                  </FormDescription>
+                </div>
               </FormItem>
             )}
           />
+
+          {/* The whole location block disappears for a remote job — there is no
+              site, so a greyed-out address field would just be a question with
+              no answer. */}
+          {!isRemote && (
+            <>
+              <CountryCityFields form={form} />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex : 123 Avenue de la Paix, Poto-Poto"
+                        disabled={isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={form.control}

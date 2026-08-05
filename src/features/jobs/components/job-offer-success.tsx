@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { REMOTE_LOCATION_LABEL } from "@/lib/job-location";
 import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,14 @@ export function JobOfferSuccess({
       <dl className="mt-6 space-y-3 text-sm">
         <RecapRow label="Offre" value={recap.title} />
         <RecapRow label="Date" value={dateLabel} />
-        <RecapRow label="Adresse" value={recap.address} />
+        <RecapRow
+          label="Lieu"
+          value={
+            recap.isRemote
+              ? REMOTE_LOCATION_LABEL
+              : [recap.address, recap.city].filter(Boolean).join(", ")
+          }
+        />
         <RecapRow label="Nombre de personnes" value={String(recap.quantity)} />
         <RecapRow label="Montant" value={amountLabel} />
         {recap.paymentFlow ? (

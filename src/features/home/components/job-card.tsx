@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { jobLocationLabel } from "@/lib/job-location";
 import { useNavigate } from "react-router";
 import {
   Bookmark,
@@ -110,7 +111,7 @@ export function JobCard({ job, canApply }: Props) {
           </p>
           <p className="flex items-center gap-2">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{job.address}</span>
+            <span className="truncate">{jobLocationLabel(job)}</span>
           </p>
         </div>
       </button>
@@ -131,7 +132,7 @@ export function JobCard({ job, canApply }: Props) {
         onOpenChange={setConfirmOpen}
         title={job.title}
         scheduledAt={job.scheduledAt}
-        address={job.address}
+        address={jobLocationLabel(job)}
         amount={job.amount}
         isPending={apply.isPending}
         onConfirm={() =>

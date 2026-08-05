@@ -2,7 +2,10 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { User, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFileUpload } from "@/hooks/use-file-upload";
+import {
+  DEFAULT_MAX_UPLOAD_BYTES,
+  useFileUpload,
+} from "@/hooks/use-file-upload";
 import { useUpdateAvatar } from "@/hooks/use-update-avatar";
 import { editProfileContent } from "@/content/profile";
 
@@ -16,7 +19,7 @@ type AvatarUploadProps = Readonly<{
 }>;
 
 export function AvatarUpload({
-  maxSize = 2 * 1024 * 1024,
+  maxSize = DEFAULT_MAX_UPLOAD_BYTES,
   className,
   defaultAvatar,
   onAvatarChange,
