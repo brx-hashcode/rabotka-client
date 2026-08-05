@@ -21,6 +21,18 @@ export function RecommendedWorkerCard({
 
   return (
     <div className="flex h-full flex-col rounded-xl bg-card p-4 shadow-soft">
+      {/*
+        The card body is the navigation target, mirroring job-card on the
+        worker side: tapping anywhere opens the profile. Contacter stays a
+        SIBLING of this button — nesting it would be invalid HTML and the outer
+        button would swallow the tap, sending people to the profile instead of
+        the confirm sheet.
+      */}
+      <button
+        type="button"
+        onClick={() => navigate(`/recommandations/${worker.id}`)}
+        className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 rounded-lg"
+      >
       <div className="flex gap-3">
         <Avatar className="h-16 w-16 shrink-0">
           {worker.avatarUrl && (
@@ -60,22 +72,20 @@ export function RecommendedWorkerCard({
           {worker.description}
         </p>
       )}
+      </button>
 
-      <div className="mt-auto flex gap-2 pt-4">
-        <Button
-          className="flex-[2] bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-          disabled={blocked}
-          onClick={() => setConfirmOpen(true)}
-        >
-          {blocked && reason ? kycShortLabel(reason) : "Contacter"}
-        </Button>
-        <Button
-          className="flex-1 bg-whatsapp/10 text-whatsapp shadow-none hover:bg-whatsapp/10 active:bg-whatsapp/20"
-          onClick={() => navigate(`/recommandations/${worker.id}`)}
-        >
-          Voir profil
-        </Button>
-      </div>
+      {/*
+        One button, so the rule is unambiguous: this charges you, everything
+        else opens the profile. "Voir profil" went with the card becoming
+        tappable — a second route to the same place is just clutter on a phone.
+      */}
+      <Button
+        className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
+        disabled={blocked}
+        onClick={() => setConfirmOpen(true)}
+      >
+        {blocked && reason ? kycShortLabel(reason) : "Contacter"}
+      </Button>
 
       <ContactConfirmDrawer
         open={confirmOpen}
