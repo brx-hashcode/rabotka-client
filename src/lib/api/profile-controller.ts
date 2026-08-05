@@ -6,6 +6,9 @@ export type CreateProfilePayload = {
   lastName: string;
   email: string;
   phone: string;
+  countryCode: string;
+  countryName: string;
+  city: string;
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
@@ -36,6 +39,9 @@ export type ProfileMeResponse = {
   email: string;
   phone: string;
   address: string;
+  countryCode: string | null;
+  countryName: string | null;
+  city: string | null;
   description: string;
   profileType: "WORKER" | "EMPLOYER";
   status: "PENDING_ACTIVATION" | "ACTIVE" | "SUSPENDED" | "BANNED";
@@ -59,6 +65,9 @@ export type UpdateProfilePayload = {
   lastName?: string;
   description?: string;
   address?: string;
+  countryCode?: string;
+  countryName?: string;
+  city?: string;
   categoryIds?: string[];
 };
 

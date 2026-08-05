@@ -31,6 +31,7 @@ import {
   type EditProfileFormData,
 } from "@/lib/validations/profile";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import { CountryCityFields } from "@/components/common/country-city-fields";
 import {
   getCategories,
   type JobCategory,
@@ -51,6 +52,12 @@ export function EditProfileSheetButton({
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
   const [allCategories, setAllCategories] = useState<JobCategory[]>([]);
+  /**
+   * The Sheet's own content element, used as the combobox portal target. Without
+   * it the dropdown mounts on document.body, outside the sheet's scroll lock,
+   * and the list cannot be scrolled on a phone.
+   */
+  const [sheetContent, setSheetContent] = useState<HTMLDivElement | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const isMobile = useIsMobile();
 
@@ -68,6 +75,9 @@ export function EditProfileSheetButton({
     defaultValues: {
       firstName: profile.firstName,
       lastName: profile.lastName,
+      countryCode: profile.countryCode ?? "",
+      countryName: profile.countryName ?? "",
+      city: profile.city ?? "",
       address: profile.address,
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
@@ -83,6 +93,9 @@ export function EditProfileSheetButton({
     form.reset({
       firstName: profile.firstName,
       lastName: profile.lastName,
+      countryCode: profile.countryCode ?? "",
+      countryName: profile.countryName ?? "",
+      city: profile.city ?? "",
       address: profile.address,
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
@@ -96,6 +109,9 @@ export function EditProfileSheetButton({
       {
         firstName: data.firstName,
         lastName: data.lastName,
+        countryCode: data.countryCode,
+        countryName: data.countryName,
+        city: data.city,
         address: data.address,
         description: data.description,
         categoryIds: data.categoryIds,
@@ -140,6 +156,7 @@ export function EditProfileSheetButton({
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
+          ref={setSheetContent}
           side="right"
           className="w-full sm:max-w-md overflow-y-auto"
         >
@@ -191,6 +208,8 @@ export function EditProfileSheetButton({
                   </FormItem>
                 )}
               />
+
+              <CountryCityFields form={form} container={sheetContent} />
 
               <FormField
                 control={form.control}
