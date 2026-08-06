@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { isNetworkError, serverMessage } from "@/lib/api/errors";
+import { isNetworkError, isUnauthorized, serverMessage } from "@/lib/api/errors";
+
+/** What the SDK throws before `handleError` flattens it. */
+function apiError(message: string, statusCode: number): Error {
+  return Object.assign(new Error(message), { statusCode });
+}
 
 /**
  * These assertions encode a contract owned by mvc-front-sdk: its ApiService
@@ -27,6 +32,33 @@ describe("isNetworkError", () => {
     expect(isNetworkError(undefined)).toBe(false);
     expect(isNetworkError(null)).toBe(false);
     expect(isNetworkError("Network error occurred")).toBe(false);
+  });
+});
+
+describe("isUnauthorized", () => {
+  it("recognises a refused session", () => {
+    expect(isUnauthorized(apiError("Session invalide ou expirée", 401))).toBe(
+      true,
+    );
+  });
+
+  it("does not treat a transport failure as a logout", () => {
+    // The SDK gives a rejected fetch `statusCode: 0`. Getting this wrong sends
+    // a signed-in user on a flaky connection through the login screen.
+    expect(isUnauthorized(apiError("Network error occurred", 0))).toBe(false);
+  });
+
+  it("does not treat a server fault as a logout", () => {
+    expect(isUnauthorized(apiError("Erreur interne", 500))).toBe(false);
+    expect(isUnauthorized(apiError("Token CSRF invalide", 403))).toBe(false);
+  });
+
+  it("is false once handleError has stripped the status", () => {
+    // The safe direction: a caller that cannot tell must not claim the user is
+    // signed out.
+    expect(isUnauthorized(new Error("Session invalide ou expirée"))).toBe(false);
+    expect(isUnauthorized(undefined)).toBe(false);
+    expect(isUnauthorized(null)).toBe(false);
   });
 });
 
