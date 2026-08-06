@@ -49,9 +49,16 @@ export default function Pay() {
       // the payment was still unpaid. Without this the user returns to a screen
       // still reading "Paiement requis" with a stale wallet balance, and in the
       // WhatsApp webview (no focus/reconnect refetch) it stays that way until a
-      // manual reload. Blanket invalidation: money moved, and this is a leaf
-      // screen with nothing expensive mounted.
-      getQueryClient().invalidateQueries();
+      // manual reload.
+      //
+      // Everything EXCEPT this payment: `GET /pay/:token` throws once the
+      // request settles, so refetching it here replaced the success screen with
+      // "Lien invalide ou expiré" — the invalidation meant to support this
+      // screen was destroying it. We already hold the last-good payment, and
+      // the token is spent, so there is nothing left to refetch.
+      getQueryClient().invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== "payment",
+      });
       setLocalStatus("approved");
     } else if (status === "TIMEOUT") setLocalStatus("timeout");
     else setLocalStatus("rejected");
@@ -77,6 +84,64 @@ export default function Pay() {
       },
     );
   };
+
+  // Before the loading and error branches, deliberately. The socket is the
+  // authority on this: once it says APPROVED, the money has moved and the token
+  // is spent — so `GET /pay/:token` failing from here on is the expected
+  // outcome, not a reason to tell someone who just paid that their link is
+  // invalid. Nothing below may override it.
+  if (localStatus === "approved") {
+    return (
+      <PageWrapper>
+        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+              <Check className="h-9 w-9 text-white" strokeWidth={3} />
+            </div>
+          </div>
+
+          <h1 className="mt-6 text-2xl font-bold text-foreground">
+            Paiement effectué !
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Votre paiement a bien été confirmé.
+          </p>
+
+          {/* Optional chaining: this branch now runs even when the payment
+              query is in an error state, where `data` may be absent. The
+              confirmation above does not depend on it. */}
+          {typeof payment?.amount === "number" && (
+            <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
+              <p className="text-3xl font-bold text-foreground">
+                {payment.amount.toLocaleString("fr-FR")}
+                <span className="ml-2 text-base font-medium text-muted-foreground">
+                  FCFA
+                </span>
+              </p>
+              {payment.description && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {payment.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/*
+            Always offer a way onward. A payment opened from a WhatsApp link
+            carries no `return`, and this screen has no header and no tab bar —
+            so the old "vous pouvez fermer cette page" left the user stranded on
+            a success page with nowhere to go.
+          */}
+          <Button
+            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+            onClick={() => navigate(returnTo ?? "/home")}
+          >
+            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+          </Button>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -112,56 +177,6 @@ export default function Pay() {
           */}
           <Button
             className="mt-2 bg-whatsapp text-white hover:bg-whatsapp-dark"
-            onClick={() => navigate(returnTo ?? "/home")}
-          >
-            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
-          </Button>
-        </div>
-      </PageWrapper>
-    );
-  }
-
-  if (localStatus === "approved") {
-    return (
-      <PageWrapper>
-        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
-              <Check className="h-9 w-9 text-white" strokeWidth={3} />
-            </div>
-          </div>
-
-          <h1 className="mt-6 text-2xl font-bold text-foreground">
-            Paiement effectué !
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Votre paiement a bien été confirmé.
-          </p>
-
-          {typeof payment.amount === "number" && (
-            <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
-              <p className="text-3xl font-bold text-foreground">
-                {payment.amount.toLocaleString("fr-FR")}
-                <span className="ml-2 text-base font-medium text-muted-foreground">
-                  FCFA
-                </span>
-              </p>
-              {payment.description && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {payment.description}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/*
-            Always offer a way onward. A payment opened from a WhatsApp link
-            carries no `return`, and this screen has no header and no tab bar —
-            so the old "vous pouvez fermer cette page" left the user stranded on
-            a success page with nowhere to go.
-          */}
-          <Button
-            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
             onClick={() => navigate(returnTo ?? "/home")}
           >
             {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
