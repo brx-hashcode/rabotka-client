@@ -183,6 +183,19 @@ class ProfileController extends RabotkaBaseController {
     }
   }
 
+  /**
+   * `getMe` with the failure left intact.
+   *
+   * This call doubles as the session check, and telling "signed out" apart from
+   * "the network dropped" decides whether the app redirects to /login or simply
+   * retries. `handleError` rethrows every ApiError as a bare `Error`, dropping
+   * the status code, so skipping it is the only way to keep that distinction —
+   * see `isUnauthorized` in ./errors. Success is byte-identical to `getMe`.
+   */
+  getMeRaw(): Promise<ProfileMeResponse> {
+    return this.get<ProfileMeResponse>("/profile/me");
+  }
+
   async getPenalties(): Promise<ProfilePenaltyItem[]> {
     try {
       return await this.get<ProfilePenaltyItem[]>("/profile/penalties");
@@ -336,6 +349,7 @@ class ProfileController extends RabotkaBaseController {
 
 export const {
   getMe,
+  getMeRaw,
   getPenalties,
   getPenaltiesDue,
   payPenaltiesWithWallet,

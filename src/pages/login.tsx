@@ -10,6 +10,7 @@ import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
 import { getMe } from "@/lib/api/profile-controller";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { LoadingScreen } from "@/components/auth";
 import {
   Step1PhoneForm,
   Step2OTPForm,
@@ -41,7 +42,7 @@ export default function Login() {
   // Already signed in — typically a WhatsApp link whose `?s=` code was just
   // exchanged for a session. Showing the phone form there would ask a logged-in
   // user to log in again, so go straight to the destination.
-  const { data: profile } = useProfileMe();
+  const { data: profile, isPending: isCheckingSession } = useProfileMe();
   useEffect(() => {
     if (step === "1" && profile) {
       navigate(redirectTo === "/onboarding/avatar" ? "/home" : redirectTo, {
@@ -115,6 +116,15 @@ export default function Login() {
       setApiError((error as Error).message);
     }
   }, [phone, resendOtpMutation]);
+
+  // Hold the form until we know whether there is already a session. Users
+  // arrive here signed in more often than not — a spent WhatsApp link, a stale
+  // bookmark — and painting the phone form first meant they watched the app ask
+  // them to log in and then immediately let them in. A signed-out visitor waits
+  // on a 401, which the guard answers before any database work.
+  if (step === "1" && isCheckingSession) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
