@@ -12,7 +12,7 @@ import {
   Phone,
   Mail,
   MapPin,
-  Briefcase,
+  AlertCircle,
   FileWarning,
   Shield,
   Globe,
@@ -272,16 +272,22 @@ export default function Profile() {
                   onClick={() => navigate("/dashboard")}
                 />
                 <ActionRow
-                  icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
-                  label="Créer une offre"
-                  onClick={() => navigate("/job-offers/new")}
-                />
-                <ActionRow
                   icon={
                     <UsersRound className="h-4 w-4 text-muted-foreground" />
                   }
                   label="Profils contactés"
                   onClick={() => navigate("/profils-contactes")}
+                />
+                {/* Workers reach claims from their tab bar, but an employer's
+                    five slots are already full — so without this row there is
+                    no way into /claims at all, even though the endpoint has
+                    never been role-gated. */}
+                <ActionRow
+                  icon={
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  }
+                  label="Réclamations"
+                  onClick={() => navigate("/claims")}
                 />
               </>
             )}
