@@ -19,6 +19,24 @@ export function isNetworkError(error: unknown): boolean {
 }
 
 /**
+ * The session was refused — signing in again is the only way forward.
+ *
+ * Only meaningful for callers that skip `handleError` and let the SDK's
+ * `ApiError` through (see `getMeRaw` in profile-controller). Everything else has
+ * already had `statusCode` stripped and will read as `false` here, which is the
+ * safe direction: a caller that cannot tell will not claim the user is signed
+ * out. A transport failure carries `statusCode: 0`, so it is correctly excluded.
+ */
+export function isUnauthorized(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    (error as { statusCode: unknown }).statusCode === 401
+  );
+}
+
+/**
  * The server's own explanation, or null when there isn't one.
  *
  * Returns null for transport failures specifically so callers never render the
