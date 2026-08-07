@@ -1,4 +1,6 @@
 import { BottomNav } from "../components/bottom-nav";
+import { useProfileMe } from "@/hooks/use-profile-me";
+import { useJobEvents } from "@/hooks/use-job-events";
 
 type AppShellProps = {
   readonly children: React.ReactNode;
@@ -14,6 +16,13 @@ export function AppShell({
   children,
   withNav = true,
 }: Readonly<AppShellProps>) {
+  // Mounted here rather than on the two mission screens: the counterparty is
+  // rarely looking at the matching screen when the other side acts, so the
+  // listener has to be wherever they actually are. One socket for the whole
+  // authenticated app.
+  const { data: profile } = useProfileMe();
+  useJobEvents(profile?.status === "ACTIVE");
+
   return (
     <div className="relative mx-auto min-h-screen w-full max-w-md bg-background">
       {/* Clears the fixed nav with room to spare. pb-20 was a hair under the
