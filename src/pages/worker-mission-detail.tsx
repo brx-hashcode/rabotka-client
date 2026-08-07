@@ -1,7 +1,18 @@
 import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
+import {
+  EMPLOYMENT_TYPE_LABELS,
+  isCompletable,
+} from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
-import { Calendar, Coins, MapPin, Star, ShieldCheck } from "lucide-react";
+import {
+  Calendar,
+  Coins,
+  FileText,
+  MapPin,
+  Star,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorState } from "@/components/common/query-error-state";
@@ -64,8 +75,12 @@ export default function WorkerMissionDetail() {
     : true;
   const title = engaged ? "Détail de la mission" : "Détail de la candidature";
 
+  // Only a one-off gig is ever "finished". A CDI, CDD or stage is an ongoing
+  // engagement with no moment to confirm, and the API refuses it — so offering
+  // the action would just produce an error the worker cannot act on.
   const canRate =
     !!mission &&
+    isCompletable(mission.jobOffer.employmentType) &&
     !mission.ratedEmployer &&
     COMPLETABLE_STATUSES.has(mission.applicationStatus);
 
@@ -148,11 +163,20 @@ export default function WorkerMissionDetail() {
               </InfoRow>
             )}
             <InfoRow
-              icon={<Calendar className="h-4 w-4 text-whatsapp" />}
-              label="Date prévue"
+              icon={<FileText className="h-4 w-4 text-whatsapp" />}
+              label="Type de contrat"
             >
-              {formatDateTime(mission.jobOffer.scheduledAt)}
+              {EMPLOYMENT_TYPE_LABELS[mission.jobOffer.employmentType] ??
+                mission.jobOffer.employmentType}
             </InfoRow>
+            {mission.jobOffer.scheduledAt && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4 text-whatsapp" />}
+                label="Date de clôture"
+              >
+                {formatDateTime(mission.jobOffer.scheduledAt)}
+              </InfoRow>
+            )}
             <InfoRow
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"

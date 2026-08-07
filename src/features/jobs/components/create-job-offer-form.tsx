@@ -28,6 +28,11 @@ import { CategoryCombobox } from "@/components/common/category-combobox";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCategories } from "@/lib/api/job-category-controller";
+import {
+  EMPLOYMENT_TYPE_LABELS,
+  EMPLOYMENT_TYPE_VALUES,
+  requiresClosingDate,
+} from "@/lib/employment-type";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
   CreateJobOfferPayload,
@@ -69,6 +74,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
     defaultValues: {
       title: "",
       description: "",
+      employmentType: "MISSION",
       scheduledAt: "",
       isRemote: false,
       countryCode: "",
@@ -85,12 +91,16 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   });
 
   const isRemote = form.watch("isRemote");
+  const employmentType = form.watch("employmentType");
+  // Only a one-off gig closes on a date. Asking a CDI for one would force the
+  // employer to invent it, which is what made a permanent role unpostable.
+  const needsClosingDate = requiresClosingDate(employmentType);
 
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
       title: data.title.trim(),
       description: data.description.trim(),
-      scheduled_at: new Date(data.scheduledAt).toISOString(),
+      employment_type: data.employmentType,
       quantity: data.quantity,
       // A remote job sends no location at all. Sending empty strings would
       // store a country the server then has to reject, and sending the fields
@@ -104,6 +114,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             countryName: data.countryName,
             city: data.city,
           }),
+      // Conditional, like every other optional field: an unconditional
+      // `new Date("").toISOString()` throws RangeError the moment the field is
+      // legitimately left empty.
+      ...(data.scheduledAt
+        ? { scheduled_at: new Date(data.scheduledAt).toISOString() }
+        : {}),
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
       ...(data.note?.trim() ? { note: data.note.trim() } : {}),
@@ -161,27 +177,65 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
           <FormField
             control={form.control}
-            name="scheduledAt"
+            name="employmentType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date et heure *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    min={minScheduledAt()}
-                    className="w-full min-w-0 max-w-full"
-                    disabled={isPending}
-                    {...field}
-                  />
-                </FormControl>
+                <FormLabel>Type de contrat *</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isPending}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choisir..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {EMPLOYMENT_TYPE_VALUES.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {EMPLOYMENT_TYPE_LABELS[value]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormDescription>
-                  Appuyez pour choisir la date et l'heure de début (au moins 4
-                  heures à l'avance).
+                  Une mission ponctuelle se termine à une date donnée. Un CDI,
+                  un CDD ou un stage est un engagement continu.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {/* Only a one-off gig has a closing date. Hidden rather than
+              disabled for the others: a greyed-out field still reads as
+              something the employer failed to fill in. */}
+          {needsClosingDate && (
+            <FormField
+              control={form.control}
+              name="scheduledAt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date de clôture *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="datetime-local"
+                      min={minScheduledAt()}
+                      className="w-full min-w-0 max-w-full"
+                      disabled={isPending}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    La date après laquelle l'offre n'accepte plus de
+                    candidatures (au moins 4 heures à l'avance).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
