@@ -23,6 +23,7 @@ const offer = (
   amount: 10000,
   paymentFlow: "DAILY",
   address: "Brazzaville",
+  isRemote: false,
   quantity,
   acceptedCount,
   pendingApplicationsCount: 0,

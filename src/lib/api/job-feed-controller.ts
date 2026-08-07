@@ -24,6 +24,7 @@ export type JobFeedItem = {
   address: string | null;
   isRemote: boolean;
   city?: string | null;
+  countryName?: string | null;
   quantity: number;
   acceptedCount: number;
   createdAt: string;
@@ -80,6 +81,7 @@ type BackendJobFeedItem = {
   address: string | null;
   isRemote: boolean;
   city?: string | null;
+  countryName?: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;
@@ -110,6 +112,9 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     amount: o.amount ?? null,
     paymentFlow: o.payment_flow ?? "",
     address: o.address,
+    isRemote: o.isRemote ?? false,
+    city: o.city ?? null,
+    countryName: o.countryName ?? null,
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,

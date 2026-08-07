@@ -163,6 +163,8 @@ export type JobOfferWorkerItem = {
   status: string;
   createdAt: string;
   contractId: string | null;
+  /** The employer has already rated this worker — hides the rating action. */
+  ratedByEmployer: boolean;
   worker: {
     id: string;
     firstName: string;
@@ -178,6 +180,7 @@ type BackendOfferApplication = {
   status: string;
   created_at: string;
   contractId?: string | null;
+  ratedByEmployer?: boolean;
   worker?: {
     id: string;
     first_name: string;
@@ -243,6 +246,9 @@ class JobOfferController extends RabotkaBaseController {
           amount: o.amount ?? 0,
           paymentFlow: o.payment_flow ?? "",
           address: o.address,
+          isRemote: o.isRemote ?? false,
+          city: o.city ?? null,
+          countryName: o.countryName ?? null,
           quantity: o.quantity,
           acceptedCount: o.acceptedCount ?? 0,
           pendingApplicationsCount: 0,
@@ -312,6 +318,9 @@ class JobOfferController extends RabotkaBaseController {
         amount: o.amount ?? 0,
         paymentFlow: o.payment_flow ?? "",
         address: o.address,
+        isRemote: o.isRemote ?? false,
+        city: o.city ?? null,
+        countryName: o.countryName ?? null,
         note: o.note,
         quantity: o.quantity,
         acceptedCount: o.acceptedCount,
@@ -342,6 +351,7 @@ class JobOfferController extends RabotkaBaseController {
         status: a.status,
         createdAt: a.created_at,
         contractId: a.contractId ?? null,
+        ratedByEmployer: a.ratedByEmployer ?? false,
         worker: {
           id: a.worker?.id ?? "",
           firstName: a.worker?.first_name ?? "",
