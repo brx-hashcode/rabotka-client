@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useApplicationTerms } from "@/hooks/use-application-terms";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { formatAmount, formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
   readonly open: boolean;
@@ -62,7 +62,7 @@ export function ApplyConfirmDrawer({
             <dl className="space-y-2 rounded-xl bg-card p-3 text-left text-sm shadow-soft">
               <RecapRow label="Date" value={formatDateTime(scheduledAt)} />
               {amount != null && (
-                <RecapRow label="Montant" value={formatAmount(amount)} />
+                <RecapRow label="Montant" value={formatOfferAmount(amount)} />
               )}
               <RecapRow label="Adresse" value={address} />
             </dl>

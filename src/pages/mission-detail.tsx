@@ -40,7 +40,7 @@ import {
   getApplicationStatusChipClass,
 } from "@/features/employer";
 import type { JobOfferWorkerItem } from "@/lib/api/job-offer-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function MissionDetail() {
   const navigate = useNavigate();
@@ -204,7 +204,7 @@ export default function MissionDetail() {
           <Section title="Informations">
             <InfoRow icon={<Coins className="h-4 w-4 text-whatsapp" />} label="Rémunération">
               <span className="font-medium text-foreground">
-                {formatAmount(offer.amount)}
+                {formatOfferAmount(offer.amount)}
               </span>{" "}
               {PAYMENT_FLOW_LABELS[offer.paymentFlow] ?? ""}
             </InfoRow>

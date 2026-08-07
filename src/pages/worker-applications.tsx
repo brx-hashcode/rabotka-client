@@ -11,7 +11,7 @@ import {
 } from "@/features/employer";
 import { useProfileApplicationsInfinite } from "@/hooks/use-profile-applications-infinite";
 import type { ProfileApplicationItem } from "@/lib/api/profile-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 const PAGE_SIZE = 5;
 
@@ -99,7 +99,7 @@ function ApplicationCard({
       <div className="mt-2 space-y-0.5 text-sm text-muted-foreground">
         <p>{formatDateTime(app.jobOffer.scheduledAt)}</p>
         <p className="font-medium text-foreground">
-          {formatAmount(app.jobOffer.amount)}
+          {formatOfferAmount(app.jobOffer.amount)}
         </p>
         <p className="truncate">{jobLocationLabel(app.jobOffer)}</p>
       </div>

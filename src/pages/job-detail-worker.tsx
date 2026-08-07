@@ -36,7 +36,7 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function JobDetailWorker() {
   const navigate = useNavigate();
@@ -128,7 +128,7 @@ export default function JobDetailWorker() {
                 label="Rémunération"
               >
                 <span className="font-medium text-foreground">
-                  {formatAmount(job.amount)}
+                  {formatOfferAmount(job.amount)}
                 </span>{" "}
                 {PAYMENT_FLOW_LABELS[job.paymentFlow] ?? ""}
               </InfoRow>

@@ -32,7 +32,7 @@ import {
   getApplicationStatusChipClass,
 } from "@/features/employer";
 import { contractDownloadUrl } from "@/lib/api/profile-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 const COMPLETABLE_STATUSES = new Set(["ACCEPTED", "STARTED", "END"]);
 
@@ -158,7 +158,7 @@ export default function WorkerMissionDetail() {
                 label="Rémunération"
               >
                 <span className="font-medium text-foreground">
-                  {formatAmount(mission.jobOffer.amount)}
+                  {formatOfferAmount(mission.jobOffer.amount)}
                 </span>
               </InfoRow>
             )}

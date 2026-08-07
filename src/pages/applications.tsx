@@ -10,7 +10,7 @@ import {
   getApplicationStatusChipClass,
 } from "@/features/employer";
 import type { WorkerMission } from "@/lib/api/worker-mission-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function Applications() {
   const navigate = useNavigate();
@@ -107,7 +107,7 @@ function MissionCard({
           <p className="flex items-center gap-2">
             <Coins className="h-4 w-4 text-whatsapp" />
             <span className="font-medium text-foreground">
-              {formatAmount(jobOffer.amount)}
+              {formatOfferAmount(jobOffer.amount)}
             </span>
           </p>
         )}

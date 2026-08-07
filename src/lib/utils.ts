@@ -11,6 +11,23 @@ export const formatAmount = (amount: number) =>
     currency: "XAF",
   }).format(amount);
 
+/** What an offer shows when the employer named no price. */
+export const NEGOTIABLE_AMOUNT = "À négocier";
+
+/**
+ * The amount on a *job offer*, where "no price" is a real, common state.
+ *
+ * The amount field is optional at creation — «Laisser vide si pas de prix fixe»
+ * — and both null and 0 mean the same thing there: the pay is open to
+ * negotiation. `formatAmount` rendered that as «0 FCFA», which reads as "this
+ * job pays nothing" rather than "the price is not set yet".
+ *
+ * Deliberately separate from `formatAmount`: on a wallet balance, a penalty or
+ * a fee, zero is a genuine value and must keep printing as «0 FCFA».
+ */
+export const formatOfferAmount = (amount: number | null | undefined) =>
+  amount == null || amount === 0 ? NEGOTIABLE_AMOUNT : formatAmount(amount);
+
 /**
  * What a screen shows where a date would go but there isn't one.
  *
