@@ -27,6 +27,7 @@ import {
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DeselectableSelectItem } from "@/components/ui/deselectable-select-item";
 import { getCategories } from "@/lib/api/job-category-controller";
 import {
   EMPLOYMENT_TYPE_LABELS,
@@ -359,10 +360,17 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    {/* Optional field: tapping the chosen option clears it,
+                        which Radix cannot do on its own. */}
                     {PAYMENT_FLOW_VALUES.map((value) => (
-                      <SelectItem key={value} value={value}>
+                      <DeselectableSelectItem
+                        key={value}
+                        value={value}
+                        selected={field.value || undefined}
+                        onDeselect={() => field.onChange("")}
+                      >
                         {PAYMENT_FLOW_LABELS[value]}
-                      </SelectItem>
+                      </DeselectableSelectItem>
                     ))}
                   </SelectContent>
                 </Select>
