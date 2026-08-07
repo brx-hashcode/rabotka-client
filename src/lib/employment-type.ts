@@ -4,6 +4,11 @@
  * Mirrors the backend `EmploymentType` enum. Defined once and imported
  * everywhere: the payment-flow equivalent ended up as two divergent label maps
  * and three hardcoded value lists, and this is the same shape of data.
+ *
+ * Labels are the uppercase enum values themselves, matching the admin exactly.
+ * "CDI" and "CDD" are acronyms that are always written uppercase, so casing
+ * MISSION and STAGE differently made the set look like two unrelated things —
+ * and the client and back office had drifted to different casings besides.
  */
 export const EMPLOYMENT_TYPE_VALUES = [
   "MISSION",
@@ -15,18 +20,10 @@ export const EMPLOYMENT_TYPE_VALUES = [
 export type EmploymentTypeValue = (typeof EMPLOYMENT_TYPE_VALUES)[number];
 
 export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentTypeValue, string> = {
-  MISSION: "Mission ponctuelle",
+  MISSION: "MISSION",
   CDD: "CDD",
   CDI: "CDI",
-  STAGE: "Stage",
-};
-
-/** Short form for cards and list rows, where the full label is too long. */
-export const EMPLOYMENT_TYPE_SHORT: Record<EmploymentTypeValue, string> = {
-  MISSION: "Mission",
-  CDD: "CDD",
-  CDI: "CDI",
-  STAGE: "Stage",
+  STAGE: "STAGE",
 };
 
 /**

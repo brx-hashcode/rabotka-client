@@ -19,7 +19,7 @@ import { useKycGate } from "@/hooks/use-kyc-gate";
 import { kycShortLabel } from "@/features/kyc";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
   readonly job: JobFeedItem;
@@ -39,6 +39,7 @@ export function JobCard({ job, canApply }: Props) {
   const { blocked, reason } = useKycGate();
 
   const flowLabel = PAYMENT_FLOW_LABELS[job.paymentFlow] ?? "";
+  const hasAmount = job.amount != null && job.amount !== 0;
   const goDetail = () => navigate(`/offres/${job.id}`);
 
   // About the offer rather than the worker, so it takes precedence: a filled
@@ -96,15 +97,15 @@ export function JobCard({ job, canApply }: Props) {
         </div>
 
         <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-          {job.amount != null && (
-            <p className="flex items-center gap-2">
-              <Coins className="h-4 w-4 shrink-0 text-whatsapp" />
-              <span className="font-medium text-foreground">
-                {formatAmount(job.amount)}
-              </span>
-              {flowLabel && <span>{flowLabel}</span>}
-            </p>
-          )}
+          {/* Always shown: an offer with no amount is «À négocier», which is
+              information a worker needs, not an empty row to hide. */}
+          <p className="flex items-center gap-2">
+            <Coins className="h-4 w-4 shrink-0 text-whatsapp" />
+            <span className="font-medium text-foreground">
+              {formatOfferAmount(job.amount)}
+            </span>
+            {hasAmount && flowLabel && <span>{flowLabel}</span>}
+          </p>
           {/* Guarded like the amount row above: an offer with no closing date
               would otherwise show a bare calendar icon beside a dash. */}
           {job.scheduledAt && (
