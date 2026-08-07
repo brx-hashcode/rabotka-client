@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { jobLocationDetail, jobLocationLabel } from "@/lib/job-location";
+import {
+  jobLocationLabel,
+  jobLocationRegion,
+  REMOTE_LOCATION_LABEL,
+} from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
   Coins,
   MapPin,
+  Globe,
+  Building2,
   ShieldCheck,
   Bookmark,
   Loader2,
@@ -40,6 +46,9 @@ export default function JobDetailWorker() {
     isFetching,
     refetch,
   } = useJobDetail(id);
+  // Null for a remote job, and for offers created before the location pickers
+  // existed — the row is dropped rather than rendered empty.
+  const region = job ? jobLocationRegion(job) : null;
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
   const apply = useApplyToJob();
@@ -128,12 +137,40 @@ export default function JobDetailWorker() {
             >
               {formatDateTime(job.scheduledAt)}
             </InfoRow>
-            <InfoRow
-              icon={<MapPin className="h-4 w-4 text-whatsapp" />}
-              label="Adresse"
-            >
-              {jobLocationDetail(job)}
-            </InfoRow>
+            {/* Where the job is, split across rows now that the payload carries
+                more than a street. A remote job has no address at all, so
+                printing an empty "Adresse" was the old failure; and an address
+                alone hid which city a worker would be travelling to. */}
+            {job.isRemote ? (
+              <InfoRow
+                icon={<Globe className="h-4 w-4 text-whatsapp" />}
+                label="Lieu"
+              >
+                <span className="font-medium text-foreground">
+                  {REMOTE_LOCATION_LABEL}
+                </span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Mission à distance — aucun déplacement.
+                </p>
+              </InfoRow>
+            ) : (
+              <>
+                <InfoRow
+                  icon={<MapPin className="h-4 w-4 text-whatsapp" />}
+                  label="Adresse"
+                >
+                  {jobLocationLabel(job)}
+                </InfoRow>
+                {region && (
+                  <InfoRow
+                    icon={<Building2 className="h-4 w-4 text-whatsapp" />}
+                    label="Ville"
+                  >
+                    {region}
+                  </InfoRow>
+                )}
+              </>
+            )}
           </Section>
 
           {job.description && (

@@ -203,14 +203,15 @@ class ApplicationController extends RabotkaBaseController {
     }
   }
 
-  // Employer marks the mission completed and rates the worker (1–5, optional note).
-  async completeMission(
+  // Employer rates the worker (1–5, optional note). Does NOT complete the
+  // mission — only the worker can confirm that, and this 400s until they have.
+  async rateWorker(
     id: string,
     payload: { score: number; note?: string },
   ): Promise<void> {
     try {
       await this.post<{ success: boolean }>(
-        `/profile/applications/${id}/complete`,
+        `/profile/applications/${id}/rate`,
         payload,
       );
     } catch (error) {
@@ -225,5 +226,5 @@ export const {
   rejectApplication,
   payUnlockWallet,
   payUnlockMobile,
-  completeMission,
+  rateWorker,
 } = new ApplicationController();
