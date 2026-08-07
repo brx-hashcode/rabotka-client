@@ -1,6 +1,9 @@
 /** What a remote job shows where an address would otherwise go. */
 export const REMOTE_LOCATION_LABEL = "En ligne";
 
+/** An on-site job whose address never got filled in. */
+export const UNKNOWN_LOCATION_LABEL = "Lieu non précisé";
+
 type JobLocation = {
   address?: string | null;
   isRemote?: boolean | null;
@@ -35,7 +38,14 @@ export function jobLocationRegion(job: JobLocation): string | null {
 export function jobLocationLabel(job: JobLocation): string {
   if (job.isRemote) return REMOTE_LOCATION_LABEL;
   const address = job.address?.trim();
-  return address || REMOTE_LOCATION_LABEL;
+  if (address) return address;
+  // Only a remote job is "En ligne". An on-site offer whose address is missing
+  // falls back to its city, then to an honest placeholder — claiming it is
+  // remote would send a worker to the wrong kind of job entirely.
+  const region = [job.city?.trim(), job.countryName?.trim()]
+    .filter(Boolean)
+    .join(", ");
+  return region || UNKNOWN_LOCATION_LABEL;
 }
 
 /**
@@ -49,7 +59,7 @@ export function jobLocationDetail(job: JobLocation): string {
   if (job.isRemote) return REMOTE_LOCATION_LABEL;
   const address = job.address?.trim();
   const city = job.city?.trim();
-  if (!address) return city || REMOTE_LOCATION_LABEL;
+  if (!address) return city || UNKNOWN_LOCATION_LABEL;
   if (!city || address.toLowerCase().includes(city.toLowerCase())) {
     return address;
   }

@@ -1,4 +1,5 @@
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
+import { jobLocationLabel } from "@/lib/job-location";
 import { Calendar, MapPin, Users, Coins } from "lucide-react";
 import { cn, formatDate, formatOfferAmount } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
@@ -56,7 +57,7 @@ export function JobOfferCard({ offer, onClick }: Readonly<JobOfferCardProps>) {
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 shrink-0" />
-          <span className="truncate">{offer.address}</span>
+          <span className="truncate">{jobLocationLabel(offer)}</span>
         </p>
       </div>
 
