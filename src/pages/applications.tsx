@@ -11,6 +11,7 @@ import {
 } from "@/features/employer";
 import type { WorkerMission } from "@/lib/api/worker-mission-controller";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
+import { jobLocationLabel } from "@/lib/job-location";
 
 export default function Applications() {
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ function MissionCard({
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-whatsapp" />
-          <span className="truncate">{jobOffer.address}</span>
+          <span className="truncate">{jobLocationLabel(jobOffer)}</span>
         </p>
       </div>
     </button>
