@@ -10,6 +10,7 @@ import {
   StickyNote,
   RefreshCw,
   Trash2,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +25,7 @@ import { useJobOfferApplications } from "@/hooks/use-job-offer-applications";
 import { useRepublishJobOffer } from "@/hooks/use-republish-job-offer";
 import { RepublishOfferDialog } from "@/features/employer/components/republish-offer-dialog";
 import { useDeleteJobOffer } from "@/hooks/use-delete-job-offer";
-import { useCompleteMission } from "@/hooks/use-complete-mission";
+import { useRateWorker } from "@/hooks/use-rate-worker";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
 import {
@@ -54,10 +55,10 @@ export default function MissionDetail() {
   const { mutate: deleteOffer, isPending: isDeleting } = useDeleteJobOffer();
   const { mutate: republishOffer, isPending: isRepublishing } =
     useRepublishJobOffer();
-  const complete = useCompleteMission();
+  const rate = useRateWorker();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [republishOpen, setRepublishOpen] = useState(false);
-  const [completeTarget, setCompleteTarget] = useState<JobOfferWorkerItem | null>(
+  const [rateTarget, setRateTarget] = useState<JobOfferWorkerItem | null>(
     null,
   );
 
@@ -73,15 +74,19 @@ export default function MissionDetail() {
     !workersLoading &&
     (workers?.length ?? 0) === 0;
 
-  // Workers still engaged on the mission. Completing the mission closes the whole
-  // offer at once (backend), so this is a single mission-level action — the rated
-  // worker is the (typically only) active one.
-  const activeWorkers =
-    workers?.filter(
-      (w) => w.status === "ACCEPTED" || w.status === "STARTED",
-    ) ?? [];
-  const completable =
-    !!offer && offer.status !== "COMPLETED" && activeWorkers.length > 0;
+  // The employer rates; they no longer close anything. Only a worker who has
+  // confirmed their own mission (application → END) can be rated, which is the
+  // same rule the API enforces — showing the button earlier would just produce
+  // a 400 saying the worker has not confirmed yet.
+  const ratableWorkers =
+    workers?.filter((w) => w.status === "END" && !w.ratedByEmployer) ?? [];
+  const ratable = !!offer && ratableWorkers.length > 0;
+  // Everyone rateable already has been — say so, rather than just showing an
+  // empty space where the button used to be.
+  const allRated =
+    !!offer &&
+    !ratable &&
+    (workers?.some((w) => w.status === "END" && w.ratedByEmployer) ?? false);
 
   // Only an expired offer can be reopened. The backend re-checks.
   // Republishing puts a live offer back on the market, so it needs the same KYC
@@ -107,11 +112,11 @@ export default function MissionDetail() {
     );
   };
 
-  const handleComplete = (score: number, note?: string) => {
-    if (!id || !completeTarget) return;
-    complete.mutate(
-      { applicationId: completeTarget.applicationId, offerId: id, score, note },
-      { onSuccess: () => setCompleteTarget(null) },
+  const handleRate = (score: number, note?: string) => {
+    if (!id || !rateTarget) return;
+    rate.mutate(
+      { applicationId: rateTarget.applicationId, offerId: id, score, note },
+      { onSuccess: () => setRateTarget(null) },
     );
   };
 
@@ -169,14 +174,24 @@ export default function MissionDetail() {
             )}
           </div>
 
-          {/* Complete the whole mission (closes the offer + rates the worker) */}
-          {completable && (
+          {/* Rate the worker. The offer closes on its own once every hired
+              worker has confirmed — that is the worker's call, not this one. */}
+          {ratable && (
             <Button
               className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-              onClick={() => setCompleteTarget(activeWorkers[0])}
+              onClick={() => setRateTarget(ratableWorkers[0])}
             >
-              Terminer la mission
+              Noter le travailleur
             </Button>
+          )}
+
+          {allRated && (
+            <div className="bg-card flex items-center justify-center gap-2 rounded-xl px-4 py-3 shadow-soft">
+              <Star className="h-4 w-4 fill-whatsapp text-whatsapp" />
+              <span className="text-sm font-medium text-foreground">
+                Travailleur noté
+              </span>
+            </div>
           )}
 
           {/* Key info */}
@@ -313,17 +328,17 @@ export default function MissionDetail() {
       />
 
       <CompleteMissionDrawer
-        open={!!completeTarget}
-        onOpenChange={(o) => !o && setCompleteTarget(null)}
-        title="Terminer la mission"
+        open={!!rateTarget}
+        onOpenChange={(o) => !o && setRateTarget(null)}
+        title="Noter le travailleur"
         subtitle={
-          completeTarget
-            ? `Notez ${completeTarget.worker.firstName} ${completeTarget.worker.lastName}`
+          rateTarget
+            ? `Notez ${rateTarget.worker.firstName} ${rateTarget.worker.lastName}`
             : undefined
         }
         showNote
-        onSubmit={handleComplete}
-        isPending={complete.isPending}
+        onSubmit={handleRate}
+        isPending={rate.isPending}
       />
     </div>
   );

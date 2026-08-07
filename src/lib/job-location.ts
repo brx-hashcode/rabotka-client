@@ -9,6 +9,22 @@ type JobLocation = {
 };
 
 /**
+ * City and country on their own line, or null when neither is known.
+ *
+ * For a detail screen, which has room to separate the street from the wider
+ * area — a worker deciding whether to take a job cares which city it is in
+ * before they read the street. Returns null rather than an empty string so the
+ * caller drops the row entirely: offers created before the location pickers
+ * existed have no city, and a labelled row with nothing after it reads as a
+ * loading bug.
+ */
+export function jobLocationRegion(job: JobLocation): string | null {
+  if (job.isRemote) return null;
+  const parts = [job.city?.trim(), job.countryName?.trim()].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
+/**
  * A job's location as one line.
  *
  * `address` is null for a remote job, and every card, list row and detail
