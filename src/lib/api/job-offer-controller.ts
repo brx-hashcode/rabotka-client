@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 
 export type JobOfferStatus =
   | "DRAFT"
@@ -14,7 +15,8 @@ export type EmployerJobOfferItem = {
   id: string;
   title: string;
   status: JobOfferStatus;
-  scheduledAt: string;
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
   amount: number;
   paymentFlow: string;
   /** Null for a remote job — render `isRemote` instead. */
@@ -48,7 +50,8 @@ export type JobOfferDetail = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduledAt: string;
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
   amount: number;
   paymentFlow: string;
   /** Null for a remote job — render `isRemote` instead. */
@@ -78,7 +81,7 @@ export type EmployerApplicationItem = {
   jobOffer: {
     id: string;
     title: string;
-    scheduledAt: string;
+    scheduledAt: string | null;
     /** Drives the capacity gate — a FILLED offer can take no more candidates. */
     status: JobOfferStatus;
   };
@@ -97,7 +100,8 @@ type BackendEmployerOffer = {
   id: string;
   title: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  employmentType?: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
   /** Null for a remote job — render `isRemote` instead. */
@@ -136,7 +140,8 @@ type BackendJobOfferDetail = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  employmentType?: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
   /** Null for a remote job — render `isRemote` instead. */
@@ -194,7 +199,9 @@ type BackendOfferApplication = {
 export type CreateJobOfferPayload = {
   title: string;
   description: string;
-  scheduled_at: string; // ISO date-time
+  /** ISO date-time. The offer's CLOSING date; required only for a MISSION. */
+  scheduled_at?: string;
+  employment_type?: EmploymentTypeValue;
   /** Omitted for a remote job — it has no site. */
   address?: string;
   isRemote?: boolean;
@@ -243,6 +250,7 @@ class JobOfferController extends RabotkaBaseController {
           title: o.title,
           status: o.status,
           scheduledAt: o.scheduled_at,
+          employmentType: o.employmentType ?? "MISSION",
           amount: o.amount ?? 0,
           paymentFlow: o.payment_flow ?? "",
           address: o.address,
@@ -315,6 +323,7 @@ class JobOfferController extends RabotkaBaseController {
         description: o.description,
         status: o.status,
         scheduledAt: o.scheduled_at,
+        employmentType: o.employmentType ?? "MISSION",
         amount: o.amount ?? 0,
         paymentFlow: o.payment_flow ?? "",
         address: o.address,

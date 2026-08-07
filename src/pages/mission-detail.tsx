@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
+import { EMPLOYMENT_TYPE_LABELS, isCompletable } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
@@ -11,6 +12,7 @@ import {
   RefreshCw,
   Trash2,
   Star,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,7 +82,11 @@ export default function MissionDetail() {
   // a 400 saying the worker has not confirmed yet.
   const ratableWorkers =
     workers?.filter((w) => w.status === "END" && !w.ratedByEmployer) ?? [];
-  const ratable = !!offer && ratableWorkers.length > 0;
+  // A CDI/CDD/STAGE never completes, so no worker on one can reach END and
+  // there is nothing to rate. Gated explicitly rather than relying on that,
+  // so the button cannot reappear if the status rules change.
+  const ratable =
+    !!offer && isCompletable(offer.employmentType) && ratableWorkers.length > 0;
   // Everyone rateable already has been — say so, rather than just showing an
   // empty space where the button used to be.
   const allRated =
@@ -203,11 +209,20 @@ export default function MissionDetail() {
               {PAYMENT_FLOW_LABELS[offer.paymentFlow] ?? ""}
             </InfoRow>
             <InfoRow
-              icon={<Calendar className="h-4 w-4 text-whatsapp" />}
-              label="Date prévue"
+              icon={<FileText className="h-4 w-4 text-whatsapp" />}
+              label="Type de contrat"
             >
-              {formatDateTime(offer.scheduledAt)}
+              {EMPLOYMENT_TYPE_LABELS[offer.employmentType] ??
+                offer.employmentType}
             </InfoRow>
+            {offer.scheduledAt && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4 text-whatsapp" />}
+                label="Date de clôture"
+              >
+                {formatDateTime(offer.scheduledAt)}
+              </InfoRow>
+            )}
             <InfoRow
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"

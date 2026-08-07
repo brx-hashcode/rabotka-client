@@ -1,3 +1,4 @@
+import { EMPLOYMENT_TYPE_SHORT } from "@/lib/employment-type";
 import { Calendar, MapPin, Users, Coins } from "lucide-react";
 import { cn, formatAmount, formatDate } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
@@ -42,9 +43,13 @@ export function JobOfferCard({ offer, onClick }: Readonly<JobOfferCardProps>) {
           </span>
           {flowLabel && <span>{flowLabel}</span>}
         </p>
+        {/* Only a mission closes on a date; a CDI/CDD/STAGE shows its type
+            instead of an empty calendar row. */}
         <p className="flex items-center gap-2">
           <Calendar className="h-4 w-4 shrink-0" />
-          {formatDate(offer.scheduledAt)}
+          {offer.scheduledAt
+            ? formatDate(offer.scheduledAt)
+            : EMPLOYMENT_TYPE_SHORT[offer.employmentType]}
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 shrink-0" />

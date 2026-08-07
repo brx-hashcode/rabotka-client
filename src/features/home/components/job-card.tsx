@@ -105,10 +105,14 @@ export function JobCard({ job, canApply }: Props) {
               {flowLabel && <span>{flowLabel}</span>}
             </p>
           )}
-          <p className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 shrink-0" />
-            {formatDateTime(job.scheduledAt)}
-          </p>
+          {/* Guarded like the amount row above: an offer with no closing date
+              would otherwise show a bare calendar icon beside a dash. */}
+          {job.scheduledAt && (
+            <p className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0" />
+              {formatDateTime(job.scheduledAt)}
+            </p>
+          )}
           <p className="flex items-center gap-2">
             <MapPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{jobLocationLabel(job)}</span>

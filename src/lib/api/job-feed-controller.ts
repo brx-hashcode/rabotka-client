@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
 export type JobFeedEmployer = {
@@ -17,7 +18,9 @@ export type JobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduledAt: string;
+  /** Null for CDI/CDD/STAGE, which have no closing date. */
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   paymentFlow: string;
   /** Null for a remote job — render `isRemote` instead. */
@@ -74,7 +77,8 @@ type BackendJobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  employmentType?: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
   /** Null for a remote job — render `isRemote` instead. */
@@ -109,6 +113,7 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     description: o.description,
     status: o.status,
     scheduledAt: o.scheduled_at,
+    employmentType: o.employmentType ?? "MISSION",
     amount: o.amount ?? null,
     paymentFlow: o.payment_flow ?? "",
     address: o.address,
