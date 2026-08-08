@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  EMPLOYMENT_TYPE_VALUES,
+  requiresClosingDate,
+} from "@/lib/employment-type";
 
 export const PAYMENT_FLOW_VALUES = ["HOURLY", "DAILY", "MONTHLY"] as const;
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
@@ -24,14 +28,11 @@ export const createJobOfferSchema = z.object({
     .trim()
     .min(20, "La description doit contenir entre 20 et 1000 caractères")
     .max(1000, "La description doit contenir entre 20 et 1000 caractères"),
-  scheduledAt: z
-    .string()
-    .min(1, "La date est requise")
-    .refine((v) => !Number.isNaN(Date.parse(v)), "Date invalide")
-    .refine(
-      (v) => Date.parse(v) >= Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000,
-      "La date doit être au moins 4 heures dans le futur",
-    ),
+  employmentType: z.enum(EMPLOYMENT_TYPE_VALUES).default("MISSION"),
+  // Required only for a MISSION — enforced in the superRefine below, which is
+  // the only place that can see employmentType alongside it. A CDI has no
+  // single closing date, so demanding one here would make it unpostable.
+  scheduledAt: z.string().default(""),
   isRemote: z.boolean().default(false),
   countryCode: z.string().default(""),
   countryName: z.string().default(""),
@@ -71,6 +72,34 @@ export const createJobOfferSchema = z.object({
    * blocked by an address it will never have.
    */
   .superRefine((data, ctx) => {
+    // The closing date is required for a MISSION and meaningless otherwise.
+    // Checked here rather than on the field because it is the only place that
+    // can see employmentType alongside it.
+    if (requiresClosingDate(data.employmentType)) {
+      if (!data.scheduledAt) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["scheduledAt"],
+          message: "La date de clôture est requise",
+        });
+      } else if (Number.isNaN(Date.parse(data.scheduledAt))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["scheduledAt"],
+          message: "Date invalide",
+        });
+      } else if (
+        Date.parse(data.scheduledAt) <
+        Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["scheduledAt"],
+          message: "La date doit être au moins 4 heures dans le futur",
+        });
+      }
+    }
+
     if (data.isRemote) return;
 
     if (data.address.trim().length < 10) {
