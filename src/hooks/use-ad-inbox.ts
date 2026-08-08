@@ -35,14 +35,22 @@ export function useAdInbox() {
   });
 }
 
-export function useDismissAd() {
+/**
+ * Records that a delivery has been seen — a viewport impression on its feed
+ * card, or a tap through an untracked destination.
+ *
+ * Server-side this stamps `opened_at` and retires the delivery, so it is the
+ * one write that decides whether an ad comes back.
+ */
+export function useMarkAdSeen() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (deliveryId: string) => markAdSeen(deliveryId),
-    // Drop it from the cache right away so the card disappears on tap instead
-    // of after the round-trip — and stays gone across route changes, which
-    // remount the popup. A failed call simply lets the next poll bring it back.
+    // Keeps the query honest and stops the next poll resurrecting an ad that
+    // has already been counted. It is deliberately NOT what removes the card:
+    // the feed renders from a frozen slate (features/ads/ad-slate) precisely so
+    // a counted ad stays put instead of collapsing the list mid-scroll.
     onMutate: (deliveryId: string) => {
       queryClient.setQueryData<InAppAd[]>(adInboxQueryKey, (ads) =>
         (ads ?? []).filter((ad) => ad.deliveryId !== deliveryId),
