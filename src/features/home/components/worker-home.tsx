@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Bookmark,
@@ -11,15 +11,20 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
+import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { SponsoredCard, interleaveAds, useFeedAds } from "@/features/ads";
 import { cn } from "@/lib/utils";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
 const SKELETON_KEYS = ["s1", "s2", "s3"];
+
+/** Shared so a loading feed keeps the same array, and the memo below holds. */
+const NO_JOBS: JobFeedItem[] = [];
 
 type Chip = { id: string | null; name: string };
 
@@ -63,8 +68,14 @@ export function WorkerHome() {
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
 
-  const list = jobs ?? [];
+  const list = jobs ?? NO_JOBS;
   const canLoadMore = isFetching || list.length >= limit;
+
+  const ads = useFeedAds();
+  // Memoised so the entries keep their identity across the re-renders this
+  // screen gets from the quota and KYC caches — otherwise an ad card remounts
+  // and its impression timer restarts before it can finish.
+  const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);
 
   const chips: Chip[] = [
     { id: null, name: "Pour vous" },
@@ -195,9 +206,17 @@ export function WorkerHome() {
       {!isLoading && list.length > 0 && (
         <section className="space-y-3 py-2">
           <div className="grid grid-cols-1 gap-3 px-4">
-            {list.map((j) => (
-              <JobCard key={j.id} job={j} canApply={canApply} />
-            ))}
+            {entries.map((entry) =>
+              entry.kind === "ad" ? (
+                <SponsoredCard key={entry.key} ad={entry.item} />
+              ) : (
+                <JobCard
+                  key={entry.key}
+                  job={entry.item}
+                  canApply={canApply}
+                />
+              ),
+            )}
           </div>
           {canLoadMore && (
             <div className="px-4">

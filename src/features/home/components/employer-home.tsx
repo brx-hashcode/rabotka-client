@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Users,
@@ -12,22 +12,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkerFeed } from "@/hooks/use-recommendations";
+import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
 import { HomeHeader } from "./home-header";
 import { RecommendedWorkerCard } from "./recommended-worker-card";
+import { SponsoredCard, interleaveAds, useFeedAds } from "@/features/ads";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
 const SKELETON_KEYS = ["s1", "s2", "s3"];
+
+/** Shared so a loading feed keeps the same array, and the memo below holds. */
+const NO_WORKERS: RecommendedWorker[] = [];
 
 export function EmployerHome() {
   const navigate = useNavigate();
   const [limit, setLimit] = useState(INITIAL_LIMIT);
   const { data: workers, isLoading, isFetching } = useWorkerFeed(limit);
 
-  const list = workers ?? [];
+  const list = workers ?? NO_WORKERS;
   // Keep the button visible while a larger page is being fetched (the pending
   // `limit` runs ahead of the placeholder list) so its loading state shows.
   const canLoadMore = isFetching || list.length >= limit;
+
+  const ads = useFeedAds();
+  // Same slot rule as the worker feed — the two lists are the same shape, so
+  // an advert lands in the same place whichever side of the app you are on.
+  const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);
 
   return (
     <div className="flex flex-col">
@@ -72,9 +82,13 @@ export function EmployerHome() {
           {/* Single column: the feed is already ranked best-first, so a
               carousel just hid the ranking behind a horizontal swipe. */}
           <div className="grid grid-cols-1 gap-3 px-4">
-            {list.map((w) => (
-              <RecommendedWorkerCard key={w.id} worker={w} />
-            ))}
+            {entries.map((entry) =>
+              entry.kind === "ad" ? (
+                <SponsoredCard key={entry.key} ad={entry.item} />
+              ) : (
+                <RecommendedWorkerCard key={entry.key} worker={entry.item} />
+              ),
+            )}
           </div>
           {canLoadMore && (
             <div className="px-4">
