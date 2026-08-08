@@ -18,7 +18,8 @@ type Props = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
-  readonly scheduledAt: string;
+  /** Null for a CDI, CDD or stage — formatDateTime renders «—». */
+  readonly scheduledAt: string | null;
   readonly address: string;
   readonly amount?: number | null;
   readonly isPending?: boolean;

@@ -138,7 +138,7 @@ type BackendEmployerApplication = {
   job_offer?: {
     id: string;
     title: string;
-    scheduled_at: string;
+    scheduled_at: string | null;
     status?: JobOfferStatus;
   };
 };
