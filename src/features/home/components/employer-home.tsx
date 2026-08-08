@@ -15,7 +15,9 @@ import { useWorkerFeed } from "@/hooks/use-recommendations";
 import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
 import { HomeHeader } from "./home-header";
 import { RecommendedWorkerCard } from "./recommended-worker-card";
-import { SponsoredCard, interleaveAds, useFeedAds } from "@/features/ads";
+import { SponsoredCard } from "@/features/sponsored/sponsored-card";
+import { interleaveAds } from "@/features/sponsored/interleave";
+import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
@@ -34,7 +36,7 @@ export function EmployerHome() {
   // `limit` runs ahead of the placeholder list) so its loading state shows.
   const canLoadMore = isFetching || list.length >= limit;
 
-  const ads = useFeedAds();
+  const ads = useFeedSlots();
   // Same slot rule as the worker feed — the two lists are the same shape, so
   // an advert lands in the same place whichever side of the app you are on.
   const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);

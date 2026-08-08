@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { isTrackedAdUrl } from "@/features/ads/ad-destination";
+import { isTrackedAdUrl } from "@/features/sponsored/destination";
 
 /**
  * Which destinations record their own click.

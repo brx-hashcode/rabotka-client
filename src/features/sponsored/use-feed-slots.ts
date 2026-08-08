@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { useLocation } from "react-router";
 import { useAdInbox } from "@/hooks/use-ad-inbox";
 import type { InAppAd } from "@/lib/api/ad-inbox-controller";
-import { isRenderableAd, mergeAdSlate } from "./ad-slate";
+import { isRenderableAd, mergeAdSlate } from "./slate";
 import { isMutedRoute } from "./muted-routes";
 
 const NO_ADS: InAppAd[] = [];
@@ -20,7 +20,7 @@ const NO_ADS: InAppAd[] = [];
  * on every quota and KYC cache read, and a new array each time would re-key
  * the list and tear the impression observers down mid-count.
  */
-export function useFeedAds(): InAppAd[] {
+export function useFeedSlots(): InAppAd[] {
   const { pathname } = useLocation();
   const { data } = useAdInbox();
   const slate = useRef<InAppAd[]>(NO_ADS);

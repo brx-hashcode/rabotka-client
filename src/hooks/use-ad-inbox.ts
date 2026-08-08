@@ -49,7 +49,7 @@ export function useMarkAdSeen() {
     mutationFn: (deliveryId: string) => markAdSeen(deliveryId),
     // Keeps the query honest and stops the next poll resurrecting an ad that
     // has already been counted. It is deliberately NOT what removes the card:
-    // the feed renders from a frozen slate (features/ads/ad-slate) precisely so
+    // the feed renders from a frozen slate (features/sponsored/slate) precisely so
     // a counted ad stays put instead of collapsing the list mid-scroll.
     onMutate: (deliveryId: string) => {
       queryClient.setQueryData<InAppAd[]>(adInboxQueryKey, (ads) =>

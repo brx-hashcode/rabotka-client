@@ -3,8 +3,8 @@ import { Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMarkAdSeen } from "@/hooks/use-ad-inbox";
 import type { InAppAd } from "@/lib/api/ad-inbox-controller";
-import { openAdDestination } from "./ad-destination";
-import { useAdImpression } from "./use-ad-impression";
+import { openAdDestination } from "./destination";
+import { useAdImpression } from "./use-impression";
 
 /** More than a few tags turns the card into a wall of chips. */
 const MAX_TAGS = 3;
