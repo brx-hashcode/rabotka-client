@@ -1,3 +1,4 @@
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 import { RabotkaBaseController } from "./base-controller";
 import { config } from "@/config";
 
@@ -99,9 +100,16 @@ export type ProfileApplicationItem = {
   jobOffer: {
     id: string;
     title: string;
-    scheduledAt: string;
-    amount: number;
-    address: string;
+    /** Null for a CDI, CDD or stage — only a mission has a closing date. */
+    scheduledAt: string | null;
+    employmentType: EmploymentTypeValue;
+    /** Null when the employer named no price — rendered as «À négocier». */
+    amount: number | null;
+    /** Null for a remote job — read through jobLocationLabel, not directly. */
+    address: string | null;
+    isRemote: boolean;
+    city: string | null;
+    countryName: string | null;
     status: string;
   };
 };

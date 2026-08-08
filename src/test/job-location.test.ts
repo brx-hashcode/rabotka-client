@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import {
   REMOTE_LOCATION_LABEL,
+  UNKNOWN_LOCATION_LABEL,
   jobLocationDetail,
   jobLocationLabel,
 } from "@/lib/job-location";
@@ -26,11 +27,18 @@ describe("jobLocationLabel()", () => {
     ).toBe("12 rue Foch");
   });
 
-  it("treats a missing address as remote rather than printing nothing", () => {
+  it("says the location is unspecified rather than claiming the job is remote", () => {
     // Offers created before the columns existed, and any row where the address
-    // went missing — a blank line beside a pin icon reads as a broken screen.
-    expect(jobLocationLabel({ address: null })).toBe(REMOTE_LOCATION_LABEL);
-    expect(jobLocationLabel({ address: "   " })).toBe(REMOTE_LOCATION_LABEL);
+    // went missing — a blank line beside a pin icon reads as a broken screen,
+    // but "En ligne" would send a worker to the wrong kind of job entirely.
+    expect(jobLocationLabel({ address: null })).toBe(UNKNOWN_LOCATION_LABEL);
+    expect(jobLocationLabel({ address: "   " })).toBe(UNKNOWN_LOCATION_LABEL);
+  });
+
+  it("falls back to the city when an on-site address is missing", () => {
+    expect(jobLocationLabel({ address: null, city: "Brazzaville" })).toBe(
+      "Brazzaville",
+    );
   });
 
   it("ignores a stale address on a remote job", () => {

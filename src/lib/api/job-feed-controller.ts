@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
 export type JobFeedEmployer = {
@@ -17,7 +18,9 @@ export type JobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduledAt: string;
+  /** Null for CDI/CDD/STAGE, which have no closing date. */
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   paymentFlow: string;
   /** Null for a remote job — render `isRemote` instead. */
@@ -74,14 +77,21 @@ type BackendJobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  /**
+   * camelCase on purpose — the server renames exactly these three, and every
+   * other key here stays snake_case. Non-optional so a server-side rename
+   * surfaces as a type error at the mapping below rather than as a silent
+   * `undefined` absorbed by a default.
+   */
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
   /** Null for a remote job — render `isRemote` instead. */
   address: string | null;
   isRemote: boolean;
-  city?: string | null;
-  countryName?: string | null;
+  city: string | null;
+  countryName: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;
@@ -109,12 +119,13 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     description: o.description,
     status: o.status,
     scheduledAt: o.scheduled_at,
+    employmentType: o.employmentType,
     amount: o.amount ?? null,
     paymentFlow: o.payment_flow ?? "",
     address: o.address,
-    isRemote: o.isRemote ?? false,
-    city: o.city ?? null,
-    countryName: o.countryName ?? null,
+    isRemote: o.isRemote,
+    city: o.city,
+    countryName: o.countryName,
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,

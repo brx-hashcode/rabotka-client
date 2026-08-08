@@ -24,6 +24,7 @@ const offer = (
   paymentFlow: "DAILY",
   address: "Brazzaville",
   isRemote: false,
+  employmentType: "MISSION",
   quantity,
   acceptedCount,
   pendingApplicationsCount: 0,

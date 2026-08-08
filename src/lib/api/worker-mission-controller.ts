@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
 export type WorkerMissionApplicationStatus =
@@ -26,7 +27,8 @@ export type WorkerMission = {
     id: string;
     title: string;
     description: string;
-    scheduledAt: string;
+    scheduledAt: string | null;
+    employmentType: EmploymentTypeValue;
     amount: number | null;
     address: string;
     status: JobOfferStatus;

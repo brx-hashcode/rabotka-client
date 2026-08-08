@@ -21,7 +21,7 @@ import {
   closedToCandidatesReason,
 } from "@/features/employer";
 import type { ApplicationDetailApplication } from "@/lib/api/application-controller";
-import { formatAmount, formatDate } from "@/lib/utils";
+import { formatAmount, formatDate, formatOfferAmount } from "@/lib/utils";
 
 export default function ApplicationDetail() {
   const navigate = useNavigate();
@@ -308,7 +308,7 @@ const OfferCard = ({ app }: Readonly<{ app: ApplicationDetailApplication }>) => 
       <p className="flex items-center gap-2">
         <Coins className="h-4 w-4 text-whatsapp" />
         <span className="font-medium text-foreground">
-          {formatAmount(app.jobOffer.amount)}
+          {formatOfferAmount(app.jobOffer.amount)}
         </span>
       </p>
       <p className="flex items-center gap-2">
