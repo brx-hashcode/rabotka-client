@@ -10,7 +10,8 @@ import {
 import { ClipboardList, FileDown, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DownloadLink } from "@/components/common/download-link";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
+import { jobLocationLabel } from "@/lib/job-location";
 import { applicationsContent } from "@/content/profile";
 import { useProfileApplications } from "@/hooks/use-profile-applications";
 import type { ProfileApplicationItem } from "@/lib/api/profile-controller";
@@ -52,10 +53,10 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
         {formatDateTime(app.jobOffer.scheduledAt)}
       </p>
       <p className="text-sm text-muted-foreground">
-        {formatAmount(app.jobOffer.amount)}
+        {formatOfferAmount(app.jobOffer.amount)}
       </p>
       <p className="text-sm text-muted-foreground truncate">
-        {app.jobOffer.address}
+        {jobLocationLabel(app.jobOffer)}
       </p>
       {app.status === "ACCEPTED" && app.contractId && (
         <DownloadLink

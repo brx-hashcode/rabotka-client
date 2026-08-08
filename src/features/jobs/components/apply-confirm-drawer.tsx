@@ -12,13 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useApplicationTerms } from "@/hooks/use-application-terms";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { formatAmount, formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
-  readonly scheduledAt: string;
+  /** Null for a CDI, CDD or stage — formatDateTime renders «—». */
+  readonly scheduledAt: string | null;
   readonly address: string;
   readonly amount?: number | null;
   readonly isPending?: boolean;
@@ -62,7 +63,7 @@ export function ApplyConfirmDrawer({
             <dl className="space-y-2 rounded-xl bg-card p-3 text-left text-sm shadow-soft">
               <RecapRow label="Date" value={formatDateTime(scheduledAt)} />
               {amount != null && (
-                <RecapRow label="Montant" value={formatAmount(amount)} />
+                <RecapRow label="Montant" value={formatOfferAmount(amount)} />
               )}
               <RecapRow label="Adresse" value={address} />
             </dl>
