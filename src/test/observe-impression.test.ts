@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DWELL_MS, observeImpression } from "@/features/ads/observe-impression";
+import { DWELL_MS, observeImpression } from "@/features/sponsored/impression";
 
 /**
  * When an advertisement counts as seen.

@@ -2,7 +2,7 @@
 // Pure, and kept out of the shared jsdom environment, which currently fails to
 // load its native `canvas` binding.
 import { describe, expect, it } from "vitest";
-import { isMutedRoute } from "@/features/ads/muted-routes";
+import { isMutedRoute } from "@/features/sponsored/muted-routes";
 
 describe("isMutedRoute", () => {
   it("shows ads on ordinary app routes", () => {

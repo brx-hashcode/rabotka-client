@@ -4,7 +4,7 @@ import {
   AD_EVERY,
   FIRST_AD_AFTER,
   interleaveAds,
-} from "@/features/ads/interleave-ads";
+} from "@/features/sponsored/interleave";
 
 /**
  * Where sponsored cards land in a feed.

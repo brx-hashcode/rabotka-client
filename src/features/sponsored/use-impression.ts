@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useMarkAdSeen } from "@/hooks/use-ad-inbox";
-import { observeImpression } from "./observe-impression";
+import { observeImpression } from "./impression";
 
 /**
  * Deliveries already counted this session.

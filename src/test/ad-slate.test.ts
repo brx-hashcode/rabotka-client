@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { isRenderableAd, mergeAdSlate } from "@/features/ads/ad-slate";
+import { isRenderableAd, mergeAdSlate } from "@/features/sponsored/slate";
 import type { InAppAd } from "@/lib/api/ad-inbox-controller";
 
 const ad = (deliveryId: string, over: Partial<InAppAd> = {}): InAppAd => ({

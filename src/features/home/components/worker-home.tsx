@@ -16,7 +16,9 @@ import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
-import { SponsoredCard, interleaveAds, useFeedAds } from "@/features/ads";
+import { SponsoredCard } from "@/features/sponsored/sponsored-card";
+import { interleaveAds } from "@/features/sponsored/interleave";
+import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
 import { cn } from "@/lib/utils";
 
 const INITIAL_LIMIT = 10;
@@ -71,7 +73,7 @@ export function WorkerHome() {
   const list = jobs ?? NO_JOBS;
   const canLoadMore = isFetching || list.length >= limit;
 
-  const ads = useFeedAds();
+  const ads = useFeedSlots();
   // Memoised so the entries keep their identity across the re-renders this
   // screen gets from the quota and KYC caches — otherwise an ad card remounts
   // and its impression timer restarts before it can finish.
