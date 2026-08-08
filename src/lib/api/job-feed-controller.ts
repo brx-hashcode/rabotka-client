@@ -78,14 +78,20 @@ type BackendJobFeedItem = {
   description: string;
   status: JobOfferStatus;
   scheduled_at: string | null;
-  employmentType?: EmploymentTypeValue;
+  /**
+   * camelCase on purpose — the server renames exactly these three, and every
+   * other key here stays snake_case. Non-optional so a server-side rename
+   * surfaces as a type error at the mapping below rather than as a silent
+   * `undefined` absorbed by a default.
+   */
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
   /** Null for a remote job — render `isRemote` instead. */
   address: string | null;
   isRemote: boolean;
-  city?: string | null;
-  countryName?: string | null;
+  city: string | null;
+  countryName: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;
@@ -113,13 +119,13 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     description: o.description,
     status: o.status,
     scheduledAt: o.scheduled_at,
-    employmentType: o.employmentType ?? "MISSION",
+    employmentType: o.employmentType,
     amount: o.amount ?? null,
     paymentFlow: o.payment_flow ?? "",
     address: o.address,
-    isRemote: o.isRemote ?? false,
-    city: o.city ?? null,
-    countryName: o.countryName ?? null,
+    isRemote: o.isRemote,
+    city: o.city,
+    countryName: o.countryName,
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,
