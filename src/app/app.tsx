@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router";
 import { Providers } from "./providers";
 import { AppRoutes } from "./routes";
-import { AdPopup } from "@/features/ads/ad-popup";
 import {
   ErrorBoundary,
   clearChunkReloadGuard,
@@ -40,8 +39,6 @@ const App = () => (
       <BrowserRouter>
         <ChunkGuardReset />
         <AppRoutes />
-        {/* Rides along on every route — it picks its own moments to appear. */}
-        <AdPopup />
       </BrowserRouter>
     </ErrorBoundary>
   </Providers>
