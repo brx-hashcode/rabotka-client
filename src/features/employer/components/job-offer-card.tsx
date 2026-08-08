@@ -1,5 +1,7 @@
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
+import { jobLocationLabel } from "@/lib/job-location";
 import { Calendar, MapPin, Users, Coins } from "lucide-react";
-import { cn, formatAmount, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatOfferAmount } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
 import { StatusChip } from "./status-chip";
 import {
@@ -15,6 +17,7 @@ type JobOfferCardProps = {
 
 export function JobOfferCard({ offer, onClick }: Readonly<JobOfferCardProps>) {
   const flowLabel = PAYMENT_FLOW_LABELS[offer.paymentFlow] ?? "";
+  const hasAmount = offer.amount != null && offer.amount !== 0;
 
   return (
     <button
@@ -38,17 +41,23 @@ export function JobOfferCard({ offer, onClick }: Readonly<JobOfferCardProps>) {
         <p className="flex items-center gap-2">
           <Coins className="h-4 w-4 shrink-0 text-whatsapp" />
           <span className="font-medium text-foreground">
-            {formatAmount(offer.amount)}
+            {formatOfferAmount(offer.amount)}
           </span>
-          {flowLabel && <span>{flowLabel}</span>}
+          {/* «À négocier par mois» is not a rate — the cadence only qualifies a
+              real figure, so it goes when the figure does. */}
+          {hasAmount && flowLabel && <span>{flowLabel}</span>}
         </p>
+        {/* Only a mission closes on a date; a CDI/CDD/STAGE shows its type
+            instead of an empty calendar row. */}
         <p className="flex items-center gap-2">
           <Calendar className="h-4 w-4 shrink-0" />
-          {formatDate(offer.scheduledAt)}
+          {offer.scheduledAt
+            ? formatDate(offer.scheduledAt)
+            : EMPLOYMENT_TYPE_LABELS[offer.employmentType]}
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 shrink-0" />
-          <span className="truncate">{offer.address}</span>
+          <span className="truncate">{jobLocationLabel(offer)}</span>
         </p>
       </div>
 

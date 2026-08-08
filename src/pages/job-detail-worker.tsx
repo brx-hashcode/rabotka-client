@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import {
   jobLocationLabel,
   jobLocationRegion,
@@ -9,6 +10,7 @@ import {
   Calendar,
   Coins,
   MapPin,
+  FileText,
   Globe,
   Building2,
   ShieldCheck,
@@ -34,7 +36,7 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function JobDetailWorker() {
   const navigate = useNavigate();
@@ -126,17 +128,28 @@ export default function JobDetailWorker() {
                 label="Rémunération"
               >
                 <span className="font-medium text-foreground">
-                  {formatAmount(job.amount)}
+                  {formatOfferAmount(job.amount)}
                 </span>{" "}
                 {PAYMENT_FLOW_LABELS[job.paymentFlow] ?? ""}
               </InfoRow>
             )}
             <InfoRow
-              icon={<Calendar className="h-4 w-4 text-whatsapp" />}
-              label="Date prévue"
+              icon={<FileText className="h-4 w-4 text-whatsapp" />}
+              label="Type de contrat"
             >
-              {formatDateTime(job.scheduledAt)}
+              {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
             </InfoRow>
+            {/* A CDI/CDD/STAGE has no closing date. Dropping the row entirely
+                rather than printing a dash: a labelled blank reads as data that
+                failed to load. */}
+            {job.scheduledAt && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4 text-whatsapp" />}
+                label="Date de clôture"
+              >
+                {formatDateTime(job.scheduledAt)}
+              </InfoRow>
+            )}
             {/* Where the job is, split across rows now that the payload carries
                 more than a street. A remote job has no address at all, so
                 printing an empty "Adresse" was the old failure; and an address
