@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { jobLocationLabel } from "@/lib/job-location";
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import { ClipboardList, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -97,7 +98,13 @@ function ApplicationCard({
       </div>
 
       <div className="mt-2 space-y-0.5 text-sm text-muted-foreground">
-        <p>{formatDateTime(app.jobOffer.scheduledAt)}</p>
+        {/* A CDI/CDD/STAGE has no closing date, so the row shows what kind of
+            engagement it is rather than a bare em dash. */}
+        <p>
+          {app.jobOffer.scheduledAt
+            ? formatDateTime(app.jobOffer.scheduledAt)
+            : EMPLOYMENT_TYPE_LABELS[app.jobOffer.employmentType]}
+        </p>
         <p className="font-medium text-foreground">
           {formatOfferAmount(app.jobOffer.amount)}
         </p>
