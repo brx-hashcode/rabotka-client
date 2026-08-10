@@ -52,17 +52,14 @@ export function useDailyQuota() {
 }
 
 /**
- * Whether the worker may still apply. Both caps come from SystemConfig
- * (`fees.max_daily_applications` and `fees.max_concurrent_applications`) via the
- * quota endpoint — never hardcode either here. Either cap blocks. Optimistic
- * while the quota is still in flight; the server re-checks on apply anyway.
+ * Whether the worker may still apply. The cap comes from SystemConfig
+ * (`fees.max_daily_applications`) via the quota endpoint — never hardcode it
+ * here. Optimistic while the quota is still in flight; the server re-checks on
+ * apply anyway.
  */
 export function useCanApply() {
   const { data: quota, isLoading } = useDailyQuota();
-  const canApply =
-    quota == null
-      ? true
-      : quota.remaining > 0 && (quota.concurrent?.remaining ?? 1) > 0;
+  const canApply = quota == null ? true : quota.remaining > 0;
   return { canApply, quota, isLoading };
 }
 

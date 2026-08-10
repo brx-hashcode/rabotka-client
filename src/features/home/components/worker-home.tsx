@@ -111,14 +111,14 @@ export function WorkerHome() {
 
       <div className="flex gap-3 overflow-x-auto px-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {(() => {
-          if (!quota?.concurrent) {
+          // Guard on the quota itself, not on a nested field. It used to key
+          // off `quota.concurrent`, so removing that server-side would have
+          // left this skeleton on screen forever rather than failing visibly.
+          if (!quota) {
             return <Skeleton className="h-28 w-40 shrink-0 rounded-2xl" />;
           }
-          const qLimit = Math.min(quota.limit, quota.concurrent.limit);
-          const remaining = Math.min(
-            quota.remaining,
-            quota.concurrent.remaining,
-          );
+          const qLimit = quota.limit;
+          const remaining = quota.remaining;
           const used = Math.max(0, qLimit - remaining);
           const pct = qLimit ? Math.min(100, (used / qLimit) * 100) : 0;
 
