@@ -61,14 +61,15 @@ export type JobSearchParams = {
 
 export type JobSearchResponse = { items: JobFeedItem[]; total: number };
 
+// The daily cap is the only limit on applying. A concurrent open-application
+// cap used to sit alongside it and was the binding one, but nothing cleared it
+// on a clock — it freed only when an employer responded — so `resetsAt` was a
+// lie whenever it was the reason a worker could not apply. Removed backend-side.
 export type DailyQuota = {
   used: number;
   limit: number;
   remaining: number;
   resetsAt: string;
-  // Concurrent open-application slots. Usually the binding limit (3 slots vs
-  // 10/day), so this is what the UI surfaces as the remaining count.
-  concurrent: { used: number; limit: number; remaining: number };
 };
 
 type BackendJobFeedItem = {
