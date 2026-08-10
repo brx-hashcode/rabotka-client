@@ -60,8 +60,8 @@ export default function JobDetailWorker() {
   const dailyExhausted = quota != null && quota.remaining <= 0;
 
   // About the offer, not the worker — so it is checked first. Applying to a
-  // filled offer costs the worker one of only three concurrent slots and can
-  // never succeed.
+  // filled offer spends one of the worker's daily applications and can never
+  // succeed.
   const offerClosed = job ? isClosedToApplications(job) : false;
 
   let applyLabel = "Postuler";
