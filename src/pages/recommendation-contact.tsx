@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { UserRound } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   PaymentScreen,
   PaymentScreenSkeleton,
@@ -106,19 +107,33 @@ export default function RecommendationContact() {
   }
 
   return (
-    <PaymentScreen>
+    <PaymentScreen align="top">
       <PaymentMethodChooser
+        // The person, not a generic glyph. This screen asks for money to reach
+        // one specific worker, and their face is the most direct confirmation
+        // that it is the right one.
         icon={
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-whatsapp/10">
-            <UserRound className="h-6 w-6 text-whatsapp" />
-          </div>
+          <Avatar className="h-16 w-16 rounded-xl">
+            <AvatarImage
+              src={worker.avatarUrl ?? undefined}
+              alt=""
+              className="rounded-xl object-cover"
+            />
+            <AvatarFallback className="rounded-xl bg-whatsapp/10 text-whatsapp">
+              <UserRound className="h-6 w-6" />
+            </AvatarFallback>
+          </Avatar>
         }
         title="Débloquer le contact"
         description={
           <>
-            Réglez les frais pour recevoir les coordonnées de{" "}
-            <span className="font-medium text-foreground">{workerName}</span> par
-            WhatsApp.
+            <span className="block text-base font-bold text-foreground">
+              {workerName}
+            </span>
+            {worker.categoryName && (
+              <span className="block">{worker.categoryName}</span>
+            )}
+            Ses coordonnées vous seront envoyées par WhatsApp.
           </>
         }
         amount={data.recommendationFee}
@@ -129,6 +144,7 @@ export default function RecommendationContact() {
         onPayMobile={handlePayMobile}
         mobilePending={payMobile.isPending}
         onCancel={goBack}
+        note="Remboursé si le contact n'est pas confirmé."
       />
     </PaymentScreen>
   );
