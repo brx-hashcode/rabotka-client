@@ -31,8 +31,8 @@ type Props = {
  * the WhatsApp flow used to show.
  *
  * Applying is not a free action — it shares the worker's contact details with
- * the employer, holds one of their concurrent slots, and binds them to a
- * penalty if they cancel late. That has to be visible before they commit, not
+ * the employer, spends one of their applications for the day, and binds them to
+ * a penalty if they cancel late. That has to be visible before they commit, not
  * discovered afterwards.
  */
 export function ApplyConfirmDrawer({
