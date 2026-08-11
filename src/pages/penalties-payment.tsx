@@ -108,7 +108,7 @@ export default function PenaltiesPayment() {
   const plural = due.count > 1 ? "s" : "";
 
   return (
-    <PaymentScreen>
+    <PaymentScreen align="top">
       <PaymentMethodChooser
         icon={
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
