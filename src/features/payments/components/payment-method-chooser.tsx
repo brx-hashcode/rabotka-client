@@ -230,10 +230,17 @@ function MethodTile({
       disabled={disabled}
       onClick={onSelect}
       className={cn(
-        "flex h-full flex-col gap-2 rounded-xl p-3.5 text-left transition-colors disabled:opacity-50",
-        // The reference marks the active tile with a border; this app has none,
-        // so selection is carried by the tint plus the check badge.
-        selected ? "bg-whatsapp-light shadow-soft" : "bg-card shadow-soft",
+        // A deliberate exception to the app's borderless rule, asked for to
+        // match the reference: the active tile is outlined as well as tinted.
+        // Selection is the one state where tint alone is ambiguous — the light
+        // green is close enough to white on a dim screen to be missed.
+        //
+        // The unselected tile carries a TRANSPARENT border of the same width,
+        // so selecting does not shift the grid by a pixel.
+        "flex h-full flex-col gap-2 rounded-xl border p-3.5 text-left transition-colors disabled:opacity-50",
+        selected
+          ? "border-whatsapp bg-whatsapp-light shadow-soft"
+          : "border-transparent bg-card shadow-soft",
       )}
     >
       <div className="flex items-center justify-between gap-2">
