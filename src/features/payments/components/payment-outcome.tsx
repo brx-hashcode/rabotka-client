@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PaymentReceipt, type ReceiptRowData } from "./payment-receipt";
 
 
 export function PaymentSuccess({
@@ -8,11 +9,18 @@ export function PaymentSuccess({
   description,
   actionLabel,
   onAction,
+  receipt,
 }: Readonly<{
   title?: string;
   description?: React.ReactNode;
   actionLabel: string;
   onAction: () => void;
+  /**
+   * What was paid, as label/value rows. Optional: a penalty settlement has
+   * nothing useful to itemise, while an unlock is the thing people screenshot
+   * when the contact does not arrive.
+   */
+  receipt?: readonly ReceiptRowData[];
 }>) {
   return (
     <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
@@ -27,11 +35,16 @@ export function PaymentSuccess({
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       )}
 
-      <Button
-      variant="outline"
-      className="mt-8 w-full"
-        onClick={onAction}
-      >
+      {receipt && receipt.length > 0 && (
+        <div className="mt-6 w-full">
+          <PaymentReceipt rows={receipt} />
+        </div>
+      )}
+
+      {/* Solid, not `outline`. This is the only control on the screen, and the
+          pale tinted outline read as a disabled or secondary action — people
+          hesitated over the one thing they are meant to tap. */}
+      <Button variant="whatsapp" className="mt-8 w-full" onClick={onAction}>
         {actionLabel}
       </Button>
     </div>

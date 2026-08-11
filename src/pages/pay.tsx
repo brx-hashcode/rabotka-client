@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
+import { PaymentReceipt } from "@/features/payments";
 import type { PaymentGateway } from "@/lib/api/payment-controller";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
@@ -122,44 +123,46 @@ export default function Pay() {
           </p>
 
           {payment && (
-            <div className="mt-6 w-full text-left">
-              <h2 className="mb-2 text-sm font-bold text-foreground">
-                Détails du paiement
-              </h2>
-              {/* A receipt, not a restatement of the amount. This is the screen
-                  someone screenshots when a contact does not arrive, so it
-                  carries what support would ask for. Only fields the API
-                  actually returns — no invented transaction metadata. */}
-              <dl className="w-full space-y-2.5 rounded-xl bg-card px-4 py-3.5 shadow-soft">
-                <ReceiptRow
-                  label="Référence"
-                  value={payment.id.slice(0, 8).toUpperCase()}
-                />
-                {paidAt && (
-                  <ReceiptRow
-                    label="Date"
-                    value={paidAt.toLocaleString("fr-FR", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  />
-                )}
-                <ReceiptRow label="Moyen" value={methodLabel(payment.gateway, operator)} />
-                {typeof payment.amount === "number" && (
-                  <ReceiptRow
-                    label="Montant"
-                    value={`${payment.amount.toLocaleString("fr-FR")} FCFA`}
-                    emphasis
-                  />
-                )}
-                {payment.description && (
-                  <ReceiptRow label="Objet" value={payment.description} />
-                )}
-                <ReceiptRow label="Statut" value="Confirmé" tone="success" />
-              </dl>
+            <div className="mt-6 w-full">
+              <PaymentReceipt
+                rows={[
+                  {
+                    label: "Référence",
+                    value: payment.id.slice(0, 8).toUpperCase(),
+                  },
+                  ...(paidAt
+                    ? [
+                        {
+                          label: "Date",
+                          value: paidAt.toLocaleString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Moyen",
+                    value: methodLabel(payment.gateway, operator),
+                  },
+                  ...(typeof payment.amount === "number"
+                    ? [
+                        {
+                          label: "Montant",
+                          value: `${payment.amount.toLocaleString("fr-FR")} FCFA`,
+                          emphasis: true,
+                        },
+                      ]
+                    : []),
+                  ...(payment.description
+                    ? [{ label: "Objet", value: payment.description }]
+                    : []),
+                  { label: "Statut", value: "Confirmé", tone: "success" as const },
+                ]}
+              />
             </div>
           )}
 
@@ -451,37 +454,6 @@ function OperatorCard({
   );
 }
 
-/**
- * One line of the receipt. Label left, value right, wrapping on the value side
- * so a long description does not push the label off the row.
- */
-function ReceiptRow({
-  label,
-  value,
-  emphasis,
-  tone,
-}: Readonly<{
-  label: string;
-  value: string;
-  emphasis?: boolean;
-  tone?: "success";
-}>) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <dt className="shrink-0 text-xs text-muted-foreground">{label}</dt>
-      <dd
-        className={cn(
-          "min-w-0 text-right text-xs font-medium",
-          tone === "success" && "text-whatsapp",
-          emphasis && "text-sm font-bold",
-          !tone && "text-foreground",
-        )}
-      >
-        {value}
-      </dd>
-    </div>
-  );
-}
 
 /**
  * What the payer actually used, in their words.
