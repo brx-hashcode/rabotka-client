@@ -4,7 +4,7 @@ import heroImage from "@/assets/hero-image-1.avif?format=webp";
 import heroImageAvif from "@/assets/hero-image-1.avif";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
-import { config, whatsappLink } from "@/config";
+import { config } from "@/config";
 
 const flowGuides = [
   { label: "Guide travailleurs", href: "#flow-travailleurs" },
@@ -69,7 +69,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="lg" asChild>
                 <a
-                  href={whatsappLink(config.whatsapp.messages.worker)}
+                  href={config.whatsapp.links.worker}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -78,7 +78,7 @@ export function HeroSection() {
               </Button>
               <Button variant="hero-outline" size="lg" asChild>
                 <a
-                  href={whatsappLink(config.whatsapp.messages.employer)}
+                  href={config.whatsapp.links.employer}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
