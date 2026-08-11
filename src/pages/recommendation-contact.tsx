@@ -64,6 +64,22 @@ export default function RecommendationContact() {
               vous ont été envoyées par WhatsApp.
             </>
           }
+          // Same facts as the Mobile Money receipt, so it makes no difference
+          // which route the payment took when someone comes back to check.
+          receipt={[
+            { label: "Contact", value: workerName },
+            ...(typeof data?.recommendationFee === "number"
+              ? [
+                  {
+                    label: "Montant",
+                    value: `${data.recommendationFee.toLocaleString("fr-FR")} FCFA`,
+                    emphasis: true,
+                  },
+                ]
+              : []),
+            { label: "Moyen", value: "Portefeuille Rabotka" },
+            { label: "Statut", value: "Confirmé", tone: "success" as const },
+          ]}
           actionLabel="Retour à l'accueil"
           onAction={goBack}
         />
