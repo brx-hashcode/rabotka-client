@@ -2,7 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ctaContent } from "@/content/landing/cta";
-import { config, whatsappLink } from "@/config";
+import { config } from "@/config";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 
 export function CTASection() {
@@ -35,7 +35,7 @@ export function CTASection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button variant="hero" size="lg" className="group" asChild>
               <a
-                href={whatsappLink(config.whatsapp.messages.worker)}
+                href={config.whatsapp.links.worker}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -44,7 +44,7 @@ export function CTASection() {
             </Button>
             <Button variant="hero-outline" size="lg" className="group" asChild>
               <a
-                href={whatsappLink(config.whatsapp.messages.employer)}
+                href={config.whatsapp.links.employer}
                 target="_blank"
                 rel="noopener noreferrer"
               >
