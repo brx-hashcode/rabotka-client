@@ -311,25 +311,28 @@ export default function Pay() {
           </p>
         </div>
 
-        <div className="bg-card shadow-soft rounded-xl px-5 py-4 space-y-3">
+        {/* The one number on the screen that matters, so it gets a label and
+            the largest type rather than sitting unannounced under a long
+            description. The purpose moves below it: useful for confirming you
+            are on the right payment, but not the thing you read first. */}
+        <div className="rounded-xl bg-card px-5 py-4 shadow-soft">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Montant à payer
+          </p>
+          <p className="mt-1 text-4xl font-bold leading-none text-foreground">
+            {/* `!== null` was not enough: a response missing `amount`
+                entirely slipped through as undefined and took the whole
+                payment page down with it. */}
+            {typeof amount === "number" ? amount.toLocaleString("fr-FR") : "—"}
+            <span className="ml-1.5 text-base font-medium text-muted-foreground">
+              FCFA
+            </span>
+          </p>
           {description && (
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full">
-              <span>{description}</span>
-            </div>
-          )}
-          <div>
-            <p className="text-3xl font-bold text-foreground">
-              {/* `!== null` was not enough: a response missing `amount`
-                  entirely slipped through as undefined and took the whole
-                  payment page down with it. */}
-              {typeof amount === "number"
-                ? amount.toLocaleString("fr-FR")
-                : "—"}
-              <span className="text-base font-medium text-muted-foreground ml-2">
-                FCFA
-              </span>
+            <p className="mt-2.5 text-xs leading-snug text-muted-foreground">
+              {description}
             </p>
-          </div>
+          )}
         </div>
 
         {!isMtnMomo && (
