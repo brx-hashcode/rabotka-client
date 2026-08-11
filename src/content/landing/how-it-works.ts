@@ -21,7 +21,7 @@ export const howItWorksContent = {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
+          "Après validation, vous recevez un message WhatsApp. Envoyez « / » pour démarrer.",
       },
       {
         icon: MessageCircle,
@@ -57,7 +57,7 @@ export const howItWorksContent = {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
+          "Après validation, vous recevez un message WhatsApp. Envoyez « / » pour démarrer.",
       },
       {
         icon: MessageCircle,
