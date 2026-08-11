@@ -7,3 +7,7 @@ export {
   PaymentSuccess,
   PaymentNotice,
 } from "./components/payment-outcome";
+export {
+  PaymentReceipt,
+  type ReceiptRowData,
+} from "./components/payment-receipt";
