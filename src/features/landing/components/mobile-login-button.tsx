@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { config, whatsappLink } from "@/config";
+import { config } from "@/config";
 
 export const MobileLoginButton = () => {
   const { data: profile, isLoading } = useProfileMe();
@@ -47,7 +47,7 @@ export const MobileLoginButton = () => {
       asChild
     >
       <a
-        href={whatsappLink(config.whatsapp.messages.start)}
+        href={config.whatsapp.links.start}
         target="_blank"
         rel="noopener noreferrer"
       >

@@ -17,10 +17,23 @@ export const config = {
     links: {
       worker: "https://wa.me/message/U54TM7P5VLMBE1",
       employer: "https://wa.me/message/MZNTEVCDNUKDC1",
+      /**
+       * The header "Commencer" button. Points at the worker link on purpose:
+       * it is the same entry point, and the short link carries its own
+       * prefilled message, so there is nothing generic to send instead.
+       */
+      start: "https://wa.me/message/U54TM7P5VLMBE1",
     },
-    /** Still used where a prefilled message is built from a raw number. */
+    /**
+     * Still used where a prefilled message is built from a raw number — only
+     * the KYC support links now. `worker` and `employer` are kept because the
+     * short links above can be revoked in WhatsApp Manager, and these are what
+     * the CTAs fall back to.
+     *
+     * `start` was removed: the header button uses `links.start`, and a
+     * prefilled message nothing sends is a trap for the next reader.
+     */
     messages: {
-      start: "Commencer",
       worker: "Bonjour, je cherche du travail",
       employer: "Bonjour, je cherche un travailleur",
     },
