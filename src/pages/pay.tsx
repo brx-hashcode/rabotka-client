@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
+import type { PaymentGateway } from "@/lib/api/payment-controller";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
 import { getQueryClient } from "@/app/providers";
@@ -40,6 +41,7 @@ export default function Pay() {
   );
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
+  const [paidAt, setPaidAt] = useState<Date | null>(null);
 
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
     if (status === "APPROVED") {
@@ -59,6 +61,11 @@ export default function Pay() {
       getQueryClient().invalidateQueries({
         predicate: (query) => query.queryKey[0] !== "payment",
       });
+      // Stamped here rather than rendered from `new Date()` in the success
+      // branch: that re-evaluates on every render, so the receipt's time would
+      // drift forward while the screen sat open. The API returns no paidAt, so
+      // this is "when approval reached us", which is the honest claim.
+      setPaidAt(new Date());
       setLocalStatus("approved");
     } else if (status === "TIMEOUT") setLocalStatus("timeout");
     else setLocalStatus("rejected");
@@ -103,26 +110,56 @@ export default function Pay() {
           <h1 className="mt-6 text-2xl font-bold text-foreground">
             Paiement effectué !
           </h1>
+          {/* The amount belongs in the confirmation line, not only in the
+              receipt below: it is the one fact someone checks before they stop
+              reading. Optional chaining because this branch now runs even when
+              the payment query is in an error state — the socket is the
+              authority, and the confirmation does not depend on `data`. */}
           <p className="mt-1 text-sm text-muted-foreground">
-            Votre paiement a bien été confirmé.
+            {typeof payment?.amount === "number"
+              ? `Vous avez payé ${payment.amount.toLocaleString("fr-FR")} FCFA.`
+              : "Votre paiement a bien été confirmé."}
           </p>
 
-          {/* Optional chaining: this branch now runs even when the payment
-              query is in an error state, where `data` may be absent. The
-              confirmation above does not depend on it. */}
-          {typeof payment?.amount === "number" && (
-            <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
-              <p className="text-3xl font-bold text-foreground">
-                {payment.amount.toLocaleString("fr-FR")}
-                <span className="ml-2 text-base font-medium text-muted-foreground">
-                  FCFA
-                </span>
-              </p>
-              {payment.description && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {payment.description}
-                </p>
-              )}
+          {payment && (
+            <div className="mt-6 w-full text-left">
+              <h2 className="mb-2 text-sm font-bold text-foreground">
+                Détails du paiement
+              </h2>
+              {/* A receipt, not a restatement of the amount. This is the screen
+                  someone screenshots when a contact does not arrive, so it
+                  carries what support would ask for. Only fields the API
+                  actually returns — no invented transaction metadata. */}
+              <dl className="w-full space-y-2.5 rounded-xl bg-card px-4 py-3.5 shadow-soft">
+                <ReceiptRow
+                  label="Référence"
+                  value={payment.id.slice(0, 8).toUpperCase()}
+                />
+                {paidAt && (
+                  <ReceiptRow
+                    label="Date"
+                    value={paidAt.toLocaleString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  />
+                )}
+                <ReceiptRow label="Moyen" value={methodLabel(payment.gateway, operator)} />
+                {typeof payment.amount === "number" && (
+                  <ReceiptRow
+                    label="Montant"
+                    value={`${payment.amount.toLocaleString("fr-FR")} FCFA`}
+                    emphasis
+                  />
+                )}
+                {payment.description && (
+                  <ReceiptRow label="Objet" value={payment.description} />
+                )}
+                <ReceiptRow label="Statut" value="Confirmé" tone="success" />
+              </dl>
             </div>
           )}
 
@@ -412,4 +449,53 @@ function OperatorCard({
       </p>
     </button>
   );
+}
+
+/**
+ * One line of the receipt. Label left, value right, wrapping on the value side
+ * so a long description does not push the label off the row.
+ */
+function ReceiptRow({
+  label,
+  value,
+  emphasis,
+  tone,
+}: Readonly<{
+  label: string;
+  value: string;
+  emphasis?: boolean;
+  tone?: "success";
+}>) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <dt className="shrink-0 text-xs text-muted-foreground">{label}</dt>
+      <dd
+        className={cn(
+          "min-w-0 text-right text-xs font-medium",
+          tone === "success" && "text-whatsapp",
+          emphasis && "text-sm font-bold",
+          !tone && "text-foreground",
+        )}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+/**
+ * What the payer actually used, in their words.
+ *
+ * `operator` is only set when the page rendered the operator picker (Monetbil);
+ * an MTN MoMo payment never shows one, so fall back to the gateway. Neither is
+ * guaranteed, hence the last resort.
+ */
+function methodLabel(
+  gateway: PaymentGateway | null,
+  operator: Operator | null,
+): string {
+  if (gateway === "MTN_MOMO") return "MTN Mobile Money";
+  if (operator === "CG_MTNMOBILEMONEY") return "MTN Mobile Money";
+  if (operator === "CG_AIRTELMONEY") return "Airtel Money";
+  return "Mobile Money";
 }
