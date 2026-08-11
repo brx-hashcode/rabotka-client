@@ -297,7 +297,7 @@ export default function Pay() {
   const isMtnMomo = payment.gateway === "MTN_MOMO";
 
   return (
-    <PageWrapper>
+    <PageWrapper align="top">
       <div className="w-full max-w-sm space-y-5">
         <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
 
@@ -340,7 +340,13 @@ export default function Pay() {
             >
               Opérateur mobile
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            {/* A real radiogroup: these are one exclusive choice, and without
+                the role a screen reader announced two unrelated buttons. */}
+            <div
+              role="radiogroup"
+              aria-label="Opérateur mobile"
+              className="grid grid-cols-2 gap-2.5"
+            >
               <OperatorCard
                 label="MTN Mobile Money"
                 selected={operator === "CG_MTNMOBILEMONEY"}
@@ -358,15 +364,23 @@ export default function Pay() {
         )}
 
         {isMtnMomo && (
-          <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+          // Not a warning. This states which operator will be charged when
+          // there is no choice to make, so it gets the same card treatment as
+          // the tiles above rather than a bordered yellow alert box.
+          <div className="flex items-center gap-3 rounded-xl bg-card px-4 py-3 shadow-soft">
             <img
               src={mtnLogo}
-              alt="MTN"
-              className="h-8 w-8 rounded-full object-cover shrink-0"
+              alt=""
+              className="h-9 w-9 shrink-0 rounded-full object-cover"
             />
-            <p className="text-sm font-medium text-foreground">
-              MTN Mobile Money
-            </p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                MTN Mobile Money
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Confirmation sur votre téléphone
+              </p>
+            </div>
           </div>
         )}
 
@@ -412,9 +426,23 @@ export default function Pay() {
   );
 }
 
-function PageWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+function PageWrapper({
+  children,
+  align = "center",
+}: Readonly<{ children: React.ReactNode; align?: "center" | "top" }>) {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 overflow-hidden">
+    // The form is top-anchored: it opens with a logo and a heading, and on a
+    // tall phone geometric centring pushed those into the middle of the screen
+    // with a void above them. The terminal states stay centred, where a single
+    // message is the whole screen.
+    <div
+      className={cn(
+        "flex min-h-dvh flex-col overflow-hidden bg-background px-4",
+        align === "top"
+          ? "items-center justify-start pb-16 pt-8"
+          : "items-center justify-center py-12",
+      )}
+    >
       {children}
     </div>
   );
@@ -434,20 +462,37 @@ function OperatorCard({
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={selected}
       onClick={onClick}
       className={cn(
-        "rounded-xl px-4 py-3 text-left transition-all border-2",
+        // Matches the method tiles in PaymentMethodChooser: elevated card, a
+        // single-pixel accent border when active, and a check badge. Was
+        // `border-2` plus a `ring-2` halo with no shadow, which made the two
+        // operator cards the only outlined boxes in the payment flow — and the
+        // unselected `border-border` read as a washed-out disabled state.
+        "flex flex-col gap-2 rounded-xl border p-3.5 text-left transition-colors",
         selected
-          ? "border-primary ring-2 ring-primary/20"
-          : "border-border hover:border-muted-foreground/40",
+          ? "border-whatsapp bg-whatsapp-light shadow-soft"
+          : "border-transparent bg-card shadow-soft",
       )}
     >
-      <img
-        src={logo}
-        alt={label}
-        className="h-8 w-8 rounded-full mb-2 object-cover"
-      />
-      <p className="text-sm font-semibold text-foreground leading-tight">
+      <div className="flex items-center justify-between gap-2">
+        <img
+          src={logo}
+          alt=""
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+        <span
+          className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
+            selected ? "bg-whatsapp text-primary-foreground" : "bg-muted",
+          )}
+        >
+          {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+        </span>
+      </div>
+      <p className="text-sm font-semibold leading-tight text-foreground">
         {label}
       </p>
     </button>
