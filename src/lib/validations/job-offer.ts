@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  EMPLOYMENT_TYPE_VALUES,
-  requiresClosingDate,
-} from "@/lib/employment-type";
+import { EMPLOYMENT_TYPE_VALUES, isDatedMission } from "@/lib/employment-type";
 
 export const PAYMENT_FLOW_VALUES = ["HOURLY", "DAILY", "MONTHLY"] as const;
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
@@ -72,32 +69,35 @@ export const createJobOfferSchema = z.object({
    * blocked by an address it will never have.
    */
   .superRefine((data, ctx) => {
-    // The closing date is required for a MISSION and meaningless otherwise.
-    // Checked here rather than on the field because it is the only place that
-    // can see employmentType alongside it.
-    if (requiresClosingDate(data.employmentType)) {
-      if (!data.scheduledAt) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["scheduledAt"],
-          message: "La date de clôture est requise",
-        });
-      } else if (Number.isNaN(Date.parse(data.scheduledAt))) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["scheduledAt"],
-          message: "Date invalide",
-        });
-      } else if (
-        Date.parse(data.scheduledAt) <
-        Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["scheduledAt"],
-          message: "La date doit être au moins 4 heures dans le futur",
-        });
-      }
+    // Every type needs this date — it is the day the offer stops being open.
+    // Only what it *means* changes: the day of the work on a MISSION, the
+    // application deadline on the rest. Checked here rather than on the field
+    // because this is the only place that can see employmentType alongside it,
+    // and the message has to name the right one: asking for "la date de la
+    // mission" on a CDI is how you get an employer inventing one.
+    if (!data.scheduledAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["scheduledAt"],
+        message: isDatedMission(data.employmentType)
+          ? "La date de la mission est requise"
+          : "La date de clôture des candidatures est requise",
+      });
+    } else if (Number.isNaN(Date.parse(data.scheduledAt))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["scheduledAt"],
+        message: "Date invalide",
+      });
+    } else if (
+      Date.parse(data.scheduledAt) <
+      Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["scheduledAt"],
+        message: "La date doit être au moins 4 heures dans le futur",
+      });
     }
 
     if (data.isRemote) return;

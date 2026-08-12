@@ -75,14 +75,23 @@ export default function WorkerMissionDetail() {
     : true;
   const title = engaged ? "Détail de la mission" : "Détail de la candidature";
 
-  // Only a one-off gig is ever "finished". A CDI, CDD or stage is an ongoing
-  // engagement with no moment to confirm, and the API refuses it — so offering
-  // the action would just produce an error the worker cannot act on.
+  // Only a one-off gig is ever "finished" by its worker. A CDI, CDD or stage
+  // is ongoing — there is no moment the worker could confirm, and the API
+  // refuses it — so the two actions differ by type. On a MISSION this both
+  // completes and rates; on the others the employer already closed the offer by
+  // confirming the hire, and this rates only.
+  const completesOnRate =
+    !!mission && isCompletable(mission.jobOffer.employmentType);
+
   const canRate =
     !!mission &&
-    isCompletable(mission.jobOffer.employmentType) &&
     !mission.ratedEmployer &&
-    COMPLETABLE_STATUSES.has(mission.applicationStatus);
+    // A MISSION can be confirmed from ACCEPTED onward — that act is the
+    // confirmation. An ongoing engagement has nothing to confirm, so it is
+    // rateable only once the employer has closed it and the worker is at END.
+    (completesOnRate
+      ? COMPLETABLE_STATUSES.has(mission.applicationStatus)
+      : mission.applicationStatus === "END");
 
   const cancellable =
     !!mission && CANCELLABLE_STATUSES.has(mission.applicationStatus);
@@ -107,7 +116,10 @@ export default function WorkerMissionDetail() {
 
   const handleRate = (score: number) => {
     if (!id) return;
-    complete.mutate({ id, score }, { onSuccess: () => setRateOpen(false) });
+    complete.mutate(
+      { id, score, completes: completesOnRate },
+      { onSuccess: () => setRateOpen(false) },
+    );
   };
 
   return (
@@ -225,13 +237,18 @@ export default function WorkerMissionDetail() {
             />
           )}
 
-          {/* Action / rated state */}
+          {/* Action / rated state. The label has to match what the tap does:
+              on a MISSION it confirms the work is finished as well as rating,
+              on an ongoing engagement it only rates — the employer already
+              closed the offer. */}
           {canRate && (
             <Button
               className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
               onClick={() => setRateOpen(true)}
             >
-              Terminer & noter le recruteur
+              {completesOnRate
+                ? "Terminer & noter le recruteur"
+                : "Noter le recruteur"}
             </Button>
           )}
 
