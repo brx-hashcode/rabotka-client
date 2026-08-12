@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
-import { EMPLOYMENT_TYPE_LABELS, isCompletable } from "@/lib/employment-type";
+import { EMPLOYMENT_TYPE_LABELS, closesOnFill } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
@@ -28,12 +28,13 @@ import { useRepublishJobOffer } from "@/hooks/use-republish-job-offer";
 import { RepublishOfferDialog } from "@/features/employer/components/republish-offer-dialog";
 import { useDeleteJobOffer } from "@/hooks/use-delete-job-offer";
 import { useRateWorker } from "@/hooks/use-rate-worker";
+import { useConfirmHire } from "@/hooks/use-confirm-hire";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
 import {
   ScreenHeader,
   StatusChip,
-  JOB_STATUS_LABELS,
+  jobStatusLabel,
   JOB_STATUS_CHIP_CLASSES,
   PAYMENT_FLOW_LABELS,
   APPLICATION_STATUS_LABELS,
@@ -58,6 +59,8 @@ export default function MissionDetail() {
   const { mutate: republishOffer, isPending: isRepublishing } =
     useRepublishJobOffer();
   const rate = useRateWorker();
+  const { mutate: confirmHire, isPending: isConfirmingHire } =
+    useConfirmHire();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [republishOpen, setRepublishOpen] = useState(false);
   const [rateTarget, setRateTarget] = useState<JobOfferWorkerItem | null>(
@@ -82,11 +85,18 @@ export default function MissionDetail() {
   // a 400 saying the worker has not confirmed yet.
   const ratableWorkers =
     workers?.filter((w) => w.status === "END" && !w.ratedByEmployer) ?? [];
-  // A CDI/CDD/STAGE never completes, so no worker on one can reach END and
-  // there is nothing to rate. Gated explicitly rather than relying on that,
-  // so the button cannot reappear if the status rules change.
-  const ratable =
-    !!offer && isCompletable(offer.employmentType) && ratableWorkers.length > 0;
+  // No longer gated on the type. A CDD/CDI/STAGE reaches END too now — not by
+  // its worker confirming the work is done, which never happens on an ongoing
+  // engagement, but by this employer confirming the hire, which closes the
+  // offer. Reaching END is the only condition that ever mattered.
+  const ratable = !!offer && ratableWorkers.length > 0;
+
+  // An ongoing engagement stops recruiting once its positions are taken, and
+  // then waits on the employer to say the hire actually stuck. That is what
+  // closes it and opens the rating in both directions — so without this button
+  // the offer sits in FILLED and nobody can rate anyone.
+  const confirmable =
+    !!offer && offer.status === "FILLED" && closesOnFill(offer.employmentType);
   // Everyone rateable already has been — say so, rather than just showing an
   // empty space where the button used to be.
   const allRated =
@@ -152,7 +162,7 @@ export default function MissionDetail() {
               <StatusChip
                 className={cn("shrink-0", JOB_STATUS_CHIP_CLASSES[offer.status])}
               >
-                {JOB_STATUS_LABELS[offer.status] ?? offer.status}
+                {jobStatusLabel(offer.status, offer.employmentType)}
               </StatusChip>
             </div>
 
@@ -180,8 +190,30 @@ export default function MissionDetail() {
             )}
           </div>
 
-          {/* Rate the worker. The offer closes on its own once every hired
-              worker has confirmed — that is the worker's call, not this one. */}
+          {/* On an ongoing engagement the offer waits here: the positions are
+              taken, and only the employer can say the hire actually stuck.
+              Confirming closes the offer and opens the rating both ways. */}
+          {confirmable && (
+            <div className="bg-card space-y-3 rounded-xl px-4 py-4 shadow-soft">
+              <p className="text-sm text-muted-foreground">
+                Tous les postes sont pourvus. Confirmez l'embauche pour clôturer
+                l'offre et noter {offer.quantity > 1 ? "les" : "le"}{" "}
+                travailleur{offer.quantity > 1 ? "s" : ""}.
+              </p>
+              <Button
+                className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+                disabled={isConfirmingHire}
+                onClick={() => id && confirmHire(id)}
+              >
+                {isConfirmingHire ? "Confirmation…" : "Confirmer l'embauche"}
+              </Button>
+            </div>
+          )}
+
+          {/* Rate the worker. On a MISSION the offer closes on its own once
+              every hired worker has confirmed — that is the worker's call, not
+              this one. On the other types the confirmation above is what
+              closed it. */}
           {ratable && (
             <Button
               className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
