@@ -194,6 +194,19 @@ export default function JobDetailWorker() {
             </Section>
           )}
 
+          {/* The employer's extra instructions — meeting point, what to bring,
+              who to ask for. The API has always sent this; the client dropped
+              it in the mapping, so a worker turned up without ever seeing it.
+              Its own section rather than appended to the description: the
+              employer wrote it as a separate, practical note. */}
+          {job.note && (
+            <Section title="Précisions du recruteur">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+                {job.note}
+              </p>
+            </Section>
+          )}
+
           {/* Employer */}
           {job.employer && (
             <Section title="Recruteur">
