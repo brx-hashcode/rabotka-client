@@ -13,6 +13,7 @@ export type WorkerMissionEmployer = {
   firstName: string;
   lastName: string;
   reliabilityScore: number | null;
+  avatarUrl: string | null;
   ratingAvg: number | null;
   ratingCount: number;
 };
@@ -30,7 +31,13 @@ export type WorkerMission = {
     scheduledAt: string | null;
     employmentType: EmploymentTypeValue;
     amount: number | null;
-    address: string;
+    /** Null for a remote job, and for offers predating the address field. */
+    address: string | null;
+    isRemote: boolean;
+    city: string | null;
+    countryName: string | null;
+    /** The employer's free-text practical instructions. */
+    note: string | null;
     status: JobOfferStatus;
   };
   employer: WorkerMissionEmployer;
