@@ -4,6 +4,7 @@ export { JobOfferList } from "./components/job-offer-list";
 export { StatusChip } from "./components/status-chip";
 export {
   JOB_STATUS_LABELS,
+  jobStatusLabel,
   JOB_STATUS_CHIP_CLASSES,
   PAYMENT_FLOW_LABELS,
   APPLICATION_STATUS_LABELS,

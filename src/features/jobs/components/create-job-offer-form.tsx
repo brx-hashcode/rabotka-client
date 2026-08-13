@@ -32,7 +32,8 @@ import { getCategories } from "@/lib/api/job-category-controller";
 import {
   EMPLOYMENT_TYPE_LABELS,
   EMPLOYMENT_TYPE_VALUES,
-  requiresClosingDate,
+  scheduledAtLabel,
+  scheduledAtHelpText,
 } from "@/lib/employment-type";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
@@ -93,9 +94,6 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
   const isRemote = form.watch("isRemote");
   const employmentType = form.watch("employmentType");
-  // Only a one-off gig closes on a date. Asking a CDI for one would force the
-  // employer to invent it, which is what made a permanent role unpostable.
-  const needsClosingDate = requiresClosingDate(employmentType);
 
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
@@ -209,34 +207,33 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             )}
           />
 
-          {/* Only a one-off gig has a closing date. Hidden rather than
-              disabled for the others: a greyed-out field still reads as
-              something the employer failed to fill in. */}
-          {needsClosingDate && (
-            <FormField
-              control={form.control}
-              name="scheduledAt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date de clôture *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      min={minScheduledAt()}
-                      className="w-full min-w-0 max-w-full"
-                      disabled={isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    La date après laquelle l'offre n'accepte plus de
-                    candidatures (au moins 4 heures à l'avance).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          {/* Shown for every type — every offer has a day it stops being open.
+              Only the label changes, and that matters: this used to be hidden
+              on a CDI/CDD/stage, which left them with no date at all, and every
+              scan that retires or closes an offer keys off it. They could never
+              expire and never close. */}
+          <FormField
+            control={form.control}
+            name="scheduledAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    min={minScheduledAt()}
+                    className="w-full min-w-0 max-w-full"
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  {scheduledAtHelpText(employmentType)}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

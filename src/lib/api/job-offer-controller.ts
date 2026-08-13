@@ -416,6 +416,25 @@ class JobOfferController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  /**
+   * Backend: POST /profile/job-offers/:id/confirm-hire → close a CDD/CDI/STAGE
+   * offer whose positions are all taken, and open the mutual rating.
+   *
+   * Only for ongoing engagements: a MISSION is closed by its worker confirming
+   * the work is done. Requires the offer to be FILLED, so one still taking
+   * candidates cannot be closed early. Idempotent once closed — the server also
+   * closes these on its own if nobody confirms within a week.
+   */
+  async confirmHire(id: string): Promise<void> {
+    try {
+      await this.post<{ success: boolean }>(
+        `/profile/job-offers/${id}/confirm-hire`,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
 export const {
@@ -426,4 +445,5 @@ export const {
   getJobOfferApplications,
   create: createJobOffer,
   remove: deleteJobOffer,
+  confirmHire,
 } = new JobOfferController();

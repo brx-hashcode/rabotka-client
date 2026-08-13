@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { jobLocationDetail } from "@/lib/job-location";
+import { jobLocationDetail, REMOTE_LOCATION_LABEL } from "@/lib/job-location";
 import {
   EMPLOYMENT_TYPE_LABELS,
   isCompletable,
@@ -9,16 +9,19 @@ import {
   Calendar,
   Coins,
   FileText,
+  Globe,
   MapPin,
   Star,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorState } from "@/components/common/query-error-state";
 import { CompleteMissionDrawer } from "@/components/common/complete-mission-drawer";
 import { PdfDownloadLink } from "@/components/common/pdf-download-link";
 import { useWorkerMission } from "@/hooks/use-worker-mission";
+import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
 import { useCompleteWorkerMission } from "@/hooks/use-complete-worker-mission";
 import {
   useCancelWorkerMission,
@@ -59,6 +62,8 @@ export default function WorkerMissionDetail() {
     refetch,
   } = useWorkerMission(id);
   const complete = useCompleteWorkerMission();
+  // Who has paid which half — the mission itself cannot say.
+  const { data: unlock } = useWorkerUnlock(id);
   const [rateOpen, setRateOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const { mutate: cancelMission, isPending: isCancelling } =
@@ -75,22 +80,42 @@ export default function WorkerMissionDetail() {
     : true;
   const title = engaged ? "Détail de la mission" : "Détail de la candidature";
 
-  // Only a one-off gig is ever "finished". A CDI, CDD or stage is an ongoing
-  // engagement with no moment to confirm, and the API refuses it — so offering
-  // the action would just produce an error the worker cannot act on.
+  // Only a one-off gig is ever "finished" by its worker. A CDI, CDD or stage
+  // is ongoing — there is no moment the worker could confirm, and the API
+  // refuses it — so the two actions differ by type. On a MISSION this both
+  // completes and rates; on the others the employer already closed the offer by
+  // confirming the hire, and this rates only.
+  const completesOnRate =
+    !!mission && isCompletable(mission.jobOffer.employmentType);
+
   const canRate =
     !!mission &&
-    isCompletable(mission.jobOffer.employmentType) &&
     !mission.ratedEmployer &&
-    COMPLETABLE_STATUSES.has(mission.applicationStatus);
+    // A MISSION can be confirmed from ACCEPTED onward — that act is the
+    // confirmation. An ongoing engagement has nothing to confirm, so it is
+    // rateable only once the employer has closed it and the worker is at END.
+    (completesOnRate
+      ? COMPLETABLE_STATUSES.has(mission.applicationStatus)
+      : mission.applicationStatus === "END");
 
   const cancellable =
     !!mission && CANCELLABLE_STATUSES.has(mission.applicationStatus);
 
-  // The worker owes their half of the contact unlock. Without this the screen
-  // showed "Paiement requis" with no way to act on it.
+  // WAITING_PAYMENT means the *unlock* is incomplete, not that this worker
+  // still owes anything — the application sits there until both sides have
+  // paid. So the button has to key off the worker's own side, or someone who
+  // has already paid is invited to pay again and gets a 400 for it. The
+  // employer's screen has had this guard on `employerPaid` all along; the
+  // worker's never got the mirror image.
+  const workerPaid = unlock?.unlock?.workerPaid === true;
   const awaitingPayment =
-    !!mission && mission.applicationStatus === "WAITING_PAYMENT";
+    !!mission &&
+    mission.applicationStatus === "WAITING_PAYMENT" &&
+    !workerPaid;
+  const waitingOnEmployer =
+    !!mission &&
+    mission.applicationStatus === "WAITING_PAYMENT" &&
+    workerPaid;
 
   const handleCancel = (reason?: string) => {
     if (!id) return;
@@ -107,7 +132,10 @@ export default function WorkerMissionDetail() {
 
   const handleRate = (score: number) => {
     if (!id) return;
-    complete.mutate({ id, score }, { onSuccess: () => setRateOpen(false) });
+    complete.mutate(
+      { id, score, completes: completesOnRate },
+      { onSuccess: () => setRateOpen(false) },
+    );
   };
 
   return (
@@ -177,12 +205,33 @@ export default function WorkerMissionDetail() {
                 {formatDateTime(mission.jobOffer.scheduledAt)}
               </InfoRow>
             )}
-            <InfoRow
-              icon={<MapPin className="h-4 w-4 text-whatsapp" />}
-              label="Adresse"
-            >
-              {jobLocationDetail(mission.jobOffer)}
-            </InfoRow>
+            {/* A remote mission has no address to travel to, so it says so
+                rather than printing a placeholder where a street should be.
+                The rest of the location only started arriving with this change:
+                `is_remote`, `city` and `country_name` were not selected, so
+                `jobLocationDetail` had nothing but a null address to work with
+                and fell through to "Lieu non précisé" on every mission —
+                including remote ones and ones whose city we knew. */}
+            {mission.jobOffer.isRemote ? (
+              <InfoRow
+                icon={<Globe className="h-4 w-4 text-whatsapp" />}
+                label="Lieu"
+              >
+                <span className="font-medium text-foreground">
+                  {REMOTE_LOCATION_LABEL}
+                </span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Mission à distance — aucun déplacement.
+                </p>
+              </InfoRow>
+            ) : (
+              <InfoRow
+                icon={<MapPin className="h-4 w-4 text-whatsapp" />}
+                label="Adresse"
+              >
+                {jobLocationDetail(mission.jobOffer)}
+              </InfoRow>
+            )}
           </Section>
 
           {/* Description */}
@@ -194,26 +243,57 @@ export default function WorkerMissionDetail() {
             </Section>
           )}
 
-          {/* Employer */}
+          {/* The employer's practical instructions — meeting point, what to
+              bring, who to ask for. Its own section, as on the offer screen:
+              the employer wrote it separately from the description. */}
+          {mission.jobOffer.note && (
+            <Section title="Précisions du recruteur">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+                {mission.jobOffer.note}
+              </p>
+            </Section>
+          )}
+
+          {/* Employer. Laid out like the offer screen's card — this one showed
+              a bare name, because `avatar_url` was never selected server-side
+              and there was nothing to render. */}
           <Section title="Recruteur">
-            <p className="text-sm font-medium text-foreground">
-              {mission.employer.firstName} {mission.employer.lastName}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {mission.employer.ratingAvg != null && (
-                <span className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  {mission.employer.ratingAvg.toFixed(1)}
-                  {mission.employer.ratingCount > 0 &&
-                    ` (${mission.employer.ratingCount})`}
-                </span>
-              )}
-              {mission.employer.reliabilityScore != null && (
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="h-4 w-4 text-whatsapp" />
-                  Fiabilité {mission.employer.reliabilityScore}%
-                </span>
-              )}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                {mission.employer.avatarUrl && (
+                  <AvatarImage
+                    src={mission.employer.avatarUrl}
+                    alt={`${mission.employer.firstName} ${mission.employer.lastName}`}
+                    className="object-cover"
+                  />
+                )}
+                <AvatarFallback className="bg-muted text-sm font-semibold text-muted-foreground">
+                  {`${mission.employer.firstName?.[0] ?? ""}${
+                    mission.employer.lastName?.[0] ?? ""
+                  }`.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">
+                  {mission.employer.firstName} {mission.employer.lastName}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  {mission.employer.ratingAvg != null && (
+                    <span className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      {mission.employer.ratingAvg.toFixed(1)}
+                      {mission.employer.ratingCount > 0 &&
+                        ` (${mission.employer.ratingCount})`}
+                    </span>
+                  )}
+                  {mission.employer.reliabilityScore != null && (
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="h-4 w-4 text-whatsapp" />
+                      Fiabilité {mission.employer.reliabilityScore}%
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </Section>
 
@@ -225,13 +305,18 @@ export default function WorkerMissionDetail() {
             />
           )}
 
-          {/* Action / rated state */}
+          {/* Action / rated state. The label has to match what the tap does:
+              on a MISSION it confirms the work is finished as well as rating,
+              on an ongoing engagement it only rates — the employer already
+              closed the offer. */}
           {canRate && (
             <Button
               className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
               onClick={() => setRateOpen(true)}
             >
-              Terminer & noter le recruteur
+              {completesOnRate
+                ? "Terminer & noter le recruteur"
+                : "Noter le recruteur"}
             </Button>
           )}
 
@@ -249,6 +334,15 @@ export default function WorkerMissionDetail() {
             >
               Payer ma part et recevoir le contact
             </Button>
+          )}
+
+          {/* Already paid, waiting on the other side. Mirrors the employer's
+              screen, which has said this since it was built. */}
+          {waitingOnEmployer && (
+            <div className="rounded-xl bg-whatsapp/10 p-4 text-center text-sm text-muted-foreground">
+              Vous avez réglé votre part. Les coordonnées vous seront envoyées
+              par WhatsApp dès que le recruteur aura payé la sienne.
+            </div>
           )}
 
           {/* Withdraw — previously only possible over WhatsApp */}

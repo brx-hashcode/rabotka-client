@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
 import { Ban, Calendar, MapPin, Coins, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +41,9 @@ export default function ApplicationDetail() {
   // button stayed live and the failure only surfaced on the payment screen.
   const offerStatus = data?.application.jobOffer.status;
   const offerClosed = offerStatus ? isClosedToNewCandidates(offerStatus) : false;
+  // No employmentType on this endpoint's offer shape, so this falls back to the
+  // MISSION wording. Only reachable if the offer closes while an employer is
+  // looking at one of its applications, and the sentence is still true.
   const closedReason = offerStatus ? closedToCandidatesReason(offerStatus) : null;
 
   const pendingDecision =
@@ -311,9 +315,15 @@ const OfferCard = ({ app }: Readonly<{ app: ApplicationDetailApplication }>) => 
           {formatOfferAmount(app.jobOffer.amount)}
         </span>
       </p>
+      {/* An offer with no date shows its type, not a dash. `formatDate` returns
+          "—" for null, which on a labelled row reads as a value that failed to
+          load rather than one that was never meant to exist. Same fallback as
+          the offer cards on the dashboard and the applications list. */}
       <p className="flex items-center gap-2">
         <Calendar className="h-4 w-4" />
-        {formatDate(app.jobOffer.scheduledAt)}
+        {app.jobOffer.scheduledAt
+          ? formatDate(app.jobOffer.scheduledAt)
+          : EMPLOYMENT_TYPE_LABELS[app.jobOffer.employmentType]}
       </p>
       <p className="flex items-center gap-2">
         <MapPin className="h-4 w-4" />
