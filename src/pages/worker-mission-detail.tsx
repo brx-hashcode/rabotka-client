@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { jobLocationDetail } from "@/lib/job-location";
+import { jobLocationDetail, REMOTE_LOCATION_LABEL } from "@/lib/job-location";
 import {
   EMPLOYMENT_TYPE_LABELS,
   isCompletable,
@@ -9,11 +9,13 @@ import {
   Calendar,
   Coins,
   FileText,
+  Globe,
   MapPin,
   Star,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorState } from "@/components/common/query-error-state";
 import { CompleteMissionDrawer } from "@/components/common/complete-mission-drawer";
@@ -189,12 +191,33 @@ export default function WorkerMissionDetail() {
                 {formatDateTime(mission.jobOffer.scheduledAt)}
               </InfoRow>
             )}
-            <InfoRow
-              icon={<MapPin className="h-4 w-4 text-whatsapp" />}
-              label="Adresse"
-            >
-              {jobLocationDetail(mission.jobOffer)}
-            </InfoRow>
+            {/* A remote mission has no address to travel to, so it says so
+                rather than printing a placeholder where a street should be.
+                The rest of the location only started arriving with this change:
+                `is_remote`, `city` and `country_name` were not selected, so
+                `jobLocationDetail` had nothing but a null address to work with
+                and fell through to "Lieu non précisé" on every mission —
+                including remote ones and ones whose city we knew. */}
+            {mission.jobOffer.isRemote ? (
+              <InfoRow
+                icon={<Globe className="h-4 w-4 text-whatsapp" />}
+                label="Lieu"
+              >
+                <span className="font-medium text-foreground">
+                  {REMOTE_LOCATION_LABEL}
+                </span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Mission à distance — aucun déplacement.
+                </p>
+              </InfoRow>
+            ) : (
+              <InfoRow
+                icon={<MapPin className="h-4 w-4 text-whatsapp" />}
+                label="Adresse"
+              >
+                {jobLocationDetail(mission.jobOffer)}
+              </InfoRow>
+            )}
           </Section>
 
           {/* Description */}
@@ -206,26 +229,57 @@ export default function WorkerMissionDetail() {
             </Section>
           )}
 
-          {/* Employer */}
+          {/* The employer's practical instructions — meeting point, what to
+              bring, who to ask for. Its own section, as on the offer screen:
+              the employer wrote it separately from the description. */}
+          {mission.jobOffer.note && (
+            <Section title="Précisions du recruteur">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+                {mission.jobOffer.note}
+              </p>
+            </Section>
+          )}
+
+          {/* Employer. Laid out like the offer screen's card — this one showed
+              a bare name, because `avatar_url` was never selected server-side
+              and there was nothing to render. */}
           <Section title="Recruteur">
-            <p className="text-sm font-medium text-foreground">
-              {mission.employer.firstName} {mission.employer.lastName}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {mission.employer.ratingAvg != null && (
-                <span className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  {mission.employer.ratingAvg.toFixed(1)}
-                  {mission.employer.ratingCount > 0 &&
-                    ` (${mission.employer.ratingCount})`}
-                </span>
-              )}
-              {mission.employer.reliabilityScore != null && (
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="h-4 w-4 text-whatsapp" />
-                  Fiabilité {mission.employer.reliabilityScore}%
-                </span>
-              )}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                {mission.employer.avatarUrl && (
+                  <AvatarImage
+                    src={mission.employer.avatarUrl}
+                    alt={`${mission.employer.firstName} ${mission.employer.lastName}`}
+                    className="object-cover"
+                  />
+                )}
+                <AvatarFallback className="bg-muted text-sm font-semibold text-muted-foreground">
+                  {`${mission.employer.firstName?.[0] ?? ""}${
+                    mission.employer.lastName?.[0] ?? ""
+                  }`.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">
+                  {mission.employer.firstName} {mission.employer.lastName}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  {mission.employer.ratingAvg != null && (
+                    <span className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      {mission.employer.ratingAvg.toFixed(1)}
+                      {mission.employer.ratingCount > 0 &&
+                        ` (${mission.employer.ratingCount})`}
+                    </span>
+                  )}
+                  {mission.employer.reliabilityScore != null && (
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="h-4 w-4 text-whatsapp" />
+                      Fiabilité {mission.employer.reliabilityScore}%
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </Section>
 
