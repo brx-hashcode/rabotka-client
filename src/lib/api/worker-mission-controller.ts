@@ -83,6 +83,27 @@ class WorkerMissionController extends RabotkaBaseController {
   }
 
   /**
+   * Worker rates the employer (1–5) without confirming anything.
+   *
+   * For CDD/CDI/STAGE, where the worker never confirms: the employer closes the
+   * offer by confirming the hire, and `/complete` refuses these types outright.
+   * On a MISSION use `completeWorkerMission` — there, confirming is the point.
+   */
+  async rateWorkerMission(
+    id: string,
+    payload: { score: number },
+  ): Promise<void> {
+    try {
+      await this.post<{ success: boolean }>(
+        `/profile/worker/missions/${id}/rate`,
+        payload,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /**
    * Whether cancelling right now would cost the worker a penalty. Called before
    * showing the confirm dialog so the cost is never a surprise.
    */
@@ -150,6 +171,7 @@ export const {
   getWorkerMissions,
   getWorkerMission,
   completeWorkerMission,
+  rateWorkerMission,
   getCancellationPreview,
   cancelWorkerMission,
   getWorkerUnlock,
