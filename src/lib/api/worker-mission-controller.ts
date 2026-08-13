@@ -2,6 +2,43 @@ import { RabotkaBaseController } from "./base-controller";
 import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
+/**
+ * The worker's own side of a contact unlock.
+ *
+ * Both parties pay separately and the contacts are only released once both
+ * have — so `workerPaid` is the only thing that says whether *this* worker
+ * still owes anything. The application stays WAITING_PAYMENT until the other
+ * side pays too, which is not the same question.
+ *
+ * Declared here because it was referenced by three methods and defined
+ * nowhere, leaving them all as `Cannot find name` errors — which is how the
+ * mission screen came to offer "Payer ma part" to a worker who had paid.
+ */
+export type WorkerUnlockState = {
+  attemptId: string;
+  status: string;
+  workerFee: number;
+  walletBalance: number;
+  expiresAt: string | null;
+  employerPaid: boolean;
+  workerPaid: boolean;
+};
+
+/** What withdrawing right now would cost. Fetched before the confirm dialog. */
+export type CancellationPreview = {
+  wouldPenalize: boolean;
+  penaltyFcfa: number;
+  thresholdHours: number;
+  scoreDeduction: number;
+};
+
+/** What it actually cost. `penaltyAmount` is null when none was applied. */
+export type CancelResult = {
+  success: boolean;
+  penaltyApplied: boolean;
+  penaltyAmount: number | null;
+};
+
 export type WorkerMissionApplicationStatus =
   | "ACCEPTED"
   | "STARTED"
