@@ -19,6 +19,7 @@ import { QueryErrorState } from "@/components/common/query-error-state";
 import { CompleteMissionDrawer } from "@/components/common/complete-mission-drawer";
 import { PdfDownloadLink } from "@/components/common/pdf-download-link";
 import { useWorkerMission } from "@/hooks/use-worker-mission";
+import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
 import { useCompleteWorkerMission } from "@/hooks/use-complete-worker-mission";
 import {
   useCancelWorkerMission,
@@ -59,6 +60,8 @@ export default function WorkerMissionDetail() {
     refetch,
   } = useWorkerMission(id);
   const complete = useCompleteWorkerMission();
+  // Who has paid which half — the mission itself cannot say.
+  const { data: unlock } = useWorkerUnlock(id);
   const [rateOpen, setRateOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const { mutate: cancelMission, isPending: isCancelling } =
@@ -87,10 +90,21 @@ export default function WorkerMissionDetail() {
   const cancellable =
     !!mission && CANCELLABLE_STATUSES.has(mission.applicationStatus);
 
-  // The worker owes their half of the contact unlock. Without this the screen
-  // showed "Paiement requis" with no way to act on it.
+  // WAITING_PAYMENT means the *unlock* is incomplete, not that this worker
+  // still owes anything — the application sits there until both sides have
+  // paid. So the button has to key off the worker's own side, or someone who
+  // has already paid is invited to pay again and gets a 400 for it. The
+  // employer's screen has had this guard on `employerPaid` all along; the
+  // worker's never got the mirror image.
+  const workerPaid = unlock?.unlock?.workerPaid === true;
   const awaitingPayment =
-    !!mission && mission.applicationStatus === "WAITING_PAYMENT";
+    !!mission &&
+    mission.applicationStatus === "WAITING_PAYMENT" &&
+    !workerPaid;
+  const waitingOnEmployer =
+    !!mission &&
+    mission.applicationStatus === "WAITING_PAYMENT" &&
+    workerPaid;
 
   const handleCancel = (reason?: string) => {
     if (!id) return;
@@ -249,6 +263,15 @@ export default function WorkerMissionDetail() {
             >
               Payer ma part et recevoir le contact
             </Button>
+          )}
+
+          {/* Already paid, waiting on the other side. Mirrors the employer's
+              screen, which has said this since it was built. */}
+          {waitingOnEmployer && (
+            <div className="rounded-xl bg-whatsapp/10 p-4 text-center text-sm text-muted-foreground">
+              Vous avez réglé votre part. Les coordonnées vous seront envoyées
+              par WhatsApp dès que le recruteur aura payé la sienne.
+            </div>
           )}
 
           {/* Withdraw — previously only possible over WhatsApp */}
