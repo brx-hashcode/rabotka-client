@@ -1,4 +1,5 @@
 import type { JobOfferStatus } from "@/lib/api/job-offer-controller";
+import { closesOnFill } from "@/lib/employment-type";
 
 // Feminine agreement — a job posting is "une offre" / "une mission".
 export const JOB_STATUS_LABELS: Record<JobOfferStatus, string> = {
@@ -11,6 +12,24 @@ export const JOB_STATUS_LABELS: Record<JobOfferStatus, string> = {
   EXPIRED: "Expirée",
   CANCELLED: "Annulée",
 };
+
+/**
+ * The status label, corrected for what COMPLETED means on this type of offer.
+ *
+ * On a MISSION it means the work was done, and "Terminée" is right. On a
+ * CDD/CDI/STAGE it means recruiting is over and the employer confirmed the
+ * hire — the job itself is just beginning. Telling an employer their new
+ * permanent role is "Terminée" reads as though something went wrong.
+ */
+export function jobStatusLabel(
+  status: JobOfferStatus,
+  employmentType?: string | null,
+): string {
+  if (status === "COMPLETED" && closesOnFill(employmentType)) {
+    return "Pourvue";
+  }
+  return JOB_STATUS_LABELS[status] ?? status;
+}
 
 export function getJobStatusVariant(
   status: JobOfferStatus,
@@ -101,9 +120,16 @@ export function isClosedToApplications(offer: {
  */
 export function closedToCandidatesReason(
   status: JobOfferStatus,
+  employmentType?: string | null,
 ): string | null {
   if (status === "FILLED") return "Tous les postes de cette offre sont pourvus.";
-  if (status === "COMPLETED") return "Cette offre est terminée.";
+  if (status === "COMPLETED") {
+    // Same distinction as jobStatusLabel: "terminée" describes work that
+    // happened, which is not what closing an ongoing engagement means.
+    return closesOnFill(employmentType)
+      ? "Le recrutement pour cette offre est clôturé."
+      : "Cette offre est terminée.";
+  }
   if (status === "CANCELLED") return "Cette offre a été annulée.";
   return null;
 }

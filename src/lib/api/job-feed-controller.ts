@@ -28,6 +28,12 @@ export type JobFeedItem = {
   isRemote: boolean;
   city?: string | null;
   countryName?: string | null;
+  /**
+   * The employer's free-text extra instructions. Sent by the API all along but
+   * dropped here, so the worker never saw what they were being told about the
+   * job — meeting point, what to bring, who to ask for.
+   */
+  note: string | null;
   quantity: number;
   acceptedCount: number;
   createdAt: string;
@@ -93,6 +99,7 @@ type BackendJobFeedItem = {
   isRemote: boolean;
   city: string | null;
   countryName: string | null;
+  note: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;
@@ -127,6 +134,7 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     isRemote: o.isRemote,
     city: o.city,
     countryName: o.countryName,
+    note: o.note ?? null,
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,

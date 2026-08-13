@@ -2,6 +2,43 @@ import { RabotkaBaseController } from "./base-controller";
 import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
+/**
+ * The worker's own side of a contact unlock.
+ *
+ * Both parties pay separately and the contacts are only released once both
+ * have — so `workerPaid` is the only thing that says whether *this* worker
+ * still owes anything. The application stays WAITING_PAYMENT until the other
+ * side pays too, which is not the same question.
+ *
+ * Declared here because it was referenced by three methods and defined
+ * nowhere, leaving them all as `Cannot find name` errors — which is how the
+ * mission screen came to offer "Payer ma part" to a worker who had paid.
+ */
+export type WorkerUnlockState = {
+  attemptId: string;
+  status: string;
+  workerFee: number;
+  walletBalance: number;
+  expiresAt: string | null;
+  employerPaid: boolean;
+  workerPaid: boolean;
+};
+
+/** What withdrawing right now would cost. Fetched before the confirm dialog. */
+export type CancellationPreview = {
+  wouldPenalize: boolean;
+  penaltyFcfa: number;
+  thresholdHours: number;
+  scoreDeduction: number;
+};
+
+/** What it actually cost. `penaltyAmount` is null when none was applied. */
+export type CancelResult = {
+  success: boolean;
+  penaltyApplied: boolean;
+  penaltyAmount: number | null;
+};
+
 export type WorkerMissionApplicationStatus =
   | "ACCEPTED"
   | "STARTED"
@@ -13,6 +50,7 @@ export type WorkerMissionEmployer = {
   firstName: string;
   lastName: string;
   reliabilityScore: number | null;
+  avatarUrl: string | null;
   ratingAvg: number | null;
   ratingCount: number;
 };
@@ -30,7 +68,13 @@ export type WorkerMission = {
     scheduledAt: string | null;
     employmentType: EmploymentTypeValue;
     amount: number | null;
-    address: string;
+    /** Null for a remote job, and for offers predating the address field. */
+    address: string | null;
+    isRemote: boolean;
+    city: string | null;
+    countryName: string | null;
+    /** The employer's free-text practical instructions. */
+    note: string | null;
     status: JobOfferStatus;
   };
   employer: WorkerMissionEmployer;
@@ -75,6 +119,27 @@ class WorkerMissionController extends RabotkaBaseController {
     try {
       await this.post<{ success: boolean }>(
         `/profile/worker/missions/${id}/complete`,
+        payload,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /**
+   * Worker rates the employer (1–5) without confirming anything.
+   *
+   * For CDD/CDI/STAGE, where the worker never confirms: the employer closes the
+   * offer by confirming the hire, and `/complete` refuses these types outright.
+   * On a MISSION use `completeWorkerMission` — there, confirming is the point.
+   */
+  async rateWorkerMission(
+    id: string,
+    payload: { score: number },
+  ): Promise<void> {
+    try {
+      await this.post<{ success: boolean }>(
+        `/profile/worker/missions/${id}/rate`,
         payload,
       );
     } catch (error) {
@@ -150,6 +215,7 @@ export const {
   getWorkerMissions,
   getWorkerMission,
   completeWorkerMission,
+  rateWorkerMission,
   getCancellationPreview,
   cancelWorkerMission,
   getWorkerUnlock,
