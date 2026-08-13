@@ -40,6 +40,9 @@ export default function ApplicationDetail() {
   // button stayed live and the failure only surfaced on the payment screen.
   const offerStatus = data?.application.jobOffer.status;
   const offerClosed = offerStatus ? isClosedToNewCandidates(offerStatus) : false;
+  // No employmentType on this endpoint's offer shape, so this falls back to the
+  // MISSION wording. Only reachable if the offer closes while an employer is
+  // looking at one of its applications, and the sentence is still true.
   const closedReason = offerStatus ? closedToCandidatesReason(offerStatus) : null;
 
   const pendingDecision =

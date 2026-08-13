@@ -5,7 +5,7 @@ import { cn, formatDate, formatOfferAmount } from "@/lib/utils";
 import type { EmployerJobOfferItem } from "@/lib/api/job-offer-controller";
 import { StatusChip } from "./status-chip";
 import {
-  JOB_STATUS_LABELS,
+  jobStatusLabel,
   JOB_STATUS_CHIP_CLASSES,
   PAYMENT_FLOW_LABELS,
 } from "../config/job-status";
@@ -33,7 +33,7 @@ export function JobOfferCard({ offer, onClick }: Readonly<JobOfferCardProps>) {
           {offer.title}
         </h3>
         <StatusChip className={cn("shrink-0", JOB_STATUS_CHIP_CLASSES[offer.status])}>
-          {JOB_STATUS_LABELS[offer.status] ?? offer.status}
+          {jobStatusLabel(offer.status, offer.employmentType)}
         </StatusChip>
       </div>
 
