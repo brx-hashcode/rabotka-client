@@ -174,11 +174,20 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             )}
           />
 
+          {/* Hidden, not removed.
+              Rabotka is not yet authorised to recruit on anything but a
+              one-off mission, so an employer must not be able to pick CDD, CDI
+              or stage. The field stays mounted and registered on the form so it
+              keeps submitting its default of MISSION — unregistering it would
+              send no employment_type at all, and the backend would then apply
+              its own MISSION default, which happens to agree today but is a
+              coincidence rather than this decision.
+              To restore: delete the `hidden` class below. Nothing else. */}
           <FormField
             control={form.control}
             name="employmentType"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="hidden">
                 <FormLabel>Type de contrat *</FormLabel>
                 <Select
                   onValueChange={field.onChange}
