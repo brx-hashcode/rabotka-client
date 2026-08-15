@@ -181,7 +181,7 @@ export function RealizationFormSheet({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea rows={4} placeholder="Décrivez le travail réalisé." {...field} />
+                    <Textarea rows={4} placeholder="Décrivez la mission réalisée." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
