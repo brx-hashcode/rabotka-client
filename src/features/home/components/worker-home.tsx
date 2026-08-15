@@ -16,6 +16,8 @@ import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
 import { SponsoredCard } from "@/features/sponsored/sponsored-card";
 import { interleaveAds } from "@/features/sponsored/interleave";
 import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
@@ -69,6 +71,7 @@ export function WorkerHome() {
   const { data: jobs, isLoading, isFetching } = useJobFeed(limit, categoryId);
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
   const list = jobs ?? NO_JOBS;
   const canLoadMore = isFetching || list.length >= limit;
@@ -199,9 +202,13 @@ export function WorkerHome() {
         </div>
       )}
 
-      {blocked && reason && (
+      {(accountBlocked || blocked) && (
         <div className="px-4 pb-2">
-          <KycNotice reason={reason} />
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} />
+          ) : (
+            reason && <KycNotice reason={reason} />
+          )}
         </div>
       )}
 
