@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { profileTypeContent } from "@/content/onboarding";
+import { matchesSearch } from "@/lib/search";
 import { StepIndicator } from "./step-indicator";
 import {
   getCategories,
@@ -160,10 +161,12 @@ export function ProfileTypeForm({
             render={({ field, fieldState }) => {
               const selected: string[] = field.value ?? [];
               const atMax = selected.length >= MAX_CATEGORIES;
-              const query = categorySearch.trim().toLowerCase();
-              const filteredCategories = query
-                ? categories.filter((c) => c.name.toLowerCase().includes(query))
-                : categories;
+              // Folded, so "maraichage" finds "Agriculture & Maraîchage" —
+              // lower-casing alone left every accented domain unreachable by
+              // the spelling people type. Same helper the comboboxes use.
+              const filteredCategories = categories.filter((c) =>
+                matchesSearch(categorySearch, c.name),
+              );
 
               const toggle = (id: string) => {
                 if (selected.includes(id)) {

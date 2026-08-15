@@ -18,6 +18,8 @@ import { QueryErrorState } from "@/components/common/query-error-state";
 import { isNetworkError, serverMessage } from "@/lib/api/errors";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycPaymentScreen } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountPaymentScreen } from "@/features/account";
 
 const BACK_TO = "/home";
 
@@ -30,6 +32,9 @@ export default function RecommendationContact() {
   const payMobile = usePayRecommendationMobile(workerId);
 
   const { blocked, reason } = useKycGate();
+  // Checked before KYC below: a suspended employer must not reach a payment
+  // screen at all, and this route is reachable directly by URL.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const [paid, setPaid] = useState(false);
   const goBack = () => navigate(BACK_TO);
 
@@ -49,6 +54,14 @@ export default function RecommendationContact() {
 
   // Ahead of every other branch: this route is reachable by direct URL, so the
   // gate has to cover the page, not just the pay buttons.
+  //
+  // Account before KYC — a suspension is the more severe problem and has a
+  // different remedy, so telling a suspended employer to finish their KYC
+  // would send them down a road that ends nowhere.
+  if (accountBlocked && accountReason) {
+    return <AccountPaymentScreen reason={accountReason} backTo={BACK_TO} />;
+  }
+
   if (blocked && reason) {
     return <KycPaymentScreen reason={reason} backTo={BACK_TO} />;
   }

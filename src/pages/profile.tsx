@@ -26,6 +26,7 @@ import {
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
+import { SupportContactButton } from "@/features/support";
 import { useEffect } from "react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
 import { cn } from "@/lib/utils";
@@ -297,7 +298,15 @@ export default function Profile() {
               onClick={() => navigate("/portefeuille")}
             />
             <InvoicesSheetButton asRow />
+            <SupportContactButton asRow />
           </div>
+
+          {/* Last thing on the screen, deliberately quiet. It exists so a
+              support conversation can start with "which version?" and get an
+              answer, not as information anyone browses for. */}
+          <p className="pb-2 text-center text-xs text-muted-foreground">
+            Rabotka v{__APP_VERSION__}
+          </p>
         </div>
       </div>
     </div>
