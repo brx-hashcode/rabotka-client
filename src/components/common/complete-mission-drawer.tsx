@@ -74,7 +74,7 @@ export function CompleteMissionDrawer({
                   id="mission-note"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Un mot sur le travail réalisé…"
+                  placeholder="Un mot sur la mission réalisée…"
                   rows={3}
                   maxLength={500}
                   disabled={isPending}
