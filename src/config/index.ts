@@ -41,7 +41,21 @@ export const config = {
 };
 
 export function whatsappLink(message: string): string {
-  return `https://wa.me/${config.whatsapp.phoneNumber}?text=${encodeURIComponent(
-    message,
-  )}`;
+  return whatsappLinkTo(config.whatsapp.phoneNumber, message);
+}
+
+/**
+ * Same link, against a number decided at runtime — the support number comes
+ * from SystemConfig (`contact.phone`), which an admin can change without a
+ * deploy.
+ *
+ * The number is stripped to digits because that is what wa.me accepts: an admin
+ * typing «+242 06 000 0000» would otherwise produce a 404 link. An empty or
+ * digit-less value falls back to the build-time number rather than linking to
+ * `wa.me/` with no recipient.
+ */
+export function whatsappLinkTo(phone: string, message: string): string {
+  const digits = phone.replace(/\D/g, "");
+  const target = digits || config.whatsapp.phoneNumber;
+  return `https://wa.me/${target}?text=${encodeURIComponent(message)}`;
 }

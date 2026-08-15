@@ -6,7 +6,6 @@ import {
   Calendar,
   MapPin,
   Coins,
-  Users,
   Hash,
   StickyNote,
   RefreshCw,
@@ -26,11 +25,14 @@ import { useJobOffer } from "@/hooks/use-job-offer";
 import { useJobOfferApplications } from "@/hooks/use-job-offer-applications";
 import { useRepublishJobOffer } from "@/hooks/use-republish-job-offer";
 import { RepublishOfferDialog } from "@/features/employer/components/republish-offer-dialog";
+import { SeatsRadial } from "@/features/employer/components/seats-radial";
 import { useDeleteJobOffer } from "@/hooks/use-delete-job-offer";
 import { useRateWorker } from "@/hooks/use-rate-worker";
 import { useConfirmHire } from "@/hooks/use-confirm-hire";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
 import {
   ScreenHeader,
   StatusChip,
@@ -108,6 +110,10 @@ export default function MissionDetail() {
   // Republishing puts a live offer back on the market, so it needs the same KYC
   // gate as creating one — otherwise it is a way around /job-offers/new.
   const { blocked: kycBlocked, reason: kycReason } = useKycGate();
+  // …and the account gate too: the server refused a suspended employer here
+  // only after this button was pressed, and until now not even then.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
+  const cannotRepublish = accountBlocked || kycBlocked;
   const republishable = !!offer && offer.status === "EXPIRED";
 
   const handleDelete = () => {
@@ -167,26 +173,11 @@ export default function MissionDetail() {
             </div>
 
             {offer.status !== "COMPLETED" && (
-              <div className="mt-3 flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-whatsapp transition-all"
-                    style={{
-                      width: `${
-                        offer.quantity > 0
-                          ? Math.round(
-                              (offer.acceptedCount / offer.quantity) * 100,
-                            )
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-                <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
-                  {offer.acceptedCount}/{offer.quantity} postes
-                </span>
-              </div>
+              <SeatsRadial
+                className="mt-3"
+                filled={offer.acceptedCount}
+                total={offer.quantity}
+              />
             )}
           </div>
 
@@ -327,14 +318,20 @@ export default function MissionDetail() {
           )}
 
           {/* Republish — the expiry notification's action, now on web too */}
-          {republishable && kycBlocked && kycReason && (
-            <KycNotice reason={kycReason} />
+          {republishable && cannotRepublish && (
+            <>
+              {accountBlocked && accountReason ? (
+                <AccountNotice reason={accountReason} />
+              ) : (
+                kycReason && <KycNotice reason={kycReason} />
+              )}
+            </>
           )}
           {republishable && (
             <Button
               variant="outline"
               className="w-full"
-              disabled={kycBlocked}
+              disabled={cannotRepublish}
               onClick={() => setRepublishOpen(true)}
             >
               <RefreshCw className="mr-2 h-4 w-4" />

@@ -17,6 +17,8 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { kycShortLabel } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { accountShortLabel } from "@/features/account";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
@@ -37,6 +39,9 @@ export function JobCard({ job, canApply }: Props) {
   // Deliberately separate from `canApply` — a daily quota and an unverified
   // identity are different problems with different remedies.
   const { blocked, reason } = useKycGate();
+  // Separate again from the KYC gate: a suspended account is not an unverified
+  // one, and it is the more severe of the two — so it wins the label below.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
   const flowLabel = PAYMENT_FLOW_LABELS[job.paymentFlow] ?? "";
   const hasAmount = job.amount != null && job.amount !== 0;
@@ -49,6 +54,8 @@ export function JobCard({ job, canApply }: Props) {
   let applyLabel = "Postuler";
   if (job.applied) applyLabel = "Déjà postulé";
   else if (offerClosed) applyLabel = "Offre pourvue";
+  else if (accountBlocked && accountReason)
+    applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (!canApply) applyLabel = "Limite atteinte";
 
@@ -124,7 +131,12 @@ export function JobCard({ job, canApply }: Props) {
       <Button
         className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
         disabled={
-          job.applied || offerClosed || !canApply || blocked || apply.isPending
+          job.applied ||
+          offerClosed ||
+          !canApply ||
+          blocked ||
+          accountBlocked ||
+          apply.isPending
         }
         onClick={() => setConfirmOpen(true)}
       >
