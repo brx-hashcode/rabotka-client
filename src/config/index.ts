@@ -34,7 +34,7 @@ export const config = {
      * prefilled message nothing sends is a trap for the next reader.
      */
     messages: {
-      worker: "Bonjour, je cherche du travail",
+      worker: "Bonjour, je cherche une mission",
       employer: "Bonjour, je cherche un travailleur",
     },
   },
