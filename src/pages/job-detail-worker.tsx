@@ -36,6 +36,8 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice, accountShortLabel } from "@/features/account";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function JobDetailWorker() {
@@ -53,6 +55,9 @@ export default function JobDetailWorker() {
   const region = job ? jobLocationRegion(job) : null;
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
+  // A suspended (or banned, or not-yet-activated) account keeps every read on
+  // this screen — it only loses the apply button.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const apply = useApplyToJob();
   const toggleSave = useToggleSaveJob();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -67,6 +72,8 @@ export default function JobDetailWorker() {
   let applyLabel = "Postuler";
   if (job?.applied) applyLabel = "Déjà postulé";
   else if (offerClosed) applyLabel = "Offre pourvue";
+  else if (accountBlocked && accountReason)
+    applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (dailyExhausted) applyLabel = "Limite quotidienne atteinte";
   else if (!canApply) applyLabel = "Trop de candidatures en cours";
@@ -250,7 +257,14 @@ export default function JobDetailWorker() {
             </Section>
           )}
 
-          {blocked && reason && <KycNotice reason={reason} className="mb-3" />}
+          {/* One banner, not two: the account status is the blocking problem
+              whenever both apply — clearing KYC changes nothing while the
+              account is suspended. */}
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} className="mb-3" />
+          ) : (
+            blocked && reason && <KycNotice reason={reason} className="mb-3" />
+          )}
 
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
@@ -259,6 +273,7 @@ export default function JobDetailWorker() {
               offerClosed ||
               !canApply ||
               blocked ||
+              accountBlocked ||
               apply.isPending
             }
             onClick={() => setConfirmOpen(true)}

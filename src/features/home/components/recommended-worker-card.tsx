@@ -3,7 +3,9 @@ import { useNavigate } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useKycGate } from "@/hooks/use-kyc-gate";
+import { useAccountGate } from "@/hooks/use-account-gate";
 import { kycShortLabel } from "@/features/kyc";
+import { accountShortLabel } from "@/features/account";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
 
@@ -14,10 +16,22 @@ export function RecommendedWorkerCard({
   // Read here rather than threaded in as a prop: a free cache read, and the
   // same treatment job-card gives the worker's apply button.
   const { blocked, reason } = useKycGate();
+  // The employer half of the same pair job-card already applies on the worker
+  // half. Without it a suspended employer saw a live "Contacter" and only
+  // found out at the payment step — this button spends wallet credit.
+  // The more severe of the two, so it wins the label.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const initials =
     `${worker.firstName?.[0] ?? ""}${worker.lastName?.[0] ?? ""}`.toUpperCase();
   const aiScore = Math.round(worker.score * 100);
+
+  // Same precedence job-card uses for the apply button: account first, then
+  // KYC. A suspension is the more severe problem and has a different remedy.
+  let contactLabel = "Contacter";
+  if (accountBlocked && accountReason)
+    contactLabel = accountShortLabel(accountReason);
+  else if (blocked && reason) contactLabel = kycShortLabel(reason);
 
   return (
     <div className="flex h-full flex-col rounded-xl bg-card p-4 shadow-soft">
@@ -81,10 +95,10 @@ export function RecommendedWorkerCard({
       */}
       <Button
         className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-        disabled={blocked}
+        disabled={blocked || accountBlocked}
         onClick={() => setConfirmOpen(true)}
       >
-        {blocked && reason ? kycShortLabel(reason) : "Contacter"}
+        {contactLabel}
       </Button>
 
       <ContactConfirmDrawer
