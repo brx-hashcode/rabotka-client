@@ -10,6 +10,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { foldedCommandFilter } from "@/lib/search";
 
 export type ComboboxOption = { id: string; name: string };
 
@@ -87,7 +88,14 @@ export function CategoryCombobox({
           // all and sat narrower than the field that opened it.
           className="z-50 w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
-          <Command shouldFilter={!controlledSearch}>
+          {/* `filter` rather than cmdk's default: its built-in scorer compares
+              raw code points, so typing "maraichage" scored 0 against
+              "Agriculture & Maraîchage" and the option disappeared. Ignored
+              when the parent owns the search (cities), which folds already. */}
+          <Command
+            shouldFilter={!controlledSearch}
+            filter={foldedCommandFilter}
+          >
             <CommandInput
               placeholder="Rechercher…"
               value={controlledSearch ? search : undefined}

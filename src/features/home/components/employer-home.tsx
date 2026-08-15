@@ -18,6 +18,10 @@ import { RecommendedWorkerCard } from "./recommended-worker-card";
 import { SponsoredCard } from "@/features/sponsored/sponsored-card";
 import { interleaveAds } from "@/features/sponsored/interleave";
 import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { AccountNotice } from "@/features/account";
+import { KycNotice } from "@/features/kyc";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
@@ -30,6 +34,8 @@ export function EmployerHome() {
   const navigate = useNavigate();
   const [limit, setLimit] = useState(INITIAL_LIMIT);
   const { data: workers, isLoading, isFetching } = useWorkerFeed(limit);
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
+  const { blocked, reason } = useKycGate();
 
   const list = workers ?? NO_WORKERS;
   // Keep the button visible while a larger page is being fetched (the pending
@@ -71,6 +77,25 @@ export function EmployerHome() {
             <Plus className="mr-2 h-4 w-4" />
             Créer une offre
           </Button>
+        </div>
+      )}
+
+      {/* Directly above the feed it governs, the same placement worker-home
+          uses. Higher up it sat between the search bar and "Créer une offre"
+          and read as a page-level banner; here it reads as the reason the
+          Contacter buttons below are dead. Same precedence too: account
+          outranks KYC. */}
+      {(accountBlocked || blocked) && (
+        // `pt-3` matches QuickActions' own top padding, which has no bottom
+        // padding of its own — without it the notice sits flush against the
+        // shortcut cards. Nothing below: the section that follows brings its
+        // own `py-4`.
+        <div className="px-4 pt-3">
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} />
+          ) : (
+            reason && <KycNotice reason={reason} />
+          )}
         </div>
       )}
 
