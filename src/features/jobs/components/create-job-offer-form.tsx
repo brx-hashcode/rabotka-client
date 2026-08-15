@@ -162,7 +162,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 <FormLabel>Description *</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Décrivez précisément le travail à réaliser."
+                    placeholder="Décrivez précisément la mission à réaliser."
                     rows={5}
                     maxLength={1000}
                     disabled={isPending}
@@ -273,7 +273,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                     Mission en ligne
                   </FormLabel>
                   <FormDescription>
-                    Le travail se fait à distance : aucune adresse n'est
+                    La mission se fait à distance : aucune adresse n'est
                     demandée.
                   </FormDescription>
                 </div>
