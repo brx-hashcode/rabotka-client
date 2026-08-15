@@ -8,7 +8,7 @@ export const kycDocumentsContent = {
       worker: "Travailleur",
       employer: "Recruteur",
     },
-    helperText: "Simplifiez le travail à employer !",
+    helperText: "Simplifiez le recrutement !",
   },
   documentType: {
     label: "Type de document",

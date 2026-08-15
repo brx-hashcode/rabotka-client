@@ -25,7 +25,7 @@ export const howItWorksContent = {
       },
       {
         icon: MessageCircle,
-        title: "Postulez aux offres d'emploi",
+        title: "Postulez aux missions",
         description:
           "Parcourez les missions disponibles, recevez des offres recommandées selon votre profil, ou retrouvez une offre précise grâce à sa référence.",
       },
