@@ -3,7 +3,7 @@ import type { Feature } from "@/types";
 
 export const whatIsRabotkaContent = {
   badge: "Qu'est-ce que Rabotka",
-  title: "Votre assistant emploi personnel",
+  title: "Votre assistant missions personnel",
   description:
     "Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les recruteurs à une aide de confiance, le tout via WhatsApp.",
   features: [
@@ -14,7 +14,7 @@ export const whatIsRabotkaContent = {
     },
     {
       icon: Bot,
-      title: "Associe emplois et compétences",
+      title: "Associe missions et compétences",
       description: "Matching intelligent par IA",
     },
     {

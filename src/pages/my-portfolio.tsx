@@ -68,7 +68,7 @@ export default function MyPortfolio() {
         {!itemsLoading && items.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
             <p className="text-muted-foreground text-sm">
-              Vous n'avez pas encore de réalisation. Montrez votre travail pour
+              Vous n'avez pas encore de réalisation. Montrez vos missions pour
               inspirer confiance aux recruteurs.
             </p>
             <Button onClick={() => setCreateOpen(true)} variant="outline">
