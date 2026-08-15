@@ -1,5 +1,6 @@
 import type { ComboboxOption } from "@/components/common/category-combobox";
 import type { Country } from "@/lib/api/geo-controller";
+import { fold } from "@/lib/search";
 
 export const countryCityLabels = {
   country: { label: "Pays", placeholder: "Choisir un pays" },
@@ -74,15 +75,6 @@ export function filterCities(
     options: matches.map((name) => ({ id: name, name })),
     truncated: Math.max(0, (q ? countMatches(all, q) : all.length) - limit),
   };
-}
-
-/** Lower-cased and stripped of diacritics, so "Béthune" matches "bethune". */
-function fold(value: string): string {
-  return value
-    .trim()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
 }
 
 function countMatches(all: readonly string[], q: string): number {

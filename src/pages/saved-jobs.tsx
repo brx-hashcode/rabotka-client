@@ -6,6 +6,8 @@ import { ScreenHeader } from "@/features/employer";
 import { JobCard } from "@/features/home/components/job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
 import { useSavedJobs, useCanApply } from "@/hooks/use-jobs";
 
 export default function SavedJobs() {
@@ -14,6 +16,7 @@ export default function SavedJobs() {
     useSavedJobs();
   const { canApply } = useCanApply();
   const { blocked, reason } = useKycGate();
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
   const jobs = data?.pages.flatMap((p) => p.items) ?? [];
 
@@ -22,7 +25,11 @@ export default function SavedJobs() {
       <ScreenHeader title="Offres enregistrées" onBack={() => navigate(-1)} />
 
       <div className="flex-1 space-y-3 px-4 py-4">
-        {blocked && reason && <KycNotice reason={reason} />}
+        {accountBlocked && accountReason ? (
+          <AccountNotice reason={accountReason} />
+        ) : (
+          blocked && reason && <KycNotice reason={reason} />
+        )}
 
         {isLoading && (
           <>
