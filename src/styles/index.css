@@ -75,6 +75,7 @@
   --color-terracotta: hsl(var(--terracotta));
   --color-sand: hsl(var(--sand));
   --color-earth: hsl(var(--earth));
+  --color-app-surround: hsl(var(--app-surround));
 }
 
 @layer base {
@@ -92,6 +93,11 @@
     /* Core palette */
     --background: 40 30% 98%;
     --foreground: 25 35% 15%;
+
+    /* The field behind the app column on tablets and up. Must sit *under*
+       --background in both themes so the column reads as raised; no existing
+       token does (--muted is darker in light but lighter in dark). */
+    --app-surround: 40 20% 92%;
 
     --card: 0 0% 100%;
     --card-foreground: 25 35% 15%;
@@ -160,6 +166,8 @@
 
     --background: 25 30% 8%;
     --foreground: 40 20% 95%;
+
+    --app-surround: 25 30% 4%;
 
     --card: 25 25% 12%;
     --card-foreground: 40 20% 95%;

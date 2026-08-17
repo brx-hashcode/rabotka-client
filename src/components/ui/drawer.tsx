@@ -31,7 +31,11 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        // sm: keeps the sheet inside AppShell's column instead of spanning the
+        // whole tablet — same breakpoint as the column itself. Centred with
+        // auto margins rather than a translate, because vaul writes an inline
+        // transform here while dragging and would clobber a -translate-x-1/2.
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background sm:mx-auto sm:max-w-lg",
         className,
       )}
       {...props}
