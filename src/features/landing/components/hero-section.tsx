@@ -56,9 +56,7 @@ export function HeroSection() {
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
                 {title.main}{" "}
-                <span className="bg-linear-to-b from-whatsapp to-whatsapp-dark bg-clip-text text-transparent drop-shadow-[0_2px_10px_hsl(var(--whatsapp)/0.35)]">
-                  {title.highlight}
-                </span>
+                <span className="text-whatsapp-dark">{title.highlight}</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
