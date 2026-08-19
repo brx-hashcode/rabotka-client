@@ -3,8 +3,6 @@ import { Navigate, useLocation } from "react-router";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { QueryErrorState } from "@/components/common/query-error-state";
 import { isUnauthorized } from "@/lib/api/errors";
-import { hasWhatsAppOrigin } from "@/lib/whatsapp-origin";
-import { WhatsAppOnlyScreen } from "@/features/whatsapp-only";
 import { LoadingScreen } from "./loading-screen";
 
 type AuthGuardProps = {
@@ -47,15 +45,14 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
     // became a link to the home screen. `login.tsx` already honours `redirect`.
     const destination = `${location.pathname}${location.search}`;
 
-    // Never followed a WhatsApp link in this browser, so the missing cookie is
-    // not a signed-out session — it is a session that exists in WhatsApp's
-    // webview and cannot be seen from here. The OTP form asks such a visitor to
-    // re-verify a number they already own; pointing them back at the
-    // conversation restores everything in one tap.
-    if (!hasWhatsAppOrigin()) {
-      return <WhatsAppOnlyScreen destination={destination} />;
-    }
-
+    // A signed-out visitor goes to the login screen, wherever they came from.
+    //
+    // This used to divert anyone with no "arrived from WhatsApp" mark to an
+    // explanatory screen. The mark lived in localStorage, and a webview with
+    // storage disabled, cleared or partitioned reports it missing — so the
+    // screen was being shown to people who were inside WhatsApp, telling them
+    // to open the app they already had open. A guard that misfires on the
+    // audience it exists to help is worse than no guard.
     return (
       <Navigate
         to={`/login?redirect=${encodeURIComponent(destination)}`}
