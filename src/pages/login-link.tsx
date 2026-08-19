@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router";
 import { Loader } from "lucide-react";
 
 import { safeDestination } from "@/lib/safe-destination";
-import { markWhatsAppOrigin } from "@/lib/whatsapp-origin";
 
 /** Same expression the backend uses to recognise a code (`^[\w-]{16,128}$`). */
 const CODE_REGEX = /^[A-Za-z0-9_-]{16,128}$/;
@@ -37,10 +36,6 @@ export default function LoginLink() {
 
   useEffect(() => {
     if (code && isCode) {
-      // Before the handoff, not after: the backend consumes the code, sets the
-      // cookie and 302s back to a fresh page load with nothing left in the URL
-      // to recognise. This is the only moment the arrival is observable.
-      markWhatsAppOrigin();
       globalThis.location.replace(`/api/v1/s/${encodeURIComponent(code)}`);
       return;
     }
