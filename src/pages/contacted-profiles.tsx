@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import { Mail, Phone, ShieldCheck, Star, UserRoundSearch } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -109,6 +110,8 @@ function ContactCard({ contact }: Readonly<{ contact: ContactedProfile }>) {
 
 export default function ContactedProfiles() {
   const navigate = useNavigate();
+  // Reached straight from the bot, where nothing sits behind it.
+  const goBack = useGoBack("/dashboard");
   const {
     data: contacts = [],
     isLoading,
@@ -130,7 +133,7 @@ export default function ContactedProfiles() {
         noIndex
       />
       <div className="flex min-h-screen flex-col">
-        <ScreenHeader title="Profils contactés" onBack={() => navigate(-1)} />
+        <ScreenHeader title="Profils contactés" onBack={goBack} />
 
         {isLoading && (
           <div className="space-y-3 px-4 py-4">
