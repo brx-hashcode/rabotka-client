@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
 import { AuthGuard } from "@/components/auth";
-import { AppShell } from "@/features/navigation";
+import { AppShell, PublicShell } from "@/features/navigation";
 
 import NotFound from "@/pages/not-found";
 
@@ -559,7 +559,9 @@ export function AppRoutes() {
         path="/p/:slug"
         element={
           <Suspense fallback={<PageLoader />}>
-            <PublicPortfolio />
+            <PublicShell>
+              <PublicPortfolio />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -568,7 +570,9 @@ export function AppRoutes() {
         path="/p/:slug/r/:itemId"
         element={
           <Suspense fallback={<PageLoader />}>
-            <RealizationDetail />
+            <PublicShell>
+              <RealizationDetail />
+            </PublicShell>
           </Suspense>
         }
       />
