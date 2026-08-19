@@ -1,4 +1,5 @@
 export { AppShell } from "./layouts/app-shell";
+export { PublicShell } from "./layouts/public-shell";
 export { BottomNav } from "./components/bottom-nav";
 export { PlaceholderPage } from "./components/placeholder-page";
 export {
