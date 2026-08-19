@@ -3,9 +3,14 @@ import type { Feature } from "@/types";
 
 export const whatIsRabotkaContent = {
   badge: "Qu'est-ce que Rabotka",
-  title: "Votre assistant missions personnel",
+  // "Assistant" belongs to VoVa now, not to the platform.
+  //
+  // This section called Rabotka "un assistant intelligent" while the section
+  // below introduces VoVa AI as the assistant — two of them, a few hundred
+  // pixels apart, for a reader meeting the product for the first time.
+  title: "La marketplace des missions du quotidien",
   description:
-    "Rabotka est un assistant intelligent qui connecte les travailleurs aux opportunités et les recruteurs à une aide de confiance, le tout via WhatsApp.",
+    "Rabotka connecte les travailleurs aux opportunités et les recruteurs à une aide de confiance, le tout via WhatsApp.",
   features: [
     {
       icon: UserCheck,

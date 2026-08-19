@@ -47,7 +47,6 @@ export default function MyPortfolio() {
               fullName: `${profile.firstName} ${profile.lastName}`.trim(),
               avatarUrl: profile.avatarUrl,
               address: profile.address,
-              description: profile.description,
               reliabilityScore: profile.reliabilityScore,
               ratingAvg: null,
               ratingCount: 0,
@@ -110,7 +109,6 @@ function HeaderSkeleton() {
         <Skeleton className="h-10 w-16" />
       </div>
 
-      <Skeleton className="h-4 w-full max-w-sm" />
       <Skeleton className="h-10 w-full" />
     </div>
   );
