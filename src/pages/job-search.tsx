@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import {
   useQueryState,
   parseAsInteger,
@@ -59,7 +59,8 @@ function presetToRange(preset: JobDatePreset): {
 }
 
 export default function JobSearch() {
-  const navigate = useNavigate();
+  // Workers reach this screen straight from the bot — see `useGoBack`.
+  const goBack = useGoBack("/jobs");
 
   const [q, setQ] = useQueryState("q", {
     defaultValue: "",
@@ -159,7 +160,7 @@ export default function JobSearch() {
           <button
             type="button"
             aria-label="Retour"
-            onClick={() => navigate(-1)}
+            onClick={goBack}
             className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-secondary"
           >
             <ArrowLeft className="h-5 w-5" />
