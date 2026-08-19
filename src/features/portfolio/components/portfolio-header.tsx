@@ -85,12 +85,6 @@ export function PortfolioHeader({
         />
       </div>
 
-      {profile.description && (
-        <p className="text-foreground/80 max-w-md text-sm whitespace-pre-line">
-          {profile.description}
-        </p>
-      )}
-
       {action}
     </header>
   );
