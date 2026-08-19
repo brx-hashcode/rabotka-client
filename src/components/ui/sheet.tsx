@@ -33,9 +33,17 @@ const sheetVariants = cva(
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        // `sm:mx-auto sm:max-w-lg` keeps a top/bottom sheet inside the app's
+        // column instead of spanning the viewport.
+        //
+        // These are portalled, so they escape AppShell's centred column and
+        // were rendering edge to edge on desktop while the page behind them sat
+        // in a 512px strip. Same breakpoint and width as `drawer.tsx`, which
+        // already got this right — below sm the column is full-width anyway, so
+        // constraining there would only inset the sheet from the screen edges.
+        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top sm:mx-auto sm:max-w-lg",
         bottom:
-          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:mx-auto sm:max-w-lg",
         left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
         right:
           "inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
