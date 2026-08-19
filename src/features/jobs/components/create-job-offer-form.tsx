@@ -432,11 +432,24 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
               {isPending ? "Publication…" : "Publier l'offre"}
             </Button>
+            {/*
+              Goes to the missions list, NOT back one entry.
+
+              `navigate(-1)` assumes the user arrived from somewhere inside the
+              app. Opened from WhatsApp they did not: the card lands on
+              `/s/<code>`, which signs them in and replaces itself with this
+              form, so the entry behind it is the login hop — and going back to
+              it bounces straight here again. Cancel was a dead end for anyone
+              who came in through the bot, which is most people.
+
+              A fixed destination cannot trap them: whatever the history holds,
+              this is a real page they are allowed to be on.
+            */}
             <Button
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/missions")}
             >
               Annuler
             </Button>
