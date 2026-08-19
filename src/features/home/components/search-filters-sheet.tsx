@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -58,17 +58,32 @@ export function SearchFiltersSheet({
     setDraft({ categoryId: null, minReliability: null, minRating: null, city: "" });
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        ref={setContainer}
-        side="bottom"
-        className="max-h-[88vh] overflow-y-auto rounded-t-2xl"
-      >
-        <SheetHeader className="text-left">
-          <SheetTitle>Filtres</SheetTitle>
-        </SheetHeader>
+    // Drawer rather than Sheet: vaul gives the grab handle and the spring
+    // physics of a native bottom sheet, where Sheet just slides a panel up.
+    // It is also already constrained to the app column, and forwards a ref —
+    // which this screen needs, because the comboboxes portal their dropdown
+    // into the sheet so it scrolls with it.
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent ref={setContainer} className="max-h-[88vh]">
+        <DrawerHeader className="px-4 pb-0 text-left">
+          <DrawerTitle>Filtres</DrawerTitle>
+        </DrawerHeader>
 
-        <div className="space-y-5 py-4">
+        <div className="space-y-5 overflow-y-auto px-4 py-4">
+          {/* City first: where the work is decides whether any of the rest
+              matters, and it was the one filter sitting below the fold.
+              Picked from the real list, so the value always matches what is
+              stored — the country is implicit, scoped to the viewer's own. */}
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Ville</Label>
+            <CityFilterCombobox
+              value={draft.city}
+              onChange={(city) => set("city", city)}
+              allLabel="Toutes les villes"
+              container={container}
+            />
+          </div>
+
           {/* Category */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Catégorie</Label>
@@ -124,18 +139,6 @@ export function SearchFiltersSheet({
             </div>
           </div>
 
-          {/* City — same change as the job filters: picked from the real
-              list, so the value always matches what is stored. */}
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Ville</Label>
-            <CityFilterCombobox
-              value={draft.city}
-              onChange={(city) => set("city", city)}
-              allLabel="Toutes les villes"
-              container={container}
-            />
-          </div>
-
           <div className="flex gap-2 pt-2">
             <Button variant="outline" className="flex-1" onClick={reset}>
               Réinitialiser
@@ -151,7 +154,7 @@ export function SearchFiltersSheet({
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
