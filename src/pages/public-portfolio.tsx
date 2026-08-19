@@ -107,7 +107,6 @@ export default function PublicPortfolio() {
           fullName,
           avatarUrl: worker.avatarUrl,
           address: worker.address,
-          description: worker.description,
           reliabilityScore: worker.reliabilityScore,
           ratingAvg: worker.ratingAvg,
           ratingCount: worker.ratingCount,
