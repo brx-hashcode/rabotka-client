@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import { useQueryState, parseAsInteger, parseAsFloat } from "nuqs";
 import { ArrowLeft, Search, SlidersHorizontal, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,9 @@ import { cn } from "@/lib/utils";
 const SKELETON_KEYS = ["s1", "s2", "s3", "s4"];
 
 export default function WorkerSearch() {
-  const navigate = useNavigate();
+  // Employers reach this screen straight from the bot, where there is no
+  // history behind it — see `useGoBack`.
+  const goBack = useGoBack("/dashboard");
 
   const [q, setQ] = useQueryState("q", { defaultValue: "", clearOnDefault: true });
   const [categoryId, setCategoryId] = useQueryState("category");
@@ -71,7 +73,7 @@ export default function WorkerSearch() {
           <button
             type="button"
             aria-label="Retour"
-            onClick={() => navigate(-1)}
+            onClick={goBack}
             className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-secondary"
           >
             <ArrowLeft className="h-5 w-5" />
