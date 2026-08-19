@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { exchangeWhatsAppSession } from "@/lib/api/auth-controller";
-import { markWhatsAppOrigin } from "@/lib/whatsapp-origin";
 
 /** Query parameter carrying the one-time login code on WhatsApp links. */
 const SESSION_PARAM = "s";
@@ -59,9 +58,6 @@ export function SessionLinkProvider({
     void exchangeWhatsAppSession(code)
       .then(() => {
         if (cancelled) return;
-        // Only on success, and deliberately not in `finally`: a dead or expired
-        // code proves nothing about where the visitor came from.
-        markWhatsAppOrigin();
         // The cookie is set; anything already holding a "logged out" answer
         // must ask again.
         return queryClient.invalidateQueries({ queryKey: ["profile", "me"] });

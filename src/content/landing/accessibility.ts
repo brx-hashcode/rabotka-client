@@ -18,9 +18,13 @@ export const accessibilityContent = {
       description: "Simple et intuitif pour tous",
     },
     {
+      // Was « Adapté aux langues locales / Communiquez dans votre langue ».
+      // No local language exists anywhere in the product: the application is in
+      // French and the assistant answers in French or English. A promise the
+      // product cannot keep costs more than the one it replaces.
       icon: Globe,
-      title: "Adapté aux langues locales",
-      description: "Communiquez dans votre langue",
+      title: "En français et en anglais",
+      description: "L'assistant vous répond dans la langue que vous écrivez",
     },
   ] as Feature[],
 } as const;

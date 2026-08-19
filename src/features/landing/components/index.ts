@@ -4,6 +4,7 @@ export { RealitySection } from "./reality-section";
 export { WhyWhatsAppSection } from "./why-whatsapp-section";
 export { WhatIsRabotkaSection } from "./what-is-rabotka-section";
 export { HowItWorksSection } from "./how-it-works-section";
+export { VovaSection } from "./vova-section";
 export { DirectContactSection } from "./direct-contact-section";
 export { TrustSection } from "./trust-section";
 export { AccessibilitySection } from "./accessibility-section";
