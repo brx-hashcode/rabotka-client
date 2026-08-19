@@ -1,53 +1,43 @@
-import { MessagesSquare, Wallet, ShieldCheck, HelpCircle } from "lucide-react";
-import type { Feature } from "@/types";
-
 /**
  * The assistant, described only in terms of what it actually does.
  *
- * Every line here maps to something that exists in the backend, and the list of
- * what it must NOT say is as load-bearing as the copy itself:
+ * **Kept short on purpose.** The first draft gave each point a three-line
+ * paragraph, and four of those stacked in identical cards read as filler — the
+ * reader skims the bold line and skips the grey block underneath, so the words
+ * were paying no rent. A claim that needs a paragraph to land is usually a
+ * claim that is not confident.
  *
- * - **No amounts, no fees, no percentages.** This page describes the model
- *   qualitatively; the assistant reads figures from a tool at the moment it
- *   answers, and they are set by an administrator at runtime. A number printed
- *   here would be wrong the day someone changes it.
- * - **No local languages.** VoVa answers in French and English. Nothing else
- *   exists.
+ * What this must never say, whatever the length:
+ *
+ * - **No amounts, no fees, no percentages.** They are set at runtime and read
+ *   from a tool at the moment of answering; a number printed here is wrong the
+ *   day somebody changes it.
+ * - **No local languages.** French and English. Nothing else exists.
  * - **Nothing about finding or pushing missions into the chat.** It explains
- *   and it looks things up; browsing happens in the app. The hero card used to
- *   promise the opposite.
- * - **Nothing about acting on your behalf.** There is no tool that writes, by
- *   design, and that is the point of the third card below.
+ *   and it looks things up; browsing happens in the app.
+ * - **Nothing about acting on your behalf.** There is no tool that writes.
  */
 export const vovaContent = {
   badge: "VoVa AI",
-  title: "Un assistant qui répond, dans la conversation",
+  title: "Posez la question. Il répond.",
   description:
-    "VoVa AI est l'assistant de Rabotka. Il répond à vos questions directement sur WhatsApp, dans la même conversation que le reste — sans formulaire, sans attente, à toute heure.",
-  features: [
+    "VoVa AI est l'assistant de Rabotka, dans la conversation WhatsApp que vous avez déjà. Pas de formulaire, pas d'attente.",
+  points: [
     {
-      icon: HelpCircle,
-      title: "Il explique comment Rabotka fonctionne",
-      description:
-        "La vérification, le déblocage de contact, les pénalités, les évaluations : posez la question comme elle vous vient, il répond avec vos mots.",
+      title: "Il explique",
+      description: "Vérification, déblocage, pénalités, évaluations.",
     },
     {
-      icon: Wallet,
-      title: "Il consulte vos informations",
-      description:
-        "Votre solde, vos candidatures, vos pénalités, l'état d'un déblocage : il va chercher l'information réelle au moment où vous la demandez.",
+      title: "Il consulte",
+      description: "Votre solde, vos candidatures, vos pénalités.",
     },
     {
-      icon: ShieldCheck,
-      title: "Il ne modifie jamais rien",
-      description:
-        "VoVa ne publie pas, ne paie pas, ne postule pas et n'annule pas à votre place. Tout ce qui engage quelque chose se fait dans l'application, où vous voyez ce que vous confirmez.",
+      title: "Il ne touche à rien",
+      description: "Tout ce qui engage se confirme dans l'application.",
     },
     {
-      icon: MessagesSquare,
-      title: "Il préfère dire qu'il ne sait pas",
-      description:
-        "Ses réponses viennent de la documentation Rabotka. Quand elle ne contient pas la réponse, il vous le dit et vous oriente vers l'équipe plutôt que d'inventer.",
+      title: "Il ne devine pas",
+      description: "Sans la réponse, il vous oriente vers l'équipe.",
     },
-  ] as Feature[],
+  ],
 } as const;
