@@ -4,6 +4,7 @@ import {
   WhyWhatsAppSection,
   WhatIsRabotkaSection,
   HowItWorksSection,
+  VovaSection,
   DirectContactSection,
   TrustSection,
   AccessibilitySection,
@@ -87,6 +88,7 @@ export default function Index() {
       <WhyWhatsAppSection />
       <WhatIsRabotkaSection />
       <HowItWorksSection />
+      <VovaSection />
       <DirectContactSection />
       <TrustSection />
       <AccessibilitySection />
