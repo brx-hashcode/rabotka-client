@@ -355,7 +355,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <MyPortfolio />
+              <AppShell>
+                <MyPortfolio />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -365,7 +367,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <RealizationDetail />
+              <AppShell>
+                <RealizationDetail />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -442,7 +446,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <ContactedProfiles />
+              <AppShell>
+                <ContactedProfiles />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -452,7 +458,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <EmployerDashboard />
+              <AppShell>
+                <EmployerDashboard />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -462,7 +470,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <CreateJobOffer />
+              <AppShell>
+                <CreateJobOffer />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
