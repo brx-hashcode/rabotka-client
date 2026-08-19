@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X } from "lucide-react";
+import { FileText, ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { useCreateClaim } from "@/hooks/use-create-claim";
 import { useUploadClaimFiles } from "@/hooks/use-upload-claim-files";
 import {
@@ -22,10 +22,8 @@ import {
   type CreateClaimFormData,
 } from "@/lib/validations/claims";
 
-type FilePreview = {
-  file: File;
-  preview: string;
-};
+const MAX_FILES = 3;
+const ACCEPT = "image/*,.pdf,.doc,.docx";
 
 export const CreateClaimForm = () => {
   const navigate = useNavigate();
@@ -33,10 +31,19 @@ export const CreateClaimForm = () => {
   const { mutate: uploadClaimFiles, isPending: isUploading } =
     useUploadClaimFiles();
 
-  const [files, setFiles] = useState<FilePreview[]>([]);
-  const [fileError, setFileError] = useState<string | null>(null);
-
-  const maxFiles = 3;
+  const [{ files, isDragging, errors }, {
+    removeFile,
+    openFileDialog,
+    getInputProps,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+  }] = useFileUpload({
+    maxFiles: MAX_FILES,
+    multiple: true,
+    accept: ACCEPT,
+  });
 
   const form = useForm<CreateClaimFormData>({
     resolver: zodResolver(createClaimSchema),
@@ -46,31 +53,6 @@ export const CreateClaimForm = () => {
     },
     mode: "onChange",
   });
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFiles = Array.from(e.target.files || []);
-    const totalFiles = files.length + newFiles.length;
-
-    if (totalFiles > maxFiles) {
-      setFileError(`Maximum ${maxFiles} fichiers autorisés`);
-      return;
-    }
-
-    const previews = newFiles.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    setFiles([...files, ...previews]);
-    setFileError(null);
-  };
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => {
-      URL.revokeObjectURL(prev[index].preview);
-      return prev.filter((_, i) => i !== index);
-    });
-  };
 
   const onSubmit = (data: CreateClaimFormData) => {
     if (files.length === 0) {
@@ -156,79 +138,77 @@ export const CreateClaimForm = () => {
           />
 
           <div className="space-y-2">
-            <label htmlFor="files" className="block text-sm font-medium">
+            <p className="block text-sm font-medium">
               Pièces Jointes (Optionnel)
-            </label>
+            </p>
             <p className="text-xs text-muted-foreground">
-              Maximum {maxFiles} fichiers. Vous en avez {files.length}/
-              {maxFiles}
+              Maximum {MAX_FILES} fichiers (images, PDF, DOC — max 5 Mo). Vous
+              en avez {files.length}/{MAX_FILES}
             </p>
 
-            {fileError && (
-              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                {fileError}
-              </div>
-            )}
+            <input {...getInputProps()} className="sr-only" />
 
-            {files.length < maxFiles && (
-              <label
-                className={cn(
-                  "block p-6 rounded-lg border-2 border-dashed border-border cursor-pointer hover:bg-muted transition-colors",
-                  isSubmitting && "opacity-50 cursor-not-allowed",
-                )}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  <span className="text-sm">
-                    {files.length === 0
-                      ? "Cliquez pour télécharger"
-                      : "Ajouter plus de fichiers"}
-                  </span>
-                </div>
-                <input
-                  id="files"
-                  type="file"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx"
-                  onChange={handleFileSelect}
-                  disabled={isSubmitting}
-                  className="hidden"
-                />
-              </label>
-            )}
-
-            {files.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {files.map((fp, idx) => (
-                  <div
-                    key={`${fp.file.name}-${idx}`}
-                    className="relative rounded-lg overflow-hidden border border-border bg-muted"
+            {/* One grid for previews and the picker: the dashed tile is the
+                same square as a thumbnail, so the block lines up with the
+                fields above instead of leaving dead space beside a lone file. */}
+            <div className="grid grid-cols-3 gap-2">
+              {files.map((f) => (
+                <div
+                  key={f.id}
+                  className="bg-muted relative aspect-square overflow-hidden rounded-md"
+                >
+                  {f.file.type.startsWith("image/") ? (
+                    <img
+                      src={f.preview}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
+                      <FileText className="text-muted-foreground size-6" />
+                      <span className="text-muted-foreground w-full truncate text-[10px]">
+                        {f.file.name}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(f.id)}
+                    disabled={isSubmitting}
+                    aria-label={`Retirer ${f.file.name}`}
+                    className="bg-destructive/90 absolute right-1 top-1 rounded-full p-1 text-white"
                   >
-                    {fp.file.type.startsWith("image/") ? (
-                      <img
-                        src={fp.preview}
-                        alt={`Aperçu ${idx}`}
-                        className="w-full h-24 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-24 flex items-center justify-center bg-muted-foreground/10">
-                        <span className="text-xs text-muted-foreground truncate px-2">
-                          {fp.file.name}
-                        </span>
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeFile(idx)}
-                      disabled={isSubmitting}
-                      className="absolute top-1 right-1 p-1 bg-black/50 rounded hover:bg-black/70 transition-colors"
-                    >
-                      <X className="h-3 w-3 text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+
+              {files.length < MAX_FILES && (
+                <button
+                  type="button"
+                  onClick={openFileDialog}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "border-input text-muted-foreground hover:bg-muted/50 flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-dashed px-2 text-center text-xs transition-colors",
+                    isDragging && "border-whatsapp bg-whatsapp/5",
+                    isSubmitting && "cursor-not-allowed opacity-50",
+                  )}
+                >
+                  <ImagePlus className="size-5" />
+                  {files.length === 0 ? "Ajouter un fichier" : "Ajouter"}
+                </button>
+              )}
+            </div>
+
+            {errors.map((message) => (
+              <p key={message} className="text-destructive text-sm">
+                {message}
+              </p>
+            ))}
           </div>
 
           <div className="flex flex-col gap-3">

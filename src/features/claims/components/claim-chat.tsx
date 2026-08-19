@@ -9,8 +9,17 @@ import {
   Info,
   Download,
   MessageCircle,
-  X,
 } from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
 import { cn, formatDateTime } from "@/lib/utils";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import {
@@ -117,80 +126,90 @@ function CommentBubble({
   );
 }
 
+/**
+ * Claim metadata, as a bottom sheet.
+ *
+ * A drawer rather than a centred modal so it matches every other sheet in the
+ * app (support, apply, cancel) and stays thumb-reachable — this opens from the
+ * header of a full-height chat, where a centred card floats over nothing.
+ */
 function ClaimInfoPanel({
   claim,
-  onClose,
-}: Readonly<{ claim: ClaimItem; onClose: () => void }>) {
+  open,
+  onOpenChange,
+}: Readonly<{
+  claim: ClaimItem;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}>) {
   return (
-    <button
-      type="button"
-      className="absolute inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
-      onClick={onClose}
-      aria-label="Fermer"
-    >
-      <div
-        className="max-h-[82%] w-full overflow-y-auto rounded-t-2xl bg-card text-left sm:max-w-md sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-5 py-4">
-          <h3 className="font-semibold text-foreground">
-            Détails de la réclamation
-          </h3>
-          <div className="flex items-center gap-2">
-            <StatusBadge status={claim.status} />
-            <span className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted">
-              <X className="h-4 w-4" />
-            </span>
-          </div>
-        </div>
-        <div className="space-y-4 px-5 pb-6">
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Titre
-            </p>
-            <p className="text-sm font-medium text-foreground">{claim.title}</p>
-          </div>
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Description
-            </p>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-              {claim.description}
-            </p>
-          </div>
-          {claim.attachmentUrls.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Pièces jointes ({claim.attachmentUrls.length})
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {claim.attachmentUrls.map((url, idx) => (
-                  <a
-                    key={`${url}-${idx}`}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
-                  >
-                    <img
-                      src={url}
-                      alt={`Pièce jointe ${idx + 1}`}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-                      <Download className="h-5 w-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
-                  </a>
-                ))}
-              </div>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+          <DrawerHeader className="text-left">
+            <div className="flex items-start justify-between gap-3">
+              <DrawerTitle>Détails de la réclamation</DrawerTitle>
+              <StatusBadge status={claim.status} />
             </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            Créée le {formatDateTime(claim.createdAt)}
-          </p>
+            <DrawerDescription>
+              Créée le {formatDateTime(claim.createdAt)}
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-2">
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Titre
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {claim.title}
+              </p>
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Description
+              </p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                {claim.description}
+              </p>
+            </div>
+            {claim.attachmentUrls.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Pièces jointes ({claim.attachmentUrls.length})
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {claim.attachmentUrls.map((url, idx) => (
+                    <a
+                      key={`${url}-${idx}`}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
+                    >
+                      <img
+                        src={url}
+                        alt={`Pièce jointe ${idx + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
+                        <Download className="h-5 w-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Fermer</Button>
+            </DrawerClose>
+          </DrawerFooter>
         </div>
-      </div>
-    </button>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -363,9 +382,11 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         </div>
       </form>
 
-      {showInfo && (
-        <ClaimInfoPanel claim={claim} onClose={() => setShowInfo(false)} />
-      )}
+      <ClaimInfoPanel
+        claim={claim}
+        open={showInfo}
+        onOpenChange={setShowInfo}
+      />
     </div>
   );
 };
