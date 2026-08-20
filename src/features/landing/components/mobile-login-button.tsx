@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { config } from "@/config";
+import { trackWhatsAppClick } from "@/lib/analytics/events";
 
 export const MobileLoginButton = () => {
   const { data: profile, isLoading } = useProfileMe();
@@ -48,6 +49,7 @@ export const MobileLoginButton = () => {
     >
       <a
         href={config.whatsapp.links.start}
+        onClick={() => trackWhatsAppClick("start", "mobile_menu")}
         target="_blank"
         rel="noopener noreferrer"
       >
