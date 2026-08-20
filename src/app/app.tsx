@@ -6,6 +6,7 @@ import {
   ErrorBoundary,
   clearChunkReloadGuard,
 } from "@/components/common/error-boundary";
+import { usePageTracking } from "@/lib/analytics/use-page-tracking";
 
 /** How long the app must run cleanly before the reload guard is released. */
 const GUARD_RESET_DELAY_MS = 10_000;
@@ -28,6 +29,15 @@ function ChunkGuardReset() {
   return null;
 }
 
+/**
+ * Reports each route change to Analytics. Renders nothing, and does nothing at
+ * all when `VITE_GA_MEASUREMENT_ID` is unset. Must sit inside `BrowserRouter`.
+ */
+function AnalyticsTracker() {
+  usePageTracking();
+  return null;
+}
+
 /*
  * The boundary sits inside Providers and around the router: a failed lazy
  * chunk (every route is lazy, and a deploy renames them) would otherwise
@@ -38,6 +48,7 @@ const App = () => (
     <ErrorBoundary>
       <BrowserRouter>
         <ChunkGuardReset />
+        <AnalyticsTracker />
         <AppRoutes />
       </BrowserRouter>
     </ErrorBoundary>

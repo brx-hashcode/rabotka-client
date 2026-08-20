@@ -12,8 +12,14 @@ COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 ARG VITE_BACKEND_URL
 ARG VITE_SITE_URL
+# Vite inlines import.meta.env at BUILD time, so the measurement id has to be
+# present here — passing it to the running container would be too late and
+# analytics would stay silently disabled. Unset is a valid state: the app then
+# never loads Google Analytics at all.
+ARG VITE_GA_MEASUREMENT_ID
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL \
-    VITE_SITE_URL=$VITE_SITE_URL
+    VITE_SITE_URL=$VITE_SITE_URL \
+    VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
 RUN pnpm run build
 
 FROM base AS production
