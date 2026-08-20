@@ -75,6 +75,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Vite inlines import.meta.env when the bundle is built, and this is
+          # the only place the bundle is ever built — production promotes this
+          # same image rather than rebuilding. A value delivered to the running
+          # container would arrive after the code that needed it was frozen.
+          #
+          # A repository *variable*, not a secret: a GA4 measurement id is
+          # served in the page to every visitor and is not confidential. Unset
+          # is a supported state — the app then never loads Analytics.
+          build-args: |
+            VITE_GA_MEASUREMENT_ID=${{ vars.VITE_GA_MEASUREMENT_ID }}
           cache-from: type=gha,scope=buildkit-develop
           # ignore-error keeps cache export best-effort: a GHA Cache outage logs
           # a warning instead of failing the build (image is already pushed).

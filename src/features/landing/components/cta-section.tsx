@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ctaContent } from "@/content/landing/cta";
 import { config } from "@/config";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
+import { trackWhatsAppClick } from "@/lib/analytics/events";
 
 export function CTASection() {
   const ref = useRef(null);
@@ -36,6 +37,7 @@ export function CTASection() {
             <Button variant="hero" size="lg" className="group" asChild>
               <a
                 href={config.whatsapp.links.worker}
+                onClick={() => trackWhatsAppClick("worker", "cta_section")}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -45,6 +47,7 @@ export function CTASection() {
             <Button variant="hero-outline" size="lg" className="group" asChild>
               <a
                 href={config.whatsapp.links.employer}
+                onClick={() => trackWhatsAppClick("employer", "cta_section")}
                 target="_blank"
                 rel="noopener noreferrer"
               >
