@@ -5,6 +5,7 @@ import heroImageAvif from "@/assets/hero-image-1.avif";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
 import { config } from "@/config";
+import { trackWhatsAppClick } from "@/lib/analytics/events";
 
 const flowGuides = [
   { label: "Guide travailleurs", href: "#flow-travailleurs" },
@@ -68,6 +69,7 @@ export function HeroSection() {
               <Button variant="hero" size="lg" asChild>
                 <a
                   href={config.whatsapp.links.worker}
+                  onClick={() => trackWhatsAppClick("worker", "hero")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -77,6 +79,7 @@ export function HeroSection() {
               <Button variant="hero-outline" size="lg" asChild>
                 <a
                   href={config.whatsapp.links.employer}
+                  onClick={() => trackWhatsAppClick("employer", "hero")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
