@@ -24,12 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
-import { kycDocumentsContent } from "@/content/onboarding";
+import { kycDocumentsContent, kycDocumentGuidance } from "@/content/onboarding";
 import { compressImage } from "@/lib/image-compress";
 import { useUploadKycFile } from "@/hooks/use-upload-kyc-file";
 import {
   KYC_DOCUMENT_TYPE_OPTIONS,
   requiresBackSide,
+  shouldDropBackSide,
 } from "@/lib/kyc-document-types";
 import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
 import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
@@ -86,6 +87,20 @@ export function KycDocumentsForm({
     kycDocumentBackPreview,
     kycSelfiePreview,
   } = kycData;
+
+  // defaultValues snapshots the store at first render, but hydrateFromStorage
+  // is async and resolves after it -- so on a reload the form starts with an
+  // empty documentType and never learns the restored one. That hid the verso
+  // zone, and made the cleanup effect below delete the verso file the user had
+  // already uploaded.
+  const storedDocumentType = kycData.documentType;
+  useEffect(() => {
+    if (storedDocumentType && !form.getValues("documentType")) {
+      form.setValue("documentType", storedDocumentType, {
+        shouldValidate: true,
+      });
+    }
+  }, [storedDocumentType, form]);
 
   useEffect(() => {
     const stored: Record<KycFileField, File | null> = {
@@ -172,9 +187,6 @@ export function KycDocumentsForm({
       form.setValue(fieldName, null as unknown as File, {
         shouldValidate: true,
       });
-      // Read through the store rather than closing over kycData: this callback
-      // feeds an effect below, and a new identity on every file change would
-      // make that effect re-run constantly.
       const preview =
         useOnboardingStore.getState().kycData[`${fieldName}Preview`];
       if (preview?.startsWith("blob:")) {
@@ -216,16 +228,28 @@ export function KycDocumentsForm({
   // uploaded to the verso zone. Left in place it would be an invisible file the
   // user cannot remove -- the zone is gone -- and the submit guard would keep
   // blocking on a field nobody can see.
+  //
+  // Gated on a type actually being chosen. "Not chosen yet" also reports as
+  // needing no back, so without this the effect deleted a perfectly good verso
+  // during the gap between first render and hydration finishing.
   useEffect(() => {
-    if (!needsBackSide && kycDocumentBack) {
+    if (shouldDropBackSide(documentType, !!kycDocumentBack)) {
       handleRemoveFile("kycDocumentBack");
     }
-  }, [needsBackSide, kycDocumentBack, handleRemoveFile]);
+  }, [documentType, kycDocumentBack, handleRemoveFile]);
 
   const kycDocumentError = form.formState.errors.kycDocument?.message;
   const kycDocumentBackError = form.formState.errors.kycDocumentBack?.message;
   const kycSelfieError = form.formState.errors.kycSelfie?.message;
   const content = kycDocumentsContent;
+
+  // Copy for the document actually chosen -- "photographiez le verso de votre
+  // carte NIU" beats "de votre pièce d'identité". Falls back to the generic
+  // wording until a type is picked, since the zones render before that.
+  const guidance = documentType ? kycDocumentGuidance[documentType] : undefined;
+  const frontCopy = guidance?.front ?? content.documents.kycDocument;
+  const backCopy = guidance?.back ?? content.documents.kycDocumentBack;
+  const selfieCopy = guidance?.selfie ?? content.documents.kycSelfie;
 
   return (
     <div className="space-y-6">
@@ -277,8 +301,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycDocument")}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
-                  label={content.documents.kycDocument.label}
-                  description={content.documents.kycDocument.description}
+                  label={frontCopy.label}
+                  description={frontCopy.description}
                   helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
@@ -309,8 +333,8 @@ export function KycDocumentsForm({
                     onRemove={() => handleRemoveFile("kycDocumentBack")}
                     accept="image/*"
                     maxSize={5 * 1024 * 1024}
-                    label={content.documents.kycDocumentBack.label}
-                    description={content.documents.kycDocumentBack.description}
+                    label={backCopy.label}
+                    description={backCopy.description}
                     helperText={content.documents.kycDocumentBack.helperText}
                     error={kycDocumentBackError}
                     type="document"
@@ -341,8 +365,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycSelfie")}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
-                  label={content.documents.kycSelfie.label}
-                  description={content.documents.kycSelfie.description}
+                  label={selfieCopy.label}
+                  description={selfieCopy.description}
                   helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"
