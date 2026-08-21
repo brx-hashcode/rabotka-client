@@ -40,6 +40,10 @@ export const validationMessages = {
   kycDocument: {
     invalid: "Document invalide (PDF, JPG, PNG - Max 5MB)",
   },
+  kycDocumentBack: {
+    invalid: "Verso invalide (JPG, PNG - Max 5MB)",
+    required: "Ajoutez le verso de votre document",
+  },
   kycSelfie: {
     invalid: "Selfie invalide (JPG, PNG - Max 5MB)",
   },

@@ -19,7 +19,8 @@ export const confirmationContent = {
   },
   kycDocuments: {
     title: "Documents KYC",
-    documentIdentity: "Document d'identité",
+    documentIdentity: "Document d'identité — recto",
+    documentIdentityBack: "Document d'identité — verso",
     selfie: "Selfie",
     noDocument: "Aucun document",
     noSelfie: "Aucun selfie",
@@ -27,15 +28,6 @@ export const confirmationContent = {
   profileTypes: {
     worker: "Travailleur",
     employer: "Recruteur",
-  },
-  documentTypes: {
-    identityCard: "Carte d'identité",
-    passport: "Passeport",
-    driverLicense: "Permis de conduire",
-    birthCertificate: "Acte de naissance",
-    studentCard: "Carte étudiant",
-    niuCard: "Carte NIU",
-    other: "Autre",
   },
   buttons: {
     back: "Retour",

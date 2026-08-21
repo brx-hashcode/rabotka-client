@@ -72,7 +72,6 @@ export default function Onboarding() {
       case "kyc-documents":
         return (
           <KycDocumentsForm
-            currentStep="kyc-documents"
             onBack={() => setStep("profile-type")}
             onNext={() => setStep("confirmation")}
           />

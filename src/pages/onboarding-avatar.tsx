@@ -12,9 +12,12 @@ export default function OnboardingAvatar() {
   const firstLoginDone = useFirstLoginDone();
   const [uploaded, setUploaded] = useState(false);
 
-  const goToProfile = async () => {
+  // Last step of onboarding, so this is where a new account lands. Home rather
+  // than the profile page: a freshly created account has nothing on its profile
+  // worth reading, while home is the feed that shows what the platform is for.
+  const goToHome = async () => {
     await firstLoginDone.mutateAsync();
-    navigate("/profile");
+    navigate("/home");
   };
 
   // Wait for the profile before rendering; an existing avatar is shown as the
@@ -42,7 +45,7 @@ export default function OnboardingAvatar() {
         <div className="px-6 pb-10 w-full max-w-sm mx-auto flex flex-col gap-3">
           <Button
             variant={uploaded ? "default" : "outline"}
-            onClick={goToProfile}
+            onClick={goToHome}
             disabled={firstLoginDone.isPending}
           >
             {uploaded ? "Continuer" : "Passer cette étape"}
