@@ -17,23 +17,29 @@ export const kycDocumentsContent = {
       identityCard: "Carte d'identité",
       passport: "Passeport",
       driverLicense: "Permis de conduire",
-      birthCertificate: "Acte de naissance",
-      studentCard: "Carte étudiant",
       niuCard: "Carte NIU",
-      other: "Autre",
     },
     helperText: "Type de document d'identité",
   },
   documents: {
     kycDocument: {
-      label: "Document d'identité KYC",
+      label: "Document d'identité — recto",
       description:
-        "Téléchargez une photo claire de votre pièce d'identité officielle (carte d'identité nationale, passeport ou permis de conduire). Le document doit être lisible, valide et toutes les informations doivent être visibles.",
+        "Téléchargez une photo claire du recto de votre pièce d'identité officielle (carte d'identité nationale, passeport, permis de conduire ou carte NIU). Le document doit être lisible, valide et toutes les informations doivent être visibles.",
       helperText: "JPG, JPEG, PNG - Max 5MB",
-      infoTooltip:
-        "Photo claire de votre pièce d'identité (recto/verso si nécessaire).",
+      infoTooltip: "Photo claire du recto de votre pièce d'identité.",
       infoImageKey: "document" as const,
       infoImageAlt: "Exemple de document d'identité accepté",
+    },
+    kycDocumentBack: {
+      label: "Document d'identité — verso",
+      description:
+        "Téléchargez le verso du même document. C'est là que figurent la date de délivrance, la date d'expiration et la signature, indispensables à la vérification. Le passeport n'est pas concerné : toutes ses informations sont sur la page photo.",
+      helperText: "JPG, JPEG, PNG - Max 5MB",
+      infoTooltip:
+        "Photo claire du verso, à plat et bien éclairé. Non demandé pour un passeport.",
+      infoImageKey: "document" as const,
+      infoImageAlt: "Exemple de verso de document d'identité",
     },
     kycSelfie: {
       label: "Selfie avec document d'identité",
