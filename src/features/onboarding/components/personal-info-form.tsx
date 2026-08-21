@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
@@ -43,6 +44,17 @@ export function PersonalInfoForm({
     defaultValues: personalInfo,
     mode: "onChange",
   });
+
+  // defaultValues snapshot the store at first render, but hydrateFromStorage is
+  // async and resolves after it -- so coming back to step 1 showed an empty
+  // form even though the store had every field. Guarded on isDirty so a slow
+  // hydration can never overwrite what someone is in the middle of typing.
+  useEffect(() => {
+    const hasStoredValues = Object.values(personalInfo).some(Boolean);
+    if (hasStoredValues && !form.formState.isDirty) {
+      form.reset(personalInfo);
+    }
+  }, [personalInfo, form]);
 
   const description = form.watch("description");
   const charCount = description?.length || 0;

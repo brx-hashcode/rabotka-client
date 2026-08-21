@@ -63,19 +63,7 @@ export function ProfileTypeForm({
 
   useEffect(() => {
     getCategories()
-      .then((cats) => {
-        setCategories(cats);
-        // If user has pre-selected categories beyond the initial slice, expand to show them
-        const preSelected = kycData.categoryIds;
-        if (preSelected.length > 0) {
-          const lastSelectedIndex = Math.max(
-            ...preSelected.map((id) => cats.findIndex((c) => c.id === id)),
-          );
-          if (lastSelectedIndex >= INITIAL_VISIBLE) {
-            setVisibleCount(Math.min(lastSelectedIndex + 1, cats.length));
-          }
-        }
-      })
+      .then(setCategories)
       .catch(() => setCategories([]));
   }, []);
 
@@ -93,6 +81,44 @@ export function ProfileTypeForm({
       form.setValue("profileType", profileTypeParam, { shouldValidate: true });
     }
   }, [profileTypeParam, form]);
+
+  // defaultValues snapshot the store at first render, but hydrateFromStorage is
+  // async and resolves after it -- so returning to this step lost the choices
+  // the store had already restored. Same gap the KYC step had.
+  const storedProfileType = kycData.profileType;
+  const storedCategoryIds = kycData.categoryIds;
+
+  useEffect(() => {
+    if (storedProfileType && !form.getValues("profileType")) {
+      form.setValue("profileType", storedProfileType, { shouldValidate: true });
+      // Keep the shareable URL agreeing with what is on screen.
+      if (!profileTypeParam) void setProfileTypeParam(storedProfileType);
+    }
+  }, [storedProfileType, profileTypeParam, setProfileTypeParam, form]);
+
+  useEffect(() => {
+    if (
+      storedCategoryIds.length > 0 &&
+      (form.getValues("categoryIds") ?? []).length === 0
+    ) {
+      form.setValue("categoryIds", storedCategoryIds, { shouldValidate: true });
+    }
+  }, [storedCategoryIds, form]);
+
+  // Reveal any restored pick that sits past the initial slice, once the
+  // categories have actually loaded -- otherwise it stays selected but
+  // invisible, and the counter reads a number the user cannot account for.
+  useEffect(() => {
+    if (categories.length === 0 || storedCategoryIds.length === 0) return;
+    const lastSelectedIndex = Math.max(
+      ...storedCategoryIds.map((id) => categories.findIndex((c) => c.id === id)),
+    );
+    if (lastSelectedIndex >= INITIAL_VISIBLE) {
+      setVisibleCount((current) =>
+        Math.max(current, Math.min(lastSelectedIndex + 1, categories.length)),
+      );
+    }
+  }, [categories, storedCategoryIds]);
 
   const onSubmit = useCallback(
     (data: Step2FormData) => {
@@ -133,6 +159,9 @@ export function ProfileTypeForm({
                   onValueChange={(value: "WORKER" | "EMPLOYER") => {
                     field.onChange(value);
                     void setProfileTypeParam(value);
+                    // Persist on pick rather than on submit: leaving the step
+                    // without pressing Continue used to discard the choice.
+                    setKycData({ profileType: value });
                   }}
                   value={field.value}
                 >
@@ -169,11 +198,23 @@ export function ProfileTypeForm({
               );
 
               const toggle = (id: string) => {
+                let next: string[];
                 if (selected.includes(id)) {
-                  field.onChange(selected.filter((s) => s !== id));
+                  next = selected.filter((s) => s !== id);
                 } else if (!atMax) {
-                  field.onChange([...selected, id]);
+                  next = [...selected, id];
+                } else {
+                  return;
                 }
+                field.onChange(next);
+                // Names travel with the ids so the confirmation view never
+                // shows a stale label for a domain that was just deselected.
+                setKycData({
+                  categoryIds: next,
+                  categoryNames: categories
+                    .filter((c) => next.includes(c.id))
+                    .map((c) => c.name),
+                });
               };
 
               return (
