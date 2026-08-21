@@ -24,7 +24,6 @@ import {
   documentTypeLabel as documentTypeLabelFor,
   requiresBackSide,
 } from "@/lib/kyc-document-types";
-import { StepIndicator } from "./step-indicator";
 import { cn } from "@/lib/utils";
 
 type OnboardingStep =
