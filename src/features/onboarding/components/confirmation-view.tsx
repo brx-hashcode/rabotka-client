@@ -76,7 +76,6 @@ export function ConfirmationView({
             {content.pageTitle}
           </h3>
         </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
       <div className="space-y-6">
         <section>
@@ -160,8 +159,8 @@ export function ConfirmationView({
               value=""
             >
               <Badge
-                variant="outline"
-                className="text-gray-700 font-semibold px-3 py-1 border-gray-300"
+                variant="secondary"
+                className="text-gray-700 font-semibold px-3 py-1 border-transparent"
               >
                 {documentTypeLabel}
               </Badge>
@@ -174,7 +173,7 @@ export function ConfirmationView({
             {content.kycDocuments.title}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-gray-300 rounded-lg p-4">
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.documentIdentity}
               </p>
@@ -197,7 +196,7 @@ export function ConfirmationView({
             </div>
 
             {requiresBackSide(kycData.documentType) && (
-              <div className="border border-gray-300 rounded-lg p-4">
+              <div className="bg-card shadow-soft rounded-lg p-4">
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   {content.kycDocuments.documentIdentityBack}
                 </p>
@@ -225,7 +224,7 @@ export function ConfirmationView({
               </div>
             )}
 
-            <div className="border border-gray-300 rounded-lg p-4">
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.selfie}
               </p>
@@ -250,7 +249,7 @@ export function ConfirmationView({
         </section>
       </div>
 
-      <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="flex items-start gap-3 rounded-lg bg-card shadow-soft p-4">
         <Checkbox
           id="policy-accept"
           checked={policyAccepted}
