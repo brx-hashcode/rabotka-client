@@ -7,7 +7,9 @@ import {
   KYC_DOCUMENT_TYPE_OPTIONS,
   documentTypeLabel,
   requiresBackSide,
+  shouldDropBackSide,
 } from "@/lib/kyc-document-types";
+import { kycDocumentGuidance } from "@/content/onboarding";
 import { step3Schema } from "@/lib/validations/onboarding";
 
 const imageFile = (name = "doc.jpg") =>
@@ -107,5 +109,53 @@ describe("step3Schema", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe("shouldDropBackSide", () => {
+  it("drops a verso once the user picks a passport", () => {
+    expect(shouldDropBackSide("PASSPORT", true)).toBe(true);
+  });
+
+  it("keeps the verso for types that have one", () => {
+    expect(shouldDropBackSide("IDENTITY_CARD", true)).toBe(false);
+    expect(shouldDropBackSide("NIU_CARD", true)).toBe(false);
+    expect(shouldDropBackSide("DRIVER_LICENSE", true)).toBe(false);
+  });
+
+  it("never drops before a type is chosen", () => {
+    // The regression this exists for: the form's defaultValues snapshot an
+    // empty documentType, and the store hydrates asynchronously after it. An
+    // unchosen type also "needs no back", so a plain !requiresBackSide check
+    // deleted the verso the user had already uploaded, on every reload.
+    expect(shouldDropBackSide("", true)).toBe(false);
+    expect(shouldDropBackSide(null, true)).toBe(false);
+    expect(shouldDropBackSide(undefined, true)).toBe(false);
+  });
+
+  it("does nothing when there is no verso to drop", () => {
+    expect(shouldDropBackSide("PASSPORT", false)).toBe(false);
+  });
+});
+
+describe("kycDocumentGuidance", () => {
+  it("names the document in every zone of every type", () => {
+    for (const type of KYC_DOCUMENT_TYPES) {
+      const guidance = kycDocumentGuidance[type];
+      expect(guidance, `missing guidance for ${type}`).toBeDefined();
+      expect(guidance.front.label).toBeTruthy();
+      expect(guidance.front.description).toBeTruthy();
+      expect(guidance.selfie.label).toBeTruthy();
+      expect(guidance.selfie.description).toBeTruthy();
+    }
+  });
+
+  it("gives a verso to exactly the types that have one", () => {
+    for (const type of KYC_DOCUMENT_TYPES) {
+      expect(
+        Boolean(kycDocumentGuidance[type].back),
+        `back copy mismatch for ${type}`,
+      ).toBe(requiresBackSide(type));
+    }
   });
 });

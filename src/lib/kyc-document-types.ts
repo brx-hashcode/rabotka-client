@@ -56,3 +56,19 @@ export const KYC_DOCUMENT_TYPE_OPTIONS = KYC_DOCUMENT_TYPES.map((value) => ({
   value,
   label: LABELS_BY_TYPE[value],
 }));
+
+/**
+ * Whether an already-uploaded verso should be dropped.
+ *
+ * True only once the user has actually chosen a type that has no back. The
+ * `documentType &&` guard is the whole point: an unchosen type also "needs no
+ * back", so without it this returns true during the gap between the form's
+ * first render and the store finishing its async hydration -- and a reload
+ * silently deleted the verso the user had already uploaded.
+ */
+export function shouldDropBackSide(
+  documentType: DocumentType | "" | null | undefined,
+  hasBackFile: boolean,
+): boolean {
+  return !!documentType && !requiresBackSide(documentType) && hasBackFile;
+}
