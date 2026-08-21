@@ -12,7 +12,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScreenHeader, StatusChip } from "@/features/employer";
+import { ScreenHeader } from "@/features/employer";
+import { DomainBadges } from "@/features/profile/components";
 import { useRecommendedWorker } from "@/hooks/use-recommendations";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
@@ -160,13 +161,7 @@ export default function RecommendedWorkerDetail() {
               <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Domaines
               </p>
-              <div className="flex flex-wrap gap-2">
-                {domains.map((name) => (
-                  <StatusChip key={name} className="bg-whatsapp/10 text-whatsapp">
-                    {name}
-                  </StatusChip>
-                ))}
-              </div>
+              <DomainBadges names={domains} />
             </div>
           )}
 
