@@ -5,8 +5,9 @@ import {
   clearKycFile,
   clearKycFiles,
 } from "@/lib/kyc-file-storage";
+import type { DocumentType } from "@/lib/kyc-document-types";
 
-export type DocumentType = "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "BIRTH_CERTIFICATE" | "STUDENT_CARD" | "NIU_CARD" | "OTHER";
+export type { DocumentType };
 
 export type PersonalInfo = {
   firstName: string;
@@ -28,6 +29,11 @@ export type KycData = {
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycDocumentUrl: string | null;
+  // Back of the document. Stays null for a PASSPORT, which has no back to
+  // photograph — see requiresBackSide in @/lib/kyc-document-types.
+  kycDocumentBack: File | null;
+  kycDocumentBackPreview: string | null;
+  kycDocumentBackUrl: string | null;
   kycSelfie: File | null;
   kycSelfiePreview: string | null;
   kycSelfieUrl: string | null;
@@ -70,6 +76,9 @@ const initialState = {
     kycDocument: null,
     kycDocumentPreview: null,
     kycDocumentUrl: null,
+    kycDocumentBack: null,
+    kycDocumentBackPreview: null,
+    kycDocumentBackUrl: null,
     kycSelfie: null,
     kycSelfiePreview: null,
     kycSelfieUrl: null,
@@ -96,18 +105,13 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
 
     if (typeof globalThis === "undefined") return;
 
-    if (data.kycDocument !== undefined) {
-      if (data.kycDocument) {
-        saveKycFile("kycDocument", data.kycDocument).catch(console.error);
+    for (const key of ["kycDocument", "kycDocumentBack", "kycSelfie"] as const) {
+      const file = data[key];
+      if (file === undefined) continue;
+      if (file) {
+        saveKycFile(key, file).catch(console.error);
       } else {
-        clearKycFile("kycDocument").catch(console.error);
-      }
-    }
-    if (data.kycSelfie !== undefined) {
-      if (data.kycSelfie) {
-        saveKycFile("kycSelfie", data.kycSelfie).catch(console.error);
-      } else {
-        clearKycFile("kycSelfie").catch(console.error);
+        clearKycFile(key).catch(console.error);
       }
     }
   },
@@ -140,13 +144,14 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             categoryNames: data.kycData?.categoryNames || [],
             documentType: data.kycData?.documentType || "",
             kycDocumentUrl: data.kycData?.kycDocumentUrl || null,
+            kycDocumentBackUrl: data.kycData?.kycDocumentBackUrl || null,
             kycSelfieUrl: data.kycData?.kycSelfieUrl || null,
           },
         });
       }
 
       const files = await loadKycFiles();
-      if (files.kycDocument || files.kycSelfie) {
+      if (files.kycDocument || files.kycDocumentBack || files.kycSelfie) {
         set((state) => ({
           kycData: {
             ...state.kycData,
@@ -154,6 +159,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             kycDocumentPreview: files.kycDocument
               ? URL.createObjectURL(files.kycDocument)
               : state.kycData.kycDocumentPreview,
+            kycDocumentBack:
+              files.kycDocumentBack ?? state.kycData.kycDocumentBack,
+            kycDocumentBackPreview: files.kycDocumentBack
+              ? URL.createObjectURL(files.kycDocumentBack)
+              : state.kycData.kycDocumentBackPreview,
             kycSelfie: files.kycSelfie ?? state.kycData.kycSelfie,
             kycSelfiePreview: files.kycSelfie
               ? URL.createObjectURL(files.kycSelfie)
@@ -181,6 +191,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           // Storage URLs are permanent — persist them so the uploaded files
           // survive a reload without re-uploading.
           kycDocumentUrl: kycData.kycDocumentUrl,
+          kycDocumentBackUrl: kycData.kycDocumentBackUrl,
           kycSelfieUrl: kycData.kycSelfieUrl,
           // Blob previews are session-scoped and invalid after reload — omit them
           // so hydrateFromStorage regenerates fresh previews from IndexedDB.

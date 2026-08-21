@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { validationMessages } from "@/content/onboarding";
+import {
+  KYC_DOCUMENT_TYPES,
+  requiresBackSide,
+} from "@/lib/kyc-document-types";
 
 export const step1Schema = z.object({
   firstName: z
@@ -46,18 +50,7 @@ export { step2SchemaBase };
 
 /** Step 3 — KYC documents */
 const step3SchemaBase = z.object({
-  documentType: z.union([
-    z.enum([
-      "IDENTITY_CARD",
-      "PASSPORT",
-      "DRIVER_LICENSE",
-      "BIRTH_CERTIFICATE",
-      "STUDENT_CARD",
-      "NIU_CARD",
-      "OTHER",
-    ]),
-    z.literal(""),
-  ]),
+  documentType: z.union([z.enum(KYC_DOCUMENT_TYPES), z.literal("")]),
   kycDocument: z.custom<File>(
     (file) => {
       if (!file || !(file instanceof File)) return false;
@@ -80,15 +73,46 @@ const step3SchemaBase = z.object({
       message: validationMessages.kycSelfie.invalid,
     }
   ),
+  // Optional on the base object on purpose: whether a back is required depends
+  // on documentType, and that rule lives in the superRefine below. Keeping the
+  // base flat also keeps `step3SchemaBase.shape[fieldName]` usable — the upload
+  // form indexes it to validate each file as it is picked.
+  kycDocumentBack: z
+    .custom<File>(
+      (file) => {
+        if (!file || !(file instanceof File)) return false;
+        if (file.size > 5 * 1024 * 1024) return false;
+        const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+        return validTypes.includes(file.type);
+      },
+      {
+        message: validationMessages.kycDocumentBack.invalid,
+      }
+    )
+    .nullish(),
 });
 
-export const step3Schema = step3SchemaBase.refine(
-  (data) => data.documentType !== "",
-  {
-    message: validationMessages.documentType.required,
-    path: ["documentType"],
+export const step3Schema = step3SchemaBase.superRefine((data, ctx) => {
+  if (data.documentType === "") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: validationMessages.documentType.required,
+      path: ["documentType"],
+    });
+    return;
   }
-);
+
+  // Everything but a passport splits its data across two sides, so the front
+  // alone cannot be verified. Reported on the field so the error lands under
+  // the verso upload zone rather than at the top of the form.
+  if (requiresBackSide(data.documentType) && !data.kycDocumentBack) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: validationMessages.kycDocumentBack.required,
+      path: ["kycDocumentBack"],
+    });
+  }
+});
 
 export { step3SchemaBase };
 
