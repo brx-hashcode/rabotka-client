@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,10 @@ import {
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
-import { StepIndicator } from "./step-indicator";
+import {
+  documentTypeLabel as documentTypeLabelFor,
+  requiresBackSide,
+} from "@/lib/kyc-document-types";
 import { cn } from "@/lib/utils";
 
 type OnboardingStep =
@@ -59,18 +62,7 @@ export function ConfirmationView({
 
   const content = confirmationContent;
 
-  const documentTypeLabel = useMemo(() => {
-    const map: Record<string, string> = {
-      IDENTITY_CARD: content.documentTypes.identityCard,
-      PASSPORT: content.documentTypes.passport,
-      DRIVER_LICENSE: content.documentTypes.driverLicense,
-      BIRTH_CERTIFICATE: content.documentTypes.birthCertificate,
-      STUDENT_CARD: content.documentTypes.studentCard,
-      NIU_CARD: content.documentTypes.niuCard,
-      OTHER: content.documentTypes.other,
-    };
-    return (kycData.documentType && map[kycData.documentType]) || "-";
-  }, [kycData.documentType, content.documentTypes]);
+  const documentTypeLabel = documentTypeLabelFor(kycData.documentType) ?? "-";
 
   return (
     <div className="space-y-6">
@@ -83,7 +75,6 @@ export function ConfirmationView({
             {content.pageTitle}
           </h3>
         </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
       <div className="space-y-6">
         <section>
@@ -167,8 +158,8 @@ export function ConfirmationView({
               value=""
             >
               <Badge
-                variant="outline"
-                className="text-gray-700 font-semibold px-3 py-1 border-gray-300"
+                variant="secondary"
+                className="text-gray-700 font-semibold px-3 py-1 border-transparent"
               >
                 {documentTypeLabel}
               </Badge>
@@ -181,7 +172,7 @@ export function ConfirmationView({
             {content.kycDocuments.title}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-gray-300 rounded-lg p-4">
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.documentIdentity}
               </p>
@@ -203,7 +194,36 @@ export function ConfirmationView({
               )}
             </div>
 
-            <div className="border border-gray-300 rounded-lg p-4">
+            {requiresBackSide(kycData.documentType) && (
+              <div className="bg-card shadow-soft rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {content.kycDocuments.documentIdentityBack}
+                </p>
+                {kycData.kycDocumentBackPreview ||
+                kycData.kycDocumentBackUrl ? (
+                  <div className="space-y-2">
+                    <img
+                      src={
+                        kycData.kycDocumentBackPreview ??
+                        kycData.kycDocumentBackUrl ??
+                        ""
+                      }
+                      alt="KYC Document Back"
+                      className="w-full h-32 object-cover rounded"
+                    />
+                    <p className="text-xs text-gray-600 truncate">
+                      {kycData.kycDocumentBack?.name}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    {content.kycDocuments.noDocument}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.selfie}
               </p>
@@ -228,7 +248,7 @@ export function ConfirmationView({
         </section>
       </div>
 
-      <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="flex items-start gap-3 rounded-lg bg-card shadow-soft p-4">
         <Checkbox
           id="policy-accept"
           checked={policyAccepted}
