@@ -1,4 +1,5 @@
 import type { EmploymentTypeValue } from "@/lib/employment-type";
+import type { DocumentType } from "@/lib/kyc-document-types";
 import { RabotkaBaseController } from "./base-controller";
 import { config } from "@/config";
 
@@ -14,16 +15,11 @@ export type CreateProfilePayload = {
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
   categoryIds?: string[];
-  documentType:
-    | "IDENTITY_CARD"
-    | "PASSPORT"
-    | "DRIVER_LICENSE"
-    | "BIRTH_CERTIFICATE"
-    | "STUDENT_CARD"
-    | "NIU_CARD"
-    | "OTHER"
-    | "";
+  documentType: DocumentType | "";
   kycDocumentUrl: string;
+  // Omitted for a PASSPORT, which has no back to photograph. The backend
+  // discards it if sent alongside one.
+  kycDocumentBackUrl?: string;
   kycSelfieUrl: string;
   readAndApprovedPolicies: boolean;
 };

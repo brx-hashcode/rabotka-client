@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,10 @@ import {
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { confirmationContent } from "@/content/onboarding";
+import {
+  documentTypeLabel as documentTypeLabelFor,
+  requiresBackSide,
+} from "@/lib/kyc-document-types";
 import { StepIndicator } from "./step-indicator";
 import { cn } from "@/lib/utils";
 
@@ -59,18 +63,7 @@ export function ConfirmationView({
 
   const content = confirmationContent;
 
-  const documentTypeLabel = useMemo(() => {
-    const map: Record<string, string> = {
-      IDENTITY_CARD: content.documentTypes.identityCard,
-      PASSPORT: content.documentTypes.passport,
-      DRIVER_LICENSE: content.documentTypes.driverLicense,
-      BIRTH_CERTIFICATE: content.documentTypes.birthCertificate,
-      STUDENT_CARD: content.documentTypes.studentCard,
-      NIU_CARD: content.documentTypes.niuCard,
-      OTHER: content.documentTypes.other,
-    };
-    return (kycData.documentType && map[kycData.documentType]) || "-";
-  }, [kycData.documentType, content.documentTypes]);
+  const documentTypeLabel = documentTypeLabelFor(kycData.documentType) ?? "-";
 
   return (
     <div className="space-y-6">
@@ -202,6 +195,35 @@ export function ConfirmationView({
                 </p>
               )}
             </div>
+
+            {requiresBackSide(kycData.documentType) && (
+              <div className="border border-gray-300 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {content.kycDocuments.documentIdentityBack}
+                </p>
+                {kycData.kycDocumentBackPreview ||
+                kycData.kycDocumentBackUrl ? (
+                  <div className="space-y-2">
+                    <img
+                      src={
+                        kycData.kycDocumentBackPreview ??
+                        kycData.kycDocumentBackUrl ??
+                        ""
+                      }
+                      alt="KYC Document Back"
+                      className="w-full h-32 object-cover rounded"
+                    />
+                    <p className="text-xs text-gray-600 truncate">
+                      {kycData.kycDocumentBack?.name}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    {content.kycDocuments.noDocument}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="border border-gray-300 rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
