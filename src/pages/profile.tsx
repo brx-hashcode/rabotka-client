@@ -26,6 +26,7 @@ import {
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
+import { DomainBadges } from "@/features/profile/components/domain-badges";
 import { SupportContactButton } from "@/features/support";
 import { useEffect } from "react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
@@ -76,7 +77,6 @@ export default function Profile() {
     `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`.toUpperCase();
   const isVerified = profile.verificationStatus === "VERIFIED";
   const isEmployer = profile.profileType === "EMPLOYER";
-  const categoryIds = profile.categoryIds ?? [];
   const categoryNames = profile.categoryNames ?? [];
 
   return (
@@ -165,16 +165,7 @@ export default function Profile() {
           </div>
           <div className="px-4 py-3">
             {categoryNames.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {categoryNames.map((name, i) => (
-                  <span
-                    key={categoryIds[i]}
-                    className="inline-flex items-center rounded-full border border-green-500 bg-green-50 px-3 py-1 text-sm font-medium text-green-700"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
+              <DomainBadges names={categoryNames} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 Aucun domaine sélectionné
