@@ -5,6 +5,8 @@ import phoneConversationImage from "@/assets/phone-conversation.jpg?format=webp"
 import { directContactContent } from "@/content/landing/direct-contact";
 import { onboardingPathWithProfile } from "@/lib/onboarding-navigation";
 import { Link } from "react-router";
+import { config } from "@/config";
+import { trackWhatsAppClick } from "@/lib/analytics/events";
 
 export function DirectContactSection() {
   const ref = useRef(null);
@@ -83,13 +85,16 @@ export function DirectContactSection() {
               </div>
             </div>
 
-            <Link
-              to={onboardingPathWithProfile("WORKER")}
+            <a
+              href={config.whatsapp.links.start}
+              onClick={() => trackWhatsAppClick("start", "direct-contact")}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-whatsapp font-medium group"
             >
               <span>{directContactContent.cta}</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:underline" />
-            </Link>
+            </a>
           </motion.div>
         </div>
       </div>

@@ -50,10 +50,6 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="space-y-4"
             >
-              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
-                <badge.icon className="w-4 h-4" />
-                {badge.text}
-              </span> */}
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
                 {title.main}{" "}
@@ -88,9 +84,6 @@ export function HeroSection() {
               </Button>
             </div>
 
-            {/* Visually hidden: "Comment ça marche" in the header already
-                links here. Kept in the DOM so search engines still see the
-                internal deep-links to each flow (#flow-travailleurs / #flow-recruteurs). */}
             <div className="sr-only">
               {flowGuides.map((guide) => (
                 <a
