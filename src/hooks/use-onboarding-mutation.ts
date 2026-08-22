@@ -37,12 +37,19 @@ export function useOnboardingMutation() {
         categoryIds: kycData.categoryIds.length > 0 ? kycData.categoryIds : undefined,
         documentType: kycData.documentType,
         kycDocumentUrl: kycData.kycDocumentUrl,
+        kycDocumentKey: kycData.kycDocumentKey ?? undefined,
         // Send the back only when the type has one, so a stale upload left over
         // from a type the user switched away from never reaches the backend.
+        // The key follows the same rule — sending one without its url would
+        // persist a pointer to a document the profile does not claim to have.
         kycDocumentBackUrl: needsBack
           ? (kycData.kycDocumentBackUrl ?? undefined)
           : undefined,
+        kycDocumentBackKey: needsBack
+          ? (kycData.kycDocumentBackKey ?? undefined)
+          : undefined,
         kycSelfieUrl: kycData.kycSelfieUrl,
+        kycSelfieKey: kycData.kycSelfieKey ?? undefined,
         readAndApprovedPolicies: true,
       });
     },
