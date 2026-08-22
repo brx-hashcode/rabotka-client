@@ -78,7 +78,7 @@ export function ConfirmationView({
       </div>
       <div className="space-y-6">
         <section>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <InfoCard
               label={content.personalInfo.fields.firstName}
               icon={User}
@@ -171,7 +171,7 @@ export function ConfirmationView({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {content.kycDocuments.title}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.documentIdentity}
