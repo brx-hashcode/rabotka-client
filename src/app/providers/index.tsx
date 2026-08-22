@@ -23,13 +23,6 @@ type ProvidersProps = {
 };
 
 export const queryClient = new QueryClient({
-  // The client runs inside WhatsApp's in-app webview, which never fires
-  // window focus/reconnect events — so React Query's usual refetch triggers
-  // never happen and mutated data stays stale until a manual page reload.
-  // Invalidate the whole cache after every successful mutation so the pages
-  // affected by it revalidate on their own. This cache-level callback runs in
-  // addition to each mutation's own onSuccess (a defaultOptions.mutations
-  // callback would instead be overridden by hooks that define their own).
   mutationCache: new MutationCache({
     onSuccess: () => {
       queryClient.invalidateQueries();
@@ -39,10 +32,6 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
-      // Refetch stale queries when a page mounts, so navigating to a screen
-      // after a mutation (which just invalidated the cache) shows fresh data
-      // instead of the pre-mutation cache. Within staleTime, ordinary
-      // re-navigation is still served from cache.
       refetchOnMount: true,
       refetchOnReconnect: false,
       retry: false,

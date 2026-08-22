@@ -29,14 +29,20 @@ export type KycData = {
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycDocumentUrl: string | null;
+  // The storage key that goes with the url above. KYC files sit in a private
+  // bucket now and are read back through signed urls; signing needs the key,
+  // so it has to survive all the way to profile creation.
+  kycDocumentKey: string | null;
   // Back of the document. Stays null for a PASSPORT, which has no back to
   // photograph — see requiresBackSide in @/lib/kyc-document-types.
   kycDocumentBack: File | null;
   kycDocumentBackPreview: string | null;
   kycDocumentBackUrl: string | null;
+  kycDocumentBackKey: string | null;
   kycSelfie: File | null;
   kycSelfiePreview: string | null;
   kycSelfieUrl: string | null;
+  kycSelfieKey: string | null;
 };
 
 type OnboardingStore = {
@@ -76,12 +82,15 @@ const initialState = {
     kycDocument: null,
     kycDocumentPreview: null,
     kycDocumentUrl: null,
+    kycDocumentKey: null,
     kycDocumentBack: null,
     kycDocumentBackPreview: null,
     kycDocumentBackUrl: null,
+    kycDocumentBackKey: null,
     kycSelfie: null,
     kycSelfiePreview: null,
     kycSelfieUrl: null,
+    kycSelfieKey: null,
   },
   isSubmitting: false,
   error: null,
@@ -144,8 +153,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             categoryNames: data.kycData?.categoryNames || [],
             documentType: data.kycData?.documentType || "",
             kycDocumentUrl: data.kycData?.kycDocumentUrl || null,
+            kycDocumentKey: data.kycData?.kycDocumentKey || null,
             kycDocumentBackUrl: data.kycData?.kycDocumentBackUrl || null,
+            kycDocumentBackKey: data.kycData?.kycDocumentBackKey || null,
             kycSelfieUrl: data.kycData?.kycSelfieUrl || null,
+            kycSelfieKey: data.kycData?.kycSelfieKey || null,
           },
         });
       }
@@ -188,11 +200,16 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
           categoryIds: kycData.categoryIds,
           categoryNames: kycData.categoryNames,
           documentType: kycData.documentType,
-          // Storage URLs are permanent — persist them so the uploaded files
-          // survive a reload without re-uploading.
+          // Persisted so the uploaded files survive a reload without being
+          // re-uploaded. The KEYS are the durable half: KYC urls are signed and
+          // expire within the hour, so a reload after that leaves a url that no
+          // longer resolves — the key is what still identifies the object.
           kycDocumentUrl: kycData.kycDocumentUrl,
+          kycDocumentKey: kycData.kycDocumentKey,
           kycDocumentBackUrl: kycData.kycDocumentBackUrl,
+          kycDocumentBackKey: kycData.kycDocumentBackKey,
           kycSelfieUrl: kycData.kycSelfieUrl,
+          kycSelfieKey: kycData.kycSelfieKey,
           // Blob previews are session-scoped and invalid after reload — omit them
           // so hydrateFromStorage regenerates fresh previews from IndexedDB.
         },
