@@ -71,7 +71,8 @@ export default function JobDetailWorker() {
 
   let applyLabel = "Postuler";
   if (job?.applied) applyLabel = "Déjà postulé";
-  else if (offerClosed) applyLabel = "Offre pourvue";
+  // Même libellé que la carte du fil : il parle du poste, pas de la personne.
+  else if (offerClosed) applyLabel = "Plus de place disponible";
   else if (accountBlocked && accountReason)
     applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
