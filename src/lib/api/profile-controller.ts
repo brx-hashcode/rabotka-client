@@ -21,6 +21,12 @@ export type CreateProfilePayload = {
   // discards it if sent alongside one.
   kycDocumentBackUrl?: string;
   kycSelfieUrl: string;
+  // Storage keys returned alongside the urls above. Optional because the
+  // backend still accepts profiles without them — a client that predates this
+  // change keeps working, and its rows get picked up by the backfill.
+  kycDocumentKey?: string;
+  kycDocumentBackKey?: string;
+  kycSelfieKey?: string;
   readAndApprovedPolicies: boolean;
 };
 
@@ -152,12 +158,19 @@ class ProfileController extends RabotkaBaseController {
    * URL. Called per-file during onboarding step 3 so the final createProfile
    * request carries only URLs, not file bytes.
    */
-  async uploadKycFile(file: File): Promise<{ url: string }> {
+  /**
+   * The `key` is what makes the file readable later. KYC documents now live in
+   * a private bucket and are served through signed urls that expire after an
+   * hour, so the admin has to re-sign on every view — and signing needs the
+   * object key. The endpoint used to return only `url`, which is why
+   * `storage_key` was NULL on every KYC row ever written.
+   */
+  async uploadKycFile(file: File): Promise<{ url: string; key: string }> {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      return await this.post<{ url: string }>(
+      return await this.post<{ url: string; key: string }>(
         "/profile/kyc-upload",
         formData as unknown as Record<string, unknown>,
       );

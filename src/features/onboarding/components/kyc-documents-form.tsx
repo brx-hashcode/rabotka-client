@@ -180,13 +180,17 @@ export function KycDocumentsForm({
         [fieldName]: compressed,
         [`${fieldName}Preview`]: preview,
         [`${fieldName}Url`]: null,
+        [`${fieldName}Key`]: null,
       });
 
       // Upload to storage right away so the final create call carries only URLs.
       setUploading((prev) => ({ ...prev, [fieldName]: true }));
       try {
-        const { url } = await uploadKyc.mutateAsync(compressed);
-        setKycData({ [`${fieldName}Url`]: url });
+        // The key travels with the url: KYC files land in a private bucket
+        // and the url is a signature that dies within the hour, so the key is
+        // what lets the document be read back afterwards.
+        const { url, key } = await uploadKyc.mutateAsync(compressed);
+        setKycData({ [`${fieldName}Url`]: url, [`${fieldName}Key`]: key });
       } catch {
         form.setError(fieldName, {
           message: "Échec de l'envoi du fichier. Veuillez réessayer.",
@@ -212,6 +216,7 @@ export function KycDocumentsForm({
         [fieldName]: null,
         [`${fieldName}Preview`]: null,
         [`${fieldName}Url`]: null,
+        [`${fieldName}Key`]: null,
       });
     },
     [form, setKycData],

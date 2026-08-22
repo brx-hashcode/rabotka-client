@@ -53,7 +53,11 @@ export function JobCard({ job, canApply }: Props) {
 
   let applyLabel = "Postuler";
   if (job.applied) applyLabel = "Déjà postulé";
-  else if (offerClosed) applyLabel = "Offre pourvue";
+  // "Offre pourvue" se lisait comme un statut de SA candidature, alors que la
+  // branche « Déjà postulé » au-dessus a déjà pris la main dans ce cas : ce
+  // libellé ne s'affiche qu'à quelqu'un qui n'a pas postulé. Il parle donc du
+  // poste, pas de la personne, et doit le dire.
+  else if (offerClosed) applyLabel = "Plus de place disponible";
   else if (accountBlocked && accountReason)
     applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
