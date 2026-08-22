@@ -31,6 +31,7 @@ import {
   KYC_DOCUMENT_TYPE_OPTIONS,
   requiresBackSide,
   shouldDropBackSide,
+  type DocumentType,
 } from "@/lib/kyc-document-types";
 import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
 import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
@@ -71,7 +72,13 @@ export function KycDocumentsForm({
   const form = useForm<Step3FormData>({
     resolver: zodResolver(step3Schema),
     defaultValues: {
-      documentType: kycData.documentType || "",
+      // Pre-selected rather than blank. With no type chosen the step rendered
+      // in a state that matches nobody: generic copy that names no document,
+      // and no verso zone -- so picking a type made a whole upload zone appear
+      // and every label rewrite itself under the user. The identity card is
+      // what the overwhelming majority present, so it is the honest default
+      // rather than an arbitrary one.
+      documentType: kycData.documentType || "IDENTITY_CARD",
     },
     mode: "onChange",
   });
@@ -89,13 +96,22 @@ export function KycDocumentsForm({
   } = kycData;
 
   // defaultValues snapshots the store at first render, but hydrateFromStorage
-  // is async and resolves after it -- so on a reload the form starts with an
-  // empty documentType and never learns the restored one. That hid the verso
-  // zone, and made the cleanup effect below delete the verso file the user had
-  // already uploaded.
+  // is async and resolves after it -- so on a reload the form starts on the
+  // default and never learns the restored type. That hid the verso zone, and
+  // made the cleanup effect below delete the verso file the user had already
+  // uploaded.
+  //
+  // Compares values rather than testing for an empty one: now that the field
+  // is pre-selected there is always something in it, so "is it blank" would
+  // never let a restored PASSPORT through. The store is written the moment the
+  // user picks, so the two differing can only mean hydration brought a choice
+  // the form has not caught up with yet.
   const storedDocumentType = kycData.documentType;
   useEffect(() => {
-    if (storedDocumentType && !form.getValues("documentType")) {
+    if (
+      storedDocumentType &&
+      storedDocumentType !== form.getValues("documentType")
+    ) {
       form.setValue("documentType", storedDocumentType, {
         shouldValidate: true,
       });
@@ -268,7 +284,16 @@ export function KycDocumentsForm({
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.documentType.label}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Persist on pick, not on submit: a reload mid-step used to
+                    // drop the choice back to the default, and the restore
+                    // effect above has nothing to restore from otherwise.
+                    setKycData({ documentType: value as DocumentType });
+                  }}
+                  value={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue
