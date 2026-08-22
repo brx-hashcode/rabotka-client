@@ -101,7 +101,9 @@ export function AppRoutes() {
         path="/onboarding"
         element={
           <Suspense fallback={<PageLoader />}>
-            <Onboarding />
+            <PublicShell>
+              <Onboarding />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -493,7 +495,9 @@ export function AppRoutes() {
         path="/login"
         element={
           <Suspense fallback={<PageLoader />}>
-            <Login />
+            <PublicShell>
+              <Login />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -502,7 +506,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <OnboardingAvatar />
+              <PublicShell>
+                <OnboardingAvatar />
+              </PublicShell>
             </AuthGuard>
           </Suspense>
         }
@@ -511,7 +517,9 @@ export function AppRoutes() {
         path="/onboarding/success"
         element={
           <Suspense fallback={<PageLoader />}>
-            <OnboardingSuccess />
+            <PublicShell>
+              <OnboardingSuccess />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -519,7 +527,9 @@ export function AppRoutes() {
         path="/onboarding/error"
         element={
           <Suspense fallback={<PageLoader />}>
-            <OnboardingError />
+            <PublicShell>
+              <OnboardingError />
+            </PublicShell>
           </Suspense>
         }
       />
