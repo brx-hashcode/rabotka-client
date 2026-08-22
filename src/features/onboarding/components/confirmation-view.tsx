@@ -259,14 +259,29 @@ export function ConfirmationView({
           htmlFor="policy-accept"
           className="text-sm text-gray-700 leading-snug cursor-pointer"
         >
+          {/* Two links, not one: the sentence claims acceptance of both
+              documents, so both have to be reachable from here. A single link
+              to /terms meant the policy being accepted could not be opened —
+              which is precisely the informed consent the law asks for. */}
           J'ai lu et j'accepte les{" "}
           <Link
             to="/terms"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 underline underline-offset-2 hover:text-green-700"
             onClick={(e) => e.stopPropagation()}
           >
-            conditions d'utilisation et la politique de confidentialité
+            conditions d'utilisation
+          </Link>{" "}
+          et la{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-600 underline underline-offset-2 hover:text-green-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            politique de confidentialité
           </Link>{" "}
           de la plateforme.
         </label>
