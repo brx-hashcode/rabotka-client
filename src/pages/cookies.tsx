@@ -9,7 +9,7 @@ export default function Cookies() {
   return (
     <PolicyShell
       title="Politique des cookies – Rabotka"
-      description="Découvrez comment Rabotka utilise les cookies et technologies similaires, et comment gérer vos préférences."
+      description="La liste complète de ce que Rabotka dépose sur votre appareil, à quoi cela sert et combien de temps cela reste — aucun cookie publicitaire ni de pistage."
       canonical="/cookies"
     >
       <article className={policyProseClassName}>
