@@ -1,8 +1,5 @@
 import { useEffect } from "react";
 import { Seo } from "@/hooks/use-seo";
-import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router";
-import { Button } from "@/components/ui/button";
 
 type PolicyShellProps = {
   title: string;
@@ -12,8 +9,13 @@ type PolicyShellProps = {
 };
 
 /**
- * Shared layout for legal pages (terms, privacy, cookies): back button,
+ * Shared layout for legal pages (terms, privacy, cookies): the eyebrow label,
  * SEO tags and the prose styling for rendered markdown content.
+ *
+ * No back button: these pages are reached from the footer and from the signup
+ * checkbox, and the landing header above already carries the way out. The
+ * label sits on the left so it reads as an eyebrow to the title beneath it
+ * rather than as something floating in the opposite corner.
  */
 export function PolicyShell({
   title,
@@ -21,8 +23,6 @@ export function PolicyShell({
   canonical,
   children,
 }: Readonly<PolicyShellProps>) {
-  const navigate = useNavigate();
-
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
       globalThis.scrollTo(0, 0);
@@ -32,20 +32,7 @@ export function PolicyShell({
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pt-28">
       <Seo title={title} description={description} canonical={canonical} />
-      <div className="mb-5 flex items-center justify-between">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            if (globalThis.history.length > 1) navigate(-1);
-            else navigate("/");
-          }}
-          className="h-8 w-8 p-0"
-          aria-label="Retour"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+      <div className="mb-5 sm:px-6">
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Document légal
         </span>
