@@ -3,14 +3,18 @@ type PublicShellProps = {
 };
 
 /**
- * `AppShell`'s frame for pages a signed-out visitor can open.
+ * `AppShell`'s frame for pages a signed-out visitor can open: the public
+ * portfolio, plus the whole way in — login and every onboarding step.
  *
  * The public portfolio rendered as a 576px column of content floating on a
  * plain white page, while every screen inside the app sits in a centred column
  * on a darker field. Same product, two different-looking surfaces, and the
- * public one is the surface a recruiter sees first.
+ * public one is the surface a recruiter sees first. Signup and login had the
+ * same break: someone crossed from a full-bleed form into a centred column the
+ * moment their account existed.
  *
- * Deliberately NOT `AppShell` itself, for two reasons that both matter here:
+ * Frame only — no header, no bottom nav. Deliberately NOT `AppShell` itself,
+ * for two reasons that both matter here:
  *
  * 1. **No bottom nav.** Its tabs go to `/home`, `/candidatures`, `/profile` —
  *    screens this visitor has no account for. Offering them is worse than

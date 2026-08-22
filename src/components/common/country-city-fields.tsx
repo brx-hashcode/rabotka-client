@@ -67,8 +67,13 @@ export function CountryCityFields<T extends FieldValues>({
     citySearch,
   );
 
+  // One column, always. Every caller renders inside a container capped well
+  // below the md breakpoint -- the onboarding column, the job-offer form, the
+  // edit-profile sheet -- so a viewport-based two-column split put both selects
+  // side by side in ~240px each and truncated their labels to "Choisissez
+  // d'abord un p...".
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <FormField
         control={form.control}
         name={countryField}
@@ -108,7 +113,7 @@ export function CountryCityFields<T extends FieldValues>({
       <FormField
         control={form.control}
         name={cityField}
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem className="flex flex-col gap-1">
             <FormLabel>{countryCityLabels.city.label}</FormLabel>
             <FormControl>
@@ -116,6 +121,7 @@ export function CountryCityFields<T extends FieldValues>({
                 options={cityOptions}
                 value={field.value || null}
                 onChange={(city) => field.onChange(city ?? "")}
+                onBlur={field.onBlur}
                 placeholder={cityPlaceholder(countryCode, cities.isPending)}
                 disabled={isCityDisabled(countryCode, cities.isPending)}
                 container={container}
@@ -128,7 +134,15 @@ export function CountryCityFields<T extends FieldValues>({
                 }
               />
             </FormControl>
-            <FormMessage />
+            {/* Only once the field has been engaged with, or once a submit has
+                been attempted. Picking a country clears the city by design, and
+                that clearing used to paint "Sélectionnez une ville" in red
+                immediately -- scolding someone for not having done something
+                they had not yet been given the chance to do. The value is still
+                validated throughout, so the submit button stays disabled. */}
+            {(fieldState.isTouched || form.formState.isSubmitted) && (
+              <FormMessage />
+            )}
           </FormItem>
         )}
       />

@@ -39,6 +39,15 @@ type CategoryComboboxProps = {
    * document.body (fine on a normal page).
    */
   readonly container?: HTMLElement | null;
+  /**
+   * Called once the picker closes, i.e. the user is done with this field.
+   *
+   * Wired to react-hook-form's `field.onBlur` by callers that want the
+   * touched state. Fired on close rather than on the trigger's own blur
+   * because opening the popover moves focus into it — which would mark the
+   * field touched at the very moment the user started engaging with it.
+   */
+  readonly onBlur?: () => void;
 };
 
 export function CategoryCombobox({
@@ -53,13 +62,20 @@ export function CategoryCombobox({
   search,
   onSearchChange,
   footnote,
+  onBlur,
 }: CategoryComboboxProps) {
   const controlledSearch = onSearchChange !== undefined;
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.id === value);
 
   return (
-    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+    <PopoverPrimitive.Root
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) onBlur?.();
+      }}
+    >
       <PopoverPrimitive.Trigger asChild>
         <button
           type="button"
