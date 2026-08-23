@@ -15,11 +15,11 @@ type SeoProps = {
 };
 
 export function Seo({
-  title = "Rabotka – Trouvez du travail et de l'aide sur WhatsApp",
-  description = "Rabotka connecte les travailleurs informels et les recruteurs grâce à un assistant WhatsApp simple. Trouvez du travail ou de l'aide directement sur WhatsApp, sans application à télécharger.",
+  title = "Rabotka – Trouvez une mission et de l'aide sur WhatsApp",
+  description = "Rabotka connecte les travailleurs informels et les recruteurs grâce à un assistant WhatsApp simple. Trouvez une mission ou de l'aide directement sur WhatsApp, sans application à télécharger.",
   canonical,
   ogImage = DEFAULT_OG_IMAGE,
-  ogImageAlt = "Rabotka – Trouvez du travail sur WhatsApp au Congo",
+  ogImageAlt = "Rabotka – Trouvez une mission sur WhatsApp au Congo",
   noIndex = false,
   jsonLd,
 }: SeoProps) {
