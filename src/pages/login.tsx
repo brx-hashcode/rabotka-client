@@ -130,7 +130,7 @@ export default function Login() {
     <>
       <Seo
         title="Connexion - Rabotka"
-        description="Connectez-vous à votre compte Rabotka pour accéder à vos offres d'emploi et gérer votre profil."
+        description="Connectez-vous à votre compte Rabotka pour accéder à vos missions et gérer votre profil."
         canonical="/login"
         noIndex={true}
       />
