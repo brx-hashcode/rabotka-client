@@ -24,6 +24,10 @@ export const confirmationContent = {
     selfie: "Selfie",
     noDocument: "Aucun document",
     noSelfie: "Aucun selfie",
+    // Shown when the file is uploaded but this tab no longer holds a local
+    // copy to preview — after a reload that emptied IndexedDB. The document is
+    // there and the signup will go through; only the thumbnail is missing.
+    uploadedNoPreview: "Document téléversé — aperçu indisponible",
   },
   profileTypes: {
     worker: "Travailleur",

@@ -176,10 +176,10 @@ export function ConfirmationView({
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.documentIdentity}
               </p>
-              {kycData.kycDocumentPreview || kycData.kycDocumentUrl ? (
+              {kycData.kycDocumentPreview ? (
                 <div className="space-y-2">
                   <img
-                    src={kycData.kycDocumentPreview ?? kycData.kycDocumentUrl ?? ""}
+                    src={kycData.kycDocumentPreview}
                     alt="KYC Document"
                     className="w-full h-32 object-cover rounded"
                   />
@@ -189,7 +189,9 @@ export function ConfirmationView({
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
-                  {content.kycDocuments.noDocument}
+                  {kycData.kycDocumentKey || kycData.kycDocumentUrl
+                    ? content.kycDocuments.uploadedNoPreview
+                    : content.kycDocuments.noDocument}
                 </p>
               )}
             </div>
@@ -199,15 +201,10 @@ export function ConfirmationView({
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   {content.kycDocuments.documentIdentityBack}
                 </p>
-                {kycData.kycDocumentBackPreview ||
-                kycData.kycDocumentBackUrl ? (
+                {kycData.kycDocumentBackPreview ? (
                   <div className="space-y-2">
                     <img
-                      src={
-                        kycData.kycDocumentBackPreview ??
-                        kycData.kycDocumentBackUrl ??
-                        ""
-                      }
+                      src={kycData.kycDocumentBackPreview}
                       alt="KYC Document Back"
                       className="w-full h-32 object-cover rounded"
                     />
@@ -217,7 +214,9 @@ export function ConfirmationView({
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">
-                    {content.kycDocuments.noDocument}
+                    {kycData.kycDocumentBackKey || kycData.kycDocumentBackUrl
+                      ? content.kycDocuments.uploadedNoPreview
+                      : content.kycDocuments.noDocument}
                   </p>
                 )}
               </div>
@@ -227,10 +226,10 @@ export function ConfirmationView({
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.selfie}
               </p>
-              {kycData.kycSelfiePreview || kycData.kycSelfieUrl ? (
+              {kycData.kycSelfiePreview ? (
                 <div className="space-y-2">
                   <img
-                    src={kycData.kycSelfiePreview ?? kycData.kycSelfieUrl ?? ""}
+                    src={kycData.kycSelfiePreview}
                     alt="KYC Selfie"
                     className="w-full h-32 object-cover rounded"
                   />
@@ -240,7 +239,9 @@ export function ConfirmationView({
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
-                  {content.kycDocuments.noSelfie}
+                  {kycData.kycSelfieKey || kycData.kycSelfieUrl
+                    ? content.kycDocuments.uploadedNoPreview
+                    : content.kycDocuments.noSelfie}
                 </p>
               )}
             </div>
