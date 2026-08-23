@@ -75,7 +75,7 @@ export function ApplyConfirmDrawer({
                   Engagement important
                 </p>
                 <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
-                  <li>Vos informations seront partagées avec l'employeur.</li>
+                  <li>Vos informations seront partagées avec le recruteur.</li>
                   <li>Vous vous engagez à être présent et ponctuel.</li>
                   <li>
                     {terms ? (
