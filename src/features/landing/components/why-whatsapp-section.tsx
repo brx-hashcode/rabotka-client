@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import whatsappPhoneImage from "@/assets/whatsapp-phone-new.png?format=webp";
+import whatsappPhoneImage from "@/assets/woman-holding-phone.png?format=webp";
 import { whyWhatsAppContent } from "@/content/landing/why-whatsapp";
 
 export function WhyWhatsAppSection() {
@@ -68,7 +68,7 @@ export function WhyWhatsAppSection() {
             <div className="rounded-3xl overflow-hidden shadow-medium max-w-sm mx-auto">
               <img
                 src={whatsappPhoneImage}
-                alt="Mains tenant un téléphone avec WhatsApp"
+                alt="Mains tenant un téléphone affichant les offres de mission dans l’application Rabotka"
                 className="w-full h-auto object-cover aspect-3/4 lg:aspect-4/5"
                 loading="lazy"
                 width={600}
