@@ -38,7 +38,7 @@ export const heroContent: HeroContent = {
   // browsing happens in the application. Copy that promises more than the
   // product delivers is the first thing a new user discovers is untrue.
   floatingCard: {
-    title: "VoVa AI",
+    title: "Rabotka",
     subtitle:
       "Bonjour ! Je suis VoVa AI, l'assistant de Rabotka. Vous cherchez une mission, ou quelqu'un pour en réaliser une ?",
     icon: MessageCircle,
