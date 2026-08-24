@@ -1,9 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Link } from "react-router";
 import { MapPin, ArrowRight } from "lucide-react";
 import citySunsetImage from "@/assets/city-sunset.png?format=webp";
 import { visionContent } from "@/content/landing/vision";
+import { config } from "@/config";
 
 export function VisionSection() {
   const ref = useRef(null);
@@ -50,12 +50,17 @@ export function VisionSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-2 text-whatsapp font-medium pt-4 group"
+              className="pt-4"
             >
-              <Link to="/onboarding" className="group-hover:underline">
+              <a
+                href={config.whatsapp.links.start}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 text-whatsapp font-medium hover:underline"
+              >
                 {visionContent.cta}
-              </Link>
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </a>
             </motion.div>
           </div>
         </motion.div>
