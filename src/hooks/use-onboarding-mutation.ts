@@ -11,7 +11,8 @@ export function useOnboardingMutation() {
   return useMutation({
     mutationKey: ["onboarding-mutation"],
     mutationFn: async (): Promise<CreateProfileResponse> => {
-      const { personalInfo, kycData } = useOnboardingStore.getState();
+      const { personalInfo, kycData, referralCode, referralSource } =
+        useOnboardingStore.getState();
 
       const needsBack = requiresBackSide(kycData.documentType);
 
@@ -51,6 +52,11 @@ export function useOnboardingMutation() {
         kycSelfieUrl: kycData.kycSelfieUrl,
         kycSelfieKey: kycData.kycSelfieKey ?? undefined,
         readAndApprovedPolicies: true,
+        // Same rule as the document back above: send it only when there is one.
+        // An empty string would pass a code the user never gave, and record a
+        // source for it.
+        referralCode: referralCode || undefined,
+        referralSource: referralCode ? referralSource : undefined,
       });
     },
     onMutate: () => {
