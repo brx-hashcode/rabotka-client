@@ -28,6 +28,11 @@ export type CreateProfilePayload = {
   kycDocumentBackKey?: string;
   kycSelfieKey?: string;
   readAndApprovedPolicies: boolean;
+  // Parrainage. Omitted entirely when the user answered "non" or left the field
+  // empty — the backend treats an unknown code as no code, but sending a blank
+  // one would still record a source we never actually observed.
+  referralCode?: string;
+  referralSource?: "LINK" | "MANUAL_CODE";
 };
 
 export type CreateProfileResponse = {
