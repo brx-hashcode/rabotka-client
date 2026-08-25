@@ -7,6 +7,7 @@ import {
   clearChunkReloadGuard,
 } from "@/components/common/error-boundary";
 import { usePageTracking } from "@/lib/analytics/use-page-tracking";
+import { useReferralCapture } from "@/hooks/use-referral-capture";
 
 /** How long the app must run cleanly before the reload guard is released. */
 const GUARD_RESET_DELAY_MS = 10_000;
@@ -38,6 +39,17 @@ function AnalyticsTracker() {
   return null;
 }
 
+/**
+ * Stores a `?ref=` parrainage code so it survives the walk from the landing
+ * page to the confirmation screen. Renders nothing. Must sit inside
+ * `BrowserRouter`, and must be here rather than on the signup page — the link
+ * lands on the landing page, not on `/onboarding`.
+ */
+function ReferralCapture() {
+  useReferralCapture();
+  return null;
+}
+
 /*
  * The boundary sits inside Providers and around the router: a failed lazy
  * chunk (every route is lazy, and a deploy renames them) would otherwise
@@ -49,6 +61,7 @@ const App = () => (
       <BrowserRouter>
         <ChunkGuardReset />
         <AnalyticsTracker />
+        <ReferralCapture />
         <AppRoutes />
       </BrowserRouter>
     </ErrorBoundary>
