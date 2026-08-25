@@ -6,6 +6,11 @@ import {
   clearKycFiles,
 } from "@/lib/kyc-file-storage";
 import type { DocumentType } from "@/lib/kyc-document-types";
+import {
+  clearReferralAttribution,
+  readReferralAttribution,
+  type ReferralSource,
+} from "@/lib/referral-attribution";
 
 export type { DocumentType };
 
@@ -48,11 +53,20 @@ export type KycData = {
 type OnboardingStore = {
   personalInfo: PersonalInfo;
   kycData: KycData;
+  /**
+   * Parrainage code, entered on the confirmation screen or carried in from a
+   * `?ref=` link. Top-level rather than inside `personalInfo`, because it is not
+   * information about this person — it names a different profile, and the step-1
+   * form and its zod schema have no business validating it.
+   */
+  referralCode: string;
+  referralSource: ReferralSource;
   isSubmitting: boolean;
   error: string | null;
 
   setPersonalInfo: (data: Partial<PersonalInfo>) => void;
   setKycData: (data: Partial<KycData>) => void;
+  setReferral: (code: string, source: ReferralSource) => void;
   setIsSubmitting: (value: boolean) => void;
   setError: (error: string | null) => void;
   resetStore: () => void;
@@ -92,6 +106,8 @@ const initialState = {
     kycSelfieUrl: null,
     kycSelfieKey: null,
   },
+  referralCode: "",
+  referralSource: "MANUAL_CODE" as ReferralSource,
   isSubmitting: false,
   error: null,
 };
@@ -125,6 +141,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     }
   },
 
+  setReferral: (code, source) => {
+    set({ referralCode: code, referralSource: source });
+    get().saveToStorage();
+  },
+
   setIsSubmitting: (value) => set({ isSubmitting: value }),
 
   setError: (error) => set({ error }),
@@ -134,6 +155,10 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     if (typeof globalThis !== "undefined") {
       clearKycFiles().catch(console.error);
       sessionStorage.removeItem(STORAGE_KEY);
+      // Also drop the captured `?ref=` attribution. Signup is the one moment we
+      // know it has been used, and phones get shared here — leaving it would
+      // credit the next person's parrainage to the previous person's parrain.
+      clearReferralAttribution();
     }
   },
 
@@ -145,6 +170,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       if (stored) {
         const data = JSON.parse(stored);
         set({
+          referralCode: data.referralCode || "",
+          referralSource: data.referralSource || "MANUAL_CODE",
           personalInfo: data.personalInfo || initialState.personalInfo,
           kycData: {
             ...initialState.kycData,
@@ -160,6 +187,20 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             kycSelfieKey: data.kycData?.kycSelfieKey || null,
           },
         });
+      }
+
+      // A `?ref=` code captured on the landing page has not been typed into the
+      // store yet, so seed it here. Only when the store has none: a code the
+      // user typed by hand on the confirmation screen is their correction of
+      // the link's, and must win over it.
+      if (!get().referralCode) {
+        const attribution = readReferralAttribution();
+        if (attribution) {
+          set({
+            referralCode: attribution.code,
+            referralSource: attribution.source,
+          });
+        }
       }
 
       const files = await loadKycFiles();
@@ -192,9 +233,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     if (typeof globalThis === "undefined") return;
 
     try {
-      const { personalInfo, kycData } = get();
+      const { personalInfo, kycData, referralCode, referralSource } = get();
       const dataToStore = {
         personalInfo,
+        referralCode,
+        referralSource,
         kycData: {
           profileType: kycData.profileType,
           categoryIds: kycData.categoryIds,
