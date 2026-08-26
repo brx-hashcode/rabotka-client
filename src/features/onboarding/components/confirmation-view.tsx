@@ -19,6 +19,7 @@ import {
   Building2,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
+import { ReferralCodeField } from "./referral-code-field";
 import { confirmationContent } from "@/content/onboarding";
 import {
   documentTypeLabel as documentTypeLabelFor,
@@ -248,6 +249,10 @@ export function ConfirmationView({
           </div>
         </section>
       </div>
+
+      {/* Parrainage sits between the recap and the policy checkbox: after the
+          user has seen what they are submitting, before they commit to it. */}
+      <ReferralCodeField />
 
       <div className="flex items-start gap-3 rounded-lg bg-card shadow-soft p-4">
         <Checkbox
