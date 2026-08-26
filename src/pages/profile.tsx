@@ -26,6 +26,7 @@ import {
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
+import { ReferralSheetButton } from "@/features/profile/components/referral-sheet-button";
 import { DomainBadges } from "@/features/profile/components/domain-badges";
 import { SupportContactButton } from "@/features/support";
 import { useEffect } from "react";
@@ -283,6 +284,7 @@ export default function Profile() {
                 />
               </>
             )}
+            <ReferralSheetButton asRow />
             <ActionRow
               icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
               label="Recharger mon portefeuille"
