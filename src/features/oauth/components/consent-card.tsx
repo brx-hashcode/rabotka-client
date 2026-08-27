@@ -28,25 +28,25 @@ export function ConsentCard({ children, appName }: Readonly<ConsentCardProps>) {
     // it, the card loses its contrast, and `shadow-soft` is the only thing left
     // separating the two.
     <div className="bg-background flex min-h-svh items-center justify-center px-4 py-10">
-      <div className="w-full max-w-100">
-        <div className="bg-card shadow-soft rounded-2xl px-7 py-8">
+      <div className="w-full max-w-115">
+        <div className="bg-card shadow-soft rounded-2xl px-8 py-10 sm:px-10">
           <header className="flex flex-col items-center text-center">
             <img
               src={rabotkaLogo}
               alt="Rabotka"
-              className="h-9 w-auto object-contain"
+              className="h-12 w-auto object-contain"
             />
-            <h1 className="mt-5 text-xl font-semibold tracking-tight">
+            <h1 className="mt-6 text-2xl font-semibold tracking-tight">
               {consentContent.header.title}
             </h1>
             {appName && (
-              <p className="text-muted-foreground mt-1 text-sm">
+              <p className="text-muted-foreground mt-1.5 text-[15px]">
                 {consentContent.header.continueTo(appName)}
               </p>
             )}
           </header>
 
-          <div className="mt-7">{children}</div>
+          <div className="mt-8">{children}</div>
         </div>
 
         {/*

@@ -19,25 +19,25 @@ export function AppIdentityRow({
   logoUrl,
 }: Readonly<AppIdentityRowProps>) {
   return (
-    <div className="bg-muted/60 flex items-center gap-3 rounded-xl p-3">
+    <div className="bg-muted/60 flex items-center gap-3.5 rounded-xl p-3.5">
       {logoUrl ? (
         <img
           src={logoUrl}
           alt=""
-          className="size-9 shrink-0 rounded-lg object-cover"
+          className="size-10 shrink-0 rounded-lg object-cover"
         />
       ) : (
         // Initials rather than a generic icon: an app with no logo should still
         // look like a specific company, or every unbranded partner looks
         // identical to every other one.
-        <div className="bg-background text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold">
+        <div className="bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold">
           {initials(name)}
         </div>
       )}
 
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium">{name}</p>
-        <p className="text-muted-foreground line-clamp-1 text-xs">
+        <p className="truncate text-[15px] font-medium">{name}</p>
+        <p className="text-muted-foreground line-clamp-1 text-[13px]">
           {description}
         </p>
       </div>
