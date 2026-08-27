@@ -22,6 +22,9 @@ const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
+const DevelopersLoginWithRabotka = lazy(
+  () => import("@/pages/developers-login-with-rabotka"),
+);
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
@@ -420,6 +423,23 @@ export function AppRoutes() {
           <Suspense fallback={<PageLoader />}>
             <LandingLayout>
               <Terms />
+            </LandingLayout>
+          </Suspense>
+        }
+      />
+      {/*
+        The integration guide for "Login with Rabotka". The API's discovery
+        document names this URL as `service_documentation`, so a partner's OIDC
+        client points its developers here — it is part of the protocol surface,
+        not a marketing page, and the path must not move without updating
+        `oauth-discovery.controller.ts`.
+      */}
+      <Route
+        path="/developers/login-with-rabotka"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <DevelopersLoginWithRabotka />
             </LandingLayout>
           </Suspense>
         }
