@@ -2,6 +2,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Seo } from "@/hooks/use-seo";
 import { cn } from "@/lib/utils";
 import { usePublicContact } from "@/hooks/use-public-contact";
+import { CodeSampleTabs } from "@/features/oauth/components/code-sample-tabs";
+import { CopyButton } from "@/features/oauth/components/copy-button";
+import { CODE_SAMPLES } from "@/content/oauth/code-samples";
 import type { PublicContactInfo } from "@/lib/api/system-config-controller";
 
 /**
@@ -29,6 +32,7 @@ const SECTIONS = [
   { id: "deroule", label: "Le déroulé" },
   { id: "jetons", label: "Ce que vous recevez" },
   { id: "sans-bibliotheque", label: "Sans bibliothèque" },
+  { id: "exemple", label: "Exemple complet" },
   { id: "verification", label: "Vérification vs téléphone" },
   { id: "sub", label: "Indexer sur sub" },
   { id: "absences", label: "Absences volontaires" },
@@ -338,6 +342,25 @@ code_challenge=$(printf %s "$code_verifier" \\
         </Callout>
       </Section>
 
+      <Section id="exemple" title="Exemple complet">
+        <p>
+          Vous avez déjà votre <Mono>client_id</Mono> et votre{" "}
+          <Mono>client_secret</Mono>. Voici l'intégration entière — le bouton, le
+          retour, et la ligne où vous créez votre propre utilisateur. Tout le
+          reste est du protocole.
+        </p>
+
+        <CodeSampleTabs samples={CODE_SAMPLES} />
+
+        <p>
+          Les quatre font la même chose : ils gardent le{" "}
+          <Mono>code_verifier</Mono> en session côté serveur, vérifient le{" "}
+          <Mono>state</Mono> au retour, échangent le code depuis le serveur,
+          puis contrôlent <Mono>aud</Mono> et <Mono>nonce</Mono> avant de faire
+          confiance aux claims.
+        </p>
+      </Section>
+
       <Section id="verification" title="phone_number_verified n'est pas rabotka_verified">
         <p>
           C'est la distinction à ne pas manquer.
@@ -466,9 +489,12 @@ function Section({
  */
 function Code({ children }: Readonly<{ children: string }>) {
   return (
-    <pre className="bg-card shadow-soft overflow-x-auto rounded-lg p-4 text-xs">
-      <code className="font-mono">{children}</code>
-    </pre>
+    <div className="relative">
+      <CopyButton value={children} />
+      <pre className="bg-card shadow-soft overflow-x-auto rounded-lg p-4 pr-14 text-xs">
+        <code className="font-mono">{children}</code>
+      </pre>
+    </div>
   );
 }
 
