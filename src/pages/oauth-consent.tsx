@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Step1PhoneForm,
   Step2OTPForm,
@@ -219,14 +218,22 @@ export default function OAuthConsentPage() {
               isResending={false}
               serverError={serverError}
             />
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={retryPhone}
-              disabled={isBusy}
-            >
-              {consentContent.noAccount.retryButton}
-            </Button>
+            {/*
+              A quiet text link, not a second full-width button. The shared OTP
+              form already ends in one ("Renvoyer le code"), and stacking an
+              identical one under it produced two bold blocks of equal weight
+              with nothing to say which was the ordinary next step.
+            */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={retryPhone}
+                disabled={isBusy}
+                className="text-muted-foreground hover:text-foreground text-xs transition-colors hover:underline disabled:opacity-50"
+              >
+                {consentContent.noAccount.retryButton}
+              </button>
+            </div>
           </div>
         )}
 

@@ -32,7 +32,12 @@ const CONTEXT: ConsentContext = {
 
 const SIGNED_IN: ConsentContext = {
   ...CONTEXT,
-  profile: { firstName: "Amina", lastName: "Nkemdirim", phoneHint: "••42" },
+  profile: {
+    firstName: "Amina",
+    lastName: "Nkemdirim",
+    phoneHint: "••42",
+    avatarUrl: null,
+  },
 };
 
 function renderPage(interaction: string | null = "int-1") {
