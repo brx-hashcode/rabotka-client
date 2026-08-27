@@ -11,6 +11,7 @@ export function Header() {
   const isScrolled = useScroll(50);
   const location = useLocation();
   const navigate = useNavigate();
+  const isDeveloperDocs = location.pathname.startsWith("/developers");
 
   const scrollToElement = useCallback((id: string, retries = 5) => {
     const element = document.getElementById(id);
@@ -82,13 +83,26 @@ export function Header() {
             ))}
           </div>
 
-          <div className="hidden md:block">
-            <LoginButton />
-          </div>
+          {/*
+            No sign-up CTA on the developer documentation.
 
-          <div className="md:hidden">
-            <MobileLoginButton />
-          </div>
+            The reader there is a partner's engineer wiring up an integration,
+            not someone deciding whether to join Rabotka — "Commencer" would
+            point them at a worker signup that is nothing to do with why they
+            came. Credentials are issued by an administrator, and the page says
+            so; a button offering otherwise contradicts it.
+          */}
+          {!isDeveloperDocs && (
+            <>
+              <div className="hidden md:block">
+                <LoginButton />
+              </div>
+
+              <div className="md:hidden">
+                <MobileLoginButton />
+              </div>
+            </>
+          )}
         </div>
       </nav>
     </header>
