@@ -10,10 +10,16 @@ export const consentContent = {
   loading: "Chargement…",
 
   header: {
-    // "veut accéder à votre compte" would be a lie: the application gets a
-    // one-off copy of a few fields, not access to anything.
-    subtitle: (appName: string) => `${appName} souhaite utiliser votre compte Rabotka`,
-    verifiedBadge: "Compte vérifié",
+    title: "Se connecter avec Rabotka",
+    /**
+     * "pour continuer vers X", not "X souhaite accéder à votre compte".
+     *
+     * The second reads as though the application gains standing access to the
+     * account, which is false — it receives a one-off copy of a few fields. The
+     * first says the true thing and is also what every user has already learned
+     * to parse from the equivalent Google screen.
+     */
+    continueTo: (appName: string) => `pour continuer vers ${appName}`,
   },
 
   phone: {
@@ -36,7 +42,6 @@ export const consentContent = {
   },
 
   consent: {
-    signedInAs: (name: string, phoneHint: string) => `${name} · ${phoneHint}`,
     willReceive: "L'application recevra :",
     approve: "Autoriser",
     deny: "Refuser",
@@ -80,6 +85,14 @@ export const consentContent = {
       detail: "Sans adresse précise.",
     },
   } as const,
+
+  footer: {
+    // Sits under every step. The user is about to hand personal data to a
+    // company that is not Rabotka, so the way out has to be permanently
+    // visible rather than buried on the last screen.
+    privacy: "Confidentialité",
+    terms: "Conditions",
+  },
 
   errors: {
     title: "Connexion impossible",

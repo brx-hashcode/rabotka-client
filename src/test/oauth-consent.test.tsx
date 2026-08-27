@@ -76,9 +76,8 @@ describe("OAuth consent screen", () => {
     getConsentContext.mockResolvedValue(SIGNED_IN);
     renderPage();
 
-    expect(
-      await screen.findByText(/Amina Nkemdirim · ••42/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Amina Nkemdirim")).toBeInTheDocument();
+    expect(screen.getByText("••42")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Autoriser" }),
     ).toBeInTheDocument();
