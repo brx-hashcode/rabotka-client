@@ -28,6 +28,7 @@ const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
+const OAuthConsent = lazy(() => import("@/pages/oauth-consent"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
@@ -498,6 +499,30 @@ export function AppRoutes() {
             <PublicShell>
               <Login />
             </PublicShell>
+          </Suspense>
+        }
+      />
+      {/*
+        "Login with Rabotka". Reached only by a redirect from the API's
+        /oauth/authorize, never linked from inside the app.
+
+        Rendered bare — no AppShell, no PublicShell. This page is somebody
+        else's login dialog, usually running in a ~480x720 popup opened by a
+        partner site. Rabotka's app chrome would frame it as a page of this app,
+        which it is not: the user is deciding whether to trust a third party,
+        and every pixel of surrounding product furniture makes that decision
+        harder to see. The page centres itself instead.
+
+        Deliberately NOT behind AuthGuard: a visitor arriving from a partner
+        site usually has no session yet, and this page's whole job is to
+        establish one. AuthGuard would bounce them to /login, which loses the
+        interaction id and with it the partner's authorization request.
+      */}
+      <Route
+        path="/oauth/consent"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OAuthConsent />
           </Suspense>
         }
       />
