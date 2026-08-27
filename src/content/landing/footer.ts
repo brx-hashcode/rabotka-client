@@ -9,6 +9,12 @@ export const footerLinks: FooterLinkGroup = {
       href: "/onboarding?profileType=EMPLOYER",
     },
     { label: "Profils vérifiés", href: "#trust" },
+    // "Connexion avec Rabotka" — the integration guide partners are sent to.
+    // Under Produit rather than Entreprise: it is a thing another company can
+    // build on, not a page about us. The API's discovery document also names
+    // this URL as `service_documentation`, so the path is fixed by the
+    // protocol — see oauth-discovery.controller.ts before changing it.
+    { label: "Connexion avec Rabotka", href: "/developers/login-with-rabotka" },
   ],
   Entreprise: [
     { label: "À propos", href: "#about" },

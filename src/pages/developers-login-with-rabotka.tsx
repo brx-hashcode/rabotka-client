@@ -1,5 +1,8 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Seo } from "@/hooks/use-seo";
+import { cn } from "@/lib/utils";
+import { usePublicContact } from "@/hooks/use-public-contact";
+import type { PublicContactInfo } from "@/lib/api/system-config-controller";
 
 /**
  * The production issuer, written out rather than derived.
@@ -11,6 +14,108 @@ import { Seo } from "@/hooks/use-seo";
  * other hands developers a discovery URL that does not resolve.
  */
 const ISSUER = "https://api.rabotka.work";
+
+/**
+ * The sidebar, and the anchor of every section, from one list.
+ *
+ * Labels are shorter than the headings they point at: a heading can afford to
+ * be a full sentence ("phone_number_verified n'est pas rabotka_verified"), a
+ * 200px rail cannot.
+ */
+const SECTIONS = [
+  { id: "en-bref", label: "En bref" },
+  { id: "identifiants", label: "Obtenir des identifiants" },
+  { id: "redirect-uris", label: "URI de redirection" },
+  { id: "deroule", label: "Le déroulé" },
+  { id: "jetons", label: "Ce que vous recevez" },
+  { id: "verification", label: "Vérification vs téléphone" },
+  { id: "sub", label: "Indexer sur sub" },
+  { id: "absences", label: "Absences volontaires" },
+  { id: "popup", label: "Popup ou redirection" },
+  { id: "contact", label: "Nous écrire" },
+] as const;
+
+/**
+ * Hoisted rather than derived inside the component: a fresh array on every
+ * render is a fresh dependency, which would tear down and rebuild the
+ * IntersectionObserver on every render.
+ */
+const SECTION_IDS = SECTIONS.map((section) => section.id);
+
+/**
+ * Which section the reader is currently in.
+ *
+ * `IntersectionObserver` against a band near the top of the viewport rather
+ * than scroll-offset arithmetic: the latter has to be redone every time a
+ * section's height changes, and gets the answer wrong while the smooth-scroll
+ * from a sidebar click is still animating.
+ */
+function useActiveSection(ids: readonly string[]): string | null {
+  const [active, setActive] = useState<string | null>(ids[0] ?? null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      // Top ~20% of the viewport: a heading is "current" once it reaches
+      // reading position, not when it first appears at the bottom.
+      { rootMargin: "-96px 0px -75% 0px", threshold: 0 },
+    );
+
+    for (const id of ids) {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    }
+
+    return () => observer.disconnect();
+  }, [ids]);
+
+  return active;
+}
+
+/**
+ * The rail. Hidden below `lg` — on a narrow screen it would push the prose into
+ * a column too thin for code samples, and the page is short enough to scroll.
+ */
+function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
+  return (
+    <aside className="hidden w-56 shrink-0 lg:block">
+      <nav
+        aria-label="Sommaire"
+        className="sticky top-28 max-h-[calc(100svh-9rem)] overflow-y-auto"
+      >
+        <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wide">
+          Sommaire
+        </p>
+        <ul className="space-y-1">
+          {SECTIONS.map((section) => {
+            const isActive = section.id === activeId;
+            return (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  aria-current={isActive ? "location" : undefined}
+                  className={cn(
+                    "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  )}
+                >
+                  {section.label}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </aside>
+  );
+}
 
 /**
  * The public integration guide for "Login with Rabotka".
@@ -30,30 +135,39 @@ export default function DevelopersLoginWithRabotka() {
     globalThis.scrollTo(0, 0);
   }, []);
 
+  const activeId = useActiveSection(SECTION_IDS);
+  const { data: contact } = usePublicContact();
+  const contactEmail = (contact as PublicContactInfo | undefined)?.email;
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-24 sm:px-6 lg:pt-28">
+    <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 pb-20 pt-24 sm:px-6 lg:pt-28">
       <Seo
         title="Connexion avec Rabotka — documentation développeur"
         description="Intégrez « Connexion avec Rabotka » : authentifiez vos utilisateurs avec leur compte Rabotka vérifié via OpenID Connect."
         canonical="/developers/login-with-rabotka"
       />
 
-      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-        Documentation développeur
-      </span>
+      <TableOfContents activeId={activeId} />
 
-      <h1 className="mt-2 text-3xl font-bold">Connexion avec Rabotka</h1>
+      <main className="min-w-0 max-w-3xl flex-1">
+        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+          Documentation développeur
+        </span>
 
-      <p className="text-muted-foreground mt-4 leading-relaxed">
-        Authentifiez vos utilisateurs avec leur compte Rabotka. Vous recevez leur
-        identité <strong className="text-foreground">et le verdict de
-        vérification KYC de Rabotka</strong> : un administrateur a lu leur pièce
-        d'identité et l'a confrontée à un selfie. C'est la raison d'intégrer —
-        n'importe quel fournisseur d'identité peut confirmer un numéro de
-        téléphone.
-      </p>
+        <h1 className="mt-2 text-3xl font-bold">Connexion avec Rabotka</h1>
 
-      <Section title="En bref">
+        <p className="text-muted-foreground mt-4 leading-relaxed">
+          Authentifiez vos utilisateurs avec leur compte Rabotka. Vous recevez
+          leur identité{" "}
+          <strong className="text-foreground">
+            et le verdict de vérification KYC de Rabotka
+          </strong>{" "}
+          : un administrateur a lu leur pièce d'identité et l'a confrontée à un
+          selfie. C'est la raison d'intégrer — n'importe quel fournisseur
+          d'identité peut confirmer un numéro de téléphone.
+        </p>
+
+      <Section id="en-bref" title="En bref">
         <p>
           Rabotka est un fournisseur OpenID Connect standard (OAuth 2.1,
           Authorization Code + PKCE). Il n'y a rien de spécifique à écrire :
@@ -67,7 +181,7 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Obtenir des identifiants">
+      <Section id="identifiants" title="Obtenir des identifiants">
         <p>
           Les applications sont enregistrées par un administrateur Rabotka — il
           n'y a pas d'inscription en libre-service. Rabotka se porte garant de
@@ -87,7 +201,7 @@ export default function DevelopersLoginWithRabotka() {
         </Callout>
       </Section>
 
-      <Section title="Les URI de redirection sont comparées à l'identique">
+      <Section id="redirect-uris" title="Les URI de redirection sont comparées à l'identique">
         <p>
           <Mono>https://vous.com/callback</Mono> et{" "}
           <Mono>https://vous.com/callback/</Mono> sont deux URI différentes.{" "}
@@ -103,7 +217,7 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Le déroulé">
+      <Section id="deroule" title="Le déroulé">
         <ol className="list-decimal space-y-3 pl-5">
           <li>
             Redirigez l'utilisateur vers <Mono>/oauth/authorize</Mono> avec{" "}
@@ -129,7 +243,7 @@ export default function DevelopersLoginWithRabotka() {
         </ol>
       </Section>
 
-      <Section title="Ce que vous recevez">
+      <Section id="jetons" title="Ce que vous recevez">
         <p>
           Un <Mono>id_token</Mono> : un JWT RS256 valable une heure, à vérifier
           contre <Mono>/.well-known/jwks.json</Mono>.
@@ -145,7 +259,7 @@ export default function DevelopersLoginWithRabotka() {
 }`}</Code>
       </Section>
 
-      <Section title="phone_number_verified n'est pas rabotka_verified">
+      <Section id="verification" title="phone_number_verified n'est pas rabotka_verified">
         <p>
           C'est la distinction à ne pas manquer.
         </p>
@@ -169,7 +283,7 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Indexez vos utilisateurs sur sub">
+      <Section id="sub" title="Indexez vos utilisateurs sur sub">
         <p>
           Le <Mono>sub</Mono> d'une personne est propre à votre application : la
           même personne présente un <Mono>sub</Mono> entièrement différent chez
@@ -182,7 +296,7 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Deux absences volontaires">
+      <Section id="absences" title="Deux absences volontaires">
         <p>
           <strong className="text-foreground">
             Le jeton d'accès n'est pas un JWT.
@@ -205,7 +319,7 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Fenêtre surgissante ou redirection">
+      <Section id="popup" title="Fenêtre surgissante ou redirection">
         <p>
           Le protocole est une redirection. Une popup n'est qu'une fenêtre dans
           laquelle vous choisissez de l'ouvrir : c'est votre page de callback
@@ -220,29 +334,45 @@ export default function DevelopersLoginWithRabotka() {
         </p>
       </Section>
 
-      <Section title="Nous écrire">
+      <Section id="contact" title="Nous écrire">
         <p>
           Pour enregistrer une application, ou si un secret vous semble
-          compromis (nous pouvons fermer la fenêtre de grâce immédiatement) :{" "}
-          <a
-            className="text-primary font-medium hover:underline"
-            href="mailto:contact@rabotka.co"
-          >
-            contact@rabotka.co
-          </a>
-          .
+          compromis (nous pouvons fermer la fenêtre de grâce immédiatement)
+          {contactEmail ? " : " : "."}
+          {/*
+            The address comes from SystemConfig (`contact.email`) via
+            /public/config/contact, the same source the footer reads — an admin
+            changes it in Settings without a deploy. Rendered only once it has
+            loaded rather than falling back to a hardcoded address: a stale
+            address on the one page telling partners how to reach us is worse
+            than a sentence with no address, and the footer below carries the
+            same value anyway.
+          */}
+          {contactEmail && (
+            <a
+              className="text-primary font-medium hover:underline"
+              href={`mailto:${contactEmail}`}
+            >
+              {contactEmail}
+            </a>
+          )}
+          {contactEmail && "."}
         </p>
-      </Section>
-    </main>
+        </Section>
+      </main>
+    </div>
   );
 }
 
 function Section({
+  id,
   title,
   children,
-}: Readonly<{ title: string; children: ReactNode }>) {
+}: Readonly<{ id: string; title: string; children: ReactNode }>) {
   return (
-    <section className="mt-10">
+    // `scroll-mt` clears the fixed header, so an anchor jump does not land with
+    // the heading hidden underneath it.
+    <section id={id} className="mt-10 scroll-mt-28">
       <h2 className="text-xl font-semibold">{title}</h2>
       <div className="text-muted-foreground mt-3 space-y-3 leading-relaxed">
         {children}
