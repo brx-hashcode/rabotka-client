@@ -22,12 +22,16 @@ const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
+const DevelopersApiDocumentation = lazy(
+  () => import("@/pages/developers-api-documentation"),
+);
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
+const OAuthConsent = lazy(() => import("@/pages/oauth-consent"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
@@ -423,6 +427,23 @@ export function AppRoutes() {
           </Suspense>
         }
       />
+      {/*
+        The integration guide for "Login with Rabotka". The API's discovery
+        document names this URL as `service_documentation`, so a partner's OIDC
+        client points its developers here — it is part of the protocol surface,
+        not a marketing page, and the path must not move without updating
+        `oauth-discovery.controller.ts`.
+      */}
+      <Route
+        path="/developers/api-documentation"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <DevelopersApiDocumentation />
+            </LandingLayout>
+          </Suspense>
+        }
+      />
       <Route
         path="/privacy"
         element={
@@ -498,6 +519,30 @@ export function AppRoutes() {
             <PublicShell>
               <Login />
             </PublicShell>
+          </Suspense>
+        }
+      />
+      {/*
+        "Login with Rabotka". Reached only by a redirect from the API's
+        /oauth/authorize, never linked from inside the app.
+
+        Rendered bare — no AppShell, no PublicShell. This page is somebody
+        else's login dialog, usually running in a ~480x720 popup opened by a
+        partner site. Rabotka's app chrome would frame it as a page of this app,
+        which it is not: the user is deciding whether to trust a third party,
+        and every pixel of surrounding product furniture makes that decision
+        harder to see. The page centres itself instead.
+
+        Deliberately NOT behind AuthGuard: a visitor arriving from a partner
+        site usually has no session yet, and this page's whole job is to
+        establish one. AuthGuard would bounce them to /login, which loses the
+        interaction id and with it the partner's authorization request.
+      */}
+      <Route
+        path="/oauth/consent"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OAuthConsent />
           </Suspense>
         }
       />
