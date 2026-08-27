@@ -14,9 +14,9 @@ type ConsentStepProps = {
 /**
  * The decision itself.
  *
- * "Refuser" is a real button of equal weight, not a link tucked under the
- * primary action. A consent screen where declining is hard to find is not
- * collecting consent.
+ * "Refuser" is a real button of equal size sitting beside "Autoriser", not a
+ * link tucked underneath. A consent screen where declining is harder to find
+ * than accepting is not collecting consent.
  */
 export function ConsentStep({
   profile,
@@ -25,38 +25,45 @@ export function ConsentStep({
   onApprove,
   onDeny,
 }: Readonly<ConsentStepProps>) {
+  const initials =
+    `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`.toUpperCase();
+
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-card p-4 shadow-soft">
-        <p className="text-sm font-medium">
-          {consentContent.consent.signedInAs(
-            `${profile.firstName} ${profile.lastName}`,
-            profile.phoneHint,
-          )}
-        </p>
+      {/* Who they are signing in as — the account-chooser row. */}
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">
+            {profile.firstName} {profile.lastName}
+          </p>
+          <p className="text-muted-foreground text-xs">{profile.phoneHint}</p>
+        </div>
       </div>
 
       <ScopeList scopes={scopes} />
 
-      <div className="space-y-2">
-        <Button className="w-full" onClick={onApprove} disabled={isDeciding}>
+      {/*
+        Side by side, refuse first. Left-to-right readers reach the safe option
+        before the consequential one, and neither is styled to look like the
+        obvious answer.
+      */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="ghost" onClick={onDeny} disabled={isDeciding}>
+          {consentContent.consent.deny}
+        </Button>
+        <Button onClick={onApprove} disabled={isDeciding}>
           {isDeciding ? (
             <Loader2 aria-hidden className="size-4 animate-spin" />
           ) : (
             consentContent.consent.approve
           )}
         </Button>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={onDeny}
-          disabled={isDeciding}
-        >
-          {consentContent.consent.deny}
-        </Button>
       </div>
 
-      <p className="text-center text-xs leading-snug text-muted-foreground">
+      <p className="text-muted-foreground text-center text-xs leading-relaxed">
         {consentContent.consent.footnote}
       </p>
     </div>

@@ -6,7 +6,8 @@ import {
   Step1PhoneForm,
   Step2OTPForm,
 } from "@/features/landing/components/login-steps";
-import { AppIdentityCard } from "@/features/oauth/components/app-identity-card";
+import { AppIdentityRow } from "@/features/oauth/components/app-identity-row";
+import { ConsentCard } from "@/features/oauth/components/consent-card";
 import { ConsentStep } from "@/features/oauth/components/consent-step";
 import { NoAccountNotice } from "@/features/oauth/components/no-account-notice";
 import { consentContent } from "@/content/oauth/consent";
@@ -159,69 +160,77 @@ export default function OAuthConsentPage() {
 
   if (step === "loading" || !context) {
     return (
-      <Screen>
-        <div className="flex justify-center py-12">
+      <ConsentCard>
+        <div className="flex justify-center py-6">
           <Loader2
             aria-label={consentContent.loading}
-            className="size-6 animate-spin text-muted-foreground"
+            className="text-muted-foreground size-5 animate-spin"
           />
         </div>
-      </Screen>
+      </ConsentCard>
     );
   }
 
   if (step === "error") {
     return (
-      <Screen>
-        <div className="space-y-4 text-center">
-          <AlertTriangle aria-hidden className="mx-auto size-8 text-destructive" />
-          <h1 className="text-lg font-semibold">{consentContent.errors.title}</h1>
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
+      <ConsentCard>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <AlertTriangle aria-hidden className="text-destructive size-7" />
+          <p className="font-medium">{consentContent.errors.title}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {errorMessage}
+          </p>
         </div>
-      </Screen>
+      </ConsentCard>
     );
   }
 
   return (
-    <Screen>
-      <AppIdentityCard
+    <ConsentCard appName={context.app.name}>
+      <AppIdentityRow
         name={context.app.name}
         description={context.app.description}
         logoUrl={context.app.logoUrl}
       />
 
-      {step === "phone" && (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {consentContent.phone.description}
-          </p>
-          <Step1PhoneForm
-            onSubmit={handlePhone}
-            isLoading={isBusy}
-            serverError={serverError}
-          />
-        </div>
-      )}
+      <div className="mt-6">
+        {step === "phone" && (
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {consentContent.phone.description}
+            </p>
+            <Step1PhoneForm
+              onSubmit={handlePhone}
+              isLoading={isBusy}
+              serverError={serverError}
+            />
+          </div>
+        )}
 
-      {step === "otp" && (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {consentContent.otp.description}
-          </p>
-          <Step2OTPForm
-            onSubmit={handleOtp}
-            onResend={handleResend}
-            isVerifying={isBusy}
-            isResending={false}
-            serverError={serverError}
-          />
-          <Button variant="ghost" className="w-full" onClick={retryPhone}>
-            {consentContent.noAccount.retryButton}
-          </Button>
-        </div>
-      )}
+        {step === "otp" && (
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {consentContent.otp.description}
+            </p>
+            <Step2OTPForm
+              onSubmit={handleOtp}
+              onResend={handleResend}
+              isVerifying={isBusy}
+              isResending={false}
+              serverError={serverError}
+            />
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={retryPhone}
+              disabled={isBusy}
+            >
+              {consentContent.noAccount.retryButton}
+            </Button>
+          </div>
+        )}
 
-      {step === "no-account" && <NoAccountNotice onRetry={retryPhone} />}
+        {step === "no-account" && <NoAccountNotice onRetry={retryPhone} />}
 
       {step === "consent" && context.profile && (
         <ConsentStep
@@ -231,29 +240,9 @@ export default function OAuthConsentPage() {
           onApprove={() => handleDecision(true)}
           onDeny={() => handleDecision(false)}
         />
-      )}
-    </Screen>
-  );
-}
-
-/**
- * The page's own frame, standing in for the app shells it deliberately does not
- * use.
- *
- * `min-h-svh` with vertical centring rather than a top-anchored column: in a
- * short popup the card should sit in the middle of the window, and `svh`
- * (rather than `vh`) is what accounts for mobile browser chrome that appears
- * and disappears as the user scrolls.
- *
- * `max-w-sm` because the widest this ever needs to be is a phone. A popup is
- * typically opened at ~480px, and a consent decision presented across a wide
- * desktop column is harder to read, not easier.
- */
-function Screen({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="flex min-h-svh items-center justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-sm space-y-6">{children}</div>
-    </div>
+        )}
+      </div>
+    </ConsentCard>
   );
 }
 
