@@ -1,10 +1,11 @@
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { consentContent } from "@/content/oauth/consent";
+import type { ConsentContext } from "@/lib/api/oauth-controller";
 import { ScopeList } from "./scope-list";
 
 type ConsentStepProps = {
-  readonly profile: { firstName: string; lastName: string; phoneHint: string };
+  readonly profile: NonNullable<ConsentContext["profile"]>;
   readonly scopes: readonly string[];
   readonly isDeciding: boolean;
   readonly onApprove: () => void;
@@ -37,9 +38,17 @@ export function ConsentStep({
       */}
       <div>
         <div className="flex items-center gap-3 pb-5">
-          <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-            {initials}
-          </div>
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt=""
+              className="size-9 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+              {initials}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">
               {profile.firstName} {profile.lastName}

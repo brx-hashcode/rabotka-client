@@ -4,7 +4,12 @@ export type ConsentContext = {
   app: { name: string; description: string; logoUrl: string | null };
   scopes: string[];
   /** Null until the visitor has authenticated inside this interaction. */
-  profile: { firstName: string; lastName: string; phoneHint: string } | null;
+  profile: {
+    firstName: string;
+    lastName: string;
+    phoneHint: string;
+    avatarUrl: string | null;
+  } | null;
   /** True when a prior consent already covers every requested scope. */
   alreadyGranted: boolean;
 };
