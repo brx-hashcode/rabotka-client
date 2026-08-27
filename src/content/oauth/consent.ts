@@ -77,8 +77,9 @@ export const consentContent = {
     },
     "rabotka:verification": {
       label: "Votre statut de vérification Rabotka",
-      detail:
-        "Indique si votre identité a été contrôlée par Rabotka — pas vos documents, qui ne quittent jamais Rabotka.",
+      // The second clause is the reassurance that matters and is easy to lose:
+      // the application learns the verdict, never the documents behind it.
+      detail: "Le résultat seul. Vos documents ne quittent jamais Rabotka.",
     },
     "rabotka:location": {
       label: "Votre ville et votre pays",

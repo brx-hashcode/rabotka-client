@@ -30,20 +30,31 @@ export function ConsentStep({
 
   return (
     <div className="space-y-6">
-      {/* Who they are signing in as — the account-chooser row. */}
-      <div className="flex items-center gap-3">
-        <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-          {initials}
+      {/*
+        Who they are signing in as. Sits directly above the list of what will be
+        shared, with only a hairline between them, because the two are one
+        sentence: this person's name, phone and status go to that application.
+      */}
+      <div>
+        <div className="flex items-center gap-3 pb-5">
+          <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">
+              {profile.firstName} {profile.lastName}
+            </p>
+            <p className="text-muted-foreground text-xs">{profile.phoneHint}</p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">
-            {profile.firstName} {profile.lastName}
-          </p>
-          <p className="text-muted-foreground text-xs">{profile.phoneHint}</p>
+
+        {/* A tinted rule, not a border — the house rule is no borders. */}
+        <div className="bg-border/60 h-px" />
+
+        <div className="pt-5">
+          <ScopeList scopes={scopes} />
         </div>
       </div>
-
-      <ScopeList scopes={scopes} />
 
       {/*
         Side by side, refuse first. Left-to-right readers reach the safe option
@@ -51,7 +62,13 @@ export function ConsentStep({
         obvious answer.
       */}
       <div className="grid grid-cols-2 gap-3">
-        <Button variant="ghost" onClick={onDeny} disabled={isDeciding}>
+        {/*
+          `secondary`, not `ghost`: ghost is transparent until hovered, so on a
+          white card it read as an empty outlined box rather than a button. It
+          has to look as pressable as "Autoriser" — declining is a real choice,
+          not a way out of the screen.
+        */}
+        <Button variant="secondary" onClick={onDeny} disabled={isDeciding}>
           {consentContent.consent.deny}
         </Button>
         <Button onClick={onApprove} disabled={isDeciding}>
