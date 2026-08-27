@@ -28,6 +28,7 @@ const SECTIONS = [
   { id: "redirect-uris", label: "URI de redirection" },
   { id: "deroule", label: "Le déroulé" },
   { id: "jetons", label: "Ce que vous recevez" },
+  { id: "sans-bibliotheque", label: "Sans bibliothèque" },
   { id: "verification", label: "Vérification vs téléphone" },
   { id: "sub", label: "Indexer sur sub" },
   { id: "absences", label: "Absences volontaires" },
@@ -130,7 +131,7 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
  * in `rabotka-backend/docs/login-with-rabotka.md`; this page is the part a
  * partner needs before they have talked to anyone.
  */
-export default function DevelopersLoginWithRabotka() {
+export default function DevelopersApiDocumentation() {
   useEffect(() => {
     globalThis.scrollTo(0, 0);
   }, []);
@@ -144,7 +145,7 @@ export default function DevelopersLoginWithRabotka() {
       <Seo
         title="Connexion avec Rabotka — documentation développeur"
         description="Intégrez « Connexion avec Rabotka » : authentifiez vos utilisateurs avec leur compte Rabotka vérifié via OpenID Connect."
-        canonical="/developers/login-with-rabotka"
+        canonical="/developers/api-documentation"
       />
 
       <TableOfContents activeId={activeId} />
@@ -257,6 +258,66 @@ export default function DevelopersLoginWithRabotka() {
   "rabotka_verified": true,
   "rabotka_verified_at": "2026-01-15T10:00:00.000Z"
 }`}</Code>
+      </Section>
+
+      <Section id="sans-bibliotheque" title="Sans bibliothèque OIDC">
+        <p>
+          Rien n'oblige à utiliser une bibliothèque : le protocole n'est que du
+          HTTP et du JSON. Trois appels suffisent, dans n'importe quel langage
+          disposant d'un client HTTP et de SHA-256.
+        </p>
+
+        <p className="text-foreground font-medium">1. Préparer PKCE</p>
+        <Code>{`code_verifier=$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-43)
+code_challenge=$(printf %s "$code_verifier" \\
+  | openssl dgst -binary -sha256 \\
+  | openssl base64 | tr '+/' '-_' | tr -d '=')`}</Code>
+        <p>
+          Gardez le <Mono>code_verifier</Mono> côté serveur, associé à la session
+          du visiteur. Il ne doit jamais passer par le navigateur.
+        </p>
+
+        <p className="text-foreground font-medium">
+          2. Envoyer l'utilisateur (redirection du navigateur)
+        </p>
+        <Code>{`${ISSUER}/api/v1/oauth/authorize
+  ?client_id=VOTRE_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fvous.com%2Fcallback
+  &response_type=code
+  &scope=openid%20profile%20phone%20rabotka%3Averification
+  &state=UNE_VALEUR_ALEATOIRE
+  &nonce=UNE_AUTRE_VALEUR
+  &code_challenge=$code_challenge
+  &code_challenge_method=S256`}</Code>
+
+        <p className="text-foreground font-medium">
+          3. Échanger le code, depuis votre serveur
+        </p>
+        <Code>{`curl -s -X POST ${ISSUER}/api/v1/oauth/token \\
+  -u "VOTRE_CLIENT_ID:VOTRE_CLIENT_SECRET" \\
+  -d grant_type=authorization_code \\
+  -d code="$code" \\
+  -d redirect_uri="https://vous.com/callback" \\
+  -d code_verifier="$code_verifier"`}</Code>
+        <p>
+          La réponse contient <Mono>id_token</Mono> et <Mono>access_token</Mono>.
+          Pour lire les informations de l'utilisateur, décodez la charge utile du
+          JWT (la partie du milieu, en base64url) ou appelez{" "}
+          <Mono>/userinfo</Mono> :
+        </p>
+        <Code>{`curl -s ${ISSUER}/api/v1/oauth/userinfo \\
+  -H "Authorization: Bearer $access_token"`}</Code>
+
+        <Callout>
+          <strong>Pouvez-vous sauter la vérification de signature ?</strong> Oui,
+          mais uniquement ici. OpenID Connect Core §3.1.3.7 l'autorise lorsque
+          l'ID token arrive <em>directement</em> du point de terminaison{" "}
+          <Mono>/token</Mono> : la validation TLS du serveur atteste déjà de
+          l'émetteur. Dès que le jeton circule autrement — transmis à un autre
+          service, mis en cache, relayé par un client — vous devez vérifier sa
+          signature contre <Mono>/.well-known/jwks.json</Mono>. Vérifiez toujours{" "}
+          <Mono>exp</Mono>, <Mono>aud</Mono> et <Mono>nonce</Mono>.
+        </Callout>
       </Section>
 
       <Section id="verification" title="phone_number_verified n'est pas rabotka_verified">

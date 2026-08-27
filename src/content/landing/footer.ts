@@ -14,7 +14,7 @@ export const footerLinks: FooterLinkGroup = {
     // about us. The API's discovery document names this URL as
     // `service_documentation`, so the path is fixed by the protocol — see
     // oauth-discovery.controller.ts before changing it.
-    { label: "Développeur", href: "/developers/login-with-rabotka" },
+    { label: "Développeur", href: "/developers/api-documentation" },
   ],
   Entreprise: [
     { label: "À propos", href: "#about" },

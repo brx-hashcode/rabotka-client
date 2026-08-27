@@ -22,8 +22,8 @@ const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
-const DevelopersLoginWithRabotka = lazy(
-  () => import("@/pages/developers-login-with-rabotka"),
+const DevelopersApiDocumentation = lazy(
+  () => import("@/pages/developers-api-documentation"),
 );
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Cookies = lazy(() => import("@/pages/cookies"));
@@ -435,11 +435,11 @@ export function AppRoutes() {
         `oauth-discovery.controller.ts`.
       */}
       <Route
-        path="/developers/login-with-rabotka"
+        path="/developers/api-documentation"
         element={
           <Suspense fallback={<PageLoader />}>
             <LandingLayout>
-              <DevelopersLoginWithRabotka />
+              <DevelopersApiDocumentation />
             </LandingLayout>
           </Suspense>
         }
