@@ -87,9 +87,20 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
     <aside className="hidden w-56 shrink-0 lg:block">
       <nav
         aria-label="Sommaire"
-        className="sticky top-28 max-h-[calc(100svh-9rem)] overflow-y-auto"
+        // `-mx-2.5` hangs each item's own padding outside the column, so the
+        // TEXT lines up with the container edge — and therefore with the logo
+        // in the header — while the active item's tint still extends past it.
+        // Without it the whole rail reads as indented by 10px against
+        // everything else on the page.
+        className="sticky top-28 -mx-2.5 max-h-[calc(100svh-9rem)] overflow-y-auto"
       >
-        <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wide">
+        {/*
+          `px-2.5` matches the padding on each link, so the heading and the item
+          labels share a left edge. Without it the links sit 10px further in
+          than the word above them, which reads as a misalignment rather than as
+          indentation.
+        */}
+        <p className="text-muted-foreground mb-3 px-2.5 text-xs font-semibold uppercase tracking-wide">
           Sommaire
         </p>
         <ul className="space-y-1">
@@ -103,7 +114,11 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
                   className={cn(
                     "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
                     isActive
-                      ? "bg-primary/10 text-primary font-medium"
+                      ? // The same pair the domain badges use: dark brown on
+                        // warm sand. `bg-primary/10 text-primary` was green on
+                        // green — around 2:1 contrast, below the 4.5:1 WCAG AA
+                        // needs for body text, and tiring to read besides.
+                        "bg-secondary text-secondary-foreground font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted",
                   )}
                 >
@@ -141,7 +156,10 @@ export default function DevelopersApiDocumentation() {
   const contactEmail = (contact as PublicContactInfo | undefined)?.email;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 pb-20 pt-24 sm:px-6 lg:pt-28">
+    // `section-container` rather than a bespoke max-width: the header and the
+    // footer both use it, so the rail lines up with the logo above it instead
+    // of starting at an unexplained offset.
+    <div className="section-container flex gap-12 pb-20 pt-24 lg:pt-28">
       <Seo
         title="Connexion avec Rabotka — documentation développeur"
         description="Intégrez « Connexion avec Rabotka » : authentifiez vos utilisateurs avec leur compte Rabotka vérifié via OpenID Connect."
