@@ -23,6 +23,12 @@ export const config = {
        * prefilled message, so there is nothing generic to send instead.
        */
       start: "https://wa.me/message/U54TM7P5VLMBE1",
+      /**
+       * "Créer un compte Rabotka" on the OAuth consent screen, when the number
+       * matches no account. Account creation happens in the WhatsApp
+       * conversation, not on `/onboarding`, so the button leaves for WhatsApp.
+       */
+      signup: "https://wa.me/message/OSVQHPPGVO47D1",
     },
     /**
      * Still used where a prefilled message is built from a raw number — only
