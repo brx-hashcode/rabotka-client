@@ -1,5 +1,6 @@
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { config } from "@/config";
 import { consentContent } from "@/content/oauth/consent";
 
 type NoAccountNoticeProps = {
@@ -14,6 +15,10 @@ type NoAccountNoticeProps = {
  * that were created seconds ago and verify nothing. So this screen sends people
  * to Rabotka's own signup and asks them to come back, rather than pretending
  * the flow can continue.
+ *
+ * Signup means the WhatsApp conversation, not `/onboarding`: that is where an
+ * account is actually opened, and dropping someone into the web form from here
+ * leaves them mid-flow with no one guiding them.
  *
  * The signup link opens in a new tab on purpose: this page is very often a
  * popup opened by the partner, and navigating it away destroys the login
@@ -34,7 +39,11 @@ export function NoAccountNotice({ onRetry }: Readonly<NoAccountNoticeProps>) {
 
       <div className="space-y-2">
         <Button asChild className="w-full">
-          <a href="/onboarding" target="_blank" rel="noopener noreferrer">
+          <a
+            href={config.whatsapp.links.signup}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {consentContent.noAccount.createButton}
           </a>
         </Button>
