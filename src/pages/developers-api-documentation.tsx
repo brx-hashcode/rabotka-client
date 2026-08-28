@@ -28,6 +28,7 @@ const ISSUER = "https://api.rabotka.work";
 const SECTIONS = [
   { id: "en-bref", label: "En bref" },
   { id: "identifiants", label: "Obtenir des identifiants" },
+  { id: "sandbox", label: "Sandbox" },
   { id: "redirect-uris", label: "URI de redirection" },
   { id: "deroule", label: "Le déroulé" },
   { id: "jetons", label: "Ce que vous recevez" },
@@ -215,12 +216,98 @@ export default function DevelopersApiDocumentation() {
           Écrivez-nous avec le nom de votre application, une description (elle
           s'affiche sur l'écran de consentement), votre logo et vos URI de
           redirection. Vous recevrez un <Mono>client_id</Mono> et un{" "}
-          <Mono>client_secret</Mono>.
+          <Mono>client_secret</Mono>. Demandez la même chose pour{" "}
+          <a
+            href="#sandbox"
+            className="text-primary font-medium hover:underline"
+          >
+            le sandbox
+          </a>{" "}
+          dans le même message : c'est avec celui-là que vous développerez, et
+          les deux s'enregistrent en une fois.
         </p>
         <Callout>
           Le secret n'est affiché qu'une seule fois. Rabotka n'en conserve qu'une
           empreinte et ne peut pas vous le redonner — en cas de perte, un
           administrateur le régénère.
+        </Callout>
+      </Section>
+
+      <Section id="sandbox" title="Le sandbox">
+        <p>
+          Construire votre intégration ne devrait pas demander un vrai compte
+          Rabotka ni un vrai téléphone. Demandez-nous une{" "}
+          <strong className="text-foreground">application sandbox</strong> :
+          elle reçoit son propre <Mono>client_id</Mono> et son propre{" "}
+          <Mono>client_secret</Mono>, et n'authentifie que deux utilisateurs
+          fixes, avec un code fixe et sans aucun message WhatsApp.
+        </p>
+
+        <Code>{`+242 06 111 1111   →  rabotka_verified: true
++242 06 111 1112   →  rabotka_verified: false
+
+Code de vérification : 111111`}</Code>
+
+        <p>
+          Il y en a deux parce qu'il y a deux réponses à tester. La seule
+          différence entre eux est <Mono>rabotka_verified</Mono>, et c'est
+          exactement la distinction que{" "}
+          <a
+            href="#verification"
+            className="text-primary font-medium hover:underline"
+          >
+            la section plus bas
+          </a>{" "}
+          vous demande de ne pas manquer : une intégration qui n'a jamais vu
+          autre chose que <Mono>true</Mono> part en production sans avoir écrit
+          la branche qui compte.
+        </p>
+
+        <p className="text-foreground font-medium">
+          Il n'y a pas d'URL distincte
+        </p>
+        <p>
+          Même émetteur, même document de découverte, mêmes points de
+          terminaison — <Mono>{ISSUER}</Mono> dans les deux cas. C'est le{" "}
+          <Mono>client_id</Mono> que vous présentez qui décide, rien d'autre. Le
+          PKCE est réel, la signature RS256 est réelle et se vérifie contre le
+          même <Mono>/.well-known/jwks.json</Mono> : du code qui fonctionne
+          contre le sandbox fonctionne en production sans une ligne de
+          changement, et c'est tout l'intérêt.
+        </p>
+
+        <p className="text-foreground font-medium">Ce qui diffère quand même</p>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            Une application sandbox n'authentifie{" "}
+            <strong className="text-foreground">que</strong> ces deux numéros.
+            Tout autre numéro reçoit « aucun compte », y compris le vôtre. La
+            réciproque tient aussi : ces deux numéros ne fonctionnent sur aucune
+            application de production.
+          </li>
+          <li>
+            Le <Mono>sub</Mono> est propre à chaque application. Le même
+            utilisateur sandbox présente donc un <Mono>sub</Mono> différent de
+            celui qu'il aurait chez votre application de production —
+            n'emportez pas ces comptes de test dans votre base réelle.
+          </li>
+          <li>
+            L'écran de consentement réapparaît à chaque connexion : rien n'est
+            enregistré, il n'y a donc pas de consentement acquis. Pratique pour
+            travailler cet écran, mais ne vous en servez pas pour conclure que
+            vos utilisateurs le reverront à chaque fois.
+          </li>
+          <li>
+            Une application est sandbox ou ne l'est pas, décidé à
+            l'enregistrement et jamais modifié ensuite. Si vous voulez les deux,
+            demandez-nous deux applications — ce sont deux jeux d'identifiants.
+          </li>
+        </ul>
+
+        <Callout>
+          Le code <Mono>111111</Mono> n'a rien de secret et n'a de sens que pour
+          ces deux numéros, sur une application sandbox. Il n'ouvre aucun compte
+          réel, nulle part.
         </Callout>
       </Section>
 
