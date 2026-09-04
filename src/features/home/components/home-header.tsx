@@ -50,10 +50,15 @@ export function HomeHeader({
         <button
           type="button"
           onClick={goToSearch}
-          className="relative flex h-11 flex-1 items-center rounded-md bg-secondary pl-10 pr-4 text-left text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+          className="relative flex h-11 flex-1 items-center overflow-hidden rounded-md bg-secondary pl-10 pr-4 text-left text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
         >
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          {placeholder}
+          {/* This LOOKS like a placeholder but is real text in a button, so it
+              wraps where an <input> would clip — and the button is a fixed h-11,
+              so the second line spilled out of the pill. `min-w-0` is the part
+              that does the work: a flex item will not shrink below its content
+              width without it, so `truncate` alone would not have helped. */}
+          <span className="min-w-0 truncate">{placeholder}</span>
         </button>
 
         <button
