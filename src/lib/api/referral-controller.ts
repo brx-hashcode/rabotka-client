@@ -2,6 +2,18 @@ import { RabotkaBaseController } from "./base-controller";
 
 export type ReferralSummary = {
   code: string;
+  /**
+   * What unit the two amounts below are in.
+   *
+   * `FIXED` — francs, paid whatever the filleul's first mise en relation cost.
+   * `PERCENTAGE` — shares of that payment. The field names keep their `Fcfa`
+   * suffix because the storage keys do; this is what says which they are, and
+   * rendering 60 as «60 FCFA» when it means «60 %» is the failure it prevents.
+   *
+   * Optional: an older backend during a rolling deploy sends no type, and
+   * absent means FIXED — the behaviour that existed before the field did.
+   */
+  commissionType?: "FIXED" | "PERCENTAGE";
   referrerCreditFcfa: number;
   refereeCreditFcfa: number;
   /**
@@ -9,8 +21,11 @@ export type ReferralSummary = {
    * Equals the two credits combined — the payout can never exceed the payment
    * that triggered it. Server-computed, from the same function the settle logic
    * uses, so the screen cannot promise a credit the backend would decline.
+   *
+   * Null in PERCENTAGE mode, where there is no minimum at all: a share fits
+   * inside any payment, so nothing can be too small to qualify.
    */
-  minQualifyingAmountFcfa: number;
+  minQualifyingAmountFcfa: number | null;
   /** null means the parrain has no cap. */
   maxRewardedPerReferrer: number | null;
   joinedCount: number;

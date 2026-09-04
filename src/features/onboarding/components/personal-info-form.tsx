@@ -166,6 +166,30 @@ export function PersonalInfoForm({
                 </FormItem>
               )}
             />
+
+            {/* Directly under the WhatsApp number, because it only makes sense
+                as "and if that one isn't the one you answer calls on". */}
+            <FormField
+              control={form.control}
+              name="directPhone"
+              render={({ field }) => (
+                <FormItem className="flex min-h-12 min-w-0 flex-col gap-1">
+                  <FormLabel>{content.fields.directPhone.label}</FormLabel>
+                  <FormControl>
+                    <PhoneInput
+                      defaultCountry="CG"
+                      placeholder={content.fields.directPhone.placeholder}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {content.fields.directPhone.hint}
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           {/* Country → city → address, in that order: the city list depends on

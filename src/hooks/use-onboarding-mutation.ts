@@ -29,6 +29,9 @@ export function useOnboardingMutation() {
         lastName: personalInfo.lastName,
         email: personalInfo.email,
         phone: personalInfo.phone,
+        // Omitted rather than sent empty: the field is optional all the way
+        // down, and "" would be stored as an empty number rather than as none.
+        directPhone: personalInfo.directPhone || undefined,
         countryCode: personalInfo.countryCode,
         countryName: personalInfo.countryName,
         city: personalInfo.city,

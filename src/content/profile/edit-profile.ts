@@ -32,6 +32,11 @@ export const editProfileContent = {
       placeholder: "Decrivez-vous en quelques mots...",
       charCount: "/500",
     },
+    directPhone: {
+      label: "Numero direct (facultatif)",
+      placeholder: "Numero avec indicatif pays",
+      hint: "Si votre numero WhatsApp n'est pas celui sur lequel on peut vous appeler.",
+    },
   },
   categories: {
     label: "Domaines d'activité",
