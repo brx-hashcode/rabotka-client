@@ -14,6 +14,12 @@ export const validationMessages = {
     required: "Numéro de téléphone requis",
     invalid: "Numéro de téléphone invalide pour le pays sélectionné",
   },
+  directPhone: {
+    // No `required` — the field is optional. Only the format is checked, and
+    // only when something was actually typed.
+    invalid: "Numéro de téléphone invalide pour le pays sélectionné",
+    sameAsPhone: "Ce numéro est déjà votre numéro WhatsApp",
+  },
   country: {
     required: "Sélectionnez un pays",
   },
