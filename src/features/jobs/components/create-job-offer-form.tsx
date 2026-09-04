@@ -130,7 +130,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   };
 
   return (
-    <div className="bg-white rounded-lg lg:p-8 p-4">
+    // Square on mobile, where it runs edge to edge and rounded corners would
+    // read as a card that overflowed. Rounds from md up, where the page gutter
+    // gives it somewhere to sit.
+    <div className="rounded-none bg-white p-4 md:rounded-lg lg:p-8">
       <h2 className="text-2xl font-bold mb-6">Créer une offre</h2>
 
       <Form {...form}>
