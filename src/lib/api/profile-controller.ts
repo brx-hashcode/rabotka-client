@@ -8,6 +8,11 @@ export type CreateProfilePayload = {
   lastName: string;
   email: string;
   phone: string;
+  /**
+   * Optional second number to be reached on, when the WhatsApp number is not
+   * one the person answers calls on. Omitted when they gave only one.
+   */
+  directPhone?: string;
   countryCode: string;
   countryName: string;
   city: string;
@@ -46,6 +51,8 @@ export type ProfileMeResponse = {
   lastName: string;
   email: string;
   phone: string;
+  /** Optional second number. Null for the majority who gave only one. */
+  directPhone: string | null;
   address: string;
   countryCode: string | null;
   countryName: string | null;
@@ -77,6 +84,15 @@ export type UpdateProfilePayload = {
   countryName?: string;
   city?: string;
   categoryIds?: string[];
+  /**
+   * Optional second number. Send "" to clear it.
+   *
+   * Editable here, unlike the WhatsApp number: nothing authenticates against a
+   * direct line, so it changes like an address does. Changing the WhatsApp
+   * number goes through `requestPhoneChange` / `confirmPhoneChange` instead,
+   * because it is the login identity.
+   */
+  directPhone?: string;
 };
 
 export type UpdateAvatarResponse = {
@@ -282,6 +298,37 @@ class ProfileController extends RabotkaBaseController {
     }
   }
 
+  /**
+   * Step 1 of changing the WhatsApp number: send a code to the NEW handset.
+   *
+   * Writes nothing yet. The number is the login identity, so it only moves once
+   * the code comes back — a typo committed straight away would send every
+   * future login link to a number the user does not own.
+   */
+  async requestPhoneChange(newPhone: string): Promise<{ success: boolean }> {
+    try {
+      return await this.post<{ success: boolean }>("/profile/phone-change/request", {
+        newPhone,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /** Step 2: hand back the code and commit the switch. */
+  async confirmPhoneChange(
+    code: string,
+  ): Promise<{ success: boolean; phone: string }> {
+    try {
+      return await this.post<{ success: boolean; phone: string }>(
+        "/profile/phone-change/confirm",
+        { code },
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async updateProfile(data: UpdateProfilePayload): Promise<ProfileMeResponse> {
     try {
       return await this.patch<ProfileMeResponse>(
@@ -378,6 +425,8 @@ export const {
   payPenaltiesWithMobile,
   updateAvatar,
   updateProfile,
+  requestPhoneChange,
+  confirmPhoneChange,
   createProfile,
   uploadKycFile,
   getApplications,

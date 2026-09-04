@@ -6,6 +6,22 @@ import {
   requiresBackSide,
 } from "@/lib/kyc-document-types";
 
+/**
+ * Optional, and empty means absent rather than invalid.
+ *
+ * `PhoneInput` yields `undefined` for an untouched field but an empty string
+ * once it has been focused and cleared, and both mean "no second number" — so
+ * the format check has to run only on a non-empty value or clearing the field
+ * would leave an error the user cannot resolve.
+ */
+const optionalPhone = z
+  .string()
+  .optional()
+  .refine(
+    (value) => !value || isValidPhoneNumber(value),
+    validationMessages.directPhone.invalid,
+  );
+
 export const step1Schema = z.object({
   firstName: z
     .string()
@@ -20,6 +36,7 @@ export const step1Schema = z.object({
     .string()
     .min(1, validationMessages.phone.required)
     .refine(isValidPhoneNumber, validationMessages.phone.invalid),
+  directPhone: optionalPhone,
   countryCode: z.string().min(1, validationMessages.country.required),
   countryName: z.string(),
   city: z.string().min(1, validationMessages.city.required),
@@ -34,7 +51,20 @@ export const step1Schema = z.object({
     .string()
     .min(80, validationMessages.description.min)
     .max(500, validationMessages.description.max),
-});
+})
+  // A direct number identical to the WhatsApp one carries no information, and
+  // saving it would make the profile claim two ways to be reached when there is
+  // one. Reported on the field so the error lands under the input the user has
+  // to change.
+  .superRefine((data, ctx) => {
+    if (data.directPhone && data.directPhone === data.phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.directPhone.sameAsPhone,
+        path: ["directPhone"],
+      });
+    }
+  });
 
 /** Step 2 — profile type + categories (for all profile types) */
 const step2SchemaBase = z.object({

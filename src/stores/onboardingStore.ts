@@ -19,6 +19,8 @@ export type PersonalInfo = {
   lastName: string;
   email: string;
   phone: string;
+  /** Optional second number. Empty string when the person gave only one. */
+  directPhone: string;
   countryCode: string;
   countryName: string;
   city: string;
@@ -82,6 +84,7 @@ const initialState = {
     lastName: "",
     email: "",
     phone: "",
+    directPhone: "",
     countryCode: "",
     countryName: "",
     city: "",
