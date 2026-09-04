@@ -21,5 +21,15 @@ export const validationMessages = {
     min: "Minimum 80 caractères",
     max: "Maximum 500 caractères",
   },
+  directPhone: {
+    // No `required` — the field is optional. Only the format is checked, and
+    // only when something was actually typed.
+    invalid: "Numéro de téléphone invalide",
+  },
+  phoneChange: {
+    invalid: "Numéro de téléphone invalide",
+    sameAsCurrent: "C'est déjà le numéro de votre compte",
+    codeRequired: "Entrez le code à 6 chiffres",
+  },
 } as const;
 

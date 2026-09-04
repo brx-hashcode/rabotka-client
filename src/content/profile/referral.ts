@@ -25,36 +25,64 @@ export const referralContent = {
    * Amounts are interpolated from the server: an admin changes them in les
    * paramètres and this text follows without a déploiement.
    */
-  steps: (
-    referrerAmount: string,
-    refereeAmount: string,
+  steps: ({
+    referrerAmount,
+    refereeAmount,
+    minQualifyingAmount,
+    isPercentage,
+  }: {
+    referrerAmount: string;
+    refereeAmount: string;
     /**
-     * Omitted when the API did not send a threshold — an older backend during a
-     * rolling deploy. The sentence drops the clause rather than rendering the
-     * word "undefined" at the user, which is what a bare interpolation does.
+     * Omitted when there is no threshold to state: an older backend during a
+     * rolling deploy, or a percentage configuration, where a share fits inside
+     * any payment and nothing can be too small. The sentence drops the clause
+     * rather than rendering the word "undefined" at the user, which is what a
+     * bare interpolation does.
      */
-    minQualifyingAmount: string | null,
-  ) => [
-    {
-      title: "Partagez votre code",
-      body: "Envoyez-le à une personne de confiance qui cherche du travail ou qui recrute.",
-    },
-    {
-      title: "Elle s'inscrit avec votre code",
-      body: `Elle le saisit à la fin de son inscription et reçoit ${refereeAmount} de crédit.`,
-    },
-    {
-      // The minimum is stated, not implied. The payout can never exceed the
-      // payment that triggered it, so a filleul whose first mise en relation
-      // costs less than the two credits combined earns nobody anything —
-      // announcing the amount without the condition is how you promise a credit
-      // that never arrives.
-      title: "Vous recevez votre crédit",
-      body: minQualifyingAmount
-        ? `${referrerAmount} sont versés sur votre portefeuille dès sa première mise en relation payée par mobile money, à partir de ${minQualifyingAmount}.`
-        : `${referrerAmount} sont versés sur votre portefeuille dès sa première mise en relation payée par mobile money.`,
-    },
-  ],
+    minQualifyingAmount: string | null;
+    /**
+     * Changes what the amounts are OF, not just how they read. A percentage is
+     * meaningless without naming the thing it is a share of, so these are
+     * different sentences rather than the same sentence with a different unit.
+     */
+    isPercentage: boolean;
+  }) => {
+    // The minimum is stated, not implied. In FIXED mode the payout can never
+    // exceed the payment that triggered it, so a filleul whose first mise en
+    // relation costs less than the two credits combined earns nobody anything —
+    // announcing the amount without the condition is how you promise a credit
+    // that never arrives.
+    //
+    // In PERCENTAGE mode that cannot happen: a share always fits inside the
+    // payment. There is no condition to state, and stating one would invent a
+    // restriction that does not exist.
+    let creditBody: string;
+    if (isPercentage) {
+      creditBody = `${referrerAmount} du montant de sa première mise en relation payée par mobile money sont versés sur votre portefeuille.`;
+    } else if (minQualifyingAmount) {
+      creditBody = `${referrerAmount} sont versés sur votre portefeuille dès sa première mise en relation payée par mobile money, à partir de ${minQualifyingAmount}.`;
+    } else {
+      creditBody = `${referrerAmount} sont versés sur votre portefeuille dès sa première mise en relation payée par mobile money.`;
+    }
+
+    return [
+      {
+        title: "Partagez votre code",
+        body: "Envoyez-le à une personne de confiance qui cherche du travail ou qui recrute.",
+      },
+      {
+        title: "Elle s'inscrit avec votre code",
+        body: isPercentage
+          ? `Elle le saisit à la fin de son inscription. Elle recevra ${refereeAmount} de sa première mise en relation en crédit.`
+          : `Elle le saisit à la fin de son inscription et reçoit ${refereeAmount} de crédit.`,
+      },
+      {
+        title: "Vous recevez votre crédit",
+        body: creditBody,
+      },
+    ];
+  },
   stats: {
     title: "Vos parrainages",
     joined: "Inscrits",

@@ -19,6 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount, cn } from "@/lib/utils";
 import { useReferral } from "@/hooks/use-referral";
+import { referralAmounts } from "@/lib/referral-amounts";
 import { referralContent as content } from "@/content/profile";
 
 /** How long a "copied" confirmation stays up. */
@@ -229,16 +230,7 @@ export const ReferralSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
                   as how it works instead of as a catch. */}
               <ol className="bg-card shadow-soft space-y-4 rounded-lg p-4">
                 {content
-                  .steps(
-                    formatAmount(data.referrerCreditFcfa),
-                    formatAmount(data.refereeCreditFcfa),
-                    // Guarded: an older API during a rolling deploy sends no
-                    // threshold, and a bare interpolation would print the word
-                    // "undefined" into the sentence.
-                    Number.isFinite(data.minQualifyingAmountFcfa)
-                      ? formatAmount(data.minQualifyingAmountFcfa)
-                      : null,
-                  )
+                  .steps(referralAmounts(data))
                   .map((step, i) => (
                     <Step
                       key={step.title}
