@@ -59,7 +59,11 @@ export default function CreateJobOffer() {
   }
 
   return (
-    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8 flex flex-col max-w-2xl mx-auto w-full">
+    // No horizontal padding on mobile: the card below already carries a p-4
+    // gutter, so having both cost 32px a side — 64px of a 390px screen, and the
+    // form fields were paying for it. The page gutter comes back from md up,
+    // where there is width to spare and the card should read as a card.
+    <div className="mx-auto flex w-full max-w-2xl flex-col px-0 pt-4 pb-8 md:px-8 lg:pt-10">
       <Seo title="Créer une offre — Rabotka" noIndex />
       {body}
     </div>
