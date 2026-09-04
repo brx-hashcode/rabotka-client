@@ -190,6 +190,15 @@ export default function Profile() {
               label="Numero WhatsApp"
               value={profile.phone}
             />
+            {/* Only when there is one. Most people have a single number, and a
+                row reading "Non renseigne" would imply something is missing. */}
+            {profile.directPhone && (
+              <InfoRow
+                icon={<Phone className="h-4 w-4 text-whatsapp" />}
+                label="Numero direct"
+                value={profile.directPhone}
+              />
+            )}
             <InfoRow
               icon={<Mail className="h-4 w-4 text-whatsapp" />}
               label="Email"
