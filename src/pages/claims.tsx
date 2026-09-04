@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Inbox } from "lucide-react";
 import { ScreenHeader } from "@/features/employer";
@@ -54,13 +53,12 @@ export default function Claims() {
               <Inbox className="h-12 w-12 text-muted-foreground" />
             </div>
             <p className="font-semibold text-lg mb-1">{content.emptyTitle}</p>
-            <p className="text-muted-foreground mb-6 max-w-sm">
+            {/* No CTA here: the header already carries a + button for exactly
+                this action, and two controls doing the same thing on one empty
+                screen just asks the user which one is the real one. */}
+            <p className="text-muted-foreground max-w-sm">
               {content.emptyDescription}
             </p>
-            <Button onClick={() => navigate("/claims/new")}>
-              <Plus className="h-4 w-4 mr-2" />
-              {content.createButton}
-            </Button>
           </div>
         )}
         {!isLoading && hasClaims && (
