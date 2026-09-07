@@ -258,7 +258,7 @@ export default function Profile() {
               <>
                 <ActionRow
                   icon={<Images className="h-4 w-4 text-muted-foreground" />}
-                  label="Mes réalisations"
+                  label="Mes publications"
                   onClick={() => navigate("/profile/portfolio")}
                 />
                 <PenaltiesSheetButton asRow />
