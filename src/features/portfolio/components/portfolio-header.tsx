@@ -68,7 +68,7 @@ export function PortfolioHeader({
       </div>
 
       <div className="flex items-center justify-center divide-x divide-border">
-        <Stat value={String(realizationsCount)} label="Réalisations" />
+        <Stat value={String(realizationsCount)} label="Publications" />
         {profile.completedMissionsCount != null && (
           <Stat
             value={String(profile.completedMissionsCount)}

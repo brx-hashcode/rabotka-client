@@ -43,7 +43,7 @@ export default function PublicPortfolio() {
       <>
         {header}
         <main className={CONTAINER}>
-          <Seo title="Portfolio — Rabotka" noIndex />
+          <Seo title="Publications — Rabotka" noIndex />
           <PortfolioSkeleton />
         </main>
       </>
@@ -55,16 +55,16 @@ export default function PublicPortfolio() {
       <>
         {header}
         <main className={CONTAINER}>
-          <Seo title="Portfolio introuvable — Rabotka" noIndex />
+          <Seo title="Publications introuvables — Rabotka" noIndex />
           <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
           <div className="bg-muted flex size-14 items-center justify-center rounded-full">
             <SearchX className="text-muted-foreground size-7" />
           </div>
           <h1 className="text-foreground text-2xl font-bold">
-            Portfolio indisponible
+            Publications indisponibles
           </h1>
           <p className="text-muted-foreground max-w-md text-sm">
-            Ce lien ne correspond à aucun portfolio valide, ou la page n'a pas
+            Ce lien ne correspond à aucun profil valide, ou la page n'a pas
             pu être chargée.
           </p>
           <p className="text-muted-foreground max-w-md text-xs">
@@ -91,14 +91,14 @@ export default function PublicPortfolio() {
       {header}
       <main className={CONTAINER}>
         <Seo
-          title={`${fullName} — Réalisations | Rabotka`}
+          title={`${fullName} — Publications | Rabotka`}
           description={
             worker.description?.slice(0, 160) ||
-            `Découvrez les réalisations de ${fullName} sur Rabotka.`
+            `Découvrez les publications de ${fullName} sur Rabotka.`
           }
           canonical={`/p/${worker.slug}`}
           ogImage={firstImage ?? worker.avatarUrl ?? undefined}
-          ogImageAlt={`Réalisations de ${fullName}`}
+          ogImageAlt={`Publications de ${fullName}`}
           jsonLd={buildJsonLd(worker, fullName)}
         />
 
@@ -119,7 +119,7 @@ export default function PublicPortfolio() {
 
       {worker.portfolio.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          Aucune réalisation publiée pour le moment.
+          Aucune publication pour le moment.
         </p>
       ) : (
         <PortfolioGrid
