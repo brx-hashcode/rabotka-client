@@ -85,7 +85,7 @@ function PublicRealization({
   return (
     <div className="flex min-h-screen flex-col">
       <Seo title={`${item.title} — ${fullName} | Rabotka`} noIndex />
-      <ScreenHeader title="Réalisation" onBack={goToPortfolio} />
+      <ScreenHeader title="Publication" onBack={goToPortfolio} />
       <RealizationView
         item={item}
         author={{ fullName, avatarUrl: worker.avatarUrl }}
@@ -117,7 +117,7 @@ function OwnRealization({ itemId }: Readonly<{ itemId: string }>) {
   return (
     <div className="flex min-h-screen flex-col">
       <Seo title={`${item.title} — Rabotka`} noIndex />
-      <ScreenHeader title="Réalisation" onBack={goToPortfolio} />
+      <ScreenHeader title="Publication" onBack={goToPortfolio} />
 
       <RealizationView
         item={item}
@@ -152,8 +152,8 @@ function OwnRealization({ itemId }: Readonly<{ itemId: string }>) {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Supprimer la réalisation"
-        description="Cette réalisation et toutes ses images seront définitivement supprimées."
+        title="Supprimer la publication"
+        description="Cette publication et toutes ses images seront définitivement supprimées."
         actionLabel="Supprimer"
         isPending={deleteMutation.isPending}
         onConfirm={() =>
@@ -170,16 +170,16 @@ function OwnRealization({ itemId }: Readonly<{ itemId: string }>) {
 function NotFound({ onBack }: Readonly<{ onBack: () => void }>) {
   return (
     <div className="flex min-h-screen flex-col">
-      <ScreenHeader title="Réalisation" onBack={onBack} />
+      <ScreenHeader title="Publication" onBack={onBack} />
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="bg-muted flex size-14 items-center justify-center rounded-full">
           <ImageOff className="text-muted-foreground size-7" />
         </div>
         <p className="text-muted-foreground max-w-xs text-sm">
-          Cette réalisation n'existe plus ou n'est pas disponible.
+          Cette publication n'existe plus ou n'est pas disponible.
         </p>
         <Button variant="outline" onClick={onBack}>
-          Retour aux réalisations
+          Retour aux publications
         </Button>
       </div>
     </div>
@@ -189,7 +189,7 @@ function NotFound({ onBack }: Readonly<{ onBack: () => void }>) {
 function DetailSkeleton({ onBack }: Readonly<{ onBack: () => void }>) {
   return (
     <div className="flex min-h-screen flex-col">
-      <ScreenHeader title="Réalisation" onBack={onBack} />
+      <ScreenHeader title="Publication" onBack={onBack} />
       <div className="mx-auto w-full max-w-xl">
         <div className="flex items-center gap-3 px-4 pb-3">
           <Skeleton className="size-9 rounded-full" />

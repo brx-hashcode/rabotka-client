@@ -33,11 +33,11 @@ export default function MyPortfolio() {
   return (
     <div className="flex min-h-screen flex-col">
       <ScreenHeader
-        title="Mes réalisations"
+        title="Mes publications"
         onBack={() => navigate("/profile")}
       />
       <main className={CONTAINER}>
-        <Seo title="Mes réalisations — Rabotka" noIndex />
+        <Seo title="Mes publications — Rabotka" noIndex />
 
         {profileLoading || itemsLoading || !profile ? (
           <HeaderSkeleton />
@@ -56,7 +56,7 @@ export default function MyPortfolio() {
             action={
               <Button onClick={() => setCreateOpen(true)} className="w-full">
                 <Plus className="size-4" />
-                Ajouter une réalisation
+                Ajouter une publication
               </Button>
             }
           />
@@ -67,12 +67,12 @@ export default function MyPortfolio() {
         {!itemsLoading && items.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
             <p className="text-muted-foreground text-sm">
-              Vous n'avez pas encore de réalisation. Montrez vos missions pour
+              Vous n'avez pas encore de publication. Montrez vos missions pour
               inspirer confiance aux recruteurs.
             </p>
             <Button onClick={() => setCreateOpen(true)} variant="outline">
               <Plus className="size-4" />
-              Ajouter ma première réalisation
+              Ajouter ma première publication
             </Button>
           </div>
         ) : (
