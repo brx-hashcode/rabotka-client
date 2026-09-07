@@ -37,12 +37,12 @@ export function useCreatePortfolioItem() {
         queryKey: PORTFOLIO_KEY,
         refetchType: "all",
       });
-      toast({ description: "Réalisation ajoutée." });
+      toast({ description: "Publication ajoutée." });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        description: errorMessage(error, "Échec de l'ajout de la réalisation."),
+        description: errorMessage(error, "Échec de l'ajout de la publication."),
       });
     },
   });
@@ -59,7 +59,7 @@ export function useUpdatePortfolioItem() {
         queryKey: PORTFOLIO_KEY,
         refetchType: "all",
       });
-      toast({ description: "Réalisation mise à jour." });
+      toast({ description: "Publication mise à jour." });
     },
     onError: (error) => {
       toast({
@@ -80,7 +80,7 @@ export function useDeletePortfolioItem() {
         queryKey: PORTFOLIO_KEY,
         refetchType: "all",
       });
-      toast({ description: "Réalisation supprimée." });
+      toast({ description: "Publication supprimée." });
     },
     onError: (error) => {
       toast({
