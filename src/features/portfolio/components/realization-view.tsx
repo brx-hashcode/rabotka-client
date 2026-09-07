@@ -214,7 +214,7 @@ function SlideImage({
       {/* contain, not cover: this view exists to inspect the work uncropped. */}
       <img
         src={url}
-        alt={`Réalisation ${index + 1}`}
+        alt={`Publication ${index + 1}`}
         className="h-full w-full object-contain"
         onError={() => setBroken(true)}
       />

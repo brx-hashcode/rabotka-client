@@ -197,7 +197,7 @@ export default function RecommendedWorkerDetail() {
               onClick={() => navigate(`/p/${worker.portfolioSlug}?back=1`)}
             >
               <Briefcase className="mr-2 h-4 w-4" />
-              Voir le portfolio
+              Voir les publications
             </Button>
           )}
 
