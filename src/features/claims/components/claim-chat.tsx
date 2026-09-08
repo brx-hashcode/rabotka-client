@@ -454,7 +454,13 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
       {/* Composer */}
       <form
         onSubmit={handleSubmit}
-        className="shrink-0 bg-background px-3 py-2.5"
+        // Lifted off the bottom edge. This screen renders with `withNav={false}`,
+        // so unlike everywhere else in the app there is no bottom bar between
+        // the send button and the device — on a phone it sat directly against
+        // the home indicator. Same `env(safe-area-inset-bottom)` the bottom nav
+        // uses, plus a little air so the row does not read as cut off on a
+        // handset that reports no inset at all.
+        className="shrink-0 bg-background px-3 pt-2.5 pb-[calc(env(safe-area-inset-bottom)+0.875rem)]"
       >
         <input {...getInputProps()} className="sr-only" />
 
