@@ -18,7 +18,7 @@ export const validationMessages = {
     max: "Adresse trop longue",
   },
   description: {
-    min: "Minimum 80 caractères",
+    min: "Minimum 5 caractères",
     max: "Maximum 500 caractères",
   },
   directPhone: {
