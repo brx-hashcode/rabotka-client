@@ -33,24 +33,21 @@ export const personalInfoContent = {
       },
     },
     phone: {
-      // Named for what it must actually be: every login link, notification and
-      // reminder is delivered over WhatsApp, so a number without WhatsApp
-      // leaves the account unreachable.
       label: "Numéro WhatsApp",
       placeholder: "Numéro avec indicatif pays",
       hint: "C'est sur ce numéro que vous recevrez vos connexions et vos notifications.",
     },
     directPhone: {
-      // Named for the case it exists to cover: plenty of people run WhatsApp on
-      // a data-only handset, or share one, and the number that reaches them by
-      // call is a different one.
       label: "Numéro direct (facultatif)",
       placeholder: "Numéro avec indicatif pays",
       hint: "Si votre numéro WhatsApp n'est pas celui sur lequel on peut vous appeler.",
     },
+    country: {
+      hint: "Le pays où vous vous trouvez actuellement.",
+    },
     address: {
       label: "Adresse",
-      placeholder: "19 rue de la joie",
+      placeholder: "Moungali, 30 rue Bondo",
     },
     description: {
       label: "Décrivez votre profil et ce que vous recherchez",

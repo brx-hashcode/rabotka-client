@@ -30,6 +30,16 @@ import {
 const MAX_CATEGORIES = 5;
 const INITIAL_VISIBLE = 10;
 
+/**
+ * Preselected, rather than making everyone answer a question most of them
+ * answer the same way. The overwhelming majority of sign-ups are people
+ * offering their work; a recruiter changes it in one tap.
+ *
+ * It is a DEFAULT, not a decision made for the user: a stored choice and a
+ * `?profileType=` link both still win, see the restore effect below.
+ */
+const DEFAULT_PROFILE_TYPE = "WORKER" as const;
+
 type OnboardingStep =
   | "personal-informations"
   | "profile-type"
@@ -70,7 +80,8 @@ export function ProfileTypeForm({
   const form = useForm<Step2FormData>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
-      profileType: profileTypeParam || undefined,
+      profileType:
+        profileTypeParam || kycData.profileType || DEFAULT_PROFILE_TYPE,
       categoryIds: kycData.categoryIds.length > 0 ? kycData.categoryIds : [],
     },
     mode: "onChange",
@@ -88,13 +99,26 @@ export function ProfileTypeForm({
   const storedProfileType = kycData.profileType;
   const storedCategoryIds = kycData.categoryIds;
 
+  // Guarded on `dirtyFields`, not on the field being empty: it is never empty
+  // any more, since DEFAULT_PROFILE_TYPE fills it at first render. Checking for
+  // emptiness here would silently stop restoring a stored EMPLOYER — the field
+  // would already hold "WORKER" and the effect would decline to touch it.
+  const profileTypeTouched = Boolean(form.formState.dirtyFields.profileType);
+
   useEffect(() => {
-    if (storedProfileType && !form.getValues("profileType")) {
-      form.setValue("profileType", storedProfileType, { shouldValidate: true });
-      // Keep the shareable URL agreeing with what is on screen.
-      if (!profileTypeParam) void setProfileTypeParam(storedProfileType);
-    }
-  }, [storedProfileType, profileTypeParam, setProfileTypeParam, form]);
+    if (!storedProfileType || profileTypeTouched || profileTypeParam) return;
+    if (form.getValues("profileType") === storedProfileType) return;
+
+    form.setValue("profileType", storedProfileType, { shouldValidate: true });
+    // Keep the shareable URL agreeing with what is on screen.
+    void setProfileTypeParam(storedProfileType);
+  }, [
+    storedProfileType,
+    profileTypeParam,
+    profileTypeTouched,
+    setProfileTypeParam,
+    form,
+  ]);
 
   useEffect(() => {
     if (
@@ -134,6 +158,8 @@ export function ProfileTypeForm({
     },
     [onNext, setKycData, categories],
   );
+
+  const selectedProfileType = form.watch("profileType");
 
   const content = profileTypeContent;
 
@@ -179,6 +205,25 @@ export function ProfileTypeForm({
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                {/* Both roles, side by side and always visible. Someone who
+                    already knows which one they are skims past it; someone who
+                    doesn't gets the answer without having to open the list.
+                    Upper-cased to match the select's own options, so the line
+                    that explains a role is spelled like the role you pick. */}
+                <div className="text-xs text-muted-foreground">
+                  <p>
+                    <span className="font-medium text-foreground">
+                      {content.profileType.options.worker.toUpperCase()}
+                    </span>{" "}
+                    — {content.profileType.hint.worker}
+                  </p>
+                  <p>
+                    <span className="font-medium text-foreground">
+                      {content.profileType.options.employer.toUpperCase()}
+                    </span>{" "}
+                    — {content.profileType.hint.employer}
+                  </p>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -226,6 +271,13 @@ export function ProfileTypeForm({
                       {content.categories.hint}
                     </span>
                   </div>
+                  {/* Worded for the role actually selected: the domains drive
+                      offers one way round and candidate profiles the other. */}
+                  <p className="text-xs text-muted-foreground">
+                    {selectedProfileType === "EMPLOYER"
+                      ? content.categories.context.employer
+                      : content.categories.context.worker}
+                  </p>
                   <input
                     type="search"
                     value={categorySearch}

@@ -33,6 +33,14 @@ type Props<T extends FieldValues> = {
   readonly form: UseFormReturn<T>;
   /** Portal target, when rendered inside a Sheet/Dialog. */
   readonly container?: HTMLElement | null;
+  /**
+   * A line under the country picker saying what this country is *for*.
+   *
+   * Caller-supplied rather than baked in, because the answer differs: on a
+   * profile it is where the person is, on a job offer it is where the work is.
+   * A single wording here would be wrong in one of those places.
+   */
+  readonly countryHint?: string;
 };
 
 /**
@@ -51,6 +59,7 @@ type Props<T extends FieldValues> = {
 export function CountryCityFields<T extends FieldValues>({
   form,
   container,
+  countryHint,
 }: Props<T>) {
   const countryField = "countryCode" as Path<T>;
   const cityField = "city" as Path<T>;
@@ -105,6 +114,9 @@ export function CountryCityFields<T extends FieldValues>({
                 container={container}
               />
             </FormControl>
+            {countryHint && (
+              <p className="text-xs text-muted-foreground">{countryHint}</p>
+            )}
             <FormMessage />
           </FormItem>
         )}

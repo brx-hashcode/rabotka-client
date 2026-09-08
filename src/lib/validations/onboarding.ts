@@ -47,9 +47,19 @@ export const step1Schema = z.object({
     .string()
     .min(4, validationMessages.address.min)
     .max(200, validationMessages.address.max),
+  /**
+   * A floor low enough to be a typo guard, not a writing assignment.
+   *
+   * It was 80, which reads as "write a paragraph". Plenty of people describe
+   * themselves in keywords — « maçon, finition, Pointe-Noire » — and that is
+   * perfectly usable: the matching index embeds whatever is here, and short
+   * keyword text still carries the trade and the place. Turning those people
+   * away at the last field of onboarding cost more than the extra prose was
+   * worth.
+   */
   description: z
     .string()
-    .min(80, validationMessages.description.min)
+    .min(5, validationMessages.description.min)
     .max(500, validationMessages.description.max),
 })
   // A direct number identical to the WhatsApp one carries no information, and

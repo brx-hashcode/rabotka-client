@@ -45,10 +45,7 @@ export function PersonalInfoForm({
     mode: "onChange",
   });
 
-  // defaultValues snapshot the store at first render, but hydrateFromStorage is
-  // async and resolves after it -- so coming back to step 1 showed an empty
-  // form even though the store had every field. Guarded on isDirty so a slow
-  // hydration can never overwrite what someone is in the middle of typing.
+
   useEffect(() => {
     const hasStoredValues = Object.values(personalInfo).some(Boolean);
     if (hasStoredValues && !form.formState.isDirty) {
@@ -69,8 +66,6 @@ export function PersonalInfoForm({
 
   return (
     <div className="space-y-6">
-      {/* No step indicator here: it squeezed the title into two lines on a
-          phone for a count the user can already see on the surrounding flow. */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
         <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
@@ -195,7 +190,10 @@ export function PersonalInfoForm({
           {/* Country → city → address, in that order: the city list depends on
               the country, and the street line only makes sense once both are
               known. */}
-          <CountryCityFields form={form} />
+          <CountryCityFields
+            form={form}
+            countryHint={content.fields.country.hint}
+          />
 
           <FormField
             control={form.control}
@@ -228,7 +226,7 @@ export function PersonalInfoForm({
                           profileType.toLowerCase() as "worker" | "employer"
                         ]
                       }
-                      className="min-h-[140px] pr-16 resize-none"
+                      className="min-h-35 pr-16 resize-none"
                       {...field}
                     />
                     <div
