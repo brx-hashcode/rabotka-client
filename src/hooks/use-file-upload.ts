@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useId } from "react";
+import { useState, useCallback, useEffect, useRef, useId } from "react";
 
 export type FileWithPreview = {
   id: string;
@@ -69,6 +69,24 @@ export function useFileUpload(
   const [errors, setErrors] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const uniqueId = useId();
+
+  // Every preview is an `URL.createObjectURL` blob that the browser holds until
+  // it is revoked. `removeFile` and `clearFiles` revoke; nothing revoked on
+  // unmount, so leaving a screen with files still picked leaked one blob per
+  // file for the life of the tab — and on this app that is the ordinary way to
+  // leave the claim form.
+  //
+  // A ref, not `files`, so the effect can stay mount-only: depending on `files`
+  // would revoke the previews on every change and blank the thumbnails.
+  const filesRef = useRef<FileWithPreview[]>([]);
+  filesRef.current = files;
+
+  useEffect(
+    () => () => {
+      filesRef.current.forEach((f) => URL.revokeObjectURL(f.preview));
+    },
+    [],
+  );
 
   const validateFile = useCallback(
     (file: File): string | null => {

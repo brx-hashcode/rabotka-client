@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, ImagePlus, X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { useCreateClaim } from "@/hooks/use-create-claim";
@@ -21,15 +22,24 @@ import {
   createClaimSchema,
   type CreateClaimFormData,
 } from "@/lib/validations/claims";
+import { compressImage } from "@/lib/image-compress";
+import {
+  IMAGE_ACCEPT,
+  IMAGE_FORMATS_LABEL,
+  MAX_CLAIM_ATTACHMENTS,
+  MAX_IMAGE_BYTES,
+} from "@/lib/image-upload";
 
-const MAX_FILES = 3;
-const ACCEPT = "image/*,.pdf,.doc,.docx";
+const MAX_FILES = MAX_CLAIM_ATTACHMENTS;
 
 export const CreateClaimForm = () => {
   const navigate = useNavigate();
   const { mutate: createClaim, isPending } = useCreateClaim();
   const { mutate: uploadClaimFiles, isPending: isUploading } =
     useUploadClaimFiles();
+  // Compression happens between the click and the upload mutation, so without
+  // its own flag the submit button re-enables for that whole stretch.
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const [{ files, isDragging, errors }, {
     removeFile,
@@ -42,7 +52,11 @@ export const CreateClaimForm = () => {
   }] = useFileUpload({
     maxFiles: MAX_FILES,
     multiple: true,
-    accept: ACCEPT,
+    // Images only. Not `image/*`: that offers SVG and HEIC in the file dialog,
+    // both of which the server refuses — turning a refusal the user sees
+    // immediately into a 400 after an upload they waited for.
+    accept: IMAGE_ACCEPT,
+    maxSize: MAX_IMAGE_BYTES,
   });
 
   const form = useForm<CreateClaimFormData>({
@@ -54,45 +68,44 @@ export const CreateClaimForm = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (data: CreateClaimFormData) => {
+  const onSubmit = async (data: CreateClaimFormData) => {
+    const goToClaim = (claim: { id: string }) => navigate(`/claims/${claim.id}`);
+
     if (files.length === 0) {
-      // No files to upload, create claim directly
       createClaim(
-        {
-          title: data.title,
-          description: data.description,
-        },
-        {
-          onSuccess: (claim) => {
-            navigate(`/claims/${claim.id}`);
-          },
-        },
+        { title: data.title, description: data.description },
+        { onSuccess: goToClaim },
       );
-    } else {
-      // Upload files first
-      uploadClaimFiles(
-        files.map((f) => f.file),
-        {
-          onSuccess: (attachmentUrls) => {
-            createClaim(
-              {
-                title: data.title,
-                description: data.description,
-                attachment_urls: attachmentUrls,
-              },
-              {
-                onSuccess: (claim) => {
-                  navigate(`/claims/${claim.id}`);
-                },
-              },
-            );
-          },
-        },
-      );
+      return;
     }
+
+    // Compressed before upload, as the KYC step already does. A phone photo is
+    // routinely 4-8 MB, which is at or past the 5 MB limit; resizing to 1920px
+    // keeps the picture legible and keeps the upload from failing on a mobile
+    // connection.
+    setIsCompressing(true);
+    let compressed: File[];
+    try {
+      compressed = await Promise.all(files.map((f) => compressImage(f.file)));
+    } finally {
+      setIsCompressing(false);
+    }
+
+    uploadClaimFiles(compressed, {
+      onSuccess: (attachmentUrls) => {
+        createClaim(
+          {
+            title: data.title,
+            description: data.description,
+            attachment_urls: attachmentUrls,
+          },
+          { onSuccess: goToClaim },
+        );
+      },
+    });
   };
 
-  const isSubmitting = isPending || isUploading;
+  const isSubmitting = isPending || isUploading || isCompressing;
 
   return (
     <div className="bg-white rounded-lg lg:p-8 p-4 max-w-2xl">
@@ -138,12 +151,10 @@ export const CreateClaimForm = () => {
           />
 
           <div className="space-y-2">
-            <p className="block text-sm font-medium">
-              Pièces Jointes (Optionnel)
-            </p>
+            <p className="block text-sm font-medium">Photos (optionnel)</p>
             <p className="text-xs text-muted-foreground">
-              Maximum {MAX_FILES} fichiers (images, PDF, DOC — max 5 Mo). Vous
-              en avez {files.length}/{MAX_FILES}
+              Maximum {MAX_FILES} images ({IMAGE_FORMATS_LABEL} — max 5 Mo).
+              Vous en avez {files.length}/{MAX_FILES}
             </p>
 
             <input {...getInputProps()} className="sr-only" />
@@ -157,20 +168,12 @@ export const CreateClaimForm = () => {
                   key={f.id}
                   className="bg-muted relative aspect-square overflow-hidden rounded-md"
                 >
-                  {f.file.type.startsWith("image/") ? (
-                    <img
-                      src={f.preview}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
-                      <FileText className="text-muted-foreground size-6" />
-                      <span className="text-muted-foreground w-full truncate text-[10px]">
-                        {f.file.name}
-                      </span>
-                    </div>
-                  )}
+                  {/* No non-image branch: `accept` admits images only now. */}
+                  <img
+                    src={f.preview}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                   <button
                     type="button"
                     onClick={() => removeFile(f.id)}
@@ -199,7 +202,7 @@ export const CreateClaimForm = () => {
                   )}
                 >
                   <ImagePlus className="size-5" />
-                  {files.length === 0 ? "Ajouter un fichier" : "Ajouter"}
+                  {files.length === 0 ? "Ajouter une image" : "Ajouter"}
                 </button>
               )}
             </div>
