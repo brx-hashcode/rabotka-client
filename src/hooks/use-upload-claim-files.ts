@@ -1,16 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
-import { uploadFiles } from "@/lib/api/claims-controller";
+import { uploadClaimAttachments } from "@/lib/api/claims-controller";
 import { useToast } from "@/hooks/use-toast";
 
 export const useUploadClaimFiles = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (files: File[]) => uploadFiles(files),
+    mutationFn: (files: File[]) => uploadClaimAttachments(files),
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to upload files",
+        title: "Envoi impossible",
+        description: "Les images n'ont pas pu être envoyées. Réessayez.",
         variant: "destructive",
       });
     },

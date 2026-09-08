@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Bookmark,
@@ -11,15 +11,24 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
+import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
+import { SponsoredCard } from "@/features/sponsored/sponsored-card";
+import { interleaveAds } from "@/features/sponsored/interleave";
+import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
 import { cn } from "@/lib/utils";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
 const SKELETON_KEYS = ["s1", "s2", "s3"];
+
+/** Shared so a loading feed keeps the same array, and the memo below holds. */
+const NO_JOBS: JobFeedItem[] = [];
 
 type Chip = { id: string | null; name: string };
 
@@ -62,9 +71,16 @@ export function WorkerHome() {
   const { data: jobs, isLoading, isFetching } = useJobFeed(limit, categoryId);
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
-  const list = jobs ?? [];
+  const list = jobs ?? NO_JOBS;
   const canLoadMore = isFetching || list.length >= limit;
+
+  const ads = useFeedSlots();
+  // Memoised so the entries keep their identity across the re-renders this
+  // screen gets from the quota and KYC caches — otherwise an ad card remounts
+  // and its impression timer restarts before it can finish.
+  const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);
 
   const chips: Chip[] = [
     { id: null, name: "Pour vous" },
@@ -98,14 +114,14 @@ export function WorkerHome() {
 
       <div className="flex gap-3 overflow-x-auto px-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {(() => {
-          if (!quota?.concurrent) {
+          // Guard on the quota itself, not on a nested field. It used to key
+          // off `quota.concurrent`, so removing that server-side would have
+          // left this skeleton on screen forever rather than failing visibly.
+          if (!quota) {
             return <Skeleton className="h-28 w-40 shrink-0 rounded-2xl" />;
           }
-          const qLimit = Math.min(quota.limit, quota.concurrent.limit);
-          const remaining = Math.min(
-            quota.remaining,
-            quota.concurrent.remaining,
-          );
+          const qLimit = quota.limit;
+          const remaining = quota.remaining;
           const used = Math.max(0, qLimit - remaining);
           const pct = qLimit ? Math.min(100, (used / qLimit) * 100) : 0;
 
@@ -186,18 +202,30 @@ export function WorkerHome() {
         </div>
       )}
 
-      {blocked && reason && (
+      {(accountBlocked || blocked) && (
         <div className="px-4 pb-2">
-          <KycNotice reason={reason} />
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} />
+          ) : (
+            reason && <KycNotice reason={reason} />
+          )}
         </div>
       )}
 
       {!isLoading && list.length > 0 && (
         <section className="space-y-3 py-2">
           <div className="grid grid-cols-1 gap-3 px-4">
-            {list.map((j) => (
-              <JobCard key={j.id} job={j} canApply={canApply} />
-            ))}
+            {entries.map((entry) =>
+              entry.kind === "ad" ? (
+                <SponsoredCard key={entry.key} ad={entry.item} />
+              ) : (
+                <JobCard
+                  key={entry.key}
+                  job={entry.item}
+                  canApply={canApply}
+                />
+              ),
+            )}
           </div>
           {canLoadMore && (
             <div className="px-4">

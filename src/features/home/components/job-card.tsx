@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { jobLocationLabel } from "@/lib/job-location";
 import { useNavigate } from "react-router";
 import {
   Bookmark,
@@ -16,9 +17,11 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { kycShortLabel } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { accountShortLabel } from "@/features/account";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
   readonly job: JobFeedItem;
@@ -36,8 +39,12 @@ export function JobCard({ job, canApply }: Props) {
   // Deliberately separate from `canApply` — a daily quota and an unverified
   // identity are different problems with different remedies.
   const { blocked, reason } = useKycGate();
+  // Separate again from the KYC gate: a suspended account is not an unverified
+  // one, and it is the more severe of the two — so it wins the label below.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
   const flowLabel = PAYMENT_FLOW_LABELS[job.paymentFlow] ?? "";
+  const hasAmount = job.amount != null && job.amount !== 0;
   const goDetail = () => navigate(`/offres/${job.id}`);
 
   // About the offer rather than the worker, so it takes precedence: a filled
@@ -46,7 +53,13 @@ export function JobCard({ job, canApply }: Props) {
 
   let applyLabel = "Postuler";
   if (job.applied) applyLabel = "Déjà postulé";
-  else if (offerClosed) applyLabel = "Offre pourvue";
+  // "Offre pourvue" se lisait comme un statut de SA candidature, alors que la
+  // branche « Déjà postulé » au-dessus a déjà pris la main dans ce cas : ce
+  // libellé ne s'affiche qu'à quelqu'un qui n'a pas postulé. Il parle donc du
+  // poste, pas de la personne, et doit le dire.
+  else if (offerClosed) applyLabel = "Plus de place disponible";
+  else if (accountBlocked && accountReason)
+    applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (!canApply) applyLabel = "Limite atteinte";
 
@@ -95,22 +108,26 @@ export function JobCard({ job, canApply }: Props) {
         </div>
 
         <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-          {job.amount != null && (
+          {/* Always shown: an offer with no amount is «À négocier», which is
+              information a worker needs, not an empty row to hide. */}
+          <p className="flex items-center gap-2">
+            <Coins className="h-4 w-4 shrink-0 text-whatsapp" />
+            <span className="font-medium text-foreground">
+              {formatOfferAmount(job.amount)}
+            </span>
+            {hasAmount && flowLabel && <span>{flowLabel}</span>}
+          </p>
+          {/* Guarded like the amount row above: an offer with no closing date
+              would otherwise show a bare calendar icon beside a dash. */}
+          {job.scheduledAt && (
             <p className="flex items-center gap-2">
-              <Coins className="h-4 w-4 shrink-0 text-whatsapp" />
-              <span className="font-medium text-foreground">
-                {formatAmount(job.amount)}
-              </span>
-              {flowLabel && <span>{flowLabel}</span>}
+              <Calendar className="h-4 w-4 shrink-0" />
+              {formatDateTime(job.scheduledAt)}
             </p>
           )}
           <p className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 shrink-0" />
-            {formatDateTime(job.scheduledAt)}
-          </p>
-          <p className="flex items-center gap-2">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{job.address}</span>
+            <span className="truncate">{jobLocationLabel(job)}</span>
           </p>
         </div>
       </button>
@@ -118,7 +135,12 @@ export function JobCard({ job, canApply }: Props) {
       <Button
         className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
         disabled={
-          job.applied || offerClosed || !canApply || blocked || apply.isPending
+          job.applied ||
+          offerClosed ||
+          !canApply ||
+          blocked ||
+          accountBlocked ||
+          apply.isPending
         }
         onClick={() => setConfirmOpen(true)}
       >
@@ -131,7 +153,7 @@ export function JobCard({ job, canApply }: Props) {
         onOpenChange={setConfirmOpen}
         title={job.title}
         scheduledAt={job.scheduledAt}
-        address={job.address}
+        address={jobLocationLabel(job)}
         amount={job.amount}
         isPending={apply.isPending}
         onConfirm={() =>

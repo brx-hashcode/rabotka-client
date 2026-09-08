@@ -21,11 +21,11 @@ export const howItWorksContent = {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
+          "Après validation, vous recevez un message WhatsApp. Envoyez « / » pour démarrer.",
       },
       {
         icon: MessageCircle,
-        title: "Postulez aux offres d'emploi",
+        title: "Postulez aux missions",
         description:
           "Parcourez les missions disponibles, recevez des offres recommandées selon votre profil, ou retrouvez une offre précise grâce à sa référence.",
       },
@@ -57,7 +57,7 @@ export const howItWorksContent = {
         icon: Link,
         title: "Activez votre accès WhatsApp",
         description:
-          "Après validation, vous recevez un message WhatsApp. Tapez Menu pour démarrer.",
+          "Après validation, vous recevez un message WhatsApp. Envoyez « / » pour démarrer.",
       },
       {
         icon: MessageCircle,

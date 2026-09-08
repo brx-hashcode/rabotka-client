@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
 
 export type JobFeedEmployer = {
@@ -17,10 +18,22 @@ export type JobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduledAt: string;
+  /** Null for CDI/CDD/STAGE, which have no closing date. */
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  city?: string | null;
+  countryName?: string | null;
+  /**
+   * The employer's free-text extra instructions. Sent by the API all along but
+   * dropped here, so the worker never saw what they were being told about the
+   * job — meeting point, what to bring, who to ask for.
+   */
+  note: string | null;
   quantity: number;
   acceptedCount: number;
   createdAt: string;
@@ -54,14 +67,15 @@ export type JobSearchParams = {
 
 export type JobSearchResponse = { items: JobFeedItem[]; total: number };
 
+// The daily cap is the only limit on applying. A concurrent open-application
+// cap used to sit alongside it and was the binding one, but nothing cleared it
+// on a clock — it freed only when an employer responded — so `resetsAt` was a
+// lie whenever it was the reason a worker could not apply. Removed backend-side.
 export type DailyQuota = {
   used: number;
   limit: number;
   remaining: number;
   resetsAt: string;
-  // Concurrent open-application slots. Usually the binding limit (3 slots vs
-  // 10/day), so this is what the UI surfaces as the remaining count.
-  concurrent: { used: number; limit: number; remaining: number };
 };
 
 type BackendJobFeedItem = {
@@ -70,10 +84,22 @@ type BackendJobFeedItem = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  /**
+   * camelCase on purpose — the server renames exactly these three, and every
+   * other key here stays snake_case. Non-optional so a server-side rename
+   * surfaces as a type error at the mapping below rather than as a silent
+   * `undefined` absorbed by a default.
+   */
+  employmentType: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  city: string | null;
+  countryName: string | null;
+  note: string | null;
   quantity: number;
   acceptedCount: number;
   created_at: string;
@@ -101,9 +127,14 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     description: o.description,
     status: o.status,
     scheduledAt: o.scheduled_at,
+    employmentType: o.employmentType,
     amount: o.amount ?? null,
     paymentFlow: o.payment_flow ?? "",
     address: o.address,
+    isRemote: o.isRemote,
+    city: o.city,
+    countryName: o.countryName,
+    note: o.note ?? null,
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,

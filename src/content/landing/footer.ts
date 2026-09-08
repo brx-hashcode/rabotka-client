@@ -3,12 +3,18 @@ import type { FooterLinkGroup } from "@/types";
 export const footerLinks: FooterLinkGroup = {
   Produit: [
     { label: "Comment ça marche", href: "#how-it-works" },
-    { label: "Trouver un emploi", href: "/onboarding?profileType=WORKER" },
+    { label: "Trouver une mission", href: "/onboarding?profileType=WORKER" },
     {
       label: "Trouver un travailleur",
       href: "/onboarding?profileType=EMPLOYER",
     },
     { label: "Profils vérifiés", href: "#trust" },
+    // The integration guide for "Connexion avec Rabotka". Under Produit rather
+    // than Entreprise: it is a thing another company can build on, not a page
+    // about us. The API's discovery document names this URL as
+    // `service_documentation`, so the path is fixed by the protocol — see
+    // oauth-discovery.controller.ts before changing it.
+    { label: "Développeur", href: "/developers/api-documentation" },
   ],
   Entreprise: [
     { label: "À propos", href: "#about" },

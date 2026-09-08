@@ -1,3 +1,5 @@
+import type { EmploymentTypeValue } from "@/lib/employment-type";
+import type { DocumentType } from "@/lib/kyc-document-types";
 import { RabotkaBaseController } from "./base-controller";
 import { config } from "@/config";
 
@@ -6,22 +8,36 @@ export type CreateProfilePayload = {
   lastName: string;
   email: string;
   phone: string;
+  /**
+   * Optional second number to be reached on, when the WhatsApp number is not
+   * one the person answers calls on. Omitted when they gave only one.
+   */
+  directPhone?: string;
+  countryCode: string;
+  countryName: string;
+  city: string;
   address: string;
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
   categoryIds?: string[];
-  documentType:
-    | "IDENTITY_CARD"
-    | "PASSPORT"
-    | "DRIVER_LICENSE"
-    | "BIRTH_CERTIFICATE"
-    | "STUDENT_CARD"
-    | "NIU_CARD"
-    | "OTHER"
-    | "";
+  documentType: DocumentType | "";
   kycDocumentUrl: string;
+  // Omitted for a PASSPORT, which has no back to photograph. The backend
+  // discards it if sent alongside one.
+  kycDocumentBackUrl?: string;
   kycSelfieUrl: string;
+  // Storage keys returned alongside the urls above. Optional because the
+  // backend still accepts profiles without them — a client that predates this
+  // change keeps working, and its rows get picked up by the backfill.
+  kycDocumentKey?: string;
+  kycDocumentBackKey?: string;
+  kycSelfieKey?: string;
   readAndApprovedPolicies: boolean;
+  // Parrainage. Omitted entirely when the user answered "non" or left the field
+  // empty — the backend treats an unknown code as no code, but sending a blank
+  // one would still record a source we never actually observed.
+  referralCode?: string;
+  referralSource?: "LINK" | "MANUAL_CODE";
 };
 
 export type CreateProfileResponse = {
@@ -35,7 +51,12 @@ export type ProfileMeResponse = {
   lastName: string;
   email: string;
   phone: string;
+  /** Optional second number. Null for the majority who gave only one. */
+  directPhone: string | null;
   address: string;
+  countryCode: string | null;
+  countryName: string | null;
+  city: string | null;
   description: string;
   profileType: "WORKER" | "EMPLOYER";
   status: "PENDING_ACTIVATION" | "ACTIVE" | "SUSPENDED" | "BANNED";
@@ -59,7 +80,19 @@ export type UpdateProfilePayload = {
   lastName?: string;
   description?: string;
   address?: string;
+  countryCode?: string;
+  countryName?: string;
+  city?: string;
   categoryIds?: string[];
+  /**
+   * Optional second number. Send "" to clear it.
+   *
+   * Editable here, unlike the WhatsApp number: nothing authenticates against a
+   * direct line, so it changes like an address does. Changing the WhatsApp
+   * number goes through `requestPhoneChange` / `confirmPhoneChange` instead,
+   * because it is the login identity.
+   */
+  directPhone?: string;
 };
 
 export type UpdateAvatarResponse = {
@@ -90,9 +123,16 @@ export type ProfileApplicationItem = {
   jobOffer: {
     id: string;
     title: string;
-    scheduledAt: string;
-    amount: number;
-    address: string;
+    /** Null for a CDI, CDD or stage — only a mission has a closing date. */
+    scheduledAt: string | null;
+    employmentType: EmploymentTypeValue;
+    /** Null when the employer named no price — rendered as «À négocier». */
+    amount: number | null;
+    /** Null for a remote job — read through jobLocationLabel, not directly. */
+    address: string | null;
+    isRemote: boolean;
+    city: string | null;
+    countryName: string | null;
     status: string;
   };
 };
@@ -139,12 +179,19 @@ class ProfileController extends RabotkaBaseController {
    * URL. Called per-file during onboarding step 3 so the final createProfile
    * request carries only URLs, not file bytes.
    */
-  async uploadKycFile(file: File): Promise<{ url: string }> {
+  /**
+   * The `key` is what makes the file readable later. KYC documents now live in
+   * a private bucket and are served through signed urls that expire after an
+   * hour, so the admin has to re-sign on every view — and signing needs the
+   * object key. The endpoint used to return only `url`, which is why
+   * `storage_key` was NULL on every KYC row ever written.
+   */
+  async uploadKycFile(file: File): Promise<{ url: string; key: string }> {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      return await this.post<{ url: string }>(
+      return await this.post<{ url: string; key: string }>(
         "/profile/kyc-upload",
         formData as unknown as Record<string, unknown>,
       );
@@ -172,6 +219,19 @@ class ProfileController extends RabotkaBaseController {
     } catch (error) {
       this.handleError(error);
     }
+  }
+
+  /**
+   * `getMe` with the failure left intact.
+   *
+   * This call doubles as the session check, and telling "signed out" apart from
+   * "the network dropped" decides whether the app redirects to /login or simply
+   * retries. `handleError` rethrows every ApiError as a bare `Error`, dropping
+   * the status code, so skipping it is the only way to keep that distinction —
+   * see `isUnauthorized` in ./errors. Success is byte-identical to `getMe`.
+   */
+  getMeRaw(): Promise<ProfileMeResponse> {
+    return this.get<ProfileMeResponse>("/profile/me");
   }
 
   async getPenalties(): Promise<ProfilePenaltyItem[]> {
@@ -232,6 +292,37 @@ class ProfileController extends RabotkaBaseController {
     try {
       return await this.get<ProfileApplicationsResponse>(
         `/profile/applications?${params.toString()}`,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /**
+   * Step 1 of changing the WhatsApp number: send a code to the NEW handset.
+   *
+   * Writes nothing yet. The number is the login identity, so it only moves once
+   * the code comes back — a typo committed straight away would send every
+   * future login link to a number the user does not own.
+   */
+  async requestPhoneChange(newPhone: string): Promise<{ success: boolean }> {
+    try {
+      return await this.post<{ success: boolean }>("/profile/phone-change/request", {
+        newPhone,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /** Step 2: hand back the code and commit the switch. */
+  async confirmPhoneChange(
+    code: string,
+  ): Promise<{ success: boolean; phone: string }> {
+    try {
+      return await this.post<{ success: boolean; phone: string }>(
+        "/profile/phone-change/confirm",
+        { code },
       );
     } catch (error) {
       this.handleError(error);
@@ -327,12 +418,15 @@ class ProfileController extends RabotkaBaseController {
 
 export const {
   getMe,
+  getMeRaw,
   getPenalties,
   getPenaltiesDue,
   payPenaltiesWithWallet,
   payPenaltiesWithMobile,
   updateAvatar,
   updateProfile,
+  requestPhoneChange,
+  confirmPhoneChange,
   createProfile,
   uploadKycFile,
   getApplications,

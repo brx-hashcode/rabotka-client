@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import {
   useQueryState,
   parseAsInteger,
@@ -18,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { JobCard } from "@/features/home/components/job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
 import {
   JobSearchFiltersSheet,
   EMPTY_JOB_FILTERS,
@@ -57,7 +59,8 @@ function presetToRange(preset: JobDatePreset): {
 }
 
 export default function JobSearch() {
-  const navigate = useNavigate();
+  // Workers reach this screen straight from the bot — see `useGoBack`.
+  const goBack = useGoBack("/jobs");
 
   const [q, setQ] = useQueryState("q", {
     defaultValue: "",
@@ -114,6 +117,9 @@ export default function JobSearch() {
     useJobSearch(filters);
   const { canApply } = useCanApply();
   const { blocked, reason } = useKycGate();
+  // Search itself stays open to a suspended account — only the per-card apply
+  // button goes away, which JobCard handles from the same gate.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
 
   const list = data?.pages.flatMap((p) => p.items) ?? [];
   const total = data?.pages[0]?.total ?? 0;
@@ -154,7 +160,7 @@ export default function JobSearch() {
           <button
             type="button"
             aria-label="Retour"
-            onClick={() => navigate(-1)}
+            onClick={goBack}
             className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-secondary"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -214,9 +220,13 @@ export default function JobSearch() {
         </div>
       )}
 
-      {blocked && reason && (
+      {(accountBlocked || blocked) && (
         <div className="px-4 pt-4">
-          <KycNotice reason={reason} />
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} />
+          ) : (
+            reason && <KycNotice reason={reason} />
+          )}
         </div>
       )}
 

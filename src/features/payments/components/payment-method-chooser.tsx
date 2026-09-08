@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { Check, Loader2, Smartphone, Wallet } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Loader2,
+  ShieldCheck,
+  Smartphone,
+  Wallet,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAmount } from "@/lib/utils";
 
 type Method = "wallet" | "mobile";
 
 type Props = {
-  /** Small icon above the title (e.g. a warning for penalties). */
+  /** Leading visual of the subject card — an avatar, or an icon for penalties. */
   readonly icon?: React.ReactNode;
   readonly title: string;
   /** ReactNode so callers can emphasise names inline. */
@@ -21,12 +28,23 @@ type Props = {
   /** Required: with no header and no tab bar this is the only way out. */
   readonly onCancel: () => void;
   readonly cancelLabel?: string;
+  /**
+   * One line of reassurance under the CTA — a refund promise, what arrives
+   * after payment. Optional because it is only honest for some flows: an
+   * unlock is refunded if the other side never confirms, a penalty is not.
+   */
+  readonly note?: React.ReactNode;
 };
 
 /**
  * The shared wallet-vs-mobile-money step. Every payment in the app (contact
  * unlock, recommendation contact, penalties) offers exactly these two methods, so
  * they all render through here rather than each page re-implementing it.
+ *
+ * Laid out as a checkout: a bar naming the action, a card describing what is
+ * being bought and for how much, then the choice, then one commit button. The
+ * previous version stacked everything centred, which gave the charge and the
+ * two options identical weight and left the eye no entry point.
  *
  * The methods are a radio group, not two action buttons: tapping one only
  * selects it, and the single primary CTA at the bottom charges. Cards that pay
@@ -49,6 +67,7 @@ export function PaymentMethodChooser({
   mobilePending,
   onCancel,
   cancelLabel = "Annuler",
+  note,
 }: Props) {
   const insufficient = walletBalance < amount;
   const busy = Boolean(walletPending || mobilePending);
@@ -61,56 +80,94 @@ export function PaymentMethodChooser({
   const pay = () => (method === "wallet" ? onPayWallet() : onPayMobile());
 
   return (
-    <div className="w-full max-w-sm space-y-5">
-      <div className="flex flex-col items-center text-center">
-        {icon}
-        <h1 className="mt-3 text-xl font-bold text-foreground">{title}</h1>
-        {description && (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        )}
+    <div className="w-full max-w-sm space-y-6">
+      {/* Action bar. The back arrow duplicates the Annuler button on purpose:
+          this route is reachable by direct URL, and the top-left arrow is where
+          a thumb goes first. */}
+      <div className="relative flex items-center justify-center">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          aria-label={cancelLabel}
+          className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full bg-card text-foreground shadow-soft transition-opacity disabled:opacity-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <h1 className="text-base font-bold text-foreground">{title}</h1>
       </div>
 
-      <div className="rounded-2xl bg-card px-5 py-4 text-center shadow-soft">
-        <p className="text-xs text-muted-foreground">{amountLabel}</p>
-        <p className="mt-1 text-3xl font-bold text-foreground">
-          {amount.toLocaleString("fr-FR")}
-          <span className="ml-2 text-base font-medium text-muted-foreground">
-            FCFA
-          </span>
-        </p>
+      {/* What is being paid for, and how much — one card, read left to right. */}
+      <div className="flex items-center gap-3.5 rounded-xl bg-card p-3.5 shadow-soft">
+        {icon && <div className="shrink-0">{icon}</div>}
+        <div className="min-w-0 flex-1">
+          {description && (
+            <p className="text-sm leading-snug text-muted-foreground">
+              {description}
+            </p>
+          )}
+          <p className="mt-2 text-sm font-medium text-muted-foreground">
+            {amountLabel} :{" "}
+            <span className="text-base font-bold text-foreground">
+              {amount.toLocaleString("fr-FR")} FCFA
+            </span>
+          </p>
+        </div>
       </div>
 
       <div className="space-y-2.5">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-sm font-bold text-foreground">
           Comment souhaitez-vous payer ?
-        </p>
+        </h2>
 
-        <div role="radiogroup" aria-label="Moyen de paiement" className="space-y-2.5">
-          <MethodOption
+        {/* Two options, so two tiles side by side rather than a stacked list —
+            both choices are visible at once and neither looks like the default
+            by position alone. */}
+        <div
+          role="radiogroup"
+          aria-label="Moyen de paiement"
+          className="grid grid-cols-2 gap-2.5"
+        >
+          <MethodTile
             icon={<Wallet className="h-5 w-5" />}
             label="Mon portefeuille"
             hint={
               insufficient
                 ? `Solde insuffisant : ${formatAmount(walletBalance)}`
-                : `Solde : ${formatAmount(walletBalance)}`
+                : // Naming what is left afterwards answers the question the
+                  // reader is actually asking.
+                  `Solde : ${formatAmount(walletBalance)}`
             }
             hintTone={insufficient ? "warning" : "muted"}
             selected={method === "wallet"}
             disabled={insufficient || busy}
             onSelect={() => setMethod("wallet")}
           />
-          <MethodOption
+          <MethodTile
             icon={<Smartphone className="h-5 w-5" />}
             label="Mobile Money"
-            hint="MTN / Airtel — paiement sur votre téléphone"
+            hint="MTN / Airtel — confirmation sur votre téléphone"
             selected={method === "mobile"}
             disabled={busy}
             onSelect={() => setMethod("mobile")}
           />
         </div>
+
+        {method === "wallet" && !insufficient && (
+          <p className="px-1 text-xs text-muted-foreground">
+            Il vous restera{" "}
+            <span className="font-medium text-foreground">
+              {formatAmount(walletBalance - amount)}
+            </span>{" "}
+            après ce paiement.
+          </p>
+        )}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
+        {/* No `rounded-full` here. The reference design uses a pill, but every
+            other button in this app is the Button primitive's `rounded-md`, and
+            one pill on one screen reads as a mistake rather than a highlight. */}
         <Button
           variant="whatsapp"
           size="lg"
@@ -128,6 +185,13 @@ export function PaymentMethodChooser({
           )}
         </Button>
 
+        {note && (
+          <p className="flex items-center justify-center gap-1.5 pt-2 text-center text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-whatsapp" />
+            {note}
+          </p>
+        )}
+
         <Button
           variant="ghost"
           className="w-full text-muted-foreground"
@@ -141,7 +205,7 @@ export function PaymentMethodChooser({
   );
 }
 
-function MethodOption({
+function MethodTile({
   icon,
   label,
   hint,
@@ -166,42 +230,58 @@ function MethodOption({
       disabled={disabled}
       onClick={onSelect}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl p-4 text-left transition-colors disabled:opacity-50",
-        selected ? "bg-whatsapp-light shadow-soft" : "bg-card shadow-soft",
+        // A deliberate exception to the app's borderless rule, asked for to
+        // match the reference: the active tile is outlined as well as tinted.
+        // Selection is the one state where tint alone is ambiguous — the light
+        // green is close enough to white on a dim screen to be missed.
+        //
+        // The unselected tile carries a TRANSPARENT border of the same width,
+        // so selecting does not shift the grid by a pixel.
+        "flex h-full flex-col gap-2 rounded-xl border p-3.5 text-left transition-colors disabled:opacity-50",
+        selected
+          ? "border-whatsapp bg-whatsapp-light shadow-soft"
+          : "border-transparent bg-card shadow-soft",
       )}
     >
-      <div
-        className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors",
-          selected
-            ? "bg-whatsapp text-primary-foreground"
-            : "bg-whatsapp/10 text-whatsapp",
-        )}
-      >
-        {icon}
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+            selected
+              ? "bg-whatsapp text-primary-foreground"
+              : "bg-whatsapp/10 text-whatsapp",
+          )}
+        >
+          {icon}
+        </span>
+        <span
+          className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
+            // `muted` rather than `secondary` when unselected: the latter is a
+            // warm tan that read as a disabled control rather than an empty
+            // choice.
+            selected ? "bg-whatsapp text-primary-foreground" : "bg-muted",
+          )}
+        >
+          {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+        </span>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-foreground">{label}</p>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold leading-tight text-foreground">
+          {label}
+        </p>
         <p
           className={cn(
-            "text-xs",
-            hintTone === "warning" ? "text-destructive" : "text-muted-foreground",
+            "mt-1 text-xs leading-snug",
+            hintTone === "warning"
+              ? "text-destructive"
+              : "text-muted-foreground",
           )}
         >
           {hint}
         </p>
       </div>
-
-      {/* Filled dot instead of an outlined radio: the app has no borders. */}
-      <span
-        className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
-          selected ? "bg-whatsapp text-primary-foreground" : "bg-secondary",
-        )}
-      >
-        {selected && <Check className="h-3 w-3" strokeWidth={3} />}
-      </span>
     </button>
   );
 }

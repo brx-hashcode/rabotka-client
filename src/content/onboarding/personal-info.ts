@@ -33,12 +33,21 @@ export const personalInfoContent = {
       },
     },
     phone: {
-      label: "Téléphone",
+      label: "Numéro WhatsApp",
       placeholder: "Numéro avec indicatif pays",
+      hint: "C'est sur ce numéro que vous recevrez vos connexions et vos notifications.",
+    },
+    directPhone: {
+      label: "Numéro direct (facultatif)",
+      placeholder: "Numéro avec indicatif pays",
+      hint: "Si votre numéro WhatsApp n'est pas celui sur lequel on peut vous appeler.",
+    },
+    country: {
+      hint: "Le pays où vous vous trouvez actuellement.",
     },
     address: {
       label: "Adresse",
-      placeholder: "19 rue de la joie Brazzaville",
+      placeholder: "Moungali, 30 rue Bondo",
     },
     description: {
       label: "Décrivez votre profil et ce que vous recherchez",

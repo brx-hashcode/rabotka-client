@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { Calendar } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { ClaimItem } from "@/lib/api/claims-controller";
+import { AttachmentPreview } from "./attachment-thumb";
 
 const statusPill = (status: string) =>
   cn(
@@ -52,16 +53,15 @@ export const ClaimCard = ({ claim }: ClaimCardProps) => {
 
       {claim.attachmentUrls.length > 0 && (
         <div className="mt-3 flex gap-1.5">
+          {/* Non-interactive: this whole card is a button, so the tile cannot
+              be a link. Older claims may hold a PDF, which AttachmentPreview
+              labels instead of painting as a broken image. */}
           {claim.attachmentUrls.slice(0, 4).map((url, idx) => (
             <div
               key={`${url}-${idx + 1}`}
               className="h-9 w-9 overflow-hidden rounded-lg bg-muted"
             >
-              <img
-                src={url}
-                alt={`Pièce jointe ${idx + 1}`}
-                className="h-full w-full object-cover"
-              />
+              <AttachmentPreview url={url} index={idx} />
             </div>
           ))}
         </div>

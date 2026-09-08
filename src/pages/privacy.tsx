@@ -9,7 +9,7 @@ export default function Privacy() {
   return (
     <PolicyShell
       title="Politique de confidentialité – Rabotka"
-      description="Découvrez comment Rabotka collecte, utilise et protège vos données personnelles, y compris vos pièces d'identité lors de la vérification."
+      description="Quelles données personnelles Rabotka collecte, pourquoi, qui y accède et combien de temps elles sont conservées — vos pièces d'identité comprises, et vos droits au titre de la loi n° 29-2019."
       canonical="/privacy"
     >
       <article className={policyProseClassName}>

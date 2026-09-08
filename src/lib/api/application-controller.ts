@@ -1,5 +1,6 @@
 import { RabotkaBaseController } from "./base-controller";
 import type { JobOfferStatus } from "./job-offer-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 
 export type ApplicationStatus =
   | "PENDING"
@@ -37,9 +38,17 @@ export type ApplicationDetailApplication = {
   jobOffer: {
     id: string;
     title: string;
-    scheduledAt: string;
-    amount: number;
-    address: string;
+    /** Null for a CDI, CDD or stage — only a mission has a closing date. */
+    scheduledAt: string | null;
+    /** What to show in place of that date when there is none. */
+    employmentType: EmploymentTypeValue;
+    /** Null when the employer named no price — rendered as «À négocier». */
+    amount: number | null;
+    /** Null for a remote job — read through jobLocationLabel, not directly. */
+    address: string | null;
+    isRemote: boolean;
+    city: string | null;
+    countryName: string | null;
     status: JobOfferStatus;
   };
 };
@@ -89,9 +98,13 @@ type BackendApplication = {
   job_offer?: {
     id: string;
     title: string;
-    scheduled_at: string;
+    scheduled_at: string | null;
+    employment_type: EmploymentTypeValue;
     amount: number | null;
-    address: string;
+    address: string | null;
+    is_remote: boolean;
+    city: string | null;
+    country_name: string | null;
     status: JobOfferStatus;
   };
 };
@@ -129,9 +142,15 @@ function mapApplication(a: BackendApplication): ApplicationDetailApplication {
     jobOffer: {
       id: a.job_offer?.id ?? "",
       title: a.job_offer?.title ?? "",
-      scheduledAt: a.job_offer?.scheduled_at ?? "",
-      amount: a.job_offer?.amount ?? 0,
-      address: a.job_offer?.address ?? "",
+      // null, not "" / 0: the display helpers distinguish "absent" from a real
+      // value, and «0 FCFA» for an open price is what this used to produce.
+      scheduledAt: a.job_offer?.scheduled_at ?? null,
+      employmentType: a.job_offer?.employment_type ?? "MISSION",
+      amount: a.job_offer?.amount ?? null,
+      address: a.job_offer?.address ?? null,
+      isRemote: a.job_offer?.is_remote ?? false,
+      city: a.job_offer?.city ?? null,
+      countryName: a.job_offer?.country_name ?? null,
       status: (a.job_offer?.status ?? "ACTIVE") as JobOfferStatus,
     },
   };
@@ -203,14 +222,15 @@ class ApplicationController extends RabotkaBaseController {
     }
   }
 
-  // Employer marks the mission completed and rates the worker (1–5, optional note).
-  async completeMission(
+  // Employer rates the worker (1–5, optional note). Does NOT complete the
+  // mission — only the worker can confirm that, and this 400s until they have.
+  async rateWorker(
     id: string,
     payload: { score: number; note?: string },
   ): Promise<void> {
     try {
       await this.post<{ success: boolean }>(
-        `/profile/applications/${id}/complete`,
+        `/profile/applications/${id}/rate`,
         payload,
       );
     } catch (error) {
@@ -225,5 +245,5 @@ export const {
   rejectApplication,
   payUnlockWallet,
   payUnlockMobile,
-  completeMission,
+  rateWorker,
 } = new ApplicationController();

@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { jobLocationDetail } from "@/lib/job-location";
+import { EMPLOYMENT_TYPE_LABELS, closesOnFill } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
   MapPin,
   Coins,
-  Users,
   Hash,
   StickyNote,
   RefreshCw,
   Trash2,
+  Star,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,21 +25,25 @@ import { useJobOffer } from "@/hooks/use-job-offer";
 import { useJobOfferApplications } from "@/hooks/use-job-offer-applications";
 import { useRepublishJobOffer } from "@/hooks/use-republish-job-offer";
 import { RepublishOfferDialog } from "@/features/employer/components/republish-offer-dialog";
+import { SeatsRadial } from "@/features/employer/components/seats-radial";
 import { useDeleteJobOffer } from "@/hooks/use-delete-job-offer";
-import { useCompleteMission } from "@/hooks/use-complete-mission";
+import { useRateWorker } from "@/hooks/use-rate-worker";
+import { useConfirmHire } from "@/hooks/use-confirm-hire";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice } from "@/features/account";
 import {
   ScreenHeader,
   StatusChip,
-  JOB_STATUS_LABELS,
+  jobStatusLabel,
   JOB_STATUS_CHIP_CLASSES,
   PAYMENT_FLOW_LABELS,
   APPLICATION_STATUS_LABELS,
   getApplicationStatusChipClass,
 } from "@/features/employer";
 import type { JobOfferWorkerItem } from "@/lib/api/job-offer-controller";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function MissionDetail() {
   const navigate = useNavigate();
@@ -53,10 +60,12 @@ export default function MissionDetail() {
   const { mutate: deleteOffer, isPending: isDeleting } = useDeleteJobOffer();
   const { mutate: republishOffer, isPending: isRepublishing } =
     useRepublishJobOffer();
-  const complete = useCompleteMission();
+  const rate = useRateWorker();
+  const { mutate: confirmHire, isPending: isConfirmingHire } =
+    useConfirmHire();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [republishOpen, setRepublishOpen] = useState(false);
-  const [completeTarget, setCompleteTarget] = useState<JobOfferWorkerItem | null>(
+  const [rateTarget, setRateTarget] = useState<JobOfferWorkerItem | null>(
     null,
   );
 
@@ -72,20 +81,39 @@ export default function MissionDetail() {
     !workersLoading &&
     (workers?.length ?? 0) === 0;
 
-  // Workers still engaged on the mission. Completing the mission closes the whole
-  // offer at once (backend), so this is a single mission-level action — the rated
-  // worker is the (typically only) active one.
-  const activeWorkers =
-    workers?.filter(
-      (w) => w.status === "ACCEPTED" || w.status === "STARTED",
-    ) ?? [];
-  const completable =
-    !!offer && offer.status !== "COMPLETED" && activeWorkers.length > 0;
+  // The employer rates; they no longer close anything. Only a worker who has
+  // confirmed their own mission (application → END) can be rated, which is the
+  // same rule the API enforces — showing the button earlier would just produce
+  // a 400 saying the worker has not confirmed yet.
+  const ratableWorkers =
+    workers?.filter((w) => w.status === "END" && !w.ratedByEmployer) ?? [];
+  // No longer gated on the type. A CDD/CDI/STAGE reaches END too now — not by
+  // its worker confirming the work is done, which never happens on an ongoing
+  // engagement, but by this employer confirming the hire, which closes the
+  // offer. Reaching END is the only condition that ever mattered.
+  const ratable = !!offer && ratableWorkers.length > 0;
+
+  // An ongoing engagement stops recruiting once its positions are taken, and
+  // then waits on the employer to say the hire actually stuck. That is what
+  // closes it and opens the rating in both directions — so without this button
+  // the offer sits in FILLED and nobody can rate anyone.
+  const confirmable =
+    !!offer && offer.status === "FILLED" && closesOnFill(offer.employmentType);
+  // Everyone rateable already has been — say so, rather than just showing an
+  // empty space where the button used to be.
+  const allRated =
+    !!offer &&
+    !ratable &&
+    (workers?.some((w) => w.status === "END" && w.ratedByEmployer) ?? false);
 
   // Only an expired offer can be reopened. The backend re-checks.
   // Republishing puts a live offer back on the market, so it needs the same KYC
   // gate as creating one — otherwise it is a way around /job-offers/new.
   const { blocked: kycBlocked, reason: kycReason } = useKycGate();
+  // …and the account gate too: the server refused a suspended employer here
+  // only after this button was pressed, and until now not even then.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
+  const cannotRepublish = accountBlocked || kycBlocked;
   const republishable = !!offer && offer.status === "EXPIRED";
 
   const handleDelete = () => {
@@ -106,11 +134,11 @@ export default function MissionDetail() {
     );
   };
 
-  const handleComplete = (score: number, note?: string) => {
-    if (!id || !completeTarget) return;
-    complete.mutate(
-      { applicationId: completeTarget.applicationId, offerId: id, score, note },
-      { onSuccess: () => setCompleteTarget(null) },
+  const handleRate = (score: number, note?: string) => {
+    if (!id || !rateTarget) return;
+    rate.mutate(
+      { applicationId: rateTarget.applicationId, offerId: id, score, note },
+      { onSuccess: () => setRateTarget(null) },
     );
   };
 
@@ -140,63 +168,89 @@ export default function MissionDetail() {
               <StatusChip
                 className={cn("shrink-0", JOB_STATUS_CHIP_CLASSES[offer.status])}
               >
-                {JOB_STATUS_LABELS[offer.status] ?? offer.status}
+                {jobStatusLabel(offer.status, offer.employmentType)}
               </StatusChip>
             </div>
 
             {offer.status !== "COMPLETED" && (
-              <div className="mt-3 flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-whatsapp transition-all"
-                    style={{
-                      width: `${
-                        offer.quantity > 0
-                          ? Math.round(
-                              (offer.acceptedCount / offer.quantity) * 100,
-                            )
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-                <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
-                  {offer.acceptedCount}/{offer.quantity} postes
-                </span>
-              </div>
+              <SeatsRadial
+                className="mt-3"
+                filled={offer.acceptedCount}
+                total={offer.quantity}
+              />
             )}
           </div>
 
-          {/* Complete the whole mission (closes the offer + rates the worker) */}
-          {completable && (
+          {/* On an ongoing engagement the offer waits here: the positions are
+              taken, and only the employer can say the hire actually stuck.
+              Confirming closes the offer and opens the rating both ways. */}
+          {confirmable && (
+            <div className="bg-card space-y-3 rounded-xl px-4 py-4 shadow-soft">
+              <p className="text-sm text-muted-foreground">
+                Tous les postes sont pourvus. Confirmez l'embauche pour clôturer
+                l'offre et noter {offer.quantity > 1 ? "les" : "le"}{" "}
+                travailleur{offer.quantity > 1 ? "s" : ""}.
+              </p>
+              <Button
+                className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+                disabled={isConfirmingHire}
+                onClick={() => id && confirmHire(id)}
+              >
+                {isConfirmingHire ? "Confirmation…" : "Confirmer l'embauche"}
+              </Button>
+            </div>
+          )}
+
+          {/* Rate the worker. On a MISSION the offer closes on its own once
+              every hired worker has confirmed — that is the worker's call, not
+              this one. On the other types the confirmation above is what
+              closed it. */}
+          {ratable && (
             <Button
               className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-              onClick={() => setCompleteTarget(activeWorkers[0])}
+              onClick={() => setRateTarget(ratableWorkers[0])}
             >
-              Terminer la mission
+              Noter le travailleur
             </Button>
+          )}
+
+          {allRated && (
+            <div className="bg-card flex items-center justify-center gap-2 rounded-xl px-4 py-3 shadow-soft">
+              <Star className="h-4 w-4 fill-whatsapp text-whatsapp" />
+              <span className="text-sm font-medium text-foreground">
+                Travailleur noté
+              </span>
+            </div>
           )}
 
           {/* Key info */}
           <Section title="Informations">
             <InfoRow icon={<Coins className="h-4 w-4 text-whatsapp" />} label="Rémunération">
               <span className="font-medium text-foreground">
-                {formatAmount(offer.amount)}
+                {formatOfferAmount(offer.amount)}
               </span>{" "}
               {PAYMENT_FLOW_LABELS[offer.paymentFlow] ?? ""}
             </InfoRow>
             <InfoRow
-              icon={<Calendar className="h-4 w-4 text-whatsapp" />}
-              label="Date prévue"
+              icon={<FileText className="h-4 w-4 text-whatsapp" />}
+              label="Type de contrat"
             >
-              {formatDateTime(offer.scheduledAt)}
+              {EMPLOYMENT_TYPE_LABELS[offer.employmentType] ??
+                offer.employmentType}
             </InfoRow>
+            {offer.scheduledAt && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4 text-whatsapp" />}
+                label="Date de clôture"
+              >
+                {formatDateTime(offer.scheduledAt)}
+              </InfoRow>
+            )}
             <InfoRow
               icon={<MapPin className="h-4 w-4 text-whatsapp" />}
               label="Adresse"
             >
-              {offer.address}
+              {jobLocationDetail(offer)}
             </InfoRow>
             <InfoRow
               icon={<Hash className="h-4 w-4 text-whatsapp" />}
@@ -264,14 +318,20 @@ export default function MissionDetail() {
           )}
 
           {/* Republish — the expiry notification's action, now on web too */}
-          {republishable && kycBlocked && kycReason && (
-            <KycNotice reason={kycReason} />
+          {republishable && cannotRepublish && (
+            <>
+              {accountBlocked && accountReason ? (
+                <AccountNotice reason={accountReason} />
+              ) : (
+                kycReason && <KycNotice reason={kycReason} />
+              )}
+            </>
           )}
           {republishable && (
             <Button
               variant="outline"
               className="w-full"
-              disabled={kycBlocked}
+              disabled={cannotRepublish}
               onClick={() => setRepublishOpen(true)}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
@@ -312,17 +372,17 @@ export default function MissionDetail() {
       />
 
       <CompleteMissionDrawer
-        open={!!completeTarget}
-        onOpenChange={(o) => !o && setCompleteTarget(null)}
-        title="Terminer la mission"
+        open={!!rateTarget}
+        onOpenChange={(o) => !o && setRateTarget(null)}
+        title="Noter le travailleur"
         subtitle={
-          completeTarget
-            ? `Notez ${completeTarget.worker.firstName} ${completeTarget.worker.lastName}`
+          rateTarget
+            ? `Notez ${rateTarget.worker.firstName} ${rateTarget.worker.lastName}`
             : undefined
         }
         showNote
-        onSubmit={handleComplete}
-        isPending={complete.isPending}
+        onSubmit={handleRate}
+        isPending={rate.isPending}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
 import { AuthGuard } from "@/components/auth";
-import { AppShell } from "@/features/navigation";
+import { AppShell, PublicShell } from "@/features/navigation";
 
 import NotFound from "@/pages/not-found";
 
@@ -22,12 +22,16 @@ const Profile = lazy(() => import("@/pages/profile"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
+const DevelopersApiDocumentation = lazy(
+  () => import("@/pages/developers-api-documentation"),
+);
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Cookies = lazy(() => import("@/pages/cookies"));
 const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
+const OAuthConsent = lazy(() => import("@/pages/oauth-consent"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
@@ -101,7 +105,9 @@ export function AppRoutes() {
         path="/onboarding"
         element={
           <Suspense fallback={<PageLoader />}>
-            <Onboarding />
+            <PublicShell>
+              <Onboarding />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -355,7 +361,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <MyPortfolio />
+              <AppShell>
+                <MyPortfolio />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -365,7 +373,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <RealizationDetail />
+              <AppShell>
+                <RealizationDetail />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -417,6 +427,23 @@ export function AppRoutes() {
           </Suspense>
         }
       />
+      {/*
+        The integration guide for "Login with Rabotka". The API's discovery
+        document names this URL as `service_documentation`, so a partner's OIDC
+        client points its developers here — it is part of the protocol surface,
+        not a marketing page, and the path must not move without updating
+        `oauth-discovery.controller.ts`.
+      */}
+      <Route
+        path="/developers/api-documentation"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <LandingLayout>
+              <DevelopersApiDocumentation />
+            </LandingLayout>
+          </Suspense>
+        }
+      />
       <Route
         path="/privacy"
         element={
@@ -442,7 +469,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <ContactedProfiles />
+              <AppShell>
+                <ContactedProfiles />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -452,7 +481,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <EmployerDashboard />
+              <AppShell>
+                <EmployerDashboard />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -462,7 +493,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <CreateJobOffer />
+              <AppShell>
+                <CreateJobOffer />
+              </AppShell>
             </AuthGuard>
           </Suspense>
         }
@@ -483,7 +516,33 @@ export function AppRoutes() {
         path="/login"
         element={
           <Suspense fallback={<PageLoader />}>
-            <Login />
+            <PublicShell>
+              <Login />
+            </PublicShell>
+          </Suspense>
+        }
+      />
+      {/*
+        "Login with Rabotka". Reached only by a redirect from the API's
+        /oauth/authorize, never linked from inside the app.
+
+        Rendered bare — no AppShell, no PublicShell. This page is somebody
+        else's login dialog, usually running in a ~480x720 popup opened by a
+        partner site. Rabotka's app chrome would frame it as a page of this app,
+        which it is not: the user is deciding whether to trust a third party,
+        and every pixel of surrounding product furniture makes that decision
+        harder to see. The page centres itself instead.
+
+        Deliberately NOT behind AuthGuard: a visitor arriving from a partner
+        site usually has no session yet, and this page's whole job is to
+        establish one. AuthGuard would bounce them to /login, which loses the
+        interaction id and with it the partner's authorization request.
+      */}
+      <Route
+        path="/oauth/consent"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OAuthConsent />
           </Suspense>
         }
       />
@@ -492,7 +551,9 @@ export function AppRoutes() {
         element={
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
-              <OnboardingAvatar />
+              <PublicShell>
+                <OnboardingAvatar />
+              </PublicShell>
             </AuthGuard>
           </Suspense>
         }
@@ -501,7 +562,9 @@ export function AppRoutes() {
         path="/onboarding/success"
         element={
           <Suspense fallback={<PageLoader />}>
-            <OnboardingSuccess />
+            <PublicShell>
+              <OnboardingSuccess />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -509,7 +572,9 @@ export function AppRoutes() {
         path="/onboarding/error"
         element={
           <Suspense fallback={<PageLoader />}>
-            <OnboardingError />
+            <PublicShell>
+              <OnboardingError />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -549,7 +614,9 @@ export function AppRoutes() {
         path="/p/:slug"
         element={
           <Suspense fallback={<PageLoader />}>
-            <PublicPortfolio />
+            <PublicShell>
+              <PublicPortfolio />
+            </PublicShell>
           </Suspense>
         }
       />
@@ -558,7 +625,9 @@ export function AppRoutes() {
         path="/p/:slug/r/:itemId"
         element={
           <Suspense fallback={<PageLoader />}>
-            <RealizationDetail />
+            <PublicShell>
+              <RealizationDetail />
+            </PublicShell>
           </Suspense>
         }
       />

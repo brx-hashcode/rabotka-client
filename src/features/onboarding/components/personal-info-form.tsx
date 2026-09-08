@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
@@ -16,20 +17,13 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
-import { StepIndicator } from "./step-indicator";
-
-type OnboardingStep =
-  | "personal-informations"
-  | "kyc-documents"
-  | "confirmation";
+import { CountryCityFields } from "@/components/common/country-city-fields";
 
 type PersonalInfoFormProps = {
-  currentStep: OnboardingStep;
   onNext: () => void;
 };
 
 export function PersonalInfoForm({
-  currentStep,
   onNext,
 }: Readonly<PersonalInfoFormProps>) {
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
@@ -51,6 +45,14 @@ export function PersonalInfoForm({
     mode: "onChange",
   });
 
+
+  useEffect(() => {
+    const hasStoredValues = Object.values(personalInfo).some(Boolean);
+    if (hasStoredValues && !form.formState.isDirty) {
+      form.reset(personalInfo);
+    }
+  }, [personalInfo, form]);
+
   const description = form.watch("description");
   const charCount = description?.length || 0;
   const isOverLimit = charCount > 500;
@@ -64,17 +66,14 @@ export function PersonalInfoForm({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-          <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
-        </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
+        <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="firstName"
@@ -118,7 +117,7 @@ export function PersonalInfoForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="email"
@@ -155,11 +154,46 @@ export function PersonalInfoForm({
                       onChange={field.onChange}
                     />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {content.fields.phone.hint}
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Directly under the WhatsApp number, because it only makes sense
+                as "and if that one isn't the one you answer calls on". */}
+            <FormField
+              control={form.control}
+              name="directPhone"
+              render={({ field }) => (
+                <FormItem className="flex min-h-12 min-w-0 flex-col gap-1">
+                  <FormLabel>{content.fields.directPhone.label}</FormLabel>
+                  <FormControl>
+                    <PhoneInput
+                      defaultCountry="CG"
+                      placeholder={content.fields.directPhone.placeholder}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {content.fields.directPhone.hint}
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Country → city → address, in that order: the city list depends on
+              the country, and the street line only makes sense once both are
+              known. */}
+          <CountryCityFields
+            form={form}
+            countryHint={content.fields.country.hint}
+          />
 
           <FormField
             control={form.control}
@@ -192,7 +226,7 @@ export function PersonalInfoForm({
                           profileType.toLowerCase() as "worker" | "employer"
                         ]
                       }
-                      className="min-h-[140px] pr-16 resize-none"
+                      className="min-h-35 pr-16 resize-none"
                       {...field}
                     />
                     <div

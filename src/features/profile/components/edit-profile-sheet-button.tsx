@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
@@ -31,6 +32,7 @@ import {
   type EditProfileFormData,
 } from "@/lib/validations/profile";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import { CountryCityFields } from "@/components/common/country-city-fields";
 import {
   getCategories,
   type JobCategory,
@@ -51,6 +53,12 @@ export function EditProfileSheetButton({
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
   const [allCategories, setAllCategories] = useState<JobCategory[]>([]);
+  /**
+   * The Sheet's own content element, used as the combobox portal target. Without
+   * it the dropdown mounts on document.body, outside the sheet's scroll lock,
+   * and the list cannot be scrolled on a phone.
+   */
+  const [sheetContent, setSheetContent] = useState<HTMLDivElement | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const isMobile = useIsMobile();
 
@@ -68,9 +76,13 @@ export function EditProfileSheetButton({
     defaultValues: {
       firstName: profile.firstName,
       lastName: profile.lastName,
+      countryCode: profile.countryCode ?? "",
+      countryName: profile.countryName ?? "",
+      city: profile.city ?? "",
       address: profile.address,
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
+      directPhone: profile.directPhone ?? "",
     },
     mode: "onChange",
   });
@@ -83,9 +95,13 @@ export function EditProfileSheetButton({
     form.reset({
       firstName: profile.firstName,
       lastName: profile.lastName,
+      countryCode: profile.countryCode ?? "",
+      countryName: profile.countryName ?? "",
+      city: profile.city ?? "",
       address: profile.address,
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
+      directPhone: profile.directPhone ?? "",
     });
     setAvatarUrl(profile.avatarUrl);
     setIsOpen(true);
@@ -96,9 +112,15 @@ export function EditProfileSheetButton({
       {
         firstName: data.firstName,
         lastName: data.lastName,
+        countryCode: data.countryCode,
+        countryName: data.countryName,
+        city: data.city,
         address: data.address,
         description: data.description,
         categoryIds: data.categoryIds,
+        // Always sent, including as "" — that is how a number gets removed.
+        // The backend maps an empty string to NULL rather than storing one.
+        directPhone: data.directPhone ?? "",
       },
       {
         onSuccess: () => {
@@ -140,6 +162,7 @@ export function EditProfileSheetButton({
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
+          ref={setSheetContent}
           side="right"
           className="w-full sm:max-w-md overflow-y-auto"
         >
@@ -187,6 +210,34 @@ export function EditProfileSheetButton({
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <CountryCityFields form={form} container={sheetContent} />
+
+              {/* The WhatsApp number is deliberately absent: it is the login
+                  identity, and an unverified overwrite would send every future
+                  login link to a number the user may have mistyped. Changing it
+                  goes through the verify-then-switch endpoints instead. */}
+              <FormField
+                control={form.control}
+                name="directPhone"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.directPhone.label}</FormLabel>
+                    <FormControl>
+                      <PhoneInput
+                        defaultCountry="CG"
+                        placeholder={content.fields.directPhone.placeholder}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <p className="text-muted-foreground text-xs">
+                      {content.fields.directPhone.hint}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

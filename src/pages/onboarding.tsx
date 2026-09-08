@@ -59,10 +59,7 @@ export default function Onboarding() {
     switch (step) {
       case "personal-informations":
         return (
-          <PersonalInfoForm
-            currentStep="personal-informations"
-            onNext={() => setStep("profile-type")}
-          />
+          <PersonalInfoForm onNext={() => setStep("profile-type")} />
         );
       case "profile-type":
         return (
@@ -75,7 +72,6 @@ export default function Onboarding() {
       case "kyc-documents":
         return (
           <KycDocumentsForm
-            currentStep="kyc-documents"
             onBack={() => setStep("profile-type")}
             onNext={() => setStep("confirmation")}
           />
@@ -103,7 +99,9 @@ export default function Onboarding() {
         noIndex={false}
       />
       <div className="min-h-screen bg-background flex items-center justify-center py-8">
-        <div className="w-full max-w-3xl mx-auto p-4 lg:p-0">
+        {/* No max-width of its own: PublicShell caps the column at 512px, and
+            a wider constraint here would only be dead weight that misleads. */}
+        <div className="w-full p-4 lg:p-0">
           <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
         </div>
       </div>

@@ -1,9 +1,18 @@
 import { useState } from "react";
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
+import {
+  jobLocationLabel,
+  jobLocationRegion,
+  REMOTE_LOCATION_LABEL,
+} from "@/lib/job-location";
 import { useNavigate, useParams } from "react-router";
 import {
   Calendar,
   Coins,
   MapPin,
+  FileText,
+  Globe,
+  Building2,
   ShieldCheck,
   Bookmark,
   Loader2,
@@ -27,7 +36,9 @@ import {
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
-import { cn, formatAmount, formatDateTime } from "@/lib/utils";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice, accountShortLabel } from "@/features/account";
+import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 export default function JobDetailWorker() {
   const navigate = useNavigate();
@@ -39,8 +50,14 @@ export default function JobDetailWorker() {
     isFetching,
     refetch,
   } = useJobDetail(id);
+  // Null for a remote job, and for offers created before the location pickers
+  // existed — the row is dropped rather than rendered empty.
+  const region = job ? jobLocationRegion(job) : null;
   const { canApply, quota } = useCanApply();
   const { blocked, reason } = useKycGate();
+  // A suspended (or banned, or not-yet-activated) account keeps every read on
+  // this screen — it only loses the apply button.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const apply = useApplyToJob();
   const toggleSave = useToggleSaveJob();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -48,13 +65,16 @@ export default function JobDetailWorker() {
   const dailyExhausted = quota != null && quota.remaining <= 0;
 
   // About the offer, not the worker — so it is checked first. Applying to a
-  // filled offer costs the worker one of only three concurrent slots and can
-  // never succeed.
+  // filled offer spends one of the worker's daily applications and can never
+  // succeed.
   const offerClosed = job ? isClosedToApplications(job) : false;
 
   let applyLabel = "Postuler";
   if (job?.applied) applyLabel = "Déjà postulé";
-  else if (offerClosed) applyLabel = "Offre pourvue";
+  // Même libellé que la carte du fil : il parle du poste, pas de la personne.
+  else if (offerClosed) applyLabel = "Plus de place disponible";
+  else if (accountBlocked && accountReason)
+    applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
   else if (dailyExhausted) applyLabel = "Limite quotidienne atteinte";
   else if (!canApply) applyLabel = "Trop de candidatures en cours";
@@ -116,29 +136,81 @@ export default function JobDetailWorker() {
                 label="Rémunération"
               >
                 <span className="font-medium text-foreground">
-                  {formatAmount(job.amount)}
+                  {formatOfferAmount(job.amount)}
                 </span>{" "}
                 {PAYMENT_FLOW_LABELS[job.paymentFlow] ?? ""}
               </InfoRow>
             )}
             <InfoRow
-              icon={<Calendar className="h-4 w-4 text-whatsapp" />}
-              label="Date prévue"
+              icon={<FileText className="h-4 w-4 text-whatsapp" />}
+              label="Type de contrat"
             >
-              {formatDateTime(job.scheduledAt)}
+              {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
             </InfoRow>
-            <InfoRow
-              icon={<MapPin className="h-4 w-4 text-whatsapp" />}
-              label="Adresse"
-            >
-              {job.address}
-            </InfoRow>
+            {/* A CDI/CDD/STAGE has no closing date. Dropping the row entirely
+                rather than printing a dash: a labelled blank reads as data that
+                failed to load. */}
+            {job.scheduledAt && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4 text-whatsapp" />}
+                label="Date de clôture"
+              >
+                {formatDateTime(job.scheduledAt)}
+              </InfoRow>
+            )}
+            {/* Where the job is, split across rows now that the payload carries
+                more than a street. A remote job has no address at all, so
+                printing an empty "Adresse" was the old failure; and an address
+                alone hid which city a worker would be travelling to. */}
+            {job.isRemote ? (
+              <InfoRow
+                icon={<Globe className="h-4 w-4 text-whatsapp" />}
+                label="Lieu"
+              >
+                <span className="font-medium text-foreground">
+                  {REMOTE_LOCATION_LABEL}
+                </span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Mission à distance — aucun déplacement.
+                </p>
+              </InfoRow>
+            ) : (
+              <>
+                <InfoRow
+                  icon={<MapPin className="h-4 w-4 text-whatsapp" />}
+                  label="Adresse"
+                >
+                  {jobLocationLabel(job)}
+                </InfoRow>
+                {region && (
+                  <InfoRow
+                    icon={<Building2 className="h-4 w-4 text-whatsapp" />}
+                    label="Ville"
+                  >
+                    {region}
+                  </InfoRow>
+                )}
+              </>
+            )}
           </Section>
 
           {job.description && (
             <Section title="Description">
               <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
                 {job.description}
+              </p>
+            </Section>
+          )}
+
+          {/* The employer's extra instructions — meeting point, what to bring,
+              who to ask for. The API has always sent this; the client dropped
+              it in the mapping, so a worker turned up without ever seeing it.
+              Its own section rather than appended to the description: the
+              employer wrote it as a separate, practical note. */}
+          {job.note && (
+            <Section title="Précisions du recruteur">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+                {job.note}
               </p>
             </Section>
           )}
@@ -186,7 +258,14 @@ export default function JobDetailWorker() {
             </Section>
           )}
 
-          {blocked && reason && <KycNotice reason={reason} className="mb-3" />}
+          {/* One banner, not two: the account status is the blocking problem
+              whenever both apply — clearing KYC changes nothing while the
+              account is suspended. */}
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} className="mb-3" />
+          ) : (
+            blocked && reason && <KycNotice reason={reason} className="mb-3" />
+          )}
 
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
@@ -195,6 +274,7 @@ export default function JobDetailWorker() {
               offerClosed ||
               !canApply ||
               blocked ||
+              accountBlocked ||
               apply.isPending
             }
             onClick={() => setConfirmOpen(true)}
@@ -208,7 +288,7 @@ export default function JobDetailWorker() {
             onOpenChange={setConfirmOpen}
             title={job.title}
             scheduledAt={job.scheduledAt}
-            address={job.address}
+            address={jobLocationLabel(job)}
             amount={job.amount}
             isPending={apply.isPending}
             onConfirm={() =>

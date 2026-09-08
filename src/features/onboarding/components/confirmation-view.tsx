@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useOnboardingMutation } from "@/hooks/use-onboarding-mutation";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,16 @@ import {
   Briefcase,
   ClipboardList,
   CreditCard,
+  Globe,
+  Building2,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
+import { ReferralCodeField } from "./referral-code-field";
 import { confirmationContent } from "@/content/onboarding";
-import { StepIndicator } from "./step-indicator";
+import {
+  documentTypeLabel as documentTypeLabelFor,
+  requiresBackSide,
+} from "@/lib/kyc-document-types";
 import { cn } from "@/lib/utils";
 
 type OnboardingStep =
@@ -57,18 +63,7 @@ export function ConfirmationView({
 
   const content = confirmationContent;
 
-  const documentTypeLabel = useMemo(() => {
-    const map: Record<string, string> = {
-      IDENTITY_CARD: content.documentTypes.identityCard,
-      PASSPORT: content.documentTypes.passport,
-      DRIVER_LICENSE: content.documentTypes.driverLicense,
-      BIRTH_CERTIFICATE: content.documentTypes.birthCertificate,
-      STUDENT_CARD: content.documentTypes.studentCard,
-      NIU_CARD: content.documentTypes.niuCard,
-      OTHER: content.documentTypes.other,
-    };
-    return (kycData.documentType && map[kycData.documentType]) || "-";
-  }, [kycData.documentType, content.documentTypes]);
+  const documentTypeLabel = documentTypeLabelFor(kycData.documentType) ?? "-";
 
   return (
     <div className="space-y-6">
@@ -81,11 +76,10 @@ export function ConfirmationView({
             {content.pageTitle}
           </h3>
         </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
       <div className="space-y-6">
         <section>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <InfoCard
               label={content.personalInfo.fields.firstName}
               icon={User}
@@ -105,6 +99,16 @@ export function ConfirmationView({
               label={content.personalInfo.fields.phone}
               icon={Phone}
               value={personalInfo.phone}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.country}
+              icon={Globe}
+              value={personalInfo.countryName}
+            />
+            <InfoCard
+              label={content.personalInfo.fields.city}
+              icon={Building2}
+              value={personalInfo.city}
             />
             <InfoCard
               label={content.personalInfo.fields.address}
@@ -155,8 +159,8 @@ export function ConfirmationView({
               value=""
             >
               <Badge
-                variant="outline"
-                className="text-gray-700 font-semibold px-3 py-1 border-gray-300"
+                variant="secondary"
+                className="text-gray-700 font-semibold px-3 py-1 border-transparent"
               >
                 {documentTypeLabel}
               </Badge>
@@ -168,15 +172,15 @@ export function ConfirmationView({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {content.kycDocuments.title}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-gray-300 rounded-lg p-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.documentIdentity}
               </p>
-              {kycData.kycDocumentPreview || kycData.kycDocumentUrl ? (
+              {kycData.kycDocumentPreview ? (
                 <div className="space-y-2">
                   <img
-                    src={kycData.kycDocumentPreview ?? kycData.kycDocumentUrl ?? ""}
+                    src={kycData.kycDocumentPreview}
                     alt="KYC Document"
                     className="w-full h-32 object-cover rounded"
                   />
@@ -186,19 +190,47 @@ export function ConfirmationView({
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
-                  {content.kycDocuments.noDocument}
+                  {kycData.kycDocumentKey || kycData.kycDocumentUrl
+                    ? content.kycDocuments.uploadedNoPreview
+                    : content.kycDocuments.noDocument}
                 </p>
               )}
             </div>
 
-            <div className="border border-gray-300 rounded-lg p-4">
+            {requiresBackSide(kycData.documentType) && (
+              <div className="bg-card shadow-soft rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {content.kycDocuments.documentIdentityBack}
+                </p>
+                {kycData.kycDocumentBackPreview ? (
+                  <div className="space-y-2">
+                    <img
+                      src={kycData.kycDocumentBackPreview}
+                      alt="KYC Document Back"
+                      className="w-full h-32 object-cover rounded"
+                    />
+                    <p className="text-xs text-gray-600 truncate">
+                      {kycData.kycDocumentBack?.name}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    {kycData.kycDocumentBackKey || kycData.kycDocumentBackUrl
+                      ? content.kycDocuments.uploadedNoPreview
+                      : content.kycDocuments.noDocument}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
                 {content.kycDocuments.selfie}
               </p>
-              {kycData.kycSelfiePreview || kycData.kycSelfieUrl ? (
+              {kycData.kycSelfiePreview ? (
                 <div className="space-y-2">
                   <img
-                    src={kycData.kycSelfiePreview ?? kycData.kycSelfieUrl ?? ""}
+                    src={kycData.kycSelfiePreview}
                     alt="KYC Selfie"
                     className="w-full h-32 object-cover rounded"
                   />
@@ -208,7 +240,9 @@ export function ConfirmationView({
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
-                  {content.kycDocuments.noSelfie}
+                  {kycData.kycSelfieKey || kycData.kycSelfieUrl
+                    ? content.kycDocuments.uploadedNoPreview
+                    : content.kycDocuments.noSelfie}
                 </p>
               )}
             </div>
@@ -216,7 +250,11 @@ export function ConfirmationView({
         </section>
       </div>
 
-      <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      {/* Parrainage sits between the recap and the policy checkbox: after the
+          user has seen what they are submitting, before they commit to it. */}
+      <ReferralCodeField />
+
+      <div className="flex items-start gap-3 rounded-lg bg-card shadow-soft p-4">
         <Checkbox
           id="policy-accept"
           checked={policyAccepted}
@@ -227,14 +265,29 @@ export function ConfirmationView({
           htmlFor="policy-accept"
           className="text-sm text-gray-700 leading-snug cursor-pointer"
         >
+          {/* Two links, not one: the sentence claims acceptance of both
+              documents, so both have to be reachable from here. A single link
+              to /terms meant the policy being accepted could not be opened —
+              which is precisely the informed consent the law asks for. */}
           J'ai lu et j'accepte les{" "}
           <Link
             to="/terms"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 underline underline-offset-2 hover:text-green-700"
             onClick={(e) => e.stopPropagation()}
           >
-            conditions d'utilisation et la politique de confidentialité
+            conditions d'utilisation
+          </Link>{" "}
+          et la{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-600 underline underline-offset-2 hover:text-green-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            politique de confidentialité
           </Link>{" "}
           de la plateforme.
         </label>

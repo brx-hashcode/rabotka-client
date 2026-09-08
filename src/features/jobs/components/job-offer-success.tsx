@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router";
+import { REMOTE_LOCATION_LABEL } from "@/lib/job-location";
+import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,13 +25,17 @@ export function JobOfferSuccess({
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const dateLabel = new Date(recap.scheduledAt).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  // Guarded: a CDI/CDD/STAGE has no closing date, and `new Date("")` renders
+  // the literal string "Invalid Date" straight into the recap.
+  const dateLabel = recap.scheduledAt
+    ? new Date(recap.scheduledAt).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
   const amountLabel =
     typeof recap.amount === "number"
       ? `${recap.amount.toLocaleString("fr-FR")} FCFA`
@@ -74,8 +80,21 @@ export function JobOfferSuccess({
 
       <dl className="mt-6 space-y-3 text-sm">
         <RecapRow label="Offre" value={recap.title} />
-        <RecapRow label="Date" value={dateLabel} />
-        <RecapRow label="Adresse" value={recap.address} />
+        <RecapRow
+          label="Type de contrat"
+          value={EMPLOYMENT_TYPE_LABELS[recap.employmentType]}
+        />
+        {dateLabel ? (
+          <RecapRow label="Date de clôture" value={dateLabel} />
+        ) : null}
+        <RecapRow
+          label="Lieu"
+          value={
+            recap.isRemote
+              ? REMOTE_LOCATION_LABEL
+              : [recap.address, recap.city].filter(Boolean).join(", ")
+          }
+        />
         <RecapRow label="Nombre de personnes" value={String(recap.quantity)} />
         <RecapRow label="Montant" value={amountLabel} />
         {recap.paymentFlow ? (

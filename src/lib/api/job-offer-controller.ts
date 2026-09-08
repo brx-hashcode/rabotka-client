@@ -1,4 +1,5 @@
 import { RabotkaBaseController } from "./base-controller";
+import type { EmploymentTypeValue } from "@/lib/employment-type";
 
 export type JobOfferStatus =
   | "DRAFT"
@@ -14,10 +15,16 @@ export type EmployerJobOfferItem = {
   id: string;
   title: string;
   status: JobOfferStatus;
-  scheduledAt: string;
-  amount: number;
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
+  /** Null when the employer named no price — rendered as «À négocier». */
+  amount: number | null;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   quantity: number;
   acceptedCount: number;
   pendingApplicationsCount: number;
@@ -44,10 +51,16 @@ export type JobOfferDetail = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduledAt: string;
-  amount: number;
+  scheduledAt: string | null;
+  employmentType: EmploymentTypeValue;
+  /** Null when the employer named no price — rendered as «À négocier». */
+  amount: number | null;
   paymentFlow: string;
-  address: string;
+  /** Null for a remote job — render `isRemote` instead. */
+  address: string | null;
+  isRemote: boolean;
+  countryName?: string | null;
+  city?: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -70,7 +83,7 @@ export type EmployerApplicationItem = {
   jobOffer: {
     id: string;
     title: string;
-    scheduledAt: string;
+    scheduledAt: string | null;
     /** Drives the capacity gate — a FILLED offer can take no more candidates. */
     status: JobOfferStatus;
   };
@@ -85,14 +98,26 @@ export type EmployerApplicationsResponse = {
 
 // Raw backend shapes (snake_case) returned by /profile/job-offers and
 // /profile/received-applications — mapped to the camelCase types above.
+//
+// Every field here must match the server's key exactly. employment_type,
+// is_remote, city and country_name were declared in camelCase, so they read
+// undefined on every response and the `??` defaults below quietly supplied
+// "MISSION", false and null — a CDI showed as a mission, and a remote job as
+// on-site. They are non-optional now so a rename on either side is a type
+// error rather than a plausible-looking wrong value.
 type BackendEmployerOffer = {
   id: string;
   title: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  employment_type: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `is_remote` instead. */
+  address: string | null;
+  is_remote: boolean;
+  country_name: string | null;
+  city: string | null;
   quantity: number;
   acceptedCount?: number;
   created_at: string;
@@ -113,7 +138,7 @@ type BackendEmployerApplication = {
   job_offer?: {
     id: string;
     title: string;
-    scheduled_at: string;
+    scheduled_at: string | null;
     status?: JobOfferStatus;
   };
 };
@@ -124,10 +149,15 @@ type BackendJobOfferDetail = {
   title: string;
   description: string;
   status: JobOfferStatus;
-  scheduled_at: string;
+  scheduled_at: string | null;
+  employment_type: EmploymentTypeValue;
   amount: number | null;
   payment_flow: string | null;
-  address: string;
+  /** Null for a remote job — render `is_remote` instead. */
+  address: string | null;
+  is_remote: boolean;
+  country_name: string | null;
+  city: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -147,6 +177,8 @@ export type JobOfferWorkerItem = {
   status: string;
   createdAt: string;
   contractId: string | null;
+  /** The employer has already rated this worker — hides the rating action. */
+  ratedByEmployer: boolean;
   worker: {
     id: string;
     firstName: string;
@@ -162,6 +194,7 @@ type BackendOfferApplication = {
   status: string;
   created_at: string;
   contractId?: string | null;
+  ratedByEmployer?: boolean;
   worker?: {
     id: string;
     first_name: string;
@@ -175,8 +208,15 @@ type BackendOfferApplication = {
 export type CreateJobOfferPayload = {
   title: string;
   description: string;
-  scheduled_at: string; // ISO date-time
-  address: string;
+  /** ISO date-time. The offer's CLOSING date; required only for a MISSION. */
+  scheduled_at?: string;
+  employment_type?: EmploymentTypeValue;
+  /** Omitted for a remote job — it has no site. */
+  address?: string;
+  isRemote?: boolean;
+  countryCode?: string;
+  countryName?: string;
+  city?: string;
   quantity: number;
   amount?: number;
   payment_flow?: "HOURLY" | "DAILY" | "MONTHLY";
@@ -219,9 +259,13 @@ class JobOfferController extends RabotkaBaseController {
           title: o.title,
           status: o.status,
           scheduledAt: o.scheduled_at,
-          amount: o.amount ?? 0,
+          employmentType: o.employment_type,
+          amount: o.amount,
           paymentFlow: o.payment_flow ?? "",
           address: o.address,
+          isRemote: o.is_remote,
+          city: o.city,
+          countryName: o.country_name,
           quantity: o.quantity,
           acceptedCount: o.acceptedCount ?? 0,
           pendingApplicationsCount: 0,
@@ -288,9 +332,13 @@ class JobOfferController extends RabotkaBaseController {
         description: o.description,
         status: o.status,
         scheduledAt: o.scheduled_at,
-        amount: o.amount ?? 0,
+        employmentType: o.employment_type,
+        amount: o.amount,
         paymentFlow: o.payment_flow ?? "",
         address: o.address,
+        isRemote: o.is_remote,
+        city: o.city,
+        countryName: o.country_name,
         note: o.note,
         quantity: o.quantity,
         acceptedCount: o.acceptedCount,
@@ -321,6 +369,7 @@ class JobOfferController extends RabotkaBaseController {
         status: a.status,
         createdAt: a.created_at,
         contractId: a.contractId ?? null,
+        ratedByEmployer: a.ratedByEmployer ?? false,
         worker: {
           id: a.worker?.id ?? "",
           firstName: a.worker?.first_name ?? "",
@@ -367,6 +416,25 @@ class JobOfferController extends RabotkaBaseController {
       this.handleError(error);
     }
   }
+
+  /**
+   * Backend: POST /profile/job-offers/:id/confirm-hire → close a CDD/CDI/STAGE
+   * offer whose positions are all taken, and open the mutual rating.
+   *
+   * Only for ongoing engagements: a MISSION is closed by its worker confirming
+   * the work is done. Requires the offer to be FILLED, so one still taking
+   * candidates cannot be closed early. Idempotent once closed — the server also
+   * closes these on its own if nobody confirms within a week.
+   */
+  async confirmHire(id: string): Promise<void> {
+    try {
+      await this.post<{ success: boolean }>(
+        `/profile/job-offers/${id}/confirm-hire`,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 }
 
 export const {
@@ -377,4 +445,5 @@ export const {
   getJobOfferApplications,
   create: createJobOffer,
   remove: deleteJobOffer,
+  confirmHire,
 } = new JobOfferController();

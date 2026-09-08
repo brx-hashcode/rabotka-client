@@ -12,13 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useApplicationTerms } from "@/hooks/use-application-terms";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { formatAmount, formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
-  readonly scheduledAt: string;
+  /** Null for a CDI, CDD or stage — formatDateTime renders «—». */
+  readonly scheduledAt: string | null;
   readonly address: string;
   readonly amount?: number | null;
   readonly isPending?: boolean;
@@ -30,8 +31,8 @@ type Props = {
  * the WhatsApp flow used to show.
  *
  * Applying is not a free action — it shares the worker's contact details with
- * the employer, holds one of their concurrent slots, and binds them to a
- * penalty if they cancel late. That has to be visible before they commit, not
+ * the employer, spends one of their applications for the day, and binds them to
+ * a penalty if they cancel late. That has to be visible before they commit, not
  * discovered afterwards.
  */
 export function ApplyConfirmDrawer({
@@ -62,7 +63,7 @@ export function ApplyConfirmDrawer({
             <dl className="space-y-2 rounded-xl bg-card p-3 text-left text-sm shadow-soft">
               <RecapRow label="Date" value={formatDateTime(scheduledAt)} />
               {amount != null && (
-                <RecapRow label="Montant" value={formatAmount(amount)} />
+                <RecapRow label="Montant" value={formatOfferAmount(amount)} />
               )}
               <RecapRow label="Adresse" value={address} />
             </dl>
@@ -74,7 +75,7 @@ export function ApplyConfirmDrawer({
                   Engagement important
                 </p>
                 <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
-                  <li>Vos informations seront partagées avec l'employeur.</li>
+                  <li>Vos informations seront partagées avec le recruteur.</li>
                   <li>Vous vous engagez à être présent et ponctuel.</li>
                   <li>
                     {terms ? (

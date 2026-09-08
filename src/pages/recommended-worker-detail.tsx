@@ -12,10 +12,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScreenHeader, StatusChip } from "@/features/employer";
+import { ScreenHeader } from "@/features/employer";
+import { DomainBadges } from "@/features/profile/components";
 import { useRecommendedWorker } from "@/hooks/use-recommendations";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { AccountNotice, accountShortLabel } from "@/features/account";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 
 export default function RecommendedWorkerDetail() {
@@ -23,7 +26,15 @@ export default function RecommendedWorkerDetail() {
   const { workerId = "" } = useParams<{ workerId: string }>();
   const { data, isLoading, isError } = useRecommendedWorker(workerId);
   const { blocked, reason } = useKycGate();
+  // Account before KYC, matching job-card on the worker side: a suspension is
+  // the more severe problem, so it wins both the notice and the label.
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  let contactLabel = "Contacter";
+  if (accountBlocked && accountReason)
+    contactLabel = accountShortLabel(accountReason);
+  else if (blocked && reason) contactLabel = kycShortLabel(reason);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -150,13 +161,7 @@ export default function RecommendedWorkerDetail() {
               <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Domaines
               </p>
-              <div className="flex flex-wrap gap-2">
-                {domains.map((name) => (
-                  <StatusChip key={name} className="bg-whatsapp/10 text-whatsapp">
-                    {name}
-                  </StatusChip>
-                ))}
-              </div>
+              <DomainBadges names={domains} />
             </div>
           )}
 
@@ -171,14 +176,19 @@ export default function RecommendedWorkerDetail() {
             </div>
           )}
 
-          {blocked && reason && <KycNotice reason={reason} />}
+          {accountBlocked && accountReason && (
+            <AccountNotice reason={accountReason} />
+          )}
+          {!accountBlocked && blocked && reason && (
+            <KycNotice reason={reason} />
+          )}
 
           <Button
             className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-            disabled={blocked}
+            disabled={blocked || accountBlocked}
             onClick={() => setConfirmOpen(true)}
           >
-            {blocked && reason ? kycShortLabel(reason) : "Contacter"}
+            {contactLabel}
           </Button>
 
           {worker.portfolioSlug && (
@@ -187,7 +197,7 @@ export default function RecommendedWorkerDetail() {
               onClick={() => navigate(`/p/${worker.portfolioSlug}?back=1`)}
             >
               <Briefcase className="mr-2 h-4 w-4" />
-              Voir le portfolio
+              Voir les publications
             </Button>
           )}
 

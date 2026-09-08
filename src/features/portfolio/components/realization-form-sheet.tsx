@@ -128,7 +128,7 @@ export function RealizationFormSheet({
   const handleAddImages = () => {
     if (!item || files.length === 0) return;
     if (files.length > remainingSlots) {
-      setImageError(`Maximum ${MAX_IMAGES} images par réalisation.`);
+      setImageError(`Maximum ${MAX_IMAGES} images par publication.`);
       return;
     }
     addImagesMutation.mutate(
@@ -147,7 +147,7 @@ export function RealizationFormSheet({
       >
         <SheetHeader className="text-left">
           <SheetTitle>
-            {isEdit ? "Modifier la réalisation" : "Nouvelle réalisation"}
+            {isEdit ? "Modifier la publication" : "Nouvelle publication"}
           </SheetTitle>
           <SheetDescription>
             {isEdit
@@ -181,7 +181,7 @@ export function RealizationFormSheet({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea rows={4} placeholder="Décrivez le travail réalisé." {...field} />
+                    <Textarea rows={4} placeholder="Décrivez la mission réalisée." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -217,7 +217,7 @@ export function RealizationFormSheet({
                         }
                         title={
                           item.images.length === 1
-                            ? "Une réalisation doit garder au moins une image"
+                            ? "Une publication doit garder au moins une image"
                             : "Supprimer l'image"
                         }
                         className="bg-destructive/90 absolute right-1 top-1 rounded-full p-1 text-white disabled:opacity-40"
@@ -291,7 +291,7 @@ export function RealizationFormSheet({
 
             <Button type="submit" className="w-full" disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {isEdit ? "Enregistrer" : "Créer la réalisation"}
+              {isEdit ? "Enregistrer" : "Créer la publication"}
             </Button>
           </form>
         </Form>

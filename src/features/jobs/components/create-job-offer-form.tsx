@@ -25,7 +25,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CategoryCombobox } from "@/components/common/category-combobox";
+import { CountryCityFields } from "@/components/common/country-city-fields";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DeselectableSelectItem } from "@/components/ui/deselectable-select-item";
 import { getCategories } from "@/lib/api/job-category-controller";
+import {
+  EMPLOYMENT_TYPE_LABELS,
+  EMPLOYMENT_TYPE_VALUES,
+  scheduledAtLabel,
+  scheduledAtHelpText,
+} from "@/lib/employment-type";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
   CreateJobOfferPayload,
@@ -67,7 +76,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
     defaultValues: {
       title: "",
       description: "",
+      employmentType: "MISSION",
       scheduledAt: "",
+      isRemote: false,
+      countryCode: "",
+      countryName: "",
+      city: "",
       address: "",
       quantity: 1,
       amount: "",
@@ -78,13 +92,33 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
     mode: "onChange",
   });
 
+  const isRemote = form.watch("isRemote");
+  const employmentType = form.watch("employmentType");
+
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
       title: data.title.trim(),
       description: data.description.trim(),
-      scheduled_at: new Date(data.scheduledAt).toISOString(),
-      address: data.address.trim(),
+      employment_type: data.employmentType,
       quantity: data.quantity,
+      // A remote job sends no location at all. Sending empty strings would
+      // store a country the server then has to reject, and sending the fields
+      // for an on-site job is what puts it in the right city.
+      ...(data.isRemote
+        ? { isRemote: true }
+        : {
+            isRemote: false,
+            address: data.address.trim(),
+            countryCode: data.countryCode,
+            countryName: data.countryName,
+            city: data.city,
+          }),
+      // Conditional, like every other optional field: an unconditional
+      // `new Date("").toISOString()` throws RangeError the moment the field is
+      // legitimately left empty.
+      ...(data.scheduledAt
+        ? { scheduled_at: new Date(data.scheduledAt).toISOString() }
+        : {}),
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
       ...(data.note?.trim() ? { note: data.note.trim() } : {}),
@@ -96,7 +130,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   };
 
   return (
-    <div className="bg-white rounded-lg lg:p-8 p-4">
+    // Square on mobile, where it runs edge to edge and rounded corners would
+    // read as a card that overflowed. Rounds from md up, where the page gutter
+    // gives it somewhere to sit.
+    <div className="rounded-none bg-white p-4 md:rounded-lg lg:p-8">
       <h2 className="text-2xl font-bold mb-6">Créer une offre</h2>
 
       <Form {...form}>
@@ -128,7 +165,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 <FormLabel>Description *</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Décrivez précisément le travail à réaliser."
+                    placeholder="Décrivez précisément la mission à réaliser."
                     rows={5}
                     maxLength={1000}
                     disabled={isPending}
@@ -140,12 +177,59 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             )}
           />
 
+          {/* Hidden, not removed.
+              Rabotka is not yet authorised to recruit on anything but a
+              one-off mission, so an employer must not be able to pick CDD, CDI
+              or stage. The field stays mounted and registered on the form so it
+              keeps submitting its default of MISSION — unregistering it would
+              send no employment_type at all, and the backend would then apply
+              its own MISSION default, which happens to agree today but is a
+              coincidence rather than this decision.
+              To restore: delete the `hidden` class below. Nothing else. */}
+          <FormField
+            control={form.control}
+            name="employmentType"
+            render={({ field }) => (
+              <FormItem className="hidden">
+                <FormLabel>Type de contrat *</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isPending}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choisir..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {EMPLOYMENT_TYPE_VALUES.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {EMPLOYMENT_TYPE_LABELS[value]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Une mission ponctuelle se termine à une date donnée. Un CDI,
+                  un CDD ou un stage est un engagement continu.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Shown for every type — every offer has a day it stops being open.
+              Only the label changes, and that matters: this used to be hidden
+              on a CDI/CDD/stage, which left them with no date at all, and every
+              scan that retires or closes an offer keys off it. They could never
+              expire and never close. */}
           <FormField
             control={form.control}
             name="scheduledAt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date et heure *</FormLabel>
+                <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
                 <FormControl>
                   <Input
                     type="datetime-local"
@@ -156,8 +240,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Appuyez pour choisir la date et l'heure de début (au moins 4
-                  heures à l'avance).
+                  {scheduledAtHelpText(employmentType)}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -166,21 +249,67 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
           <FormField
             control={form.control}
-            name="address"
+            name="isRemote"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse *</FormLabel>
+              <FormItem className="flex flex-row items-start gap-3 rounded-md bg-muted/40 p-3">
                 <FormControl>
-                  <Input
-                    placeholder="Ex : 123 Avenue de la Paix, Poto-Poto, Brazzaville"
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      const isRemote = checked === true;
+                      field.onChange(isRemote);
+                      // Clear the location rather than hide it: a stale address
+                      // left in the form would be submitted the moment someone
+                      // unticked and reticked the box.
+                      if (isRemote) {
+                        form.setValue("address", "");
+                        form.setValue("countryCode", "");
+                        form.setValue("countryName", "");
+                        form.setValue("city", "");
+                      }
+                    }}
                     disabled={isPending}
-                    {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <div className="space-y-0.5 leading-none">
+                  <FormLabel className="cursor-pointer">
+                    Mission en ligne
+                  </FormLabel>
+                  <FormDescription>
+                    La mission se fait à distance : aucune adresse n'est
+                    demandée.
+                  </FormDescription>
+                </div>
               </FormItem>
             )}
           />
+
+          {/* The whole location block disappears for a remote job — there is no
+              site, so a greyed-out address field would just be a question with
+              no answer. */}
+          {!isRemote && (
+            <>
+              <CountryCityFields form={form} />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex : 123 Avenue de la Paix, Poto-Poto"
+                        disabled={isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={form.control}
@@ -240,10 +369,17 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    {/* Optional field: tapping the chosen option clears it,
+                        which Radix cannot do on its own. */}
                     {PAYMENT_FLOW_VALUES.map((value) => (
-                      <SelectItem key={value} value={value}>
+                      <DeselectableSelectItem
+                        key={value}
+                        value={value}
+                        selected={field.value || undefined}
+                        onDeselect={() => field.onChange("")}
+                      >
                         {PAYMENT_FLOW_LABELS[value]}
-                      </SelectItem>
+                      </DeselectableSelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -299,11 +435,24 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
               {isPending ? "Publication…" : "Publier l'offre"}
             </Button>
+            {/*
+              Goes to the missions list, NOT back one entry.
+
+              `navigate(-1)` assumes the user arrived from somewhere inside the
+              app. Opened from WhatsApp they did not: the card lands on
+              `/s/<code>`, which signs them in and replaces itself with this
+              form, so the entry behind it is the login hop — and going back to
+              it bounces straight here again. Cancel was a dead end for anyone
+              who came in through the bot, which is most people.
+
+              A fixed destination cannot trap them: whatever the history holds,
+              this is a real page they are allowed to be on.
+            */}
             <Button
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/missions")}
             >
               Annuler
             </Button>

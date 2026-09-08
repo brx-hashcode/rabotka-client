@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Users,
@@ -12,22 +12,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkerFeed } from "@/hooks/use-recommendations";
+import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
 import { HomeHeader } from "./home-header";
 import { RecommendedWorkerCard } from "./recommended-worker-card";
+import { SponsoredCard } from "@/features/sponsored/sponsored-card";
+import { interleaveAds } from "@/features/sponsored/interleave";
+import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
+import { useAccountGate } from "@/hooks/use-account-gate";
+import { useKycGate } from "@/hooks/use-kyc-gate";
+import { AccountNotice } from "@/features/account";
+import { KycNotice } from "@/features/kyc";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
 const SKELETON_KEYS = ["s1", "s2", "s3"];
 
+/** Shared so a loading feed keeps the same array, and the memo below holds. */
+const NO_WORKERS: RecommendedWorker[] = [];
+
 export function EmployerHome() {
   const navigate = useNavigate();
   const [limit, setLimit] = useState(INITIAL_LIMIT);
   const { data: workers, isLoading, isFetching } = useWorkerFeed(limit);
+  const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
+  const { blocked, reason } = useKycGate();
 
-  const list = workers ?? [];
+  const list = workers ?? NO_WORKERS;
   // Keep the button visible while a larger page is being fetched (the pending
   // `limit` runs ahead of the placeholder list) so its loading state shows.
   const canLoadMore = isFetching || list.length >= limit;
+
+  const ads = useFeedSlots();
+  // Same slot rule as the worker feed — the two lists are the same shape, so
+  // an advert lands in the same place whichever side of the app you are on.
+  const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);
 
   return (
     <div className="flex flex-col">
@@ -62,6 +80,25 @@ export function EmployerHome() {
         </div>
       )}
 
+      {/* Directly above the feed it governs, the same placement worker-home
+          uses. Higher up it sat between the search bar and "Créer une offre"
+          and read as a page-level banner; here it reads as the reason the
+          Contacter buttons below are dead. Same precedence too: account
+          outranks KYC. */}
+      {(accountBlocked || blocked) && (
+        // `pt-3` matches QuickActions' own top padding, which has no bottom
+        // padding of its own — without it the notice sits flush against the
+        // shortcut cards. Nothing below: the section that follows brings its
+        // own `py-4`.
+        <div className="px-4 pt-3">
+          {accountBlocked && accountReason ? (
+            <AccountNotice reason={accountReason} />
+          ) : (
+            reason && <KycNotice reason={reason} />
+          )}
+        </div>
+      )}
+
       {!isLoading && list.length > 0 && (
         <section className="space-y-3 py-4">
           <SectionHeader
@@ -72,9 +109,13 @@ export function EmployerHome() {
           {/* Single column: the feed is already ranked best-first, so a
               carousel just hid the ranking behind a horizontal swipe. */}
           <div className="grid grid-cols-1 gap-3 px-4">
-            {list.map((w) => (
-              <RecommendedWorkerCard key={w.id} worker={w} />
-            ))}
+            {entries.map((entry) =>
+              entry.kind === "ad" ? (
+                <SponsoredCard key={entry.key} ad={entry.item} />
+              ) : (
+                <RecommendedWorkerCard key={entry.key} worker={entry.item} />
+              ),
+            )}
           </div>
           {canLoadMore && (
             <div className="px-4">

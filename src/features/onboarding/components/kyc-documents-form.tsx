@@ -24,10 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileUploadZone } from "./file-upload-zone";
-import { kycDocumentsContent } from "@/content/onboarding";
+import { kycDocumentsContent, kycDocumentGuidance } from "@/content/onboarding";
 import { compressImage } from "@/lib/image-compress";
 import { useUploadKycFile } from "@/hooks/use-upload-kyc-file";
-import { StepIndicator } from "./step-indicator";
+import {
+  KYC_DOCUMENT_TYPE_OPTIONS,
+  requiresBackSide,
+  shouldDropBackSide,
+  type DocumentType,
+} from "@/lib/kyc-document-types";
 import kycDocumentExample from "@/assets/kyc_document.png?format=webp";
 import kycSelfieExample from "@/assets/kyc_selfie.png?format=webp";
 
@@ -36,20 +41,21 @@ const kycExampleImages: Record<"document" | "selfie", string> = {
   selfie: kycSelfieExample,
 };
 
-type OnboardingStep =
-  | "personal-informations"
-  | "profile-type"
-  | "kyc-documents"
-  | "confirmation";
+/** The upload zones this form owns. */
+type KycFileField = "kycDocument" | "kycDocumentBack" | "kycSelfie";
+
+const KYC_FILE_FIELDS: readonly KycFileField[] = [
+  "kycDocument",
+  "kycDocumentBack",
+  "kycSelfie",
+];
 
 type KycDocumentsFormProps = {
-  currentStep: OnboardingStep;
   onBack: () => void;
   onNext: () => void;
 };
 
 export function KycDocumentsForm({
-  currentStep,
   onBack,
   onNext,
 }: Readonly<KycDocumentsFormProps>) {
@@ -57,53 +63,102 @@ export function KycDocumentsForm({
   const setKycData = useOnboardingStore((state) => state.setKycData);
   const uploadKyc = useUploadKycFile();
 
-  const [uploading, setUploading] = useState<{
-    kycDocument: boolean;
-    kycSelfie: boolean;
-  }>({ kycDocument: false, kycSelfie: false });
+  const [uploading, setUploading] = useState<Record<KycFileField, boolean>>({
+    kycDocument: false,
+    kycDocumentBack: false,
+    kycSelfie: false,
+  });
 
   const form = useForm<Step3FormData>({
     resolver: zodResolver(step3Schema),
     defaultValues: {
-      documentType: kycData.documentType || "",
+      // Pre-selected rather than blank. With no type chosen the step rendered
+      // in a state that matches nobody: generic copy that names no document,
+      // and no verso zone -- so picking a type made a whole upload zone appear
+      // and every label rewrite itself under the user. The identity card is
+      // what the overwhelming majority present, so it is the honest default
+      // rather than an arbitrary one.
+      documentType: kycData.documentType || "IDENTITY_CARD",
     },
     mode: "onChange",
   });
 
+  // Destructured so both effects below can depend on the exact values they
+  // read; indexing kycData by a loop variable would force the whole object into
+  // the dependency array, and the preview effect writes back to it.
+  const {
+    kycDocument,
+    kycDocumentBack,
+    kycSelfie,
+    kycDocumentPreview,
+    kycDocumentBackPreview,
+    kycSelfiePreview,
+  } = kycData;
+
+  // defaultValues snapshots the store at first render, but hydrateFromStorage
+  // is async and resolves after it -- so on a reload the form starts on the
+  // default and never learns the restored type. That hid the verso zone, and
+  // made the cleanup effect below delete the verso file the user had already
+  // uploaded.
+  //
+  // Compares values rather than testing for an empty one: now that the field
+  // is pre-selected there is always something in it, so "is it blank" would
+  // never let a restored PASSPORT through. The store is written the moment the
+  // user picks, so the two differing can only mean hydration brought a choice
+  // the form has not caught up with yet.
+  const storedDocumentType = kycData.documentType;
   useEffect(() => {
-    const docValue = form.getValues("kycDocument");
-    const selfieValue = form.getValues("kycSelfie");
-    if (kycData.kycDocument && !docValue) {
-      form.setValue("kycDocument", kycData.kycDocument, {
+    if (
+      storedDocumentType &&
+      storedDocumentType !== form.getValues("documentType")
+    ) {
+      form.setValue("documentType", storedDocumentType, {
         shouldValidate: true,
       });
     }
-    if (kycData.kycSelfie && !selfieValue) {
-      form.setValue("kycSelfie", kycData.kycSelfie, { shouldValidate: true });
-    }
-  }, [kycData.kycDocument, kycData.kycSelfie, form]);
+  }, [storedDocumentType, form]);
 
   useEffect(() => {
-    const updates: Partial<typeof kycData> = {};
-    if (kycData.kycDocument && !kycData.kycDocumentPreview) {
-      updates.kycDocumentPreview = URL.createObjectURL(kycData.kycDocument);
+    const stored: Record<KycFileField, File | null> = {
+      kycDocument,
+      kycDocumentBack,
+      kycSelfie,
+    };
+    for (const field of KYC_FILE_FIELDS) {
+      const file = stored[field];
+      if (file && !form.getValues(field)) {
+        form.setValue(field, file, { shouldValidate: true });
+      }
     }
-    if (kycData.kycSelfie && !kycData.kycSelfiePreview) {
-      updates.kycSelfiePreview = URL.createObjectURL(kycData.kycSelfie);
+  }, [kycDocument, kycDocumentBack, kycSelfie, form]);
+
+  useEffect(() => {
+    const zones: [KycFileField, File | null, string | null][] = [
+      ["kycDocument", kycDocument, kycDocumentPreview],
+      ["kycDocumentBack", kycDocumentBack, kycDocumentBackPreview],
+      ["kycSelfie", kycSelfie, kycSelfiePreview],
+    ];
+    const updates: Partial<typeof kycData> = {};
+    for (const [field, file, preview] of zones) {
+      if (file && !preview) {
+        updates[`${field}Preview`] = URL.createObjectURL(file);
+      }
     }
     if (Object.keys(updates).length > 0) {
       setKycData(updates);
     }
   }, [
-    kycData.kycDocument,
-    kycData.kycSelfie,
-    kycData.kycDocumentPreview,
-    kycData.kycSelfiePreview,
+    kycDocument,
+    kycDocumentBack,
+    kycSelfie,
+    kycDocumentPreview,
+    kycDocumentBackPreview,
+    kycSelfiePreview,
     setKycData,
   ]);
 
   const handleFileSelect = useCallback(
-    async (file: File, fieldName: "kycDocument" | "kycSelfie") => {
+    async (file: File, fieldName: KycFileField) => {
       // Validate the raw file first (type + size check)
       const fieldSchema = step3SchemaBase.shape[fieldName];
       const result = fieldSchema.safeParse(file);
@@ -125,13 +180,17 @@ export function KycDocumentsForm({
         [fieldName]: compressed,
         [`${fieldName}Preview`]: preview,
         [`${fieldName}Url`]: null,
+        [`${fieldName}Key`]: null,
       });
 
       // Upload to storage right away so the final create call carries only URLs.
       setUploading((prev) => ({ ...prev, [fieldName]: true }));
       try {
-        const { url } = await uploadKyc.mutateAsync(compressed);
-        setKycData({ [`${fieldName}Url`]: url });
+        // The key travels with the url: KYC files land in a private bucket
+        // and the url is a signature that dies within the hour, so the key is
+        // what lets the document be read back afterwards.
+        const { url, key } = await uploadKyc.mutateAsync(compressed);
+        setKycData({ [`${fieldName}Url`]: url, [`${fieldName}Key`]: key });
       } catch {
         form.setError(fieldName, {
           message: "Échec de l'envoi du fichier. Veuillez réessayer.",
@@ -143,57 +202,75 @@ export function KycDocumentsForm({
     [form, setKycData, uploadKyc],
   );
 
-  const handleRemoveFile = (fieldName: "kycDocument" | "kycSelfie") => {
-    form.setValue(fieldName, null as unknown as File, { shouldValidate: true });
-    if (kycData[`${fieldName}Preview` as keyof typeof kycData]) {
-      const preview = kycData[
-        `${fieldName}Preview` as keyof typeof kycData
-      ] as string;
+  const handleRemoveFile = useCallback(
+    (fieldName: KycFileField) => {
+      form.setValue(fieldName, null as unknown as File, {
+        shouldValidate: true,
+      });
+      const preview =
+        useOnboardingStore.getState().kycData[`${fieldName}Preview`];
       if (preview?.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
-    }
-    setKycData({
-      [fieldName]: null,
-      [`${fieldName}Preview`]: null,
-      [`${fieldName}Url`]: null,
-    });
-  };
+      setKycData({
+        [fieldName]: null,
+        [`${fieldName}Preview`]: null,
+        [`${fieldName}Url`]: null,
+        [`${fieldName}Key`]: null,
+      });
+    },
+    [form, setKycData],
+  );
 
   const onSubmit = useCallback(
     (data: Step3FormData) => {
       const fullData = {
         ...data,
         kycDocument: kycData.kycDocument,
+        kycDocumentBack: kycData.kycDocumentBack,
         kycSelfie: kycData.kycSelfie,
       };
       setKycData(fullData);
       onNext();
     },
-    [kycData.kycDocument, kycData.kycSelfie, onNext, setKycData],
+    [
+      kycData.kycDocument,
+      kycData.kycDocumentBack,
+      kycData.kycSelfie,
+      onNext,
+      setKycData,
+    ],
   );
 
+  const documentType = form.watch("documentType");
+  const needsBackSide = requiresBackSide(documentType);
+
+  // Switching to a type with no back (i.e. PASSPORT) must drop anything already
+  // uploaded to the verso zone. Left in place it would be an invisible file the
+  // user cannot remove -- the zone is gone -- and the submit guard would keep
+  // blocking on a field nobody can see.
+  //
+  // Gated on a type actually being chosen. "Not chosen yet" also reports as
+  // needing no back, so without this the effect deleted a perfectly good verso
+  // during the gap between first render and hydration finishing.
+  useEffect(() => {
+    if (shouldDropBackSide(documentType, !!kycDocumentBack)) {
+      handleRemoveFile("kycDocumentBack");
+    }
+  }, [documentType, kycDocumentBack, handleRemoveFile]);
+
   const kycDocumentError = form.formState.errors.kycDocument?.message;
+  const kycDocumentBackError = form.formState.errors.kycDocumentBack?.message;
   const kycSelfieError = form.formState.errors.kycSelfie?.message;
   const content = kycDocumentsContent;
-  const documentTypeOptions = [
-    {
-      value: "IDENTITY_CARD",
-      label: content.documentType.options.identityCard,
-    },
-    { value: "PASSPORT", label: content.documentType.options.passport },
-    {
-      value: "DRIVER_LICENSE",
-      label: content.documentType.options.driverLicense,
-    },
-    {
-      value: "BIRTH_CERTIFICATE",
-      label: content.documentType.options.birthCertificate,
-    },
-    { value: "STUDENT_CARD", label: content.documentType.options.studentCard },
-    { value: "NIU_CARD", label: content.documentType.options.niuCard },
-    { value: "OTHER", label: content.documentType.options.other },
-  ] as const;
+
+  // Copy for the document actually chosen -- "photographiez le verso de votre
+  // carte NIU" beats "de votre pièce d'identité". Falls back to the generic
+  // wording until a type is picked, since the zones render before that.
+  const guidance = documentType ? kycDocumentGuidance[documentType] : undefined;
+  const frontCopy = guidance?.front ?? content.documents.kycDocument;
+  const backCopy = guidance?.back ?? content.documents.kycDocumentBack;
+  const selfieCopy = guidance?.selfie ?? content.documents.kycSelfie;
 
   return (
     <div className="space-y-6">
@@ -202,7 +279,6 @@ export function KycDocumentsForm({
           <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
           <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
         </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
 
       <Form {...form}>
@@ -213,7 +289,16 @@ export function KycDocumentsForm({
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.documentType.label}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Persist on pick, not on submit: a reload mid-step used to
+                    // drop the choice back to the default, and the restore
+                    // effect above has nothing to restore from otherwise.
+                    setKycData({ documentType: value as DocumentType });
+                  }}
+                  value={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue
@@ -222,7 +307,7 @@ export function KycDocumentsForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {documentTypeOptions.map((option) => (
+                    {KYC_DOCUMENT_TYPE_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label.toLocaleUpperCase("fr-FR")}
                       </SelectItem>
@@ -246,8 +331,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycDocument")}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
-                  label={content.documents.kycDocument.label}
-                  description={content.documents.kycDocument.description}
+                  label={frontCopy.label}
+                  description={frontCopy.description}
                   helperText={content.documents.kycDocument.helperText}
                   error={kycDocumentError}
                   type="document"
@@ -263,6 +348,41 @@ export function KycDocumentsForm({
             )}
           />
 
+          {needsBackSide && (
+            <FormField
+              control={form.control}
+              name="kycDocumentBack"
+              render={() => (
+                <FormItem className="flex flex-col gap-1">
+                  <FileUploadZone
+                    onFileSelect={(file) =>
+                      handleFileSelect(file, "kycDocumentBack")
+                    }
+                    preview={kycData.kycDocumentBackPreview}
+                    fileName={kycData.kycDocumentBack?.name || null}
+                    onRemove={() => handleRemoveFile("kycDocumentBack")}
+                    accept="image/*"
+                    maxSize={5 * 1024 * 1024}
+                    label={backCopy.label}
+                    description={backCopy.description}
+                    helperText={content.documents.kycDocumentBack.helperText}
+                    error={kycDocumentBackError}
+                    type="document"
+                    uploading={uploading.kycDocumentBack}
+                    infoTooltip={content.documents.kycDocumentBack.infoTooltip}
+                    infoImage={
+                      kycExampleImages[
+                        content.documents.kycDocumentBack.infoImageKey
+                      ]
+                    }
+                    infoImageAlt={content.documents.kycDocumentBack.infoImageAlt}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <FormField
             control={form.control}
             name="kycSelfie"
@@ -275,8 +395,8 @@ export function KycDocumentsForm({
                   onRemove={() => handleRemoveFile("kycSelfie")}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
-                  label={content.documents.kycSelfie.label}
-                  description={content.documents.kycSelfie.description}
+                  label={selfieCopy.label}
+                  description={selfieCopy.description}
                   helperText={content.documents.kycSelfie.helperText}
                   error={kycSelfieError}
                   type="selfie"
@@ -306,9 +426,11 @@ export function KycDocumentsForm({
               disabled={
                 !form.formState.isValid ||
                 uploading.kycDocument ||
+                uploading.kycDocumentBack ||
                 uploading.kycSelfie ||
                 !kycData.kycDocumentUrl ||
-                !kycData.kycSelfieUrl
+                !kycData.kycSelfieUrl ||
+                (needsBackSide && !kycData.kycDocumentBackUrl)
               }
               className="w-full"
             >

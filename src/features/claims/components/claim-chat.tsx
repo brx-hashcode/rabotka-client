@@ -7,10 +7,20 @@ import {
   Trash2,
   ArrowLeft,
   Info,
-  Download,
+  ImagePlus,
   MessageCircle,
   X,
 } from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
 import { cn, formatDateTime } from "@/lib/utils";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import {
@@ -20,6 +30,16 @@ import {
 } from "@/hooks/use-claim-comments";
 import { useClaimCommentsSocket } from "@/hooks/use-claim-comments-socket";
 import type { ClaimItem, ClaimCommentItem } from "@/lib/api/claims-controller";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { useUploadClaimFiles } from "@/hooks/use-upload-claim-files";
+import { compressImage } from "@/lib/image-compress";
+import {
+  IMAGE_ACCEPT,
+  MAX_CLAIM_ATTACHMENTS,
+  MAX_IMAGE_BYTES,
+} from "@/lib/image-upload";
+import { AttachmentThumb } from "./attachment-thumb";
+import { AttachmentViewer } from "./attachment-viewer";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   CREATED: { label: "Créée", className: "bg-yellow-100 text-yellow-800" },
@@ -54,6 +74,8 @@ type CommentItemProps = Readonly<{
   currentUserId?: string;
   onDelete: (commentId: string) => void;
   isDeletingComment: boolean;
+  /** Lifted to the thread so one viewer serves every bubble. */
+  onOpenAttachment: (url: string) => void;
 }>;
 
 function getCommentAuthorName(
@@ -71,9 +93,15 @@ function CommentBubble({
   currentUserId,
   onDelete,
   isDeletingComment,
+  onOpenAttachment,
 }: CommentItemProps) {
   const mine =
     comment.createdByType === "profile" && comment.profileId === currentUserId;
+
+  // `?? []` is load-bearing: a bundle newer than the backend it talks to gets
+  // comments with no such field, and `.map` on undefined blanks the thread.
+  const attachments = comment.attachmentUrls ?? [];
+  const hasText = comment.content.trim().length > 0;
 
   return (
     <div
@@ -86,19 +114,59 @@ function CommentBubble({
         className={cn(
           // WhatsApp bubbles: tight radius with a squared-off corner on the
           // sender's side, pale green outgoing / white incoming, dark text on both.
-          "max-w-[80%] rounded-xl px-2.5 py-1.5 text-sm text-foreground",
+          "max-w-[80%] rounded-xl text-sm text-foreground",
+          // Tighter padding around a bare photo, the way WhatsApp does it —
+          // a full text bubble's inset around an image reads as a gap.
+          hasText ? "px-2.5 py-1.5" : "p-1",
           mine ? "rounded-br-sm bg-whatsapp-light" : "rounded-bl-sm bg-card",
         )}
       >
         {!mine && (
-          <p className="mb-0.5 text-[11px] font-semibold text-whatsapp">
+          <p
+            className={cn(
+              "text-[11px] font-semibold text-whatsapp",
+              hasText ? "mb-0.5" : "mb-1 px-1.5 pt-1",
+            )}
+          >
             {getCommentAuthorName(comment, mine)}
           </p>
         )}
-        <p className="whitespace-pre-wrap break-words leading-relaxed">
-          {comment.content}
-        </p>
-        <p className="mt-0.5 text-right text-[10px] leading-none text-muted-foreground">
+
+        {attachments.length > 0 && (
+          <div
+            className={cn(
+              "grid gap-1",
+              attachments.length === 1 ? "grid-cols-1" : "grid-cols-2",
+              hasText && "mb-1.5",
+            )}
+          >
+            {attachments.map((url, idx) => (
+              <AttachmentThumb
+                key={`${url}-${idx}`}
+                url={url}
+                index={idx}
+                onOpen={onOpenAttachment}
+                className={
+                  attachments.length === 1
+                    ? "aspect-auto max-h-52 w-full"
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+        )}
+
+        {hasText && (
+          <p className="whitespace-pre-wrap break-words leading-relaxed">
+            {comment.content}
+          </p>
+        )}
+        <p
+          className={cn(
+            "text-right text-[10px] leading-none text-muted-foreground",
+            hasText ? "mt-0.5" : "px-1 pb-0.5 pt-1",
+          )}
+        >
           {formatDateTime(comment.createdAt)}
         </p>
       </div>
@@ -117,80 +185,82 @@ function CommentBubble({
   );
 }
 
+/**
+ * Claim metadata, as a bottom sheet.
+ *
+ * A drawer rather than a centred modal so it matches every other sheet in the
+ * app (support, apply, cancel) and stays thumb-reachable — this opens from the
+ * header of a full-height chat, where a centred card floats over nothing.
+ */
 function ClaimInfoPanel({
   claim,
-  onClose,
-}: Readonly<{ claim: ClaimItem; onClose: () => void }>) {
+  open,
+  onOpenChange,
+}: Readonly<{
+  claim: ClaimItem;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}>) {
   return (
-    <button
-      type="button"
-      className="absolute inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
-      onClick={onClose}
-      aria-label="Fermer"
-    >
-      <div
-        className="max-h-[82%] w-full overflow-y-auto rounded-t-2xl bg-card text-left sm:max-w-md sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-5 py-4">
-          <h3 className="font-semibold text-foreground">
-            Détails de la réclamation
-          </h3>
-          <div className="flex items-center gap-2">
-            <StatusBadge status={claim.status} />
-            <span className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted">
-              <X className="h-4 w-4" />
-            </span>
-          </div>
-        </div>
-        <div className="space-y-4 px-5 pb-6">
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Titre
-            </p>
-            <p className="text-sm font-medium text-foreground">{claim.title}</p>
-          </div>
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Description
-            </p>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-              {claim.description}
-            </p>
-          </div>
-          {claim.attachmentUrls.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Pièces jointes ({claim.attachmentUrls.length})
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {claim.attachmentUrls.map((url, idx) => (
-                  <a
-                    key={`${url}-${idx}`}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
-                  >
-                    <img
-                      src={url}
-                      alt={`Pièce jointe ${idx + 1}`}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-                      <Download className="h-5 w-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
-                  </a>
-                ))}
-              </div>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+          <DrawerHeader className="text-left">
+            <div className="flex items-start justify-between gap-3">
+              <DrawerTitle>Détails de la réclamation</DrawerTitle>
+              <StatusBadge status={claim.status} />
             </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            Créée le {formatDateTime(claim.createdAt)}
-          </p>
+            <DrawerDescription>
+              Créée le {formatDateTime(claim.createdAt)}
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-2">
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Titre
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {claim.title}
+              </p>
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Description
+              </p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                {claim.description}
+              </p>
+            </div>
+            {claim.attachmentUrls.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Pièces jointes ({claim.attachmentUrls.length})
+                </p>
+                {/* Claims accepted PDF and DOC until recently, so these rows
+                    are not all images — AttachmentThumb says so instead of
+                    painting a broken picture. */}
+                <div className="grid grid-cols-3 gap-2">
+                  {claim.attachmentUrls.map((url, idx) => (
+                    <AttachmentThumb
+                      key={`${url}-${idx}`}
+                      url={url}
+                      index={idx}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Fermer</Button>
+            </DrawerClose>
+          </DrawerFooter>
         </div>
-      </div>
-    </button>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -209,8 +279,23 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
 
   const [message, setMessage] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { mutateAsync: uploadClaimFiles, isPending: isUploading } =
+    useUploadClaimFiles();
+
+  const [
+    { files, errors: fileErrors },
+    { removeFile, openFileDialog, getInputProps, clearFiles },
+  ] = useFileUpload({
+    maxFiles: MAX_CLAIM_ATTACHMENTS,
+    multiple: true,
+    accept: IMAGE_ACCEPT,
+    maxSize: MAX_IMAGE_BYTES,
+  });
 
   const isClaimClosed = useMemo(
     () => claim.status === "COMPLETED" || claim.status === "REJECTED",
@@ -235,11 +320,44 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
     el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
   }, [message]);
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const isSending = isAddingComment || isUploading || isPreparing;
+  // Either half is enough: a photo with no caption is the ordinary thing to
+  // send in a thread, and the server accepts one.
+  const canSend = message.trim().length > 0 || files.length > 0;
+
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const content = message.trim();
-    if (!content) return;
-    addComment({ content }, { onSuccess: () => setMessage("") });
+    if (!canSend || isSending) return;
+
+    let attachment_urls: string[] | undefined;
+    if (files.length > 0) {
+      setIsPreparing(true);
+      try {
+        // Compressed first, as the KYC step does: a phone photo is routinely
+        // past the 5 MB limit, and 1920px keeps it legible.
+        const compressed = await Promise.all(
+          files.map((f) => compressImage(f.file)),
+        );
+        attachment_urls = await uploadClaimFiles(compressed);
+      } catch {
+        // The mutation already raised a toast; leave the draft and the picked
+        // files alone so the user can retry rather than retype and re-pick.
+        return;
+      } finally {
+        setIsPreparing(false);
+      }
+    }
+
+    addComment(
+      { content: content || undefined, attachment_urls },
+      {
+        onSuccess: () => {
+          setMessage("");
+          clearFiles();
+        },
+      },
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -314,6 +432,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
               currentUserId={currentUser?.id}
               onDelete={deleteComment}
               isDeletingComment={isDeletingComment || isClaimClosed}
+              onOpenAttachment={setViewerUrl}
             />
           ))}
       </div>
@@ -337,7 +456,57 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         onSubmit={handleSubmit}
         className="shrink-0 bg-background px-3 py-2.5"
       >
+        <input {...getInputProps()} className="sr-only" />
+
+        {/* Picked-but-unsent photos, above the input the way a phone keyboard
+            shows them. Scrolls sideways so three thumbnails never push the
+            text field off a small screen. */}
+        {files.length > 0 && (
+          <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+            {files.map((f) => (
+              <div
+                key={f.id}
+                className="relative size-14 shrink-0 overflow-hidden rounded-md bg-muted"
+              >
+                <img
+                  src={f.preview}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeFile(f.id)}
+                  disabled={isSending}
+                  aria-label={`Retirer ${f.file.name}`}
+                  className="absolute right-0.5 top-0.5 rounded-full bg-destructive/90 p-0.5 text-white disabled:opacity-40"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {fileErrors.map((message) => (
+          <p key={message} className="mb-1.5 text-xs text-destructive">
+            {message}
+          </p>
+        ))}
+
         <div className="flex items-end gap-2">
+          <button
+            type="button"
+            onClick={openFileDialog}
+            disabled={
+              isClaimClosed ||
+              isSending ||
+              files.length >= MAX_CLAIM_ATTACHMENTS
+            }
+            className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-40"
+            aria-label="Joindre une image"
+          >
+            <ImagePlus className="h-5 w-5" />
+          </button>
           <textarea
             ref={textareaRef}
             placeholder={
@@ -348,13 +517,13 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isClaimClosed || isAddingComment}
+            disabled={isClaimClosed || isSending}
             rows={1}
             className="max-h-[140px] flex-1 resize-none rounded-2xl bg-card px-4 py-2.5 text-sm leading-snug placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-whatsapp/40 disabled:opacity-60"
           />
           <button
             type="submit"
-            disabled={isClaimClosed || isAddingComment || !message.trim()}
+            disabled={isClaimClosed || isSending || !canSend}
             className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white transition-colors hover:bg-whatsapp-dark disabled:opacity-40"
             aria-label="Envoyer"
           >
@@ -363,9 +532,18 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         </div>
       </form>
 
-      {showInfo && (
-        <ClaimInfoPanel claim={claim} onClose={() => setShowInfo(false)} />
-      )}
+      <ClaimInfoPanel
+        claim={claim}
+        open={showInfo}
+        onOpenChange={setShowInfo}
+      />
+
+      {/* One instance for the whole thread, mounted outside the message list
+          so re-rendering a bubble cannot close it. */}
+      <AttachmentViewer
+        url={viewerUrl}
+        onOpenChange={(open) => !open && setViewerUrl(null)}
+      />
     </div>
   );
 };

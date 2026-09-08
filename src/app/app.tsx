@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router";
 import { Providers } from "./providers";
 import { AppRoutes } from "./routes";
-import { AdPopup } from "@/features/ads/ad-popup";
 import {
   ErrorBoundary,
   clearChunkReloadGuard,
 } from "@/components/common/error-boundary";
+import { usePageTracking } from "@/lib/analytics/use-page-tracking";
+import { useReferralCapture } from "@/hooks/use-referral-capture";
 
 /** How long the app must run cleanly before the reload guard is released. */
 const GUARD_RESET_DELAY_MS = 10_000;
@@ -29,6 +30,26 @@ function ChunkGuardReset() {
   return null;
 }
 
+/**
+ * Reports each route change to Analytics. Renders nothing, and does nothing at
+ * all when `VITE_GA_MEASUREMENT_ID` is unset. Must sit inside `BrowserRouter`.
+ */
+function AnalyticsTracker() {
+  usePageTracking();
+  return null;
+}
+
+/**
+ * Stores a `?ref=` parrainage code so it survives the walk from the landing
+ * page to the confirmation screen. Renders nothing. Must sit inside
+ * `BrowserRouter`, and must be here rather than on the signup page — the link
+ * lands on the landing page, not on `/onboarding`.
+ */
+function ReferralCapture() {
+  useReferralCapture();
+  return null;
+}
+
 /*
  * The boundary sits inside Providers and around the router: a failed lazy
  * chunk (every route is lazy, and a deploy renames them) would otherwise
@@ -39,9 +60,9 @@ const App = () => (
     <ErrorBoundary>
       <BrowserRouter>
         <ChunkGuardReset />
+        <AnalyticsTracker />
+        <ReferralCapture />
         <AppRoutes />
-        {/* Rides along on every route — it picks its own moments to appear. */}
-        <AdPopup />
       </BrowserRouter>
     </ErrorBoundary>
   </Providers>

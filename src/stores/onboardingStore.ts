@@ -5,14 +5,25 @@ import {
   clearKycFile,
   clearKycFiles,
 } from "@/lib/kyc-file-storage";
+import type { DocumentType } from "@/lib/kyc-document-types";
+import {
+  clearReferralAttribution,
+  readReferralAttribution,
+  type ReferralSource,
+} from "@/lib/referral-attribution";
 
-export type DocumentType = "IDENTITY_CARD" | "PASSPORT" | "DRIVER_LICENSE" | "BIRTH_CERTIFICATE" | "STUDENT_CARD" | "NIU_CARD" | "OTHER";
+export type { DocumentType };
 
 export type PersonalInfo = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  /** Optional second number. Empty string when the person gave only one. */
+  directPhone: string;
+  countryCode: string;
+  countryName: string;
+  city: string;
   address: string;
   description: string;
 };
@@ -25,19 +36,39 @@ export type KycData = {
   kycDocument: File | null;
   kycDocumentPreview: string | null;
   kycDocumentUrl: string | null;
+  // The storage key that goes with the url above. KYC files sit in a private
+  // bucket now and are read back through signed urls; signing needs the key,
+  // so it has to survive all the way to profile creation.
+  kycDocumentKey: string | null;
+  // Back of the document. Stays null for a PASSPORT, which has no back to
+  // photograph — see requiresBackSide in @/lib/kyc-document-types.
+  kycDocumentBack: File | null;
+  kycDocumentBackPreview: string | null;
+  kycDocumentBackUrl: string | null;
+  kycDocumentBackKey: string | null;
   kycSelfie: File | null;
   kycSelfiePreview: string | null;
   kycSelfieUrl: string | null;
+  kycSelfieKey: string | null;
 };
 
 type OnboardingStore = {
   personalInfo: PersonalInfo;
   kycData: KycData;
+  /**
+   * Parrainage code, entered on the confirmation screen or carried in from a
+   * `?ref=` link. Top-level rather than inside `personalInfo`, because it is not
+   * information about this person — it names a different profile, and the step-1
+   * form and its zod schema have no business validating it.
+   */
+  referralCode: string;
+  referralSource: ReferralSource;
   isSubmitting: boolean;
   error: string | null;
 
   setPersonalInfo: (data: Partial<PersonalInfo>) => void;
   setKycData: (data: Partial<KycData>) => void;
+  setReferral: (code: string, source: ReferralSource) => void;
   setIsSubmitting: (value: boolean) => void;
   setError: (error: string | null) => void;
   resetStore: () => void;
@@ -53,6 +84,10 @@ const initialState = {
     lastName: "",
     email: "",
     phone: "",
+    directPhone: "",
+    countryCode: "",
+    countryName: "",
+    city: "",
     address: "",
     description: "",
   },
@@ -64,10 +99,18 @@ const initialState = {
     kycDocument: null,
     kycDocumentPreview: null,
     kycDocumentUrl: null,
+    kycDocumentKey: null,
+    kycDocumentBack: null,
+    kycDocumentBackPreview: null,
+    kycDocumentBackUrl: null,
+    kycDocumentBackKey: null,
     kycSelfie: null,
     kycSelfiePreview: null,
     kycSelfieUrl: null,
+    kycSelfieKey: null,
   },
+  referralCode: "",
+  referralSource: "MANUAL_CODE" as ReferralSource,
   isSubmitting: false,
   error: null,
 };
@@ -90,20 +133,20 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
 
     if (typeof globalThis === "undefined") return;
 
-    if (data.kycDocument !== undefined) {
-      if (data.kycDocument) {
-        saveKycFile("kycDocument", data.kycDocument).catch(console.error);
+    for (const key of ["kycDocument", "kycDocumentBack", "kycSelfie"] as const) {
+      const file = data[key];
+      if (file === undefined) continue;
+      if (file) {
+        saveKycFile(key, file).catch(console.error);
       } else {
-        clearKycFile("kycDocument").catch(console.error);
+        clearKycFile(key).catch(console.error);
       }
     }
-    if (data.kycSelfie !== undefined) {
-      if (data.kycSelfie) {
-        saveKycFile("kycSelfie", data.kycSelfie).catch(console.error);
-      } else {
-        clearKycFile("kycSelfie").catch(console.error);
-      }
-    }
+  },
+
+  setReferral: (code, source) => {
+    set({ referralCode: code, referralSource: source });
+    get().saveToStorage();
   },
 
   setIsSubmitting: (value) => set({ isSubmitting: value }),
@@ -115,6 +158,10 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     if (typeof globalThis !== "undefined") {
       clearKycFiles().catch(console.error);
       sessionStorage.removeItem(STORAGE_KEY);
+      // Also drop the captured `?ref=` attribution. Signup is the one moment we
+      // know it has been used, and phones get shared here — leaving it would
+      // credit the next person's parrainage to the previous person's parrain.
+      clearReferralAttribution();
     }
   },
 
@@ -126,6 +173,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       if (stored) {
         const data = JSON.parse(stored);
         set({
+          referralCode: data.referralCode || "",
+          referralSource: data.referralSource || "MANUAL_CODE",
           personalInfo: data.personalInfo || initialState.personalInfo,
           kycData: {
             ...initialState.kycData,
@@ -134,13 +183,31 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             categoryNames: data.kycData?.categoryNames || [],
             documentType: data.kycData?.documentType || "",
             kycDocumentUrl: data.kycData?.kycDocumentUrl || null,
+            kycDocumentKey: data.kycData?.kycDocumentKey || null,
+            kycDocumentBackUrl: data.kycData?.kycDocumentBackUrl || null,
+            kycDocumentBackKey: data.kycData?.kycDocumentBackKey || null,
             kycSelfieUrl: data.kycData?.kycSelfieUrl || null,
+            kycSelfieKey: data.kycData?.kycSelfieKey || null,
           },
         });
       }
 
+      // A `?ref=` code captured on the landing page has not been typed into the
+      // store yet, so seed it here. Only when the store has none: a code the
+      // user typed by hand on the confirmation screen is their correction of
+      // the link's, and must win over it.
+      if (!get().referralCode) {
+        const attribution = readReferralAttribution();
+        if (attribution) {
+          set({
+            referralCode: attribution.code,
+            referralSource: attribution.source,
+          });
+        }
+      }
+
       const files = await loadKycFiles();
-      if (files.kycDocument || files.kycSelfie) {
+      if (files.kycDocument || files.kycDocumentBack || files.kycSelfie) {
         set((state) => ({
           kycData: {
             ...state.kycData,
@@ -148,6 +215,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
             kycDocumentPreview: files.kycDocument
               ? URL.createObjectURL(files.kycDocument)
               : state.kycData.kycDocumentPreview,
+            kycDocumentBack:
+              files.kycDocumentBack ?? state.kycData.kycDocumentBack,
+            kycDocumentBackPreview: files.kycDocumentBack
+              ? URL.createObjectURL(files.kycDocumentBack)
+              : state.kycData.kycDocumentBackPreview,
             kycSelfie: files.kycSelfie ?? state.kycData.kycSelfie,
             kycSelfiePreview: files.kycSelfie
               ? URL.createObjectURL(files.kycSelfie)
@@ -164,18 +236,26 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     if (typeof globalThis === "undefined") return;
 
     try {
-      const { personalInfo, kycData } = get();
+      const { personalInfo, kycData, referralCode, referralSource } = get();
       const dataToStore = {
         personalInfo,
+        referralCode,
+        referralSource,
         kycData: {
           profileType: kycData.profileType,
           categoryIds: kycData.categoryIds,
           categoryNames: kycData.categoryNames,
           documentType: kycData.documentType,
-          // Storage URLs are permanent — persist them so the uploaded files
-          // survive a reload without re-uploading.
+          // Persisted so the uploaded files survive a reload without being
+          // re-uploaded. The KEYS are the durable half: KYC urls are signed and
+          // expire within the hour, so a reload after that leaves a url that no
+          // longer resolves — the key is what still identifies the object.
           kycDocumentUrl: kycData.kycDocumentUrl,
+          kycDocumentKey: kycData.kycDocumentKey,
+          kycDocumentBackUrl: kycData.kycDocumentBackUrl,
+          kycDocumentBackKey: kycData.kycDocumentBackKey,
           kycSelfieUrl: kycData.kycSelfieUrl,
+          kycSelfieKey: kycData.kycSelfieKey,
           // Blob previews are session-scoped and invalid after reload — omit them
           // so hydrateFromStorage regenerates fresh previews from IndexedDB.
         },

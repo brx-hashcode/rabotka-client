@@ -4,7 +4,8 @@ import heroImage from "@/assets/hero-image-1.avif?format=webp";
 import heroImageAvif from "@/assets/hero-image-1.avif";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 import { heroContent } from "@/content/landing/hero";
-import { config, whatsappLink } from "@/config";
+import { config } from "@/config";
+import { trackWhatsAppClick } from "@/lib/analytics/events";
 
 const flowGuides = [
   { label: "Guide travailleurs", href: "#flow-travailleurs" },
@@ -49,16 +50,10 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="space-y-4"
             >
-              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-whatsapp-light text-whatsapp-dark text-sm font-medium">
-                <badge.icon className="w-4 h-4" />
-                {badge.text}
-              </span> */}
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold text-foreground leading-tight text-balance mb-6">
                 {title.main}{" "}
-                <span className="bg-linear-to-b from-whatsapp to-whatsapp-dark bg-clip-text text-transparent drop-shadow-[0_2px_10px_hsl(var(--whatsapp)/0.35)]">
-                  {title.highlight}
-                </span>
+                <span className="text-whatsapp-dark">{title.highlight}</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
@@ -69,7 +64,8 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="lg" asChild>
                 <a
-                  href={whatsappLink(config.whatsapp.messages.worker)}
+                  href={config.whatsapp.links.worker}
+                  onClick={() => trackWhatsAppClick("worker", "hero")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -78,7 +74,8 @@ export function HeroSection() {
               </Button>
               <Button variant="hero-outline" size="lg" asChild>
                 <a
-                  href={whatsappLink(config.whatsapp.messages.employer)}
+                  href={config.whatsapp.links.employer}
+                  onClick={() => trackWhatsAppClick("employer", "hero")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -87,9 +84,6 @@ export function HeroSection() {
               </Button>
             </div>
 
-            {/* Visually hidden: "Comment ça marche" in the header already
-                links here. Kept in the DOM so search engines still see the
-                internal deep-links to each flow (#flow-travailleurs / #flow-recruteurs). */}
             <div className="sr-only">
               {flowGuides.map((guide) => (
                 <a

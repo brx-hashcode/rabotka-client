@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
+import { PaymentReceipt } from "@/features/payments";
+import type { PaymentGateway } from "@/lib/api/payment-controller";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
 import { getQueryClient } from "@/app/providers";
@@ -40,6 +42,7 @@ export default function Pay() {
   );
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
+  const [paidAt, setPaidAt] = useState<Date | null>(null);
 
   usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
     if (status === "APPROVED") {
@@ -49,9 +52,21 @@ export default function Pay() {
       // the payment was still unpaid. Without this the user returns to a screen
       // still reading "Paiement requis" with a stale wallet balance, and in the
       // WhatsApp webview (no focus/reconnect refetch) it stays that way until a
-      // manual reload. Blanket invalidation: money moved, and this is a leaf
-      // screen with nothing expensive mounted.
-      getQueryClient().invalidateQueries();
+      // manual reload.
+      //
+      // Everything EXCEPT this payment: `GET /pay/:token` throws once the
+      // request settles, so refetching it here replaced the success screen with
+      // "Lien invalide ou expiré" — the invalidation meant to support this
+      // screen was destroying it. We already hold the last-good payment, and
+      // the token is spent, so there is nothing left to refetch.
+      getQueryClient().invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== "payment",
+      });
+      // Stamped here rather than rendered from `new Date()` in the success
+      // branch: that re-evaluates on every render, so the receipt's time would
+      // drift forward while the screen sat open. The API returns no paidAt, so
+      // this is "when approval reached us", which is the honest claim.
+      setPaidAt(new Date());
       setLocalStatus("approved");
     } else if (status === "TIMEOUT") setLocalStatus("timeout");
     else setLocalStatus("rejected");
@@ -77,6 +92,96 @@ export default function Pay() {
       },
     );
   };
+
+  // Before the loading and error branches, deliberately. The socket is the
+  // authority on this: once it says APPROVED, the money has moved and the token
+  // is spent — so `GET /pay/:token` failing from here on is the expected
+  // outcome, not a reason to tell someone who just paid that their link is
+  // invalid. Nothing below may override it.
+  if (localStatus === "approved") {
+    return (
+      <PageWrapper>
+        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+              <Check className="h-9 w-9 text-white" strokeWidth={3} />
+            </div>
+          </div>
+
+          <h1 className="mt-6 text-2xl font-bold text-foreground">
+            Paiement effectué !
+          </h1>
+          {/* The amount belongs in the confirmation line, not only in the
+              receipt below: it is the one fact someone checks before they stop
+              reading. Optional chaining because this branch now runs even when
+              the payment query is in an error state — the socket is the
+              authority, and the confirmation does not depend on `data`. */}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {typeof payment?.amount === "number"
+              ? `Vous avez payé ${payment.amount.toLocaleString("fr-FR")} FCFA.`
+              : "Votre paiement a bien été confirmé."}
+          </p>
+
+          {payment && (
+            <div className="mt-6 w-full">
+              <PaymentReceipt
+                rows={[
+                  {
+                    label: "Référence",
+                    value: payment.id.slice(0, 8).toUpperCase(),
+                  },
+                  ...(paidAt
+                    ? [
+                        {
+                          label: "Date",
+                          value: paidAt.toLocaleString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Moyen",
+                    value: methodLabel(payment.gateway, operator),
+                  },
+                  ...(typeof payment.amount === "number"
+                    ? [
+                        {
+                          label: "Montant",
+                          value: `${payment.amount.toLocaleString("fr-FR")} FCFA`,
+                          emphasis: true,
+                        },
+                      ]
+                    : []),
+                  ...(payment.description
+                    ? [{ label: "Objet", value: payment.description }]
+                    : []),
+                  { label: "Statut", value: "Confirmé", tone: "success" as const },
+                ]}
+              />
+            </div>
+          )}
+
+          {/*
+            Always offer a way onward. A payment opened from a WhatsApp link
+            carries no `return`, and this screen has no header and no tab bar —
+            so the old "vous pouvez fermer cette page" left the user stranded on
+            a success page with nowhere to go.
+          */}
+          <Button
+            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+            onClick={() => navigate(returnTo ?? "/home")}
+          >
+            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
+          </Button>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -112,56 +217,6 @@ export default function Pay() {
           */}
           <Button
             className="mt-2 bg-whatsapp text-white hover:bg-whatsapp-dark"
-            onClick={() => navigate(returnTo ?? "/home")}
-          >
-            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
-          </Button>
-        </div>
-      </PageWrapper>
-    );
-  }
-
-  if (localStatus === "approved") {
-    return (
-      <PageWrapper>
-        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
-              <Check className="h-9 w-9 text-white" strokeWidth={3} />
-            </div>
-          </div>
-
-          <h1 className="mt-6 text-2xl font-bold text-foreground">
-            Paiement effectué !
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Votre paiement a bien été confirmé.
-          </p>
-
-          {typeof payment.amount === "number" && (
-            <div className="mt-6 w-full rounded-xl bg-card px-5 py-4 shadow-soft">
-              <p className="text-3xl font-bold text-foreground">
-                {payment.amount.toLocaleString("fr-FR")}
-                <span className="ml-2 text-base font-medium text-muted-foreground">
-                  FCFA
-                </span>
-              </p>
-              {payment.description && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {payment.description}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/*
-            Always offer a way onward. A payment opened from a WhatsApp link
-            carries no `return`, and this screen has no header and no tab bar —
-            so the old "vous pouvez fermer cette page" left the user stranded on
-            a success page with nowhere to go.
-          */}
-          <Button
-            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
             onClick={() => navigate(returnTo ?? "/home")}
           >
             {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
@@ -242,7 +297,7 @@ export default function Pay() {
   const isMtnMomo = payment.gateway === "MTN_MOMO";
 
   return (
-    <PageWrapper>
+    <PageWrapper align="top">
       <div className="w-full max-w-sm space-y-5">
         <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
 
@@ -256,25 +311,28 @@ export default function Pay() {
           </p>
         </div>
 
-        <div className="bg-card shadow-soft rounded-xl px-5 py-4 space-y-3">
+        {/* The one number on the screen that matters, so it gets a label and
+            the largest type rather than sitting unannounced under a long
+            description. The purpose moves below it: useful for confirming you
+            are on the right payment, but not the thing you read first. */}
+        <div className="rounded-xl bg-card px-5 py-4 shadow-soft">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Montant à payer
+          </p>
+          <p className="mt-1 text-4xl font-bold leading-none text-foreground">
+            {/* `!== null` was not enough: a response missing `amount`
+                entirely slipped through as undefined and took the whole
+                payment page down with it. */}
+            {typeof amount === "number" ? amount.toLocaleString("fr-FR") : "—"}
+            <span className="ml-1.5 text-base font-medium text-muted-foreground">
+              FCFA
+            </span>
+          </p>
           {description && (
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full">
-              <span>{description}</span>
-            </div>
-          )}
-          <div>
-            <p className="text-3xl font-bold text-foreground">
-              {/* `!== null` was not enough: a response missing `amount`
-                  entirely slipped through as undefined and took the whole
-                  payment page down with it. */}
-              {typeof amount === "number"
-                ? amount.toLocaleString("fr-FR")
-                : "—"}
-              <span className="text-base font-medium text-muted-foreground ml-2">
-                FCFA
-              </span>
+            <p className="mt-2.5 text-xs leading-snug text-muted-foreground">
+              {description}
             </p>
-          </div>
+          )}
         </div>
 
         {!isMtnMomo && (
@@ -285,7 +343,13 @@ export default function Pay() {
             >
               Opérateur mobile
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            {/* A real radiogroup: these are one exclusive choice, and without
+                the role a screen reader announced two unrelated buttons. */}
+            <div
+              role="radiogroup"
+              aria-label="Opérateur mobile"
+              className="grid grid-cols-2 gap-2.5"
+            >
               <OperatorCard
                 label="MTN Mobile Money"
                 selected={operator === "CG_MTNMOBILEMONEY"}
@@ -303,15 +367,23 @@ export default function Pay() {
         )}
 
         {isMtnMomo && (
-          <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+          // Not a warning. This states which operator will be charged when
+          // there is no choice to make, so it gets the same card treatment as
+          // the tiles above rather than a bordered yellow alert box.
+          <div className="flex items-center gap-3 rounded-xl bg-card px-4 py-3 shadow-soft">
             <img
               src={mtnLogo}
-              alt="MTN"
-              className="h-8 w-8 rounded-full object-cover shrink-0"
+              alt=""
+              className="h-9 w-9 shrink-0 rounded-full object-cover"
             />
-            <p className="text-sm font-medium text-foreground">
-              MTN Mobile Money
-            </p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                MTN Mobile Money
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Confirmation sur votre téléphone
+              </p>
+            </div>
           </div>
         )}
 
@@ -357,9 +429,23 @@ export default function Pay() {
   );
 }
 
-function PageWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+function PageWrapper({
+  children,
+  align = "center",
+}: Readonly<{ children: React.ReactNode; align?: "center" | "top" }>) {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 overflow-hidden">
+    // The form is top-anchored: it opens with a logo and a heading, and on a
+    // tall phone geometric centring pushed those into the middle of the screen
+    // with a void above them. The terminal states stay centred, where a single
+    // message is the whole screen.
+    <div
+      className={cn(
+        "flex min-h-dvh flex-col overflow-hidden bg-background px-4",
+        align === "top"
+          ? "items-center justify-start pb-16 pt-8"
+          : "items-center justify-center py-12",
+      )}
+    >
       {children}
     </div>
   );
@@ -379,22 +465,57 @@ function OperatorCard({
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={selected}
       onClick={onClick}
       className={cn(
-        "rounded-xl px-4 py-3 text-left transition-all border-2",
+        // Matches the method tiles in PaymentMethodChooser: elevated card, a
+        // single-pixel accent border when active, and a check badge. Was
+        // `border-2` plus a `ring-2` halo with no shadow, which made the two
+        // operator cards the only outlined boxes in the payment flow — and the
+        // unselected `border-border` read as a washed-out disabled state.
+        "flex flex-col gap-2 rounded-xl border p-3.5 text-left transition-colors",
         selected
-          ? "border-primary ring-2 ring-primary/20"
-          : "border-border hover:border-muted-foreground/40",
+          ? "border-whatsapp bg-whatsapp-light shadow-soft"
+          : "border-transparent bg-card shadow-soft",
       )}
     >
-      <img
-        src={logo}
-        alt={label}
-        className="h-8 w-8 rounded-full mb-2 object-cover"
-      />
-      <p className="text-sm font-semibold text-foreground leading-tight">
+      <div className="flex items-center justify-between gap-2">
+        <img
+          src={logo}
+          alt=""
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+        <span
+          className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
+            selected ? "bg-whatsapp text-primary-foreground" : "bg-muted",
+          )}
+        >
+          {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+        </span>
+      </div>
+      <p className="text-sm font-semibold leading-tight text-foreground">
         {label}
       </p>
     </button>
   );
+}
+
+
+/**
+ * What the payer actually used, in their words.
+ *
+ * `operator` is only set when the page rendered the operator picker (Monetbil);
+ * an MTN MoMo payment never shows one, so fall back to the gateway. Neither is
+ * guaranteed, hence the last resort.
+ */
+function methodLabel(
+  gateway: PaymentGateway | null,
+  operator: Operator | null,
+): string {
+  if (gateway === "MTN_MOMO") return "MTN Mobile Money";
+  if (operator === "CG_MTNMOBILEMONEY") return "MTN Mobile Money";
+  if (operator === "CG_AIRTELMONEY") return "Airtel Money";
+  return "Mobile Money";
 }
