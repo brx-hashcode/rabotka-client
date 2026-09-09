@@ -2,7 +2,23 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      `interactive-widget=resizes-content`: when a native picker or the keyboard
+      opens, shrink the LAYOUT viewport so the page reflows above it. The default
+      (`resizes-visual`) only shrinks the visual viewport, so `position: fixed`
+      chrome — our bottom nav — slides up over the content and the page appears
+      to lurch. That lurch is what the datetime picker on the job form showed.
+
+      `viewport-fit=cover`: without it iOS resolves every `env(safe-area-inset-*)`
+      to 0, which silently disabled the safe-area padding on the bottom nav and
+      on the claim-thread composer. Both become effective with this. It also
+      lets content extend under the notch, so full-height screens are worth a
+      look on a notched device.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <meta name="theme-color" content="#25D366" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta
