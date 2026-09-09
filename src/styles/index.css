@@ -290,8 +290,21 @@
     @apply border-border;
   }
 
+  /*
+   * No `scroll-behavior: smooth` here.
+   *
+   * It applies to EVERY scroll the document makes, including the one the
+   * browser performs to bring a focused field into view. Opening the native
+   * datetime picker on the job form therefore animated the page upward, which
+   * reads as the screen drifting rather than as a deliberate scroll.
+   *
+   * The two places that genuinely want smooth scrolling — the landing page's
+   * back-to-top button and its anchor links — already pass
+   * `behavior: "smooth"` to `window.scrollTo` themselves, so they are
+   * unaffected. Route changes (`ScrollToTopOnNavigate`) become instant, which
+   * is what they should always have been.
+   */
   html {
-    scroll-behavior: smooth;
     overflow-x: hidden;
     scrollbar-width: none;
   }
