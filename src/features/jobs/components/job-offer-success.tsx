@@ -54,7 +54,13 @@ export function JobOfferSuccess({
   };
 
   return (
-    <div className="flex w-full flex-col">
+    // The gutter has to live here, not on the page. `create-job-offer.tsx` sets
+    // `px-0` on mobile on purpose — the form it renders in the other branch
+    // carries its own `p-4`, and doubling up cost 64px of a 390px screen. This
+    // is that branch's sibling, and it was the one left without any, so its
+    // label/value rows landed flush against both edges. Same shape as the
+    // form's root so the two branches stay visibly paired.
+    <div className="flex w-full flex-col rounded-none bg-white p-4 md:rounded-lg lg:p-8">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-green-100">
           <Check className="size-8 text-green-600" strokeWidth={3} />
