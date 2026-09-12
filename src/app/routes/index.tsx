@@ -1,5 +1,6 @@
-import { Routes, Route, useLocation } from "react-router";
-import { lazy, Suspense, useEffect } from "react";
+import { Routes, Route } from "react-router";
+import { ScrollRestoration } from "@/app/scroll-restoration";
+import { lazy, Suspense } from "react";
 import { AuthGuard } from "@/components/auth";
 import { AppShell, PublicShell } from "@/features/navigation";
 
@@ -78,18 +79,10 @@ function PageLoader() {
   );
 }
 
-function ScrollToTopOnNavigate() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-}
-
 export function AppRoutes() {
   return (
     <>
-      <ScrollToTopOnNavigate />
+      <ScrollRestoration />
       <Routes>
       <Route
         path="/"

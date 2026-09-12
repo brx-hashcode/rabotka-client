@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SheetCloseFooter } from "./sheet-close-footer";
 import { FileText, Download, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount, formatDate } from "@/lib/utils";
@@ -122,6 +123,7 @@ export const InvoicesSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
               </ul>
             )}
           </div>
+          <SheetCloseFooter />
         </SheetContent>
       </Sheet>
     </>

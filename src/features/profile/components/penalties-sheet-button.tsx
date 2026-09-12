@@ -5,6 +5,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -121,8 +122,11 @@ export const PenaltiesSheetButton = ({ asRow = false }: { asRow?: boolean }) => 
             )}
           </div>
 
-          {unpaid.length > 0 && (
-            <SheetFooter>
+          {/* One footer, always rendered: the Payer button is conditional but
+              the way out must not be. It was previously inside the condition,
+              so a profile with nothing unpaid had no footer at all. */}
+          <SheetFooter className="shrink-0 flex-col gap-2 pt-4 sm:flex-col">
+            {unpaid.length > 0 && (
               <Button
                 className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
                 onClick={() => {
@@ -132,8 +136,13 @@ export const PenaltiesSheetButton = ({ asRow = false }: { asRow?: boolean }) => 
               >
                 Payer {formatAmount(unpaidTotal)}
               </Button>
-            </SheetFooter>
-          )}
+            )}
+            <SheetClose asChild>
+              <Button variant="outline" className="w-full">
+                Fermer
+              </Button>
+            </SheetClose>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
     </>

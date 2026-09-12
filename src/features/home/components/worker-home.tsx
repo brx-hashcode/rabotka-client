@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useRestoredFeedSize } from "@/hooks/use-restored-feed-size";
 import { useNavigate } from "react-router";
 import {
   Bookmark,
@@ -65,7 +66,11 @@ function QuickCard({
 export function WorkerHome() {
   const navigate = useNavigate();
   const { data: profile } = useProfileMe();
-  const [limit, setLimit] = useState(INITIAL_LIMIT);
+  // Remembered across a job-detail round trip: see `useRestoredFeedSize`.
+  const [limit, setLimit, resetLimit] = useRestoredFeedSize(
+    "feed:worker-home",
+    INITIAL_LIMIT,
+  );
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const { data: jobs, isLoading, isFetching } = useJobFeed(limit, categoryId);
@@ -92,7 +97,9 @@ export function WorkerHome() {
 
   const selectChip = (id: string | null) => {
     setCategoryId(id);
-    setLimit(INITIAL_LIMIT);
+    // A different category is a different list, so it starts at one page —
+    // and the remembered size is cleared with it rather than reapplied.
+    resetLimit();
   };
 
   return (
