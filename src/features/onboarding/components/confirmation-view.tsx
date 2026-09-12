@@ -90,11 +90,16 @@ export function ConfirmationView({
               icon={User}
               value={personalInfo.lastName}
             />
-            <InfoCard
-              label={content.personalInfo.fields.email}
-              icon={Mail}
-              value={personalInfo.email}
-            />
+            {/* Only when one was given. The field is optional and most people
+                leave it blank, so an empty card here would read as a step they
+                forgot rather than a choice the form offered them. */}
+            {personalInfo.email && (
+              <InfoCard
+                label={content.personalInfo.fields.email}
+                icon={Mail}
+                value={personalInfo.email}
+              />
+            )}
             <InfoCard
               label={content.personalInfo.fields.phone}
               icon={Phone}

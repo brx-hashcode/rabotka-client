@@ -26,6 +26,10 @@ export const validationMessages = {
     // only when something was actually typed.
     invalid: "Numéro de téléphone invalide",
   },
+  email: {
+    // Optional too, for the same reason: most people sign up without one.
+    invalid: "Email invalide",
+  },
   phoneChange: {
     invalid: "Numéro de téléphone invalide",
     sameAsCurrent: "C'est déjà le numéro de votre compte",

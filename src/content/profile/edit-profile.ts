@@ -37,6 +37,11 @@ export const editProfileContent = {
       placeholder: "Numero avec indicatif pays",
       hint: "Si votre numero WhatsApp n'est pas celui sur lequel on peut vous appeler.",
     },
+    email: {
+      label: "Email (facultatif)",
+      placeholder: "john.doe@gmail.com",
+      hint: "Pour recevoir vos factures. Laissez vide si vous n'en avez pas.",
+    },
   },
   categories: {
     label: "Domaines d'activité",

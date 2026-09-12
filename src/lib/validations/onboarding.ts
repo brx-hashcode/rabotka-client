@@ -22,6 +22,26 @@ const optionalPhone = z
     validationMessages.directPhone.invalid,
   );
 
+/**
+ * Optional for the same reason, and cleared the same way.
+ *
+ * Most of the informal sector has a phone and no email address. Requiring one
+ * did not produce email addresses — it produced invented ones that bounce. The
+ * WhatsApp number is the identity signup actually proves, and every
+ * notification goes there.
+ *
+ * The format check runs only on a non-empty value: an untouched input yields
+ * "", and treating that as an invalid address would block onboarding at the
+ * last step for exactly the people this change is meant to let in.
+ */
+const optionalEmail = z
+  .string()
+  .optional()
+  .refine(
+    (value) => !value || z.string().email().safeParse(value).success,
+    validationMessages.email.invalid,
+  );
+
 export const step1Schema = z.object({
   firstName: z
     .string()
@@ -31,7 +51,7 @@ export const step1Schema = z.object({
     .string()
     .min(2, validationMessages.lastName.min)
     .max(50, validationMessages.lastName.max),
-  email: z.string().email(validationMessages.email.invalid),
+  email: optionalEmail,
   phone: z
     .string()
     .min(1, validationMessages.phone.required)

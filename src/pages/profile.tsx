@@ -199,11 +199,17 @@ export default function Profile() {
                 value={profile.directPhone}
               />
             )}
-            <InfoRow
-              icon={<Mail className="h-4 w-4 text-whatsapp" />}
-              label="Email"
-              value={profile.email}
-            />
+            {/* Same rule as the direct number above: shown only when there is
+                one. Email is optional at signup and most profiles have none, so
+                a row reading "Non renseigne" would flag the normal case as an
+                omission to go and fix. */}
+            {profile.email && (
+              <InfoRow
+                icon={<Mail className="h-4 w-4 text-whatsapp" />}
+                label="Email"
+                value={profile.email}
+              />
+            )}
             {profile.countryName && (
               <InfoRow
                 icon={<Globe className="h-4 w-4 text-whatsapp" />}
@@ -273,13 +279,19 @@ export default function Profile() {
                   label="Tableau de bord"
                   onClick={() => navigate("/dashboard")}
                 />
-                <ActionRow
-                  icon={
-                    <UsersRound className="h-4 w-4 text-muted-foreground" />
-                  }
-                  label="Profils contactés"
-                  onClick={() => navigate("/profils-contactes")}
-                />
+                {/* Hidden, not removed. The page, its route and
+                    `GET /profile/contacts` all still work — this only takes the
+                    entry point out of the menu, so restoring it is deleting one
+                    wrapper rather than rebuilding the feature. */}
+                <div className="hidden">
+                  <ActionRow
+                    icon={
+                      <UsersRound className="h-4 w-4 text-muted-foreground" />
+                    }
+                    label="Profils contactés"
+                    onClick={() => navigate("/profils-contactes")}
+                  />
+                </div>
                 {/* Workers reach claims from their tab bar, but an employer's
                     five slots are already full — so without this row there is
                     no way into /claims at all, even though the endpoint has
