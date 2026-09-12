@@ -17,6 +17,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -404,10 +405,23 @@ export function EditProfileSheetButton({
                 }}
               />
 
-              <SheetFooter>
+              <SheetFooter className="shrink-0 flex-col gap-2 pt-4 sm:flex-col">
                 <Button type="submit" disabled={isSaving} className="w-full">
                   {isSaving ? content.buttons.saving : content.buttons.save}
                 </Button>
+                {/* Below Save, never above it: this form is long, and a close
+                    button that outranked the save on a half-filled form would
+                    lose someone's edits to a mis-tap. */}
+                <SheetClose asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isSaving}
+                    className="w-full"
+                  >
+                    Fermer
+                  </Button>
+                </SheetClose>
               </SheetFooter>
             </form>
           </Form>

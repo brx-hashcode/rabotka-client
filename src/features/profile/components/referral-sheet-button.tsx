@@ -16,6 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SheetCloseFooter } from "./sheet-close-footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount, cn } from "@/lib/utils";
 import { useReferral } from "@/hooks/use-referral";
@@ -293,6 +294,7 @@ export const ReferralSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
               </Button>
             </div>
           )}
+          <SheetCloseFooter />
         </SheetContent>
       </Sheet>
     </>
