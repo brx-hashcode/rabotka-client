@@ -132,8 +132,12 @@ export function PersonalInfoForm({
                         type="email"
                         placeholder={f.placeholder}
                         {...field}
+                        value={field.value ?? ""}
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {content.fields.email.hint}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 );

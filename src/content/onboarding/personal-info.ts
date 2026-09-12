@@ -24,13 +24,18 @@ export const personalInfoContent = {
     },
     email: {
       worker: {
-        label: "Email",
+        label: "Email (facultatif)",
         placeholder: "john.doe@gmail.com",
       },
       employer: {
-        label: "Email",
+        label: "Email (facultatif)",
         placeholder: "contact@entreprise.com",
       },
+      // Said once, under the field, rather than per profile type: the reason is
+      // the same for both. Without it "(facultatif)" reads as an oversight, and
+      // people invent an address to be safe — which is the behaviour that made
+      // the field optional in the first place.
+      hint: "Vous recevrez tout sur WhatsApp. L'email sert uniquement à vous envoyer vos factures.",
     },
     phone: {
       label: "Numéro WhatsApp",

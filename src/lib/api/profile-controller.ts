@@ -6,7 +6,12 @@ import { config } from "@/config";
 export type CreateProfilePayload = {
   firstName: string;
   lastName: string;
-  email: string;
+  /**
+   * Optional: most of the informal sector signs up with a phone and no email.
+   * `phone` is the identity signup proves, and every notification goes there.
+   * Omitted rather than sent empty — see the note in `use-onboarding-mutation`.
+   */
+  email?: string;
   phone: string;
   /**
    * Optional second number to be reached on, when the WhatsApp number is not
@@ -49,7 +54,8 @@ export type ProfileMeResponse = {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  /** Null for the majority, who sign up with a phone and no email. */
+  email: string | null;
   phone: string;
   /** Optional second number. Null for the majority who gave only one. */
   directPhone: string | null;
@@ -93,6 +99,12 @@ export type UpdateProfilePayload = {
    * because it is the login identity.
    */
   directPhone?: string;
+  /**
+   * Optional, and editable here for the same reason `directPhone` is: nothing
+   * authenticates against it. Email is optional at signup, so this is how
+   * someone adds one later or drops one that has gone stale. Send "" to clear.
+   */
+  email?: string;
 };
 
 export type UpdateAvatarResponse = {
@@ -167,7 +179,11 @@ export type ContactedProfile = {
   ratingCount: number;
   portfolioSlug: string | null;
   phone: string;
-  email: string;
+  /**
+   * Null when the worker has no email — the phone is what the payment really
+   * bought, and it is never null.
+   */
+  email: string | null;
   origin: "RECOMMENDATION" | "MISSION";
   unlockedAt: string;
   jobTitle: string | null;
