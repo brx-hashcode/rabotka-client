@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SheetCloseFooter } from "./sheet-close-footer";
 import { ClipboardList, FileDown, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DownloadLink } from "@/components/common/download-link";
@@ -142,6 +143,7 @@ export const ApplicationsSheetButton = ({ asRow = false }: { asRow?: boolean }) 
               </ul>
             )}
           </div>
+          <SheetCloseFooter />
         </SheetContent>
       </Sheet>
     </>

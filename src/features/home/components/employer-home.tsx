@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRestoredFeedSize } from "@/hooks/use-restored-feed-size";
 import { useNavigate } from "react-router";
 import {
   Users,
@@ -32,7 +33,11 @@ const NO_WORKERS: RecommendedWorker[] = [];
 
 export function EmployerHome() {
   const navigate = useNavigate();
-  const [limit, setLimit] = useState(INITIAL_LIMIT);
+  // Remembered across a worker-detail round trip: see `useRestoredFeedSize`.
+  const [limit, setLimit] = useRestoredFeedSize(
+    "feed:employer-home",
+    INITIAL_LIMIT,
+  );
   const { data: workers, isLoading, isFetching } = useWorkerFeed(limit);
   const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const { blocked, reason } = useKycGate();
