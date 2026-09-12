@@ -27,7 +27,10 @@ export function useOnboardingMutation() {
       return await createProfile({
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
-        email: personalInfo.email,
+        // Omitted rather than sent empty, like `directPhone` below. The column
+        // is unique and the backend maps "" to NULL, but sending "" would make
+        // every emailless signup race for the same empty-string value.
+        email: personalInfo.email || undefined,
         phone: personalInfo.phone,
         // Omitted rather than sent empty: the field is optional all the way
         // down, and "" would be stored as an empty number rather than as none.

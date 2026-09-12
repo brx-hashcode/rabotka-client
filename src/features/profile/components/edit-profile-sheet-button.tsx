@@ -83,6 +83,7 @@ export function EditProfileSheetButton({
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
       directPhone: profile.directPhone ?? "",
+      email: profile.email ?? "",
     },
     mode: "onChange",
   });
@@ -102,6 +103,7 @@ export function EditProfileSheetButton({
       description: profile.description,
       categoryIds: profile.categoryIds ?? [],
       directPhone: profile.directPhone ?? "",
+      email: profile.email ?? "",
     });
     setAvatarUrl(profile.avatarUrl);
     setIsOpen(true);
@@ -121,6 +123,8 @@ export function EditProfileSheetButton({
         // Always sent, including as "" — that is how a number gets removed.
         // The backend maps an empty string to NULL rather than storing one.
         directPhone: data.directPhone ?? "",
+        // Same rule, same reason: "" is how an address gets removed.
+        email: data.email ?? "",
       },
       {
         onSuccess: () => {
@@ -237,6 +241,31 @@ export function EditProfileSheetButton({
                     </FormControl>
                     <p className="text-muted-foreground text-xs">
                       {content.fields.directPhone.hint}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Beside the direct number, the other contact detail nothing
+                  authenticates against. Most profiles have none — this is where
+                  one gets added later, or dropped once it stops being read. */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1">
+                    <FormLabel>{content.fields.email.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder={content.fields.email.placeholder}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <p className="text-muted-foreground text-xs">
+                      {content.fields.email.hint}
                     </p>
                     <FormMessage />
                   </FormItem>

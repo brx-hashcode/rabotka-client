@@ -41,6 +41,21 @@ export const editProfileSchema = z.object({
       (value) => !value || isValidPhoneNumber(value),
       validationMessages.directPhone.invalid,
     ),
+  /**
+   * Optional at signup, so this is where someone adds one later or drops one
+   * that has gone stale. Same "empty means absent" rule as `directPhone`.
+   *
+   * Like the direct line and unlike the WhatsApp number, nothing authenticates
+   * against an email address, so it changes by being submitted with the rest of
+   * the form rather than through a verify-then-switch flow.
+   */
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      validationMessages.email.invalid,
+    ),
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;

@@ -199,11 +199,17 @@ export default function Profile() {
                 value={profile.directPhone}
               />
             )}
-            <InfoRow
-              icon={<Mail className="h-4 w-4 text-whatsapp" />}
-              label="Email"
-              value={profile.email}
-            />
+            {/* Same rule as the direct number above: shown only when there is
+                one. Email is optional at signup and most profiles have none, so
+                a row reading "Non renseigne" would flag the normal case as an
+                omission to go and fix. */}
+            {profile.email && (
+              <InfoRow
+                icon={<Mail className="h-4 w-4 text-whatsapp" />}
+                label="Email"
+                value={profile.email}
+              />
+            )}
             {profile.countryName && (
               <InfoRow
                 icon={<Globe className="h-4 w-4 text-whatsapp" />}

@@ -81,13 +81,25 @@ function ContactCard({ contact }: Readonly<{ contact: ContactedProfile }>) {
           <Phone className="size-4 shrink-0 text-muted-foreground" />
           {contact.phone}
         </a>
-        <a
-          href={`mailto:${contact.email}`}
-          className="flex items-center gap-2 break-all"
-        >
-          <Mail className="size-4 shrink-0 text-muted-foreground" />
-          {contact.email}
-        </a>
+        {/* Most workers have no email — the phone above is what the payment
+            really bought, and it is never null. Rendered as plain muted text
+            rather than omitted: on a page the recruiter paid to see, a silently
+            missing row reads as something withheld, and a dead `mailto:null`
+            link would be worse still. */}
+        {contact.email ? (
+          <a
+            href={`mailto:${contact.email}`}
+            className="flex items-center gap-2 break-all"
+          >
+            <Mail className="size-4 shrink-0 text-muted-foreground" />
+            {contact.email}
+          </a>
+        ) : (
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <Mail className="size-4 shrink-0" />
+            Pas d'email — joignable par téléphone et WhatsApp
+          </p>
+        )}
       </div>
 
       <Button
