@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
@@ -60,12 +60,6 @@ export default function ApplicationDetail() {
         goToPayment();
       },
     });
-
-  // Always open the detail scrolled to the top (window scroll persists across
-  // route changes inside the app shell).
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
 
   return (
     <div className="flex min-h-screen flex-col">

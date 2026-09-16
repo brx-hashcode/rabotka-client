@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Inbox } from "lucide-react";
@@ -11,10 +11,6 @@ export default function Claims() {
   const navigate = useNavigate();
   const [page] = useState(1);
   const limit = 10;
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   const { data, isLoading } = useProfileClaims({ page, limit, enabled: true });
 

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useAllEmployerJobOffers } from "@/hooks/use-employer-job-offers";
@@ -70,10 +69,6 @@ export default function EmployerDashboard() {
   const { data: applications, isLoading: appsLoading } =
     useEmployerApplications(1, DASHBOARD_APPLICATIONS_LIMIT);
   const { data: invoices, isLoading: invoicesLoading } = useProfileInvoices();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, []);
 
   if (!profileLoading && profile?.profileType !== "EMPLOYER") {
     navigate("/profile");

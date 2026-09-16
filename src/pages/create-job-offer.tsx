@@ -23,8 +23,10 @@ export default function CreateJobOffer() {
   const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const [created, setCreated] = useState<Created | null>(null);
 
+  // The confirmation replaces the form inside the same page, so it needs its
+  // own scroll to top. Arriving on the page is handled by ScrollRestoration.
   useEffect(() => {
-    window.scrollTo({ top: 0 });
+    if (created) window.scrollTo({ top: 0 });
   }, [created]);
 
   if (!profileLoading && profile && profile.profileType !== "EMPLOYER") {

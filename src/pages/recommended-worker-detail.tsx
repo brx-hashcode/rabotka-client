@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   Star,
@@ -35,10 +35,6 @@ export default function RecommendedWorkerDetail() {
   if (accountBlocked && accountReason)
     contactLabel = accountShortLabel(accountReason);
   else if (blocked && reason) contactLabel = kycShortLabel(reason);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [workerId]);
 
   const worker = data?.worker;
   const aiScore = Math.round((worker?.score ?? 0) * 100);
