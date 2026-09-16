@@ -19,6 +19,7 @@ import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice } from "@/features/kyc";
 import { useAccountGate } from "@/hooks/use-account-gate";
 import { AccountNotice } from "@/features/account";
+import { NotificationBell } from "@/features/notifications";
 import { SponsoredCard } from "@/features/sponsored/sponsored-card";
 import { interleaveAds } from "@/features/sponsored/interleave";
 import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
@@ -107,16 +108,9 @@ export function WorkerHome() {
       <HomeHeader
         to="/recherche-offres"
         placeholder="Poste, domaine, adresse, réf…"
-        trailing={
-          <button
-            type="button"
-            aria-label="Offres enregistrées"
-            onClick={() => navigate("/favoris")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground active:bg-secondary/70"
-          >
-            <Bookmark className="h-5 w-5" />
-          </button>
-        }
+        // Saved offers are reached from the "Offres enregistrées" card below,
+        // so the header keeps only filters and notifications.
+        trailing={<NotificationBell />}
       />
 
       <div className="flex gap-3 overflow-x-auto px-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

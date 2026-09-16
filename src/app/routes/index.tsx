@@ -53,6 +53,7 @@ const WorkerMissionPayment = lazy(
 );
 const JobDetailWorker = lazy(() => import("@/pages/job-detail-worker"));
 const SavedJobs = lazy(() => import("@/pages/saved-jobs"));
+const Notifications = lazy(() => import("@/pages/notifications"));
 const WalletTopUp = lazy(() => import("@/pages/wallet-top-up"));
 const Jobs = lazy(() => import("@/pages/jobs"));
 const Missions = lazy(() => import("@/pages/missions"));
@@ -159,6 +160,18 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <JobDetailWorker />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Notifications />
               </AppShell>
             </AuthGuard>
           </Suspense>
