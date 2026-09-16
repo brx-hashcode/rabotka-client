@@ -23,6 +23,7 @@ import { useAccountGate } from "@/hooks/use-account-gate";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { AccountNotice } from "@/features/account";
 import { KycNotice } from "@/features/kyc";
+import { NotificationBell } from "@/features/notifications";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
@@ -54,7 +55,7 @@ export function EmployerHome() {
 
   return (
     <div className="flex flex-col">
-      <HomeHeader />
+      <HomeHeader trailing={<NotificationBell />} />
 
       <QuickActions />
 

@@ -84,17 +84,21 @@ export function PaymentMethodChooser({
       {/* Action bar. The back arrow duplicates the Annuler button on purpose:
           this route is reachable by direct URL, and the top-left arrow is where
           a thumb goes first. */}
-      <div className="relative flex items-center justify-center">
+      {/* Same arrow and title treatment as `ScreenHeader`, so the payment
+          screens do not look like a different app. */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onCancel}
           disabled={busy}
           aria-label={cancelLabel}
-          className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full bg-card text-foreground shadow-soft transition-opacity disabled:opacity-50"
+          className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 disabled:opacity-50"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-base font-bold text-foreground">{title}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-foreground">
+          {title}
+        </h1>
       </div>
 
       {/* What is being paid for, and how much — one card, read left to right. */}
