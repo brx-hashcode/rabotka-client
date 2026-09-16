@@ -1,6 +1,7 @@
 import { BottomNav } from "../components/bottom-nav";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
+import { useNotificationsSocket } from "@/hooks/use-notifications";
 
 type AppShellProps = {
   readonly children: React.ReactNode;
@@ -22,6 +23,9 @@ export function AppShell({
   // authenticated app.
   const { data: profile } = useProfileMe();
   useJobEvents(profile?.status === "ACTIVE");
+  // Both roles have a bell, and the badge should move on whatever page the
+  // profile is looking at.
+  useNotificationsSocket(profile?.status === "ACTIVE");
 
   return (
     // From sm up the app becomes a deliberate centred column on a darker
