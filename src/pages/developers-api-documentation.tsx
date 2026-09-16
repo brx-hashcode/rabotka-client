@@ -251,7 +251,7 @@ export default function DevelopersApiDocumentation() {
 
       <TableOfContents />
 
-      <main className="min-w-0 max-w-3xl flex-1">
+      <article className="min-w-0 max-w-3xl flex-1">
         <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
           Documentation développeur
         </span>
@@ -966,7 +966,7 @@ User-Agent: Rabotka-Webhooks/1.0
         </ul>
       </Section>
 
-      <Section id="contact" title="Nous écrire">
+      <Section id="contact" title="Enregistrer une application ou signaler un secret">
         <p>
           Pour enregistrer une application, ou si un secret vous semble
           compromis (nous pouvons fermer la fenêtre de grâce immédiatement)
@@ -993,7 +993,7 @@ User-Agent: Rabotka-Webhooks/1.0
         </Section>
 
         <PrevNext />
-      </main>
+      </article>
     </div>
     </SectionContext.Provider>
   );
