@@ -193,9 +193,11 @@ function Outcome({ request }: Readonly<{ request: IdentityCheckRequest }>) {
       <p className="text-muted-foreground text-sm">
         {outcome.body(request.app.name)}
       </p>
-      <Button asChild variant="secondary" className="mt-2">
-        <Link to="/home">{content.backHome}</Link>
-      </Button>
+      {/*
+        No way onward: the person arrived from a WhatsApp message and is
+        done. Closing the page is the next step, so say so.
+      */}
+      <p className="text-muted-foreground mt-2 text-xs">{content.canClose}</p>
     </div>
   );
 }

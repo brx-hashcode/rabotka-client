@@ -54,6 +54,7 @@ export const identityCheckContent = {
   },
 
   backHome: "Retour à l'accueil",
+  canClose: "Vous pouvez fermer cette page.",
 
   errors: {
     notFound:
