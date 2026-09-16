@@ -5,6 +5,7 @@ import { usePublicContact } from "@/hooks/use-public-contact";
 import { CodeSampleTabs } from "@/features/oauth/components/code-sample-tabs";
 import { CopyButton } from "@/features/oauth/components/copy-button";
 import { CODE_SAMPLES } from "@/content/oauth/code-samples";
+import { IDENTITY_CHECK_CODE_SAMPLES } from "@/content/identity-check/code-samples";
 import type { PublicContactInfo } from "@/lib/api/system-config-controller";
 
 /**
@@ -26,19 +27,35 @@ const ISSUER = "https://api.rabotka.work";
  * 200px rail cannot.
  */
 const SECTIONS = [
-  { id: "en-bref", label: "En bref" },
-  { id: "identifiants", label: "Obtenir des identifiants" },
-  { id: "sandbox", label: "Sandbox" },
-  { id: "redirect-uris", label: "URI de redirection" },
-  { id: "deroule", label: "Le déroulé" },
-  { id: "jetons", label: "Ce que vous recevez" },
-  { id: "sans-bibliotheque", label: "Sans bibliothèque" },
-  { id: "exemple", label: "Exemple complet" },
-  { id: "verification", label: "Vérification vs téléphone" },
-  { id: "sub", label: "Indexer sur sub" },
-  { id: "absences", label: "Absences volontaires" },
-  { id: "popup", label: "Popup ou redirection" },
-  { id: "contact", label: "Nous écrire" },
+  { id: "en-bref", label: "En bref", group: "login" },
+  { id: "identifiants", label: "Obtenir des identifiants", group: "login" },
+  { id: "sandbox", label: "Sandbox", group: "login" },
+  { id: "redirect-uris", label: "URI de redirection", group: "login" },
+  { id: "deroule", label: "Le déroulé", group: "login" },
+  { id: "jetons", label: "Ce que vous recevez", group: "login" },
+  { id: "sans-bibliotheque", label: "Sans bibliothèque", group: "login" },
+  { id: "exemple", label: "Exemple complet", group: "login" },
+  { id: "verification", label: "Vérification vs téléphone", group: "login" },
+  { id: "sub", label: "Indexer sur sub", group: "login" },
+  { id: "absences", label: "Absences volontaires", group: "login" },
+  { id: "popup", label: "Popup ou redirection", group: "login" },
+  { id: "verification-identite", label: "En bref", group: "identity" },
+  { id: "ic-acces", label: "Activer l'API", group: "identity" },
+  { id: "ic-creer", label: "Créer une vérification", group: "identity" },
+  { id: "ic-statuts", label: "Statuts", group: "identity" },
+  { id: "ic-resultat", label: "Lire le résultat", group: "identity" },
+  { id: "ic-webhooks", label: "Webhooks", group: "identity" },
+  { id: "ic-exemple", label: "Exemple complet", group: "identity" },
+  { id: "ic-sandbox", label: "Sandbox", group: "identity" },
+  { id: "ic-erreurs", label: "Erreurs et limites", group: "identity" },
+  { id: "contact", label: "Nous écrire", group: "other" },
+] as const;
+
+/** The rail's group headings, in page order. `null` renders no heading. */
+const GROUPS = [
+  { id: "login", label: "Connexion avec Rabotka" },
+  { id: "identity", label: "Vérification d'identité" },
+  { id: "other", label: null },
 ] as const;
 
 /**
@@ -108,31 +125,42 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
         <p className="text-muted-foreground mb-3 px-2.5 text-xs font-semibold uppercase tracking-wide">
           Sommaire
         </p>
-        <ul className="space-y-1">
-          {SECTIONS.map((section) => {
-            const isActive = section.id === activeId;
-            return (
-              <li key={section.id}>
-                <a
-                  href={`#${section.id}`}
-                  aria-current={isActive ? "location" : undefined}
-                  className={cn(
-                    "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
-                    isActive
-                      ? // The same pair the domain badges use: dark brown on
-                        // warm sand. `bg-primary/10 text-primary` was green on
-                        // green — around 2:1 contrast, below the 4.5:1 WCAG AA
-                        // needs for body text, and tiring to read besides.
-                        "bg-secondary text-secondary-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                  )}
-                >
-                  {section.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+        {GROUPS.map((group) => (
+          <div key={group.id} className="mb-4">
+            {group.label && (
+              <p className="text-foreground mb-1 px-2.5 text-xs font-semibold">
+                {group.label}
+              </p>
+            )}
+            <ul className="space-y-1">
+              {SECTIONS.filter((section) => section.group === group.id).map(
+                (section) => {
+                  const isActive = section.id === activeId;
+                  return (
+                    <li key={section.id}>
+                      <a
+                        href={`#${section.id}`}
+                        aria-current={isActive ? "location" : undefined}
+                        className={cn(
+                          "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
+                          isActive
+                            ? // The same pair the domain badges use: dark brown on
+                              // warm sand. `bg-primary/10 text-primary` was green on
+                              // green — around 2:1 contrast, below the 4.5:1 WCAG AA
+                              // needs for body text, and tiring to read besides.
+                              "bg-secondary text-secondary-foreground font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                        )}
+                      >
+                        {section.label}
+                      </a>
+                    </li>
+                  );
+                },
+              )}
+            </ul>
+          </div>
+        ))}
       </nav>
     </aside>
   );
@@ -166,8 +194,8 @@ export default function DevelopersApiDocumentation() {
     // of starting at an unexplained offset.
     <div className="section-container flex gap-12 pb-20 pt-24 lg:pt-28">
       <Seo
-        title="Connexion avec Rabotka — documentation développeur"
-        description="Intégrez « Connexion avec Rabotka » : authentifiez vos utilisateurs avec leur compte Rabotka vérifié via OpenID Connect."
+        title="Documentation développeur Rabotka"
+        description="Intégrez « Connexion avec Rabotka » (OpenID Connect) et l'API de vérification d'identité : confirmez qu'une personne est bien celle qu'elle prétend être, avec son accord."
         canonical="/developers/api-documentation"
       />
 
@@ -523,6 +551,378 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
+      <Part
+        id="verification-identite"
+        title="API de vérification d'identité"
+      >
+        <p>
+          Votre serveur demande à Rabotka :{" "}
+          <em>la personne derrière ce numéro WhatsApp est-elle bien celle
+          qu'elle prétend être ?</em> Vous envoyez le numéro et le nom qu'on vous
+          a donnés. Rabotka demande son accord à la personne sur WhatsApp ; si
+          elle accepte, Rabotka compare vos informations à son profil vérifié et
+          vous renvoie le résultat.
+        </p>
+        <p>
+          <strong className="text-foreground">
+            Vous ne recevez jamais le profil lui-même.
+          </strong>{" "}
+          Vous apprenez si vos informations correspondent, pas ce que Rabotka
+          détient.
+        </p>
+        <ol className="list-decimal space-y-2 pl-5">
+          <li>
+            <Mono>POST /api/v1/identity-checks</Mono> avec le numéro et le nom.
+            Réponse : <Mono>202 pending_consent</Mono>.
+          </li>
+          <li>
+            La personne accepte ou refuse dans l'application Rabotka, sous 24
+            heures.
+          </li>
+          <li>
+            Rabotka envoie le résultat signé à votre webhook. Vous pouvez aussi
+            interroger <Mono>GET /api/v1/identity-checks/{"{id}"}</Mono>.
+          </li>
+        </ol>
+      </Part>
+
+      <Section id="ic-acces" title="Activer l'API">
+        <p>
+          L'API utilise votre application « Connexion avec Rabotka » : même{" "}
+          <Mono>client_id</Mono>, même <Mono>client_secret</Mono>. Un
+          administrateur Rabotka doit l'activer pour votre application, et vous
+          devez lui donner une <strong className="text-foreground">URL de
+          webhook</strong> :
+        </p>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            en <Mono>https</Mono> ; <Mono>http://localhost</Mono> n'est accepté
+            que pour une application sandbox ;
+          </li>
+          <li>sans identifiants ni fragment (<Mono>#</Mono>) dans l'URL.</li>
+        </ul>
+        <p>
+          Si vous n'utilisez que la vérification d'identité, vous n'avez besoin
+          d'aucune URI de redirection. Tant que l'API n'est pas activée, chaque
+          appel renvoie <Mono>403 identity_check_not_enabled</Mono>.
+        </p>
+        <p>
+          Authentifiez-vous en HTTP Basic avec vos identifiants, comme sur{" "}
+          <Mono>/oauth/token</Mono>. Les identifiants dans le corps de la
+          requête ne sont pas acceptés ici.
+        </p>
+      </Section>
+
+      <Section id="ic-creer" title="Créer une vérification">
+        <Code>{`curl -s -X POST ${ISSUER}/api/v1/identity-checks \\
+  -u "VOTRE_CLIENT_ID:VOTRE_CLIENT_SECRET" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: dossier-4821-essai-1" \\
+  -d '{
+    "phone": "+242061234567",
+    "first_name": "Jean",
+    "last_name": "Mabiala",
+    "country_code": "CG",
+    "city": "Brazzaville",
+    "document_type": "IDENTITY_CARD",
+    "reference": "dossier-4821"
+  }'`}</Code>
+        <FieldTable
+          rows={[
+            [
+              "phone",
+              "oui",
+              "Numéro WhatsApp avec son indicatif. 00242… et les espaces sont acceptés ; un numéro sans indicatif est refusé (400 invalid_phone).",
+            ],
+            [
+              "first_name, last_name",
+              "oui",
+              "Tels que vous les connaissez. L'ordre n'importe pas, et un nom plus court (sans les prénoms intermédiaires) correspond quand même.",
+            ],
+            ["country_code", "non", "ISO 3166-1 alpha-2, par exemple CG."],
+            ["city", "non", "La ville déclarée."],
+            [
+              "document_type",
+              "non",
+              "IDENTITY_CARD, PASSPORT, DRIVER_LICENSE ou NIU_CARD.",
+            ],
+            [
+              "reference",
+              "non",
+              "Votre propre identifiant (128 caractères max.), renvoyé dans chaque réponse.",
+            ],
+          ]}
+        />
+        <p>
+          L'en-tête <Mono>Idempotency-Key</Mono> est facultatif : un nouvel
+          essai avec la même clé renvoie la vérification d'origine au lieu d'en
+          créer une seconde. Réutiliser une clé pour un autre numéro renvoie{" "}
+          <Mono>409 idempotency_conflict</Mono>.
+        </p>
+        <Code>{`{
+  "id": "5b0c…",
+  "status": "pending_consent",
+  "reference": "dossier-4821",
+  "created_at": "2026-09-16T10:00:00.000Z",
+  "expires_at": "2026-09-17T10:00:00.000Z",
+  "completed_at": null
+}`}</Code>
+      </Section>
+
+      <Section id="ic-statuts" title="Statuts">
+        <FieldTable
+          head={["status", "Signification"]}
+          rows={[
+            ["pending_consent", "En attente de la réponse de la personne."],
+            [
+              "completed",
+              "La personne a accepté. Les champs du résultat sont présents.",
+            ],
+            [
+              "not_completed",
+              "Refusée, expirée, ou aucun compte. Pas de résultat, et completed_at vaut null.",
+            ],
+          ]}
+        />
+        <Callout>
+          <strong>Vous ne pouvez pas savoir si le numéro a un compte.</strong>{" "}
+          La réponse <Mono>202</Mono> est identique dans tous les cas, et un
+          numéro sans compte, un refus et une absence de réponse finissent tous
+          en <Mono>not_completed</Mono>. C'est voulu : sinon, l'API permettrait
+          de savoir qui utilise Rabotka sans l'accord des personnes.
+        </Callout>
+        <p>
+          Vous ne pouvez lire que les vérifications créées par votre propre
+          application ; tout autre identifiant renvoie <Mono>404</Mono>.
+        </p>
+      </Section>
+
+      <Section id="ic-resultat" title="Lire le résultat">
+        <Code>{`{
+  "id": "5b0c…",
+  "status": "completed",
+  "reference": "dossier-4821",
+  "completed_at": "2026-09-16T10:04:12.000Z",
+  "kyc": {
+    "status": "verified",
+    "verified_at": "2026-05-01T09:30:00.000Z",
+    "account_status": "active"
+  },
+  "match": {
+    "phone": "match",
+    "name": { "level": "strong", "score": 94 },
+    "country": "match",
+    "city": "unknown",
+    "document_type": "match"
+  },
+  "score": 95,
+  "recommendation": "accept"
+}`}</Code>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <Mono>kyc.status</Mono> : <Mono>verified</Mono> si un administrateur
+            Rabotka a examiné la pièce d'identité et un selfie et les a
+            approuvés, <Mono>pending</Mono> si cet examen n'a pas encore eu
+            lieu, <Mono>rejected</Mono> s'il a été refusé. L'examen est fait par
+            une personne, pas par une reconnaissance automatique.
+          </li>
+          <li>
+            <Mono>kyc.account_status</Mono> : <Mono>active</Mono>,{" "}
+            <Mono>pending_activation</Mono>, <Mono>suspended</Mono> ou{" "}
+            <Mono>banned</Mono>.
+          </li>
+          <li>
+            <Mono>match.phone</Mono> vaut toujours <Mono>match</Mono> : la
+            personne a répondu depuis le compte Rabotka lié à ce numéro.
+          </li>
+          <li>
+            <Mono>match.name.level</Mono> : <Mono>strong</Mono> (score ≥ 90),{" "}
+            <Mono>partial</Mono> (≥ 75) ou <Mono>none</Mono>. Les accents, la
+            casse, les tirets et l'ordre prénom/nom sont ignorés ; les petites
+            fautes d'orthographe sont tolérées.
+          </li>
+          <li>
+            <Mono>country</Mono>, <Mono>city</Mono>,{" "}
+            <Mono>document_type</Mono> : <Mono>match</Mono>,{" "}
+            <Mono>mismatch</Mono> ou <Mono>unknown</Mono>.{" "}
+            <Mono>unknown</Mono> signifie que vous n'avez pas envoyé le champ,
+            ou que le profil ne l'a pas ; il est alors exclu du score. Le pays
+            et la ville sont déclarés par la personne à l'inscription, et ne
+            sont pas vérifiés sur la pièce d'identité.
+          </li>
+        </ul>
+        <p>
+          <Mono>score</Mono> va de 0 à 100 : une moyenne pondérée des champs
+          comparables (nom 70, pays 15, ville 10, type de pièce 5).
+        </p>
+        <FieldTable
+          head={["recommendation", "Quand"]}
+          rows={[
+            [
+              "accept",
+              "KYC verified, score d'au moins 85, et le nom correspond.",
+            ],
+            [
+              "review",
+              "Les cas intermédiaires : par exemple une bonne correspondance avec un KYC encore pending, ou une personne vérifiée dont le pays diffère.",
+            ],
+            [
+              "reject",
+              "Le nom ne correspond pas, le KYC a été refusé, le compte est suspendu ou banni, ou le score est inférieur à 60.",
+            ],
+          ]}
+        />
+        <p>
+          <Mono>recommendation</Mono> est une suggestion : la décision vous
+          appartient.
+        </p>
+      </Section>
+
+      <Section id="ic-webhooks" title="Webhooks">
+        <p>
+          Quand une vérification se termine (<Mono>completed</Mono> ou{" "}
+          <Mono>not_completed</Mono>), Rabotka envoie une requête POST à votre
+          URL de webhook :
+        </p>
+        <Code>{`POST https://vous.com/webhooks/rabotka
+Content-Type: application/json
+User-Agent: Rabotka-Webhooks/1.0
+
+{ "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6…" }`}</Code>
+        <p>
+          Le résultat se trouve <strong className="text-foreground">à
+          l'intérieur</strong> de <Mono>jws</Mono> : un JWS compact, signé en
+          RS256 avec{" "}
+          <strong className="text-foreground">
+            la même clé que les ID tokens
+          </strong>
+          . Votre serveur le vérifie contre{" "}
+          <Mono>{`${ISSUER}/.well-known/jwks.json`}</Mono>, puis lit la charge
+          utile. Il n'y a pas de secret de webhook distinct.
+        </p>
+        <FieldTable
+          head={["En-tête ou claim", "Valeur"]}
+          rows={[
+            ["typ (en-tête)", "rabotka-identity-check+jwt"],
+            ["iss", ISSUER],
+            ["aud", "votre client_id. Refusez toute autre valeur."],
+            ["sub", "l'identifiant de la vérification"],
+            ["jti", "unique pour chaque tentative d'envoi"],
+            ["exp", "15 minutes après la signature"],
+            ["event", "identity_check.updated"],
+            ["check", "le même objet que GET /identity-checks/{id}"],
+          ]}
+        />
+        <Callout>
+          <strong>Pourquoi signer ?</strong> Une URL de webhook est une adresse
+          publique : n'importe qui peut y envoyer une requête. Sans signature,
+          un attaquant pourrait vous envoyer un faux{" "}
+          <Mono>"recommendation": "accept"</Mono>. La signature prouve que le
+          résultat vient de Rabotka, qu'il n'a pas été modifié, et qu'il vous
+          était destiné.
+        </Callout>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>Répondez par un code 2xx en moins de 10 secondes.</li>
+          <li>
+            Toute autre réponse, une redirection ou un délai dépassé entraîne
+            une nouvelle tentative : jusqu'à 8, avec un intervalle croissant à
+            partir de 30 secondes, sur environ deux heures.
+          </li>
+          <li>Rabotka ne suit jamais une redirection vers une autre URL.</li>
+          <li>
+            Si vous avez manqué un envoi,{" "}
+            <Mono>GET /api/v1/identity-checks/{"{id}"}</Mono> donne toujours
+            l'état à jour.
+          </li>
+        </ul>
+      </Section>
+
+      <Section id="ic-exemple" title="Exemple complet">
+        <p>
+          Créer une vérification, puis recevoir et vérifier le webhook. Les
+          quatre exemples contrôlent la signature, <Mono>iss</Mono> et{" "}
+          <Mono>aud</Mono> avant de faire confiance au résultat.
+        </p>
+        <CodeSampleTabs samples={IDENTITY_CHECK_CODE_SAMPLES} />
+      </Section>
+
+      <Section id="ic-sandbox" title="Sandbox">
+        <p>
+          Une application sandbox ne contacte jamais une vraie personne, et ses
+          vérifications se terminent aussitôt :
+        </p>
+        <FieldTable
+          head={["phone", "Résultat"]}
+          rows={[
+            [
+              "+242061111111",
+              "completed, KYC verified. Nom enregistré : Rabotka Sandbox, Brazzaville, CG.",
+            ],
+            ["+242061111112", "completed, KYC pending. Même nom."],
+            ["tout autre numéro", "not_completed"],
+          ]}
+        />
+        <p>
+          Envoyez un autre nom pour voir les niveaux <Mono>partial</Mono> et{" "}
+          <Mono>none</Mono>. Le webhook d'une application sandbox peut utiliser{" "}
+          <Mono>http://localhost</Mono>.
+        </p>
+      </Section>
+
+      <Section id="ic-erreurs" title="Erreurs et limites">
+        <p>
+          Les erreurs ont la même forme que celles des points de terminaison
+          OIDC :
+        </p>
+        <Code>{`{ "error": "identity_check_not_enabled", "error_description": "…" }`}</Code>
+        <FieldTable
+          head={["Statut", "error", "Quand"]}
+          rows={[
+            ["400", "invalid_phone", "Numéro sans indicatif ou mal formé."],
+            ["400", "(message de validation)", "Champ manquant ou mal formé."],
+            [
+              "401",
+              "invalid_client",
+              "Identifiants absents ou faux, ou application suspendue.",
+            ],
+            [
+              "403",
+              "identity_check_not_enabled",
+              "L'API n'est pas activée pour cette application.",
+            ],
+            ["404", "not_found", "Aucune vérification de ce nom pour vous."],
+            [
+              "409",
+              "idempotency_conflict",
+              "Idempotency-Key déjà utilisée pour un autre numéro.",
+            ],
+            ["429", "rate_limited", "Plus de 30 vérifications en une minute."],
+          ]}
+        />
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong className="text-foreground">Par application</strong> : 30
+            vérifications par minute.
+          </li>
+          <li>
+            <strong className="text-foreground">Par adresse IP</strong> : 60
+            requêtes par minute en POST, 120 en GET.
+          </li>
+          <li>
+            <strong className="text-foreground">Par numéro</strong> : au plus 3
+            messages WhatsApp de la même application en 24 heures. Au-delà, la
+            vérification est acceptée comme les autres, mais la personne n'est
+            pas relancée : elle se termine en <Mono>not_completed</Mono>.
+          </li>
+          <li>
+            <strong className="text-foreground">Conservation</strong> : les
+            informations que vous envoyez sont montrées à la personne pour
+            qu'elle reconnaisse la demande, puis effacées 90 jours après la fin
+            de la vérification.
+          </li>
+        </ul>
+      </Section>
+
       <Section id="contact" title="Nous écrire">
         <p>
           Pour enregistrer une application, ou si un secret vous semble
@@ -581,6 +981,61 @@ function Code({ children }: Readonly<{ children: string }>) {
       <pre className="bg-card shadow-soft overflow-x-auto rounded-lg p-4 pr-14 text-xs">
         <code className="font-mono">{children}</code>
       </pre>
+    </div>
+  );
+}
+
+/**
+ * A part of the guide, one level above a section. Rendered as a large heading
+ * with its own anchor so the rail can jump to the start of a product.
+ */
+function Part({
+  id,
+  title,
+  children,
+}: Readonly<{ id: string; title: string; children: ReactNode }>) {
+  return (
+    <section id={id} className="mt-20 scroll-mt-28">
+      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+        Documentation développeur
+      </span>
+      <h2 className="mt-2 text-3xl font-bold">{title}</h2>
+      <div className="text-muted-foreground mt-4 space-y-3 leading-relaxed">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** A small reference table; the first column is always code. */
+function FieldTable({
+  head = ["Champ", "Requis", "Notes"],
+  rows,
+}: Readonly<{ head?: readonly string[]; rows: readonly (readonly string[])[] }>) {
+  return (
+    <div className="bg-card shadow-soft overflow-x-auto rounded-lg">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr className="bg-muted/60">
+            {head.map((cell) => (
+              <th key={cell} className="text-foreground px-3 py-2 font-medium">
+                {cell}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.join("|")} className="even:bg-muted/30 align-top">
+              {row.map((cell, index) => (
+                <td key={`${index}-${cell}`} className="px-3 py-2">
+                  {index === 0 ? <Mono>{cell}</Mono> : cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
