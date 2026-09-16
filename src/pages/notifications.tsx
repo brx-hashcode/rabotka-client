@@ -41,10 +41,6 @@ export default function Notifications() {
   const dismiss = useDismissNotification();
   const clearAll = useClearNotifications();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   // Scrolling the list closes an open row, as it does on WhatsApp.
   useEffect(() => {
     if (!openRowId) return;

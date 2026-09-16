@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Seo } from "@/hooks/use-seo";
 
 type PolicyShellProps = {
@@ -23,12 +22,6 @@ export function PolicyShell({
   canonical,
   children,
 }: Readonly<PolicyShellProps>) {
-  useEffect(() => {
-    if (typeof globalThis !== "undefined") {
-      globalThis.scrollTo(0, 0);
-    }
-  }, []);
-
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pt-28">
       <Seo title={title} description={description} canonical={canonical} />

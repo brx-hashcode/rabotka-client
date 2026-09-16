@@ -29,7 +29,6 @@ import { InvoicesSheetButton } from "@/features/profile/components/invoices-shee
 import { ReferralSheetButton } from "@/features/profile/components/referral-sheet-button";
 import { DomainBadges } from "@/features/profile/components/domain-badges";
 import { SupportContactButton } from "@/features/support";
-import { useEffect } from "react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
 import { cn } from "@/lib/utils";
 
@@ -40,13 +39,6 @@ export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
   const { blocked: kycBlocked, reason: kycReason } = useKycGate();
-
-  useEffect(() => {
-    if (typeof globalThis !== "undefined") {
-      globalThis.history.scrollRestoration = "manual";
-      globalThis.scrollTo(0, 0);
-    }
-  }, []);
 
   if (isLoading) {
     return (
