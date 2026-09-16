@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router";
 
 /**
@@ -11,24 +11,41 @@ import { useLocation, useNavigationType } from "react-router";
  */
 const positions = new Map<string, number>();
 
-/** How long to keep trying to reach a saved offset, in animation frames. */
-const MAX_RESTORE_FRAMES = 60;
+/**
+ * How long to keep trying to reach a saved offset, in animation frames — about
+ * two seconds, for a slow WhatsApp webview still fetching the list.
+ */
+const MAX_RESTORE_FRAMES = 120;
+
+/** Any of these means the user has taken over; restoring must stop. */
+const USER_INPUT_EVENTS = ["wheel", "touchstart", "keydown"] as const;
 
 /**
  * Restores scroll position on back/forward, and scrolls to top on a new page.
  *
- * The previous version scrolled to top on every pathname change, back included
- * — so opening a job from halfway down the feed and returning dropped you at
- * the top of the list, having lost your place.
+ * **Positions are recorded as the user scrolls, not when they leave.** The
+ * first version saved the outgoing offset in an effect cleanup, which looks
+ * right and never works: by the time React runs passive cleanups it has
+ * already committed the next page (the document is a different height) and
+ * run this component's layout effect, which scrolled to the top. Every list
+ * was saved at 0, so going back always landed at the top. Do not move the save
+ * back into a cleanup.
  *
- * Restoring is not a single `scrollTo`: on POP the route is lazy, its data is
- * fetched, and the document is still short when this first runs, so the browser
- * clamps the scroll to the current height. We retry across frames until the
- * page is tall enough to honour the offset, then stop.
+ * Attribution relies on ordering: the layout effect switches `activeKey` to
+ * the new entry synchronously, while scroll events are dispatched on the next
+ * frame. So the clamp caused by the page swap, and our own `scrollTo`, are
+ * recorded against the new entry, and the old one keeps the last offset the
+ * user actually scrolled to.
+ *
+ * Restoring is not a single `scrollTo`: on POP the route may be lazy and its
+ * data in flight, so the document can still be short and the browser clamps
+ * the scroll. We retry across frames until the page is tall enough, and give
+ * up as soon as the user starts scrolling themselves.
  */
 export function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
+  const activeKey = useRef(location.key);
 
   // We restore by hand, so the browser must not also try — otherwise the two
   // fight and where you land depends on which finished last.
@@ -38,20 +55,21 @@ export function ScrollRestoration() {
     }
   }, []);
 
-  // Record where this entry was left, so a later POP back to it can return
-  // there. Runs on cleanup: at that point the scroll position is still the
-  // outgoing page's.
+  // One listener for the app's lifetime; it always writes to whichever entry
+  // is current. `pagehide` covers a tab closed before any scroll event fired.
   useEffect(() => {
-    const key = location.key;
-    const save = () => positions.set(key, globalThis.scrollY);
-    globalThis.addEventListener("pagehide", save);
+    const record = () => positions.set(activeKey.current, globalThis.scrollY);
+    globalThis.addEventListener("scroll", record, { passive: true });
+    globalThis.addEventListener("pagehide", record);
     return () => {
-      save();
-      globalThis.removeEventListener("pagehide", save);
+      globalThis.removeEventListener("scroll", record);
+      globalThis.removeEventListener("pagehide", record);
     };
-  }, [location.key]);
+  }, []);
 
   useLayoutEffect(() => {
+    // First, before any scrolling below — see the ordering note above.
+    activeKey.current = location.key;
     const saved = positions.get(location.key);
 
     // Anything that is not a back/forward is a new page, and a new page starts
@@ -63,8 +81,15 @@ export function ScrollRestoration() {
 
     let frame = 0;
     let raf = 0;
+    let stopped = false;
+
+    const stop = () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+    };
 
     const attempt = () => {
+      if (stopped) return;
       const maxScroll =
         document.documentElement.scrollHeight - globalThis.innerHeight;
 
@@ -84,8 +109,17 @@ export function ScrollRestoration() {
       }
     };
 
+    for (const type of USER_INPUT_EVENTS) {
+      globalThis.addEventListener(type, stop, { passive: true });
+    }
     raf = requestAnimationFrame(attempt);
-    return () => cancelAnimationFrame(raf);
+
+    return () => {
+      stop();
+      for (const type of USER_INPUT_EVENTS) {
+        globalThis.removeEventListener(type, stop);
+      }
+    };
   }, [location.key, navigationType]);
 
   return null;

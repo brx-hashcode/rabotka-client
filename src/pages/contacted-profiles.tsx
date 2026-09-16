@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGoBack } from "@/hooks/use-go-back";
 import { Mail, Phone, ShieldCheck, Star, UserRoundSearch } from "lucide-react";
@@ -131,10 +130,6 @@ export default function ContactedProfiles() {
     isFetching,
     refetch,
   } = useContactedProfiles();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <>
