@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import { Seo } from "@/hooks/use-seo";
 import { cn } from "@/lib/utils";
 import { usePublicContact } from "@/hooks/use-public-contact";
@@ -105,6 +106,16 @@ function useActiveSection(ids: readonly string[]): string | null {
  * a column too thin for code samples, and the page is short enough to scroll.
  */
 function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
+  const activeGroup =
+    SECTIONS.find((section) => section.id === activeId)?.group ?? "login";
+  const [openGroup, setOpenGroup] = useState<string | null>(activeGroup);
+
+  // Follow the reader: scrolling into another product opens its group and
+  // closes the previous one. A click can still close or open any group.
+  useEffect(() => {
+    setOpenGroup(activeGroup);
+  }, [activeGroup]);
+
   return (
     <aside className="hidden w-56 shrink-0 lg:block">
       <nav
@@ -125,42 +136,70 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
         <p className="text-muted-foreground mb-3 px-2.5 text-xs font-semibold uppercase tracking-wide">
           Sommaire
         </p>
-        {GROUPS.map((group) => (
-          <div key={group.id} className="mb-4">
-            {group.label && (
-              <p className="text-foreground mb-1 px-2.5 text-xs font-semibold">
-                {group.label}
-              </p>
-            )}
-            <ul className="space-y-1">
-              {SECTIONS.filter((section) => section.group === group.id).map(
-                (section) => {
-                  const isActive = section.id === activeId;
-                  return (
-                    <li key={section.id}>
-                      <a
-                        href={`#${section.id}`}
-                        aria-current={isActive ? "location" : undefined}
-                        className={cn(
-                          "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
-                          isActive
-                            ? // The same pair the domain badges use: dark brown on
-                              // warm sand. `bg-primary/10 text-primary` was green on
-                              // green — around 2:1 contrast, below the 4.5:1 WCAG AA
-                              // needs for body text, and tiring to read besides.
-                              "bg-secondary text-secondary-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                        )}
-                      >
-                        {section.label}
-                      </a>
-                    </li>
-                  );
-                },
+        {GROUPS.map((group) => {
+          const items = SECTIONS.filter(
+            (section) => section.group === group.id,
+          );
+          // An unlabelled group (the closing "Nous écrire") is always shown.
+          const collapsible = group.label !== null;
+          const isOpen = !collapsible || openGroup === group.id;
+          const panelId = `sommaire-${group.id}`;
+
+          return (
+            <div key={group.id} className="mb-2">
+              {collapsible && (
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => setOpenGroup(isOpen ? null : group.id)}
+                  className="text-foreground hover:bg-muted flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-semibold transition-colors"
+                >
+                  {group.label}
+                  <ChevronDown
+                    aria-hidden
+                    className={cn(
+                      "text-muted-foreground size-3.5 shrink-0 transition-transform",
+                      isOpen && "rotate-180",
+                    )}
+                  />
+                </button>
               )}
-            </ul>
-          </div>
-        ))}
+              {isOpen && (
+                <ul
+                  id={panelId}
+                  // Indented under its heading so the items read as its
+                  // children; the unlabelled group has no heading to sit under.
+                  className={cn("space-y-1", collapsible && "mt-1 pl-3")}
+                >
+                  {items.map((section) => {
+                    const isActive = section.id === activeId;
+                    return (
+                      <li key={section.id}>
+                        <a
+                          href={`#${section.id}`}
+                          aria-current={isActive ? "location" : undefined}
+                          className={cn(
+                            "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
+                            isActive
+                              ? // The same pair the domain badges use: dark brown on
+                                // warm sand. `bg-primary/10 text-primary` was green on
+                                // green — around 2:1 contrast, below the 4.5:1 WCAG AA
+                                // needs for body text, and tiring to read besides.
+                                "bg-secondary text-secondary-foreground font-medium"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                          )}
+                        >
+                          {section.label}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
     </aside>
   );
