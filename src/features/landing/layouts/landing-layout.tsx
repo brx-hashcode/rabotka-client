@@ -15,9 +15,11 @@ export function LandingLayout({ children }: Readonly<LandingLayoutProps>) {
   const shouldShowScrollToTop = !isMobile || isLanding;
 
   return (
-    <div className="min-h-screen bg-background w-full">
+    // A column, so a short page stretches its content and the footer sits at
+    // the bottom of the window instead of leaving empty space below it.
+    <div className="min-h-screen bg-background flex w-full flex-col">
       <Header />
-      <main className="w-full">{children}</main>
+      <main className="w-full flex-1">{children}</main>
       <Footer />
       {shouldShowScrollToTop && <ScrollToTop />}
     </div>
