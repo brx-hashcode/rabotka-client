@@ -6,6 +6,10 @@ type ConsentCardProps = {
   readonly children: React.ReactNode;
   /** Omitted on the error screen, where there is no application to name. */
   readonly appName?: string;
+  /** Replaces the sign-in heading, for Rabotka screens that are not a login. */
+  readonly title?: string;
+  /** Replaces "pour continuer vers <app>". */
+  readonly subtitle?: string;
 };
 
 /**
@@ -21,7 +25,15 @@ type ConsentCardProps = {
  * elevation. It is sized for the ~480px popup a partner opens, and centres
  * itself when it is a full page instead.
  */
-export function ConsentCard({ children, appName }: Readonly<ConsentCardProps>) {
+export function ConsentCard({
+  children,
+  appName,
+  title,
+  subtitle,
+}: Readonly<ConsentCardProps>) {
+  const caption =
+    subtitle ?? (appName ? consentContent.header.continueTo(appName) : null);
+
   return (
     // `bg-background` explicitly: it is the warm off-white (40 30% 98%) that the
     // pure-white card sits on. Without it the page inherits whatever is behind
@@ -37,11 +49,11 @@ export function ConsentCard({ children, appName }: Readonly<ConsentCardProps>) {
               className="h-12 w-auto object-contain"
             />
             <h1 className="mt-6 text-2xl font-semibold tracking-tight">
-              {consentContent.header.title}
+              {title ?? consentContent.header.title}
             </h1>
-            {appName && (
+            {caption && (
               <p className="text-muted-foreground mt-1.5 text-[15px]">
-                {consentContent.header.continueTo(appName)}
+                {caption}
               </p>
             )}
           </header>

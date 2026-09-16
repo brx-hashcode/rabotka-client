@@ -33,6 +33,7 @@ const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
 const OAuthConsent = lazy(() => import("@/pages/oauth-consent"));
+const IdentityCheck = lazy(() => import("@/pages/identity-check"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
 const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
@@ -544,6 +545,20 @@ export function AppRoutes() {
         establish one. AuthGuard would bounce them to /login, which loses the
         interaction id and with it the partner's authorization request.
       */}
+      {/*
+        Opened from the WhatsApp consent request. Signed in by the link's
+        one-tap code; full-page and shell-less, like the login consent.
+      */}
+      <Route
+        path="/identity-checks/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <IdentityCheck />
+            </AuthGuard>
+          </Suspense>
+        }
+      />
       <Route
         path="/oauth/consent"
         element={
