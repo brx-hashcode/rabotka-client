@@ -12,7 +12,7 @@ export const identityCheckContent = {
   loading: "Chargement…",
 
   claimed: {
-    heading: "Informations transmises par ce partenaire :",
+    heading: "Ce que cette entreprise nous a indiqué :",
     name: "Nom",
     country: "Pays",
     city: "Ville",
@@ -23,17 +23,17 @@ export const identityCheckContent = {
   willShare: {
     heading: "Si vous acceptez, Rabotka indiquera seulement :",
     items: [
-      "si ces informations correspondent à votre profil vérifié ;",
-      "si votre identité a été vérifiée par Rabotka, et depuis quand.",
+      "si ces informations correspondent à votre compte Rabotka vérifié ;",
+      "si notre équipe a vérifié votre identité, et depuis quand.",
     ],
     never:
-      "Aucun document, aucune photo et aucune donnée de votre profil ne sera transmis.",
+      "Aucun document, aucune photo et aucune information de votre compte ne sera transmis.",
   },
 
   approve: "Accepter",
   decline: "Refuser",
   notMe:
-    "Vous ne reconnaissez pas cette demande ? Refusez-la : le partenaire ne saura pas si vous avez refusé ou simplement pas répondu.",
+    "Vous ne reconnaissez pas cette demande ? Refusez-la : l'entreprise ne saura pas si vous avez refusé ou simplement pas répondu.",
   expiresAt: (when: string) => `Cette demande expire le ${when}.`,
 
   outcome: {
