@@ -37,25 +37,25 @@ const ISSUER = "https://api.rabotka.work";
  */
 const SECTIONS = [
   { id: "en-bref", label: "En bref", group: "login" },
-  { id: "identifiants", label: "Obtenir des identifiants", group: "login" },
-  { id: "sandbox", label: "Sandbox", group: "login" },
-  { id: "redirect-uris", label: "URI de redirection", group: "login" },
-  { id: "deroule", label: "Le déroulé", group: "login" },
+  { id: "identifiants", label: "Obtenir vos accès", group: "login" },
+  { id: "sandbox", label: "Tester sans vrai compte", group: "login" },
+  { id: "redirect-uris", label: "Adresses de retour", group: "login" },
+  { id: "deroule", label: "Comment ça se passe", group: "login" },
   { id: "jetons", label: "Ce que vous recevez", group: "login" },
-  { id: "sans-bibliotheque", label: "Sans bibliothèque", group: "login" },
+  { id: "sans-bibliotheque", label: "Sans outil tout fait", group: "login" },
   { id: "exemple", label: "Exemple complet", group: "login" },
-  { id: "verification", label: "Vérification vs téléphone", group: "login" },
-  { id: "sub", label: "Indexer sur sub", group: "login" },
-  { id: "absences", label: "Absences volontaires", group: "login" },
-  { id: "popup", label: "Popup ou redirection", group: "login" },
+  { id: "verification", label: "Téléphone ou identité vérifiée", group: "login" },
+  { id: "sub", label: "Reconnaître un utilisateur", group: "login" },
+  { id: "absences", label: "Ce que nous ne fournissons pas", group: "login" },
+  { id: "popup", label: "Fenêtre ou page entière", group: "login" },
   { id: "verification-identite", label: "En bref", group: "identity" },
-  { id: "ic-acces", label: "Activer l'API", group: "identity" },
-  { id: "ic-creer", label: "Créer une vérification", group: "identity" },
-  { id: "ic-statuts", label: "Statuts", group: "identity" },
+  { id: "ic-acces", label: "Activer le service", group: "identity" },
+  { id: "ic-creer", label: "Demander une vérification", group: "identity" },
+  { id: "ic-statuts", label: "Où en est la demande", group: "identity" },
   { id: "ic-resultat", label: "Lire le résultat", group: "identity" },
-  { id: "ic-webhooks", label: "Webhooks", group: "identity" },
+  { id: "ic-webhooks", label: "Recevoir le résultat", group: "identity" },
   { id: "ic-exemple", label: "Exemple complet", group: "identity" },
-  { id: "ic-sandbox", label: "Sandbox", group: "identity" },
+  { id: "ic-sandbox", label: "Tester sans vrai compte", group: "identity" },
   { id: "ic-erreurs", label: "Erreurs et limites", group: "identity" },
   { id: "contact", label: "Nous écrire", group: "other" },
 ] as const;
@@ -275,21 +275,30 @@ export default function DevelopersApiDocumentation() {
           </p>
         )}
 
-      <Section id="en-bref" title="En bref">
+      <Section
+        id="en-bref"
+        title="En bref"
+        plain="Vos utilisateurs se connectent chez vous avec leur compte Rabotka. Vous recevez leur nom, leur numéro et, surtout, la réponse à la question « notre équipe a-t-elle vérifié leur identité ? »."
+      >
         <p>
-          Rabotka est un fournisseur OpenID Connect standard (OAuth 2.1,
-          Authorization Code + PKCE). Il n'y a rien de spécifique à écrire :
-          pointez n'importe quelle bibliothèque OIDC vers
+          Techniquement, Rabotka suit la norme de connexion OpenID Connect (OAuth 2.1,
+          Authorization Code + PKCE), la même que « Se connecter avec Google ».
+          Il n'y a rien de spécifique à écrire : donnez à votre bibliothèque de
+          connexion (OIDC) cette adresse
         </p>
         <Code>{`${ISSUER}/.well-known/openid-configuration`}</Code>
         <p>
-          et elle se configure seule. Testé avec <Mono>openid-client</Mono>{" "}
+          et elle se règle toute seule. Testé avec <Mono>openid-client</Mono>{" "}
           (Node), NextAuth/Auth.js, Passport, <Mono>expo-auth-session</Mono> et
           Spring Security.
         </p>
       </Section>
 
-      <Section id="identifiants" title="Obtenir des identifiants">
+      <Section
+        id="identifiants"
+        title="Obtenir vos accès"
+        plain="Écrivez-nous : nous créons votre application et vous envoyons deux codes, un identifiant public (client_id) et un mot de passe secret (client_secret) que seul votre serveur connaît."
+      >
         <p>
           Les applications sont enregistrées par un administrateur Rabotka — il
           n'y a pas d'inscription en libre-service. Rabotka se porte garant de
@@ -298,25 +307,30 @@ export default function DevelopersApiDocumentation() {
         </p>
         <p>
           Écrivez-nous avec le nom de votre application, une description (elle
-          s'affiche sur l'écran de consentement), votre logo et vos URI de
-          redirection. Vous recevrez un <Mono>client_id</Mono> et un{" "}
+          s'affiche sur l'écran où la personne donne son accord), votre logo et
+          vos adresses de retour. Vous recevrez un <Mono>client_id</Mono> et un{" "}
           <Mono>client_secret</Mono>. Demandez la même chose pour{" "}
-          <SectionLink to="sandbox">le sandbox</SectionLink>{" "}
+          <SectionLink to="sandbox">l'application de test</SectionLink>{" "}
           dans le même message : c'est avec celui-là que vous développerez, et
           les deux s'enregistrent en une fois.
         </p>
         <Callout>
-          Le secret n'est affiché qu'une seule fois. Rabotka n'en conserve qu'une
-          empreinte et ne peut pas vous le redonner — en cas de perte, un
-          administrateur le régénère.
+          Le mot de passe secret n'est affiché qu'une seule fois. Rabotka n'en
+          garde qu'une empreinte et ne peut pas vous le redonner — en cas de
+          perte, nous en créons un nouveau.
         </Callout>
       </Section>
 
-      <Section id="sandbox" title="Le sandbox">
+      <Section
+        id="sandbox"
+        title="Tester sans vrai compte"
+        plain="Une application de test (« sandbox ») vous permet de tout essayer avec deux faux comptes et un code fixe, sans vrai téléphone et sans toucher à de vraies personnes."
+      >
         <p>
           Construire votre intégration ne devrait pas demander un vrai compte
           Rabotka ni un vrai téléphone. Demandez-nous une{" "}
-          <strong className="text-foreground">application sandbox</strong> :
+          <strong className="text-foreground">application de test</strong>{" "}
+          (« sandbox ») :
           elle reçoit son propre <Mono>client_id</Mono> et son propre{" "}
           <Mono>client_secret</Mono>, et n'authentifie que deux utilisateurs
           fixes, avec un code fixe et sans aucun message WhatsApp.
@@ -341,10 +355,10 @@ Code de vérification : 111111`}</Code>
           Il n'y a pas d'URL distincte
         </p>
         <p>
-          Même émetteur, même document de découverte, mêmes points de
-          terminaison — <Mono>{ISSUER}</Mono> dans les deux cas. C'est le{" "}
-          <Mono>client_id</Mono> que vous présentez qui décide, rien d'autre. Le
-          PKCE est réel, la signature RS256 est réelle et se vérifie contre le
+          Même serveur, même adresse de configuration, mêmes adresses d'appel — <Mono>{ISSUER}</Mono> dans les deux cas. C'est le{" "}
+          <Mono>client_id</Mono> que vous présentez qui décide, rien d'autre. La
+          protection PKCE et la signature des jetons sont les mêmes qu'en production,
+          et la signature et se vérifie contre le
           même <Mono>/.well-known/jwks.json</Mono> : du code qui fonctionne
           contre le sandbox fonctionne en production sans une ligne de
           changement, et c'est tout l'intérêt.
@@ -353,7 +367,7 @@ Code de vérification : 111111`}</Code>
         <p className="text-foreground font-medium">Ce qui diffère quand même</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
-            Une application sandbox n'authentifie{" "}
+            Une application de test n'authentifie{" "}
             <strong className="text-foreground">que</strong> ces deux numéros.
             Tout autre numéro reçoit « aucun compte », y compris le vôtre. La
             réciproque tient aussi : ces deux numéros ne fonctionnent sur aucune
@@ -380,20 +394,22 @@ Code de vérification : 111111`}</Code>
 
         <Callout>
           Le code <Mono>111111</Mono> n'a rien de secret et n'a de sens que pour
-          ces deux numéros, sur une application sandbox. Il n'ouvre aucun compte
+          ces deux numéros, sur une application de test. Il n'ouvre aucun compte
           réel, nulle part.
         </Callout>
       </Section>
 
-      <Section id="redirect-uris" title="Les URI de redirection sont comparées à l'identique">
+      <Section
+        id="redirect-uris"
+        title="Les adresses de retour doivent correspondre exactement"
+        plain="Après la connexion, Rabotka renvoie la personne vers une page de votre site (l'« adresse de retour » ou redirect URI). Donnez-nous chaque adresse exacte : la moindre différence la fait refuser, pour protéger vos utilisateurs."
+      >
         <p>
           <Mono>https://vous.com/callback</Mono> et{" "}
           <Mono>https://vous.com/callback/</Mono> sont deux URI différentes.{" "}
-          <Mono>http://</Mono> et <Mono>https://</Mono> aussi. Il n'y a ni
-          joker ni motif : une URI comparée approximativement est une
-          redirection ouverte, et une redirection ouverte sur un point de
-          terminaison d'autorisation livre les codes de vos utilisateurs à qui
-          les demande.
+          <Mono>http://</Mono> et <Mono>https://</Mono> aussi. Pas de joker (*) : si nous acceptions des adresses approximatives, un
+          pirate pourrait faire renvoyer vos utilisateurs — et leur code de
+          connexion — vers son propre site.
         </p>
         <p>
           Déclarez chacune en toutes lettres. <Mono>http://</Mono> n'est accepté
@@ -401,18 +417,22 @@ Code de vérification : 111111`}</Code>
         </p>
       </Section>
 
-      <Section id="deroule" title="Le déroulé">
+      <Section
+        id="deroule"
+        title="Comment ça se passe"
+        plain="Votre site envoie la personne chez Rabotka, elle se connecte avec un code WhatsApp et accepte de partager ses informations, puis Rabotka la renvoie chez vous avec un code à usage unique que votre serveur échange contre ses informations."
+      >
         <ol className="list-decimal space-y-3 pl-5">
           <li>
             Redirigez l'utilisateur vers <Mono>/oauth/authorize</Mono> avec{" "}
             <Mono>state</Mono>, <Mono>nonce</Mono> et un{" "}
-            <Mono>code_challenge</Mono> (PKCE — obligatoire, y compris pour les
-            clients confidentiels).
+            <Mono>code_challenge</Mono> (PKCE : une protection qui rend inutilisable un code volé —
+            obligatoire pour tous).
           </li>
           <li>
             Il saisit son numéro, reçoit un code sur WhatsApp, puis accepte ou
-            refuse le partage. S'il a déjà une session Rabotka, il ne voit que
-            l'écran de consentement.
+            refuse le partage. S'il est déjà connecté à Rabotka, il ne voit que
+            l'écran d'accord.
           </li>
           <li>
             Rabotka le renvoie vers votre <Mono>redirect_uri</Mono> avec un{" "}
@@ -421,16 +441,21 @@ Code de vérification : 111111`}</Code>
           </li>
           <li>
             <strong className="text-foreground">Depuis votre serveur</strong>,
-            échangez le code contre les jetons. Le code vit 60 secondes et ne
-            sert qu'une fois.
+            échangez le code contre les informations de la personne. Le code
+            ne vit que 60 secondes et ne sert qu'une fois.
           </li>
         </ol>
       </Section>
 
-      <Section id="jetons" title="Ce que vous recevez">
+      <Section
+        id="jetons"
+        title="Ce que vous recevez"
+        plain="Vous recevez un « jeton d'identité » (id_token) : un petit fichier signé par Rabotka qui contient les informations de la personne."
+      >
         <p>
-          Un <Mono>id_token</Mono> : un JWT RS256 valable une heure, à vérifier
-          contre <Mono>/.well-known/jwks.json</Mono>.
+          Un <Mono>id_token</Mono> : un jeton signé (format JWT) valable une
+          heure. Sa signature se vérifie avec nos clés publiques, publiées à{" "}
+          <Mono>/.well-known/jwks.json</Mono>.
         </p>
         <Code>{`{
   "sub": "Xk9mP2vQ...",
@@ -443,10 +468,14 @@ Code de vérification : 111111`}</Code>
 }`}</Code>
       </Section>
 
-      <Section id="sans-bibliotheque" title="Sans bibliothèque OIDC">
+      <Section
+        id="sans-bibliotheque"
+        title="Sans outil tout fait"
+        plain="Vous pouvez aussi tout faire à la main, en trois appels à notre serveur, sans installer de bibliothèque de connexion (OIDC)."
+      >
         <p>
-          Rien n'oblige à utiliser une bibliothèque : le protocole n'est que du
-          HTTP et du JSON. Trois appels suffisent, dans n'importe quel langage
+          Rien n'oblige à utiliser une bibliothèque : il ne s'agit que de
+          requêtes web ordinaires. Trois appels suffisent, dans n'importe quel langage
           disposant d'un client HTTP et de SHA-256.
         </p>
 
@@ -484,8 +513,8 @@ code_challenge=$(printf %s "$code_verifier" \\
   -d code_verifier="$code_verifier"`}</Code>
         <p>
           La réponse contient <Mono>id_token</Mono> et <Mono>access_token</Mono>.
-          Pour lire les informations de l'utilisateur, décodez la charge utile du
-          JWT (la partie du milieu, en base64url) ou appelez{" "}
+          Pour lire les informations de l'utilisateur, lisez le contenu du jeton
+          (la partie du milieu, encodée en base64url) ou appelez{" "}
           <Mono>/userinfo</Mono> :
         </p>
         <Code>{`curl -s ${ISSUER}/api/v1/oauth/userinfo \\
@@ -493,17 +522,20 @@ code_challenge=$(printf %s "$code_verifier" \\
 
         <Callout>
           <strong>Pouvez-vous sauter la vérification de signature ?</strong> Oui,
-          mais uniquement ici. OpenID Connect Core §3.1.3.7 l'autorise lorsque
-          l'ID token arrive <em>directement</em> du point de terminaison{" "}
-          <Mono>/token</Mono> : la validation TLS du serveur atteste déjà de
-          l'émetteur. Dès que le jeton circule autrement — transmis à un autre
+          mais uniquement ici. La norme (OpenID Connect Core §3.1.3.7) l'autorise quand le jeton arrive{" "}
+          <em>directement</em> de l'adresse <Mono>/token</Mono> : la connexion
+          sécurisée (https) prouve déjà qu'il vient de Rabotka. Dès que le jeton circule autrement — transmis à un autre
           service, mis en cache, relayé par un client — vous devez vérifier sa
           signature contre <Mono>/.well-known/jwks.json</Mono>. Vérifiez toujours{" "}
           <Mono>exp</Mono>, <Mono>aud</Mono> et <Mono>nonce</Mono>.
         </Callout>
       </Section>
 
-      <Section id="exemple" title="Exemple complet">
+      <Section
+        id="exemple"
+        title="Exemple complet"
+        plain="Un exemple prêt à copier dans quatre langages : le bouton de connexion, le retour sur votre site et la création de votre propre compte utilisateur."
+      >
         <p>
           Vous avez déjà votre <Mono>client_id</Mono> et votre{" "}
           <Mono>client_secret</Mono>. Voici l'intégration entière — le bouton, le
@@ -518,11 +550,15 @@ code_challenge=$(printf %s "$code_verifier" \\
           <Mono>code_verifier</Mono> en session côté serveur, vérifient le{" "}
           <Mono>state</Mono> au retour, échangent le code depuis le serveur,
           puis contrôlent <Mono>aud</Mono> et <Mono>nonce</Mono> avant de faire
-          confiance aux claims.
+          confiance aux informations reçues.
         </p>
       </Section>
 
-      <Section id="verification" title="phone_number_verified n'est pas rabotka_verified">
+      <Section
+        id="verification"
+        title="Numéro confirmé n'est pas identité vérifiée"
+        plain="Deux informations se ressemblent mais ne disent pas la même chose : l'une confirme que la personne a bien ce numéro, l'autre que notre équipe a vérifié sa pièce d'identité. Seule la seconde prouve qui elle est."
+      >
         <p>
           C'est la distinction à ne pas manquer.
         </p>
@@ -534,9 +570,8 @@ code_challenge=$(printf %s "$code_verifier" \\
             contrôle du numéro, rien de plus.
           </li>
           <li>
-            <Mono>rabotka_verified</Mono> est la décision d'un administrateur
-            Rabotka après examen d'une pièce d'identité officielle et d'un
-            selfie. C'est la donnée qui a de la valeur.
+            <Mono>rabotka_verified</Mono> est la décision de notre équipe après
+            examen d'une pièce d'identité officielle et d'un selfie. C'est la donnée qui a de la valeur.
           </li>
         </ul>
         <p>
@@ -546,32 +581,40 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Section id="sub" title="Indexez vos utilisateurs sur sub">
+      <Section
+        id="sub"
+        title="Reconnaître un utilisateur"
+        plain="Pour reconnaître une personne à sa prochaine connexion, utilisez son identifiant Rabotka propre à votre application (sub), pas son numéro de téléphone."
+      >
         <p>
-          Le <Mono>sub</Mono> d'une personne est propre à votre application : la
+          Le <Mono>sub</Mono> (l'identifiant de la personne) est propre à votre application : la
           même personne présente un <Mono>sub</Mono> entièrement différent chez
           un autre partenaire, et les deux ne peuvent pas être rapprochés.
         </p>
         <p>
-          Il ne change jamais pour vous. N'indexez pas sur{" "}
-          <Mono>phone_number</Mono> — les numéros changent de main, et un numéro
+          Il ne change jamais pour vous. N'utilisez pas{" "}
+          <Mono>phone_number</Mono> pour reconnaître quelqu'un — les numéros changent de main, et un numéro
           recyclé fusionnerait silencieusement deux comptes.
         </p>
       </Section>
 
-      <Section id="absences" title="Deux absences volontaires">
+      <Section
+        id="absences"
+        title="Ce que nous ne fournissons pas"
+        plain="Deux choses que d'autres services proposent et que nous ne donnons volontairement pas, et comment vous en passer."
+      >
         <p>
           <strong className="text-foreground">
-            Le jeton d'accès n'est pas un JWT.
+            Le jeton d'accès n'est pas lisible.
           </strong>{" "}
-          C'est une chaîne opaque d'une heure qui ne sert qu'à{" "}
-          <Mono>/userinfo</Mono>. Un partenaire à qui l'on remet deux JWT finit
-          par vérifier le mauvais — ou par lire les claims du jeton d'accès sans
-          rien vérifier du tout. L'opacité rend aussi la révocation immédiate.
+          C'est un simple code, valable une heure, qui ne sert qu'à appeler{" "}
+          <Mono>/userinfo</Mono>. Les informations se lisent dans le jeton
+          d'identité, jamais dans celui-ci — et nous pouvons l'annuler à tout
+          instant.
         </p>
         <p>
           <strong className="text-foreground">
-            Il n'y a pas de refresh token.
+            Il n'y a pas de jeton de renouvellement (refresh token).
           </strong>{" "}
           Vous créez votre propre compte et votre propre session à partir de
           l'ID token : détenir en plus un identifiant durable sur Rabotka
@@ -582,12 +625,16 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Section id="popup" title="Fenêtre surgissante ou redirection">
+      <Section
+        id="popup"
+        title="Fenêtre ou page entière"
+        plain="La connexion peut s'ouvrir dans une petite fenêtre ou sur toute la page. La page entière fonctionne partout, surtout sur téléphone."
+      >
         <p>
           Le protocole est une redirection. Une popup n'est qu'une fenêtre dans
           laquelle vous choisissez de l'ouvrir : c'est votre page de callback
           qui détecte qu'elle s'y trouve, transmet le code à sa fenêtre parente
-          et se ferme. Rabotka n'émet aucun <Mono>postMessage</Mono>.
+          et se ferme. Rabotka n'envoie aucun message à votre fenêtre (pas de <Mono>postMessage</Mono>).
         </p>
         <p>
           La redirection pleine page reste le choix le plus fiable, surtout sur
@@ -597,7 +644,11 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Section id="verification-identite" title="En bref">
+      <Section
+        id="verification-identite"
+        title="En bref"
+        plain="Vous nous donnez un numéro WhatsApp et un nom. Nous demandons son accord à la personne ; si elle accepte, nous vous disons si ces informations correspondent à son compte vérifié — sans jamais vous montrer ce compte."
+      >
         <p>
           Votre serveur demande à Rabotka :{" "}
           <em>la personne derrière ce numéro WhatsApp est-elle bien celle
@@ -623,40 +674,56 @@ code_challenge=$(printf %s "$code_verifier" \\
             heures.
           </li>
           <li>
-            Rabotka envoie le résultat signé à votre webhook. Vous pouvez aussi
+            Rabotka envoie le résultat signé à votre adresse de résultats (webhook). Vous pouvez aussi
             interroger <Mono>GET /api/v1/identity-checks/{"{id}"}</Mono>.
           </li>
         </ol>
       </Section>
 
-      <Section id="ic-acces" title="Activer l'API">
+      <Section
+        id="ic-acces"
+        title="Activer le service"
+        plain="Nous activons le service pour votre application. Vous nous donnez l'adresse de votre serveur où envoyer les résultats (webhook)."
+      >
         <p>
-          L'API utilise votre application « Connexion avec Rabotka » : même{" "}
-          <Mono>client_id</Mono>, même <Mono>client_secret</Mono>. Un
-          administrateur Rabotka doit l'activer pour votre application, et vous
-          devez lui donner une <strong className="text-foreground">URL de
-          webhook</strong> :
+          Le service utilise votre application « Connexion avec Rabotka » :
+          mêmes codes <Mono>client_id</Mono> et <Mono>client_secret</Mono>.
+          Notre équipe l'active pour votre application. Donnez-nous
+          l'
+          <strong className="text-foreground">
+            adresse de résultats (URL de webhook)
+          </strong>
+          , c'est-à-dire l'adresse de votre serveur où nous enverrons chaque
+          résultat. Elle doit être :
         </p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
             en <Mono>https</Mono> ; <Mono>http://localhost</Mono> n'est accepté
-            que pour une application sandbox ;
+            que pour une application de test ;
           </li>
-          <li>sans identifiants ni fragment (<Mono>#</Mono>) dans l'URL.</li>
+          <li>
+            sans nom d'utilisateur, mot de passe ni signe <Mono>#</Mono> dans
+            l'adresse.
+          </li>
         </ul>
         <p>
           Si vous n'utilisez que la vérification d'identité, vous n'avez besoin
-          d'aucune URI de redirection. Tant que l'API n'est pas activée, chaque
+          d'aucune adresse de retour. Tant que le service n'est pas activé, chaque
           appel renvoie <Mono>403 identity_check_not_enabled</Mono>.
         </p>
         <p>
-          Authentifiez-vous en HTTP Basic avec vos identifiants, comme sur{" "}
-          <Mono>/oauth/token</Mono>. Les identifiants dans le corps de la
-          requête ne sont pas acceptés ici.
+          Chaque appel envoie vos deux codes (client_id et client_secret) dans
+          l'en-tête <Mono>Authorization</Mono>, au format « HTTP Basic », comme
+          pour <Mono>/oauth/token</Mono>. Ils ne sont pas acceptés dans le
+          corps de la requête.
         </p>
       </Section>
 
-      <Section id="ic-creer" title="Créer une vérification">
+      <Section
+        id="ic-creer"
+        title="Demander une vérification"
+        plain="Votre serveur envoie le numéro et le nom de la personne. La réponse immédiate dit seulement que la demande est en attente."
+      >
         <Code>{`curl -s -X POST ${ISSUER}/api/v1/identity-checks \\
   -u "VOTRE_CLIENT_ID:VOTRE_CLIENT_SECRET" \\
   -H "Content-Type: application/json" \\
@@ -697,9 +764,10 @@ code_challenge=$(printf %s "$code_verifier" \\
           ]}
         />
         <p>
-          L'en-tête <Mono>Idempotency-Key</Mono> est facultatif : un nouvel
-          essai avec la même clé renvoie la vérification d'origine au lieu d'en
-          créer une seconde. Réutiliser une clé pour un autre numéro renvoie{" "}
+          L'en-tête <Mono>Idempotency-Key</Mono> (une « clé anti-doublon »)
+          est facultatif : si votre serveur renvoie la même demande avec la
+          même clé, par exemple après une coupure réseau, vous récupérez la
+          vérification d'origine au lieu d'en créer une seconde. Réutiliser une clé pour un autre numéro renvoie{" "}
           <Mono>409 idempotency_conflict</Mono>.
         </p>
         <Code>{`{
@@ -712,7 +780,11 @@ code_challenge=$(printf %s "$code_verifier" \\
 }`}</Code>
       </Section>
 
-      <Section id="ic-statuts" title="Statuts">
+      <Section
+        id="ic-statuts"
+        title="Où en est la demande"
+        plain="Une demande est en attente, terminée avec un résultat, ou terminée sans résultat. Vous ne savez jamais pourquoi elle n'a pas abouti : c'est voulu, pour protéger les personnes."
+      >
         <FieldTable
           head={["status", "Signification"]}
           rows={[
@@ -740,7 +812,11 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Section id="ic-resultat" title="Lire le résultat">
+      <Section
+        id="ic-resultat"
+        title="Lire le résultat"
+        plain="Le résultat dit si chaque information correspond, si l'identité a été vérifiée par notre équipe, une note sur 100 et une suggestion : accepter, examiner ou refuser."
+      >
         <Code>{`{
   "id": "5b0c…",
   "status": "completed",
@@ -821,7 +897,11 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Section id="ic-webhooks" title="Webhooks">
+      <Section
+        id="ic-webhooks"
+        title="Recevoir le résultat"
+        plain="Rabotka prévient votre serveur dès que la personne a répondu, en envoyant le résultat signé à votre adresse (webhook). Votre serveur vérifie la signature avant de s'y fier."
+      >
         <p>
           Quand une vérification se termine (<Mono>completed</Mono> ou{" "}
           <Mono>not_completed</Mono>), Rabotka envoie une requête POST à votre
@@ -834,17 +914,18 @@ User-Agent: Rabotka-Webhooks/1.0
 { "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6…" }`}</Code>
         <p>
           Le résultat se trouve <strong className="text-foreground">à
-          l'intérieur</strong> de <Mono>jws</Mono> : un JWS compact, signé en
-          RS256 avec{" "}
+          l'intérieur</strong> de <Mono>jws</Mono> : un jeton signé (format
+          JWS), avec{" "}
           <strong className="text-foreground">
-            la même clé que les ID tokens
+            la même clé que les jetons de connexion
           </strong>
-          . Votre serveur le vérifie contre{" "}
-          <Mono>{`${ISSUER}/.well-known/jwks.json`}</Mono>, puis lit la charge
-          utile. Il n'y a pas de secret de webhook distinct.
+          . Votre serveur vérifie la signature avec nos clés publiques (
+          <Mono>{`${ISSUER}/.well-known/jwks.json`}</Mono>), puis lit le
+          contenu. Une bibliothèque JWT le fait en trois lignes — voir
+          l'exemple complet. Il n'y a pas de mot de passe de webhook à gérer.
         </p>
         <FieldTable
-          head={["En-tête ou claim", "Valeur"]}
+          head={["Champ du jeton", "Valeur"]}
           rows={[
             ["typ (en-tête)", "rabotka-identity-check+jwt"],
             ["iss", ISSUER],
@@ -880,7 +961,11 @@ User-Agent: Rabotka-Webhooks/1.0
         </ul>
       </Section>
 
-      <Section id="ic-exemple" title="Exemple complet">
+      <Section
+        id="ic-exemple"
+        title="Exemple complet"
+        plain="Un exemple prêt à copier dans quatre langages : demander une vérification, puis recevoir et vérifier le résultat."
+      >
         <p>
           Créer une vérification, puis recevoir et vérifier le webhook. Les
           quatre exemples contrôlent la signature, <Mono>iss</Mono> et{" "}
@@ -889,9 +974,14 @@ User-Agent: Rabotka-Webhooks/1.0
         <CodeSampleTabs samples={IDENTITY_CHECK_CODE_SAMPLES} />
       </Section>
 
-      <Section id="ic-sandbox" title="Sandbox">
+      <Section
+        id="ic-sandbox"
+        title="Tester sans vrai compte"
+        plain="Avec une application de test, les vérifications se terminent aussitôt, sans contacter personne."
+      >
         <p>
-          Une application sandbox ne contacte jamais une vraie personne, et ses
+          Une application de test (sandbox) ne contacte jamais une vraie
+          personne, et ses
           vérifications se terminent aussitôt :
         </p>
         <FieldTable
@@ -907,12 +997,16 @@ User-Agent: Rabotka-Webhooks/1.0
         />
         <p>
           Envoyez un autre nom pour voir les niveaux <Mono>partial</Mono> et{" "}
-          <Mono>none</Mono>. Le webhook d'une application sandbox peut utiliser{" "}
+          <Mono>none</Mono>. L'adresse de résultats d'une application de test peut utiliser{" "}
           <Mono>http://localhost</Mono>.
         </p>
       </Section>
 
-      <Section id="ic-erreurs" title="Erreurs et limites">
+      <Section
+        id="ic-erreurs"
+        title="Erreurs et limites"
+        plain="Ce que signifient les messages d'erreur, et combien de demandes vous pouvez envoyer."
+      >
         <p>
           Les erreurs ont la même forme que celles des points de terminaison
           OIDC :
@@ -1003,14 +1097,29 @@ function Section({
   id,
   title,
   children,
-}: Readonly<{ id: SectionId; title: string; children: ReactNode }>) {
+  plain,
+}: Readonly<{
+  id: SectionId;
+  title: string;
+  /** One sentence for readers who are not developers, shown first. */
+  plain?: string;
+  children: ReactNode;
+}>) {
   const { active } = useContext(SectionContext);
   if (active !== id) return null;
 
   return (
     <section id={id} className="mt-8">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <div className="text-muted-foreground mt-3 space-y-3 leading-relaxed">
+      {plain && (
+        <div className="bg-secondary text-secondary-foreground mt-3 rounded-lg p-4 text-sm leading-relaxed">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide">
+            En clair
+          </p>
+          <p>{plain}</p>
+        </div>
+      )}
+      <div className="text-muted-foreground mt-4 space-y-3 leading-relaxed">
         {children}
       </div>
     </section>
