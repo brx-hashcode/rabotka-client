@@ -1,5 +1,13 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Seo } from "@/hooks/use-seo";
 import { cn } from "@/lib/utils";
 import { usePublicContact } from "@/hooks/use-public-contact";
@@ -59,59 +67,40 @@ const GROUPS = [
   { id: "other", label: null },
 ] as const;
 
-/**
- * Hoisted rather than derived inside the component: a fresh array on every
- * render is a fresh dependency, which would tear down and rebuild the
- * IntersectionObserver on every render.
- */
 const SECTION_IDS = SECTIONS.map((section) => section.id);
 
+type SectionId = (typeof SECTIONS)[number]["id"];
+
 /**
- * Which section the reader is currently in.
- *
- * `IntersectionObserver` against a band near the top of the viewport rather
- * than scroll-offset arithmetic: the latter has to be redone every time a
- * section's height changes, and gets the answer wrong while the smooth-scroll
- * from a sidebar click is still animating.
+ * The section on screen, kept in `?section=` so a section can be linked to,
+ * bookmarked and reached with the back button. Only that section renders.
  */
-function useActiveSection(ids: readonly string[]): string | null {
-  const [active, setActive] = useState<string | null>(ids[0] ?? null);
+const sectionParser = parseAsStringLiteral(SECTION_IDS)
+  .withDefault("en-bref")
+  .withOptions({ history: "push" });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      // Top ~20% of the viewport: a heading is "current" once it reaches
-      // reading position, not when it first appears at the bottom.
-      { rootMargin: "-96px 0px -75% 0px", threshold: 0 },
-    );
+type SectionNav = { active: SectionId; go: (id: SectionId) => void };
 
-    for (const id of ids) {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
-    }
+const SectionContext = createContext<SectionNav>({
+  active: "en-bref",
+  go: () => undefined,
+});
 
-    return () => observer.disconnect();
-  }, [ids]);
-
-  return active;
+function isSectionId(value: string): value is SectionId {
+  return (SECTION_IDS as readonly string[]).includes(value);
 }
 
 /**
  * The rail. Hidden below `lg` — on a narrow screen it would push the prose into
  * a column too thin for code samples, and the page is short enough to scroll.
  */
-function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
-  const activeGroup =
-    SECTIONS.find((section) => section.id === activeId)?.group ?? "login";
+function TableOfContents() {
+  const { active: activeId, go } = useContext(SectionContext);
+  const activeGroup = groupOf(activeId);
   const [openGroup, setOpenGroup] = useState<string | null>(activeGroup);
 
-  // Follow the reader: scrolling into another product opens its group and
-  // closes the previous one. A click can still close or open any group.
+  // Opening a section from elsewhere (a link, previous/next, the back button)
+  // opens its group. A click can still close or open any group.
   useEffect(() => {
     setOpenGroup(activeGroup);
   }, [activeGroup]);
@@ -177,8 +166,12 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
                     return (
                       <li key={section.id}>
                         <a
-                          href={`#${section.id}`}
-                          aria-current={isActive ? "location" : undefined}
+                          href={`?section=${section.id}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            go(section.id);
+                          }}
+                          aria-current={isActive ? "page" : undefined}
                           className={cn(
                             "block rounded-md px-2.5 py-1.5 text-sm leading-snug transition-colors",
                             isActive
@@ -219,18 +212,36 @@ function TableOfContents({ activeId }: Readonly<{ activeId: string | null }>) {
  * partner needs before they have talked to anyone.
  */
 export default function DevelopersApiDocumentation() {
-  useEffect(() => {
-    globalThis.scrollTo(0, 0);
-  }, []);
+  const [section, setSection] = useQueryState("section", sectionParser);
 
-  const activeId = useActiveSection(SECTION_IDS);
+  const go = useCallback(
+    (id: SectionId) => {
+      void setSection(id);
+      globalThis.scrollTo({ top: 0 });
+    },
+    [setSection],
+  );
+
+  // Links written before sections had their own URL used `#sandbox`; open
+  // the section they name instead of the default one.
+  useEffect(() => {
+    const hash = globalThis.location.hash.slice(1);
+    const hasParam = new URLSearchParams(globalThis.location.search).has(
+      "section",
+    );
+    if (!hasParam && isSectionId(hash)) void setSection(hash);
+    else globalThis.scrollTo(0, 0);
+  }, [setSection]);
+
   const { data: contact } = usePublicContact();
   const contactEmail = (contact as PublicContactInfo | undefined)?.email;
+  const group = GROUPS.find((g) => g.id === groupOf(section));
 
   return (
     // `section-container` rather than a bespoke max-width: the header and the
     // footer both use it, so the rail lines up with the logo above it instead
     // of starting at an unexplained offset.
+    <SectionContext.Provider value={{ active: section, go }}>
     <div className="section-container flex gap-12 pb-20 pt-24 lg:pt-28">
       <Seo
         title="Documentation développeur Rabotka"
@@ -238,25 +249,31 @@ export default function DevelopersApiDocumentation() {
         canonical="/developers/api-documentation"
       />
 
-      <TableOfContents activeId={activeId} />
+      <TableOfContents />
 
       <main className="min-w-0 max-w-3xl flex-1">
         <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
           Documentation développeur
         </span>
 
-        <h1 className="mt-2 text-3xl font-bold">Connexion avec Rabotka</h1>
+        <h1 className="mt-2 text-3xl font-bold">
+          {group?.label ?? "Nous écrire"}
+        </h1>
 
-        <p className="text-muted-foreground mt-4 leading-relaxed">
-          Authentifiez vos utilisateurs avec leur compte Rabotka. Vous recevez
-          leur identité{" "}
-          <strong className="text-foreground">
-            et le verdict de vérification KYC de Rabotka
-          </strong>{" "}
-          : un administrateur a lu leur pièce d'identité et l'a confrontée à un
-          selfie. C'est la raison d'intégrer — n'importe quel fournisseur
-          d'identité peut confirmer un numéro de téléphone.
-        </p>
+        <MobileSectionPicker />
+
+        {section === "en-bref" && (
+          <p className="text-muted-foreground mt-4 leading-relaxed">
+            Authentifiez vos utilisateurs avec leur compte Rabotka. Vous
+            recevez leur identité{" "}
+            <strong className="text-foreground">
+              et le verdict de vérification KYC de Rabotka
+            </strong>{" "}
+            : un administrateur a lu leur pièce d'identité et l'a confrontée à
+            un selfie. C'est la raison d'intégrer — n'importe quel fournisseur
+            d'identité peut confirmer un numéro de téléphone.
+          </p>
+        )}
 
       <Section id="en-bref" title="En bref">
         <p>
@@ -284,12 +301,7 @@ export default function DevelopersApiDocumentation() {
           s'affiche sur l'écran de consentement), votre logo et vos URI de
           redirection. Vous recevrez un <Mono>client_id</Mono> et un{" "}
           <Mono>client_secret</Mono>. Demandez la même chose pour{" "}
-          <a
-            href="#sandbox"
-            className="text-primary font-medium hover:underline"
-          >
-            le sandbox
-          </a>{" "}
+          <SectionLink to="sandbox">le sandbox</SectionLink>{" "}
           dans le même message : c'est avec celui-là que vous développerez, et
           les deux s'enregistrent en une fois.
         </p>
@@ -319,12 +331,7 @@ Code de vérification : 111111`}</Code>
           Il y en a deux parce qu'il y a deux réponses à tester. La seule
           différence entre eux est <Mono>rabotka_verified</Mono>, et c'est
           exactement la distinction que{" "}
-          <a
-            href="#verification"
-            className="text-primary font-medium hover:underline"
-          >
-            la section plus bas
-          </a>{" "}
+          <SectionLink to="verification">la section dédiée</SectionLink>{" "}
           vous demande de ne pas manquer : une intégration qui n'a jamais vu
           autre chose que <Mono>true</Mono> part en production sans avoir écrit
           la branche qui compte.
@@ -590,10 +597,7 @@ code_challenge=$(printf %s "$code_verifier" \\
         </p>
       </Section>
 
-      <Part
-        id="verification-identite"
-        title="API de vérification d'identité"
-      >
+      <Section id="verification-identite" title="En bref">
         <p>
           Votre serveur demande à Rabotka :{" "}
           <em>la personne derrière ce numéro WhatsApp est-elle bien celle
@@ -623,7 +627,7 @@ code_challenge=$(printf %s "$code_verifier" \\
             interroger <Mono>GET /api/v1/identity-checks/{"{id}"}</Mono>.
           </li>
         </ol>
-      </Part>
+      </Section>
 
       <Section id="ic-acces" title="Activer l'API">
         <p>
@@ -987,8 +991,11 @@ User-Agent: Rabotka-Webhooks/1.0
           {contactEmail && "."}
         </p>
         </Section>
+
+        <PrevNext />
       </main>
     </div>
+    </SectionContext.Provider>
   );
 }
 
@@ -996,11 +1003,12 @@ function Section({
   id,
   title,
   children,
-}: Readonly<{ id: string; title: string; children: ReactNode }>) {
+}: Readonly<{ id: SectionId; title: string; children: ReactNode }>) {
+  const { active } = useContext(SectionContext);
+  if (active !== id) return null;
+
   return (
-    // `scroll-mt` clears the fixed header, so an anchor jump does not land with
-    // the heading hidden underneath it.
-    <section id={id} className="mt-10 scroll-mt-28">
+    <section id={id} className="mt-8">
       <h2 className="text-xl font-semibold">{title}</h2>
       <div className="text-muted-foreground mt-3 space-y-3 leading-relaxed">
         {children}
@@ -1024,25 +1032,140 @@ function Code({ children }: Readonly<{ children: string }>) {
   );
 }
 
-/**
- * A part of the guide, one level above a section. Rendered as a large heading
- * with its own anchor so the rail can jump to the start of a product.
- */
-function Part({
-  id,
-  title,
+function groupOf(id: SectionId): string {
+  return SECTIONS.find((section) => section.id === id)?.group ?? "login";
+}
+
+/** A link to another section of the guide, as a real URL. */
+function SectionLink({
+  to,
   children,
-}: Readonly<{ id: string; title: string; children: ReactNode }>) {
+}: Readonly<{ to: SectionId; children: ReactNode }>) {
+  const { go } = useContext(SectionContext);
   return (
-    <section id={id} className="mt-20 scroll-mt-28">
-      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-        Documentation développeur
+    <a
+      href={`?section=${to}`}
+      onClick={(event) => {
+        event.preventDefault();
+        go(to);
+      }}
+      className="text-primary font-medium hover:underline"
+    >
+      {children}
+    </a>
+  );
+}
+
+/**
+ * The rail is hidden below `lg`, and with one section on screen a phone
+ * reader would otherwise have no way to reach the others.
+ */
+function MobileSectionPicker() {
+  const { active, go } = useContext(SectionContext);
+  return (
+    <label className="mt-4 block lg:hidden">
+      <span className="sr-only">Sommaire</span>
+      <select
+        value={active}
+        onChange={(event) => {
+          if (isSectionId(event.target.value)) go(event.target.value);
+        }}
+        className="bg-card shadow-soft text-foreground w-full rounded-lg px-3 py-2.5 text-sm"
+      >
+        {GROUPS.map((group) => {
+          const options = SECTIONS.filter((s) => s.group === group.id).map(
+            (s) => (
+              <option key={s.id} value={s.id}>
+                {s.label}
+              </option>
+            ),
+          );
+          return group.label ? (
+            <optgroup key={group.id} label={group.label}>
+              {options}
+            </optgroup>
+          ) : (
+            options
+          );
+        })}
+      </select>
+    </label>
+  );
+}
+
+/**
+ * Previous/next within the current part only: stepping never crosses from the
+ * login guide into the identity-check guide, and the closing contact section
+ * has no neighbours.
+ */
+function PrevNext() {
+  const { active, go } = useContext(SectionContext);
+  const group = groupOf(active);
+  if (group === "other") return null;
+
+  const siblings = SECTIONS.filter((section) => section.group === group);
+  const index = siblings.findIndex((section) => section.id === active);
+  const prev = siblings[index - 1];
+  const next = siblings[index + 1];
+
+  return (
+    <nav aria-label="Sections voisines" className="mt-12 grid grid-cols-2 gap-3">
+      {prev ? (
+        <PagerButton
+          section={prev}
+          direction="prev"
+          onClick={() => go(prev.id)}
+        />
+      ) : (
+        <span />
+      )}
+      {next && (
+        <PagerButton
+          section={next}
+          direction="next"
+          onClick={() => go(next.id)}
+        />
+      )}
+    </nav>
+  );
+}
+
+function PagerButton({
+  section,
+  direction,
+  onClick,
+}: Readonly<{
+  section: (typeof SECTIONS)[number];
+  direction: "prev" | "next";
+  onClick: () => void;
+}>) {
+  const isNext = direction === "next";
+  return (
+    <a
+      href={`?section=${section.id}`}
+      onClick={(event) => {
+        event.preventDefault();
+        onClick();
+      }}
+      className={cn(
+        "bg-card shadow-soft hover:bg-muted flex items-center gap-3 rounded-lg p-4 transition-colors",
+        isNext && "col-start-2 flex-row-reverse text-right",
+      )}
+    >
+      {isNext ? (
+        <ChevronRight aria-hidden className="text-muted-foreground size-4 shrink-0" />
+      ) : (
+        <ChevronLeft aria-hidden className="text-muted-foreground size-4 shrink-0" />
+      )}
+      <span className="min-w-0">
+        <span className="text-muted-foreground block text-xs">
+          {isNext ? "Suivant" : "Précédent"}
+        </span>
+        <span className="text-foreground block truncate text-sm font-medium">
+          {section.label}
+        </span>
       </span>
-      <h2 className="mt-2 text-3xl font-bold">{title}</h2>
-      <div className="text-muted-foreground mt-4 space-y-3 leading-relaxed">
-        {children}
-      </div>
-    </section>
+    </a>
   );
 }
 
