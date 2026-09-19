@@ -20,7 +20,10 @@ type Props = {
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
   readonly subtitle?: string;
-  /** When true, shows an optional note field (employer → worker feedback). */
+  /**
+   * Shows an optional note field (employer → worker feedback). Off everywhere:
+   * see the note on the component below before switching it on.
+   */
   readonly showNote?: boolean;
   readonly submitLabel?: string;
   readonly onSubmit: (score: number, note?: string) => void;
@@ -29,8 +32,13 @@ type Props = {
 
 /**
  * Bottom-sheet form to mark a mission completed and rate the other party: a
- * required 1–5 star rating and (optionally) a note. Shared by the employer and
- * worker flows — the worker flow hides the note (nowhere to store it yet).
+ * required 1–5 star rating, and nothing else.
+ *
+ * No caller passes `showNote` today, so the note field below is dormant, not
+ * live UI: a rating is a score alone. The field and its plumbing are kept
+ * because the endpoint still accepts a note (it lands on `Assignment.note`),
+ * so turning it back on is one prop rather than a rewrite. Delete the pair
+ * together if that ever stops being true.
  */
 export function CompleteMissionDrawer({
   open,
