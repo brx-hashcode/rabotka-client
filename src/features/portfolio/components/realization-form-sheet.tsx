@@ -19,7 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -35,17 +34,16 @@ const MAX_IMAGES = 10;
 const ACCEPT = "image/jpeg,image/png,image/webp";
 const MAX_SIZE = 5 * 1024 * 1024;
 
+/**
+ * Only a ceiling. "Text or images, at least one" is NOT expressible here:
+ * the files never enter form state, so a cross-field refine would not re-run
+ * when an image is added or removed. `canSubmit` below owns that rule.
+ */
 const schema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(3, "Le titre doit faire au moins 3 caractères")
-    .max(120, "Le titre ne doit pas dépasser 120 caractères"),
   description: z
     .string()
     .trim()
-    .min(3, "La description doit faire au moins 3 caractères")
-    .max(1000, "La description ne doit pas dépasser 1000 caractères"),
+    .max(1000, "Le texte ne doit pas dépasser 1000 caractères"),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -65,12 +63,15 @@ export function RealizationFormSheet({
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", description: "" },
+    defaultValues: { description: "" },
     mode: "onChange",
   });
 
   const [imageError, setImageError] = useState<string | null>(null);
-  const [{ files }, { removeFile, clearFiles, openFileDialog, getInputProps }] =
+  const [
+    { files, errors: fileErrors },
+    { removeFile, clearFiles, openFileDialog, getInputProps },
+  ] =
     useFileUpload({
       multiple: true,
       maxFiles: MAX_IMAGES,
@@ -86,10 +87,7 @@ export function RealizationFormSheet({
   // Seed / reset the form each time the sheet opens.
   useEffect(() => {
     if (open) {
-      form.reset({
-        title: item?.title ?? "",
-        description: item?.description ?? "",
-      });
+      form.reset({ description: item?.description ?? "" });
       clearFiles();
       setImageError(null);
     }
@@ -103,21 +101,31 @@ export function RealizationFormSheet({
   const existingCount = item?.images.length ?? 0;
   const remainingSlots = MAX_IMAGES - existingCount;
 
+  // A publication is text, images, or both — never neither. Derived rather
+  // than validated, because `files` lives outside the form: a zod refine would
+  // only re-run on a keystroke, leaving the button stale the moment someone
+  // adds a photo without typing.
+  const text = form.watch("description")?.trim() ?? "";
+  const canSubmit = isEdit
+    ? // Editing only ever touches the text here; images have their own
+      // buttons. Clearing it is allowed as long as photos remain.
+      !!text || existingCount > 0
+    : !!text || files.length > 0;
+
   const onSubmit = (data: FormData) => {
     if (isEdit && item) {
       updateMutation.mutate(
-        { id: item.id, payload: data },
+        { id: item.id, payload: { description: data.description } },
         { onSuccess: () => onOpenChange(false) },
       );
       return;
     }
-    if (files.length === 0) {
-      setImageError("Ajoutez au moins une image.");
+    if (!data.description.trim() && files.length === 0) {
+      setImageError("Écrivez quelque chose ou ajoutez une image.");
       return;
     }
     createMutation.mutate(
       {
-        title: data.title,
         description: data.description,
         images: files.map((f) => f.file),
       },
@@ -151,8 +159,8 @@ export function RealizationFormSheet({
           </SheetTitle>
           <SheetDescription>
             {isEdit
-              ? "Modifiez le titre, la description et les images."
-              : "Ajoutez un titre, une description et au moins une image."}
+              ? "Modifiez votre texte ou vos photos."
+              : "Écrivez quelque chose, ajoutez des photos, ou les deux."}
           </SheetDescription>
         </SheetHeader>
 
@@ -163,25 +171,19 @@ export function RealizationFormSheet({
           >
             <FormField
               control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Titre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex : Rénovation peinture" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  {/* No label: the placeholder asks the question, the way a
+                      composer does. A field called "Description" invites a
+                      paragraph about a mission; this invites a sentence. */}
                   <FormControl>
-                    <Textarea rows={4} placeholder="Décrivez la mission réalisée." {...field} />
+                    <Textarea
+                      rows={5}
+                      placeholder="Racontez votre travail, ou dites que vous êtes disponible…"
+                      autoFocus={!isEdit}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -213,11 +215,11 @@ export function RealizationFormSheet({
                         }
                         disabled={
                           removeImageMutation.isPending ||
-                          item.images.length === 1
+                          (item.images.length === 1 && !text)
                         }
                         title={
-                          item.images.length === 1
-                            ? "Une publication doit garder au moins une image"
+                          item.images.length === 1 && !text
+                            ? "Écrivez un texte pour pouvoir retirer la dernière image"
                             : "Supprimer l'image"
                         }
                         className="bg-destructive/90 absolute right-1 top-1 rounded-full p-1 text-white disabled:opacity-40"
@@ -233,7 +235,7 @@ export function RealizationFormSheet({
             {/* Uploader */}
             <div className="space-y-2">
               <p className="text-sm font-medium">
-                {isEdit ? "Ajouter des images" : "Images"}
+                {isEdit ? "Ajouter des images" : "Images (facultatif)"}
               </p>
               <input {...getInputProps()} className="sr-only" />
               <button
@@ -269,6 +271,16 @@ export function RealizationFormSheet({
                 </div>
               )}
 
+              {/* A file the hook rejected — too large, or not an image —
+                  used to disappear without a word. Survivable when a photo was
+                  mandatory and the form blocked; now it would quietly publish
+                  text alone and look like the photo simply vanished. */}
+              {fileErrors.map((message) => (
+                <p key={message} className="text-destructive text-sm">
+                  {message}
+                </p>
+              ))}
+
               {imageError && (
                 <p className="text-destructive text-sm">{imageError}</p>
               )}
@@ -289,9 +301,13 @@ export function RealizationFormSheet({
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSaving}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSaving || !canSubmit}
+            >
               {isSaving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {isEdit ? "Enregistrer" : "Créer la publication"}
+              {isEdit ? "Enregistrer" : "Publier"}
             </Button>
           </form>
         </Form>

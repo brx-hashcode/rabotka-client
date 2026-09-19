@@ -30,8 +30,8 @@ export function useCreatePortfolioItem() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: (data: { title: string; description: string; images: File[] }) =>
-      createPortfolioItem(data.title, data.description, data.images),
+    mutationFn: (data: { description: string; images: File[] }) =>
+      createPortfolioItem(data.description, data.images),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: PORTFOLIO_KEY,

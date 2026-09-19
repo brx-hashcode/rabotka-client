@@ -4,10 +4,17 @@ export type PortfolioImage = {
   position: number;
 };
 
+/**
+ * A publication: text, images, or both — never neither.
+ *
+ * There is no title any more. A publication used to demand one, plus a
+ * description and a photo, which is a portfolio entry rather than a post and
+ * made "je suis disponible cette semaine" impossible to publish.
+ */
 export type PortfolioItem = {
   id: string;
-  title: string;
-  description: string;
+  /** Null on an images-only publication. */
+  description: string | null;
   position: number;
   createdAt: string;
   images: PortfolioImage[];

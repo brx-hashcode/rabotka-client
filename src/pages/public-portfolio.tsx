@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { ScreenHeader } from "@/features/employer";
 import { PortfolioHeader } from "@/features/portfolio/components/portfolio-header";
-import { PortfolioGrid } from "@/features/portfolio/components/portfolio-grid";
+import { PortfolioFeed } from "@/features/portfolio/components/portfolio-feed";
 
 const CONTAINER = "mx-auto w-full max-w-xl px-4 pb-8 sm:pb-12";
 const SKELETON_TILE_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
@@ -122,7 +122,7 @@ export default function PublicPortfolio() {
           Aucune publication pour le moment.
         </p>
       ) : (
-        <PortfolioGrid
+        <PortfolioFeed
           items={worker.portfolio}
           onOpen={(item) =>
             navigate(`/p/${worker.slug}/r/${item.id}${backSuffix}`, {
