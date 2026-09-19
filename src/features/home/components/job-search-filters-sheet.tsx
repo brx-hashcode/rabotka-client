@@ -166,6 +166,8 @@ export function JobSearchFiltersSheet({
           {/* Domaine */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Domaine</Label>
+            {/* Three rows: inside a sheet the popover has nowhere to grow, so
+                a taller list flips upward over the card behind it. */}
             <CategoryCombobox
               options={categories}
               value={draft.categoryId}
@@ -173,6 +175,7 @@ export function JobSearchFiltersSheet({
               allLabel="Tous les domaines"
               placeholder="Tous les domaines"
               container={container}
+              maxVisibleItems={3}
             />
           </div>
 
@@ -185,6 +188,7 @@ export function JobSearchFiltersSheet({
               value={draft.city}
               onChange={(city) => set("city", city)}
               container={container}
+              maxVisibleItems={3}
             />
           </div>
 

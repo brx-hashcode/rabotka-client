@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
@@ -48,7 +48,31 @@ type CategoryComboboxProps = {
    * field touched at the very moment the user started engaging with it.
    */
   readonly onBlur?: () => void;
+  /**
+   * How many rows the list shows before it scrolls.
+   *
+   * Lower it inside a bottom sheet. The popover portals into the sheet but is
+   * positioned against the viewport, so a tall list has nowhere to go: Radix
+   * flips it upward and it covers the card the user was reading, which is what
+   * a seven-row list did on the search filters.
+   */
+  readonly maxVisibleItems?: number;
 };
+
+/**
+ * Row height in rem: `text-sm` is a 1.25rem line box, `py-1.5` adds 0.375rem
+ * either side. Kept next to the list so the two move together — the height is
+ * computed from this rather than guessed at as a `max-h-*` class, which is how
+ * the old `max-h-56` ended up meaning "about seven, probably".
+ */
+const ITEM_HEIGHT_REM = 2;
+/**
+ * Group padding, plus enough of the next row to show the list scrolls.
+ *
+ * Cutting exactly at a row boundary reads as the end of the list, and people
+ * stop scrolling.
+ */
+const LIST_PADDING_REM = 1;
 
 export function CategoryCombobox({
   options,
@@ -63,6 +87,7 @@ export function CategoryCombobox({
   onSearchChange,
   footnote,
   onBlur,
+  maxVisibleItems = 6,
 }: CategoryComboboxProps) {
   const controlledSearch = onSearchChange !== undefined;
   const [open, setOpen] = useState(false);
@@ -117,7 +142,14 @@ export function CategoryCombobox({
               value={controlledSearch ? search : undefined}
               onValueChange={onSearchChange}
             />
-            <CommandList className="max-h-56">
+            <CommandList
+              className="max-h-(--list-max-h)"
+              style={
+                {
+                  "--list-max-h": `${maxVisibleItems * ITEM_HEIGHT_REM + LIST_PADDING_REM}rem`,
+                } as CSSProperties
+              }
+            >
               <CommandEmpty>Aucun résultat.</CommandEmpty>
               <CommandGroup>
                 {allLabel && (

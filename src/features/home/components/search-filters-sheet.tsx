@@ -76,11 +76,14 @@ export function SearchFiltersSheet({
               stored — the country is implicit, scoped to the viewer's own. */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Ville</Label>
+            {/* Three rows: inside a sheet the popover has nowhere to grow, so
+                a taller list flips upward over the card behind it. */}
             <CityFilterCombobox
               value={draft.city}
               onChange={(city) => set("city", city)}
               allLabel="Toutes les villes"
               container={container}
+              maxVisibleItems={3}
             />
           </div>
 
@@ -94,6 +97,7 @@ export function SearchFiltersSheet({
               allLabel="Toutes les catégories"
               placeholder="Toutes les catégories"
               container={container}
+              maxVisibleItems={3}
             />
           </div>
 
