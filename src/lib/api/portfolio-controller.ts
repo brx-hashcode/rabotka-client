@@ -4,7 +4,7 @@ import type { PortfolioItem } from "@/features/portfolio/types";
 export type { PortfolioItem };
 
 export type UpdatePortfolioItemPayload = {
-  title?: string;
+  /** An empty string clears the text, leaving an images-only publication. */
   description?: string;
 };
 
@@ -17,15 +17,17 @@ class PortfolioController extends RabotkaBaseController {
     }
   }
 
-  async create(
-    title: string,
-    description: string,
-    images: File[],
-  ): Promise<PortfolioItem> {
+  /**
+   * Text, images, or both — the server rejects neither.
+   *
+   * An empty description is left out of the body rather than sent as "",
+   * so an images-only publication stores null instead of a blank string.
+   */
+  async create(description: string, images: File[]): Promise<PortfolioItem> {
     try {
       const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
+      const text = description.trim();
+      if (text) formData.append("description", text);
       for (const image of images) {
         formData.append("images", image);
       }

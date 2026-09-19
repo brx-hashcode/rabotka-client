@@ -18,6 +18,7 @@ import { ScreenHeader } from "@/features/employer";
 import { RealizationView } from "@/features/portfolio/components/realization-view";
 import { RealizationFormSheet } from "@/features/portfolio/components/realization-form-sheet";
 import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
+import { postLabel } from "@/features/portfolio/post-text";
 
 /**
  * One realization, on its own screen.
@@ -84,7 +85,7 @@ function PublicRealization({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Seo title={`${item.title} — ${fullName} | Rabotka`} noIndex />
+      <Seo title={`${postLabel(item.description, item.images.length)} — ${fullName} | Rabotka`} noIndex />
       <ScreenHeader title="Publication" onBack={goToPortfolio} />
       <RealizationView
         item={item}
@@ -116,7 +117,7 @@ function OwnRealization({ itemId }: Readonly<{ itemId: string }>) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Seo title={`${item.title} — Rabotka`} noIndex />
+      <Seo title={`${postLabel(item.description, item.images.length)} — Rabotka`} noIndex />
       <ScreenHeader title="Publication" onBack={goToPortfolio} />
 
       <RealizationView
