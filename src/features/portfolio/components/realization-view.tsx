@@ -1,9 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { type ReactNode } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { PostMedia } from "./post-media";
 import type { PortfolioItem } from "../types";
 
 type Author = {
@@ -35,21 +34,7 @@ export function RealizationView({
   actions,
   onAuthorClick,
 }: Readonly<Props>) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
-  const [selected, setSelected] = useState(0);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
-    emblaApi.on("select", onSelect);
-    onSelect();
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi]);
-
-  const total = item.images.length;
-  const multiple = total > 1;
+  const hasImages = item.images.length > 0;
 
   return (
     <article className="mx-auto w-full max-w-xl pb-10">
@@ -57,67 +42,17 @@ export function RealizationView({
         <AuthorRow author={author} onClick={onAuthorClick} />
       )}
 
-      {/* Dark bed so light images can't swallow the overlay controls. */}
-      <div className="relative bg-neutral-900">
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex">
-            {item.images.map((img, index) => (
-              <div key={img.id} className="min-w-0 flex-[0_0_100%]">
-                <SlideImage url={img.imageUrl} index={index} />
-              </div>
-            ))}
-          </div>
-        </div>
+      <PostMedia images={item.images} />
 
-        {multiple && (
-          <>
-            <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-              {selected + 1} / {total}
-            </span>
-
-            <ArrowButton
-              side="left"
-              disabled={selected === 0}
-              onClick={() => emblaApi?.scrollPrev()}
-            />
-            <ArrowButton
-              side="right"
-              disabled={selected === total - 1}
-              onClick={() => emblaApi?.scrollNext()}
-            />
-          </>
+      <div className={cn("space-y-3 px-4", hasImages ? "pt-4" : "pt-2")}>
+        {/* No heading: a publication has no title any more, so the text is the
+            post itself rather than a caption under one. An images-only post
+            simply has nothing here. */}
+        {item.description && (
+          <p className="text-foreground whitespace-pre-line text-sm leading-relaxed">
+            {item.description}
+          </p>
         )}
-      </div>
-
-      {multiple && (
-        <div className="flex justify-center gap-1.5 py-3">
-          {item.images.map((img, index) => (
-            <button
-              key={img.id}
-              type="button"
-              aria-label={`Image ${index + 1}`}
-              aria-current={index === selected}
-              onClick={() => emblaApi?.scrollTo(index)}
-              className={cn(
-                "h-2 rounded-full transition-all",
-                index === selected
-                  ? "w-5 bg-whatsapp"
-                  : "w-2 bg-muted-foreground/30",
-              )}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className={cn("space-y-3 px-4", multiple ? "pt-1" : "pt-4")}>
-        <div className="space-y-1">
-          <h1 className="text-foreground text-base font-bold">{item.title}</h1>
-          {item.description && (
-            <p className="text-muted-foreground whitespace-pre-line text-sm leading-relaxed">
-              {item.description}
-            </p>
-          )}
-        </div>
         {actions}
       </div>
     </article>
@@ -167,57 +102,5 @@ function AuthorRow({
     >
       {content}
     </button>
-  );
-}
-
-function ArrowButton({
-  side,
-  disabled,
-  onClick,
-}: Readonly<{
-  side: "left" | "right";
-  disabled: boolean;
-  onClick: () => void;
-}>) {
-  const Icon = side === "left" ? ChevronLeft : ChevronRight;
-  return (
-    <button
-      type="button"
-      aria-label={side === "left" ? "Image précédente" : "Image suivante"}
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        "absolute top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-opacity hover:bg-black/70 disabled:pointer-events-none disabled:opacity-0",
-        side === "left" ? "left-3" : "right-3",
-      )}
-    >
-      <Icon className="size-5" />
-    </button>
-  );
-}
-
-function SlideImage({
-  url,
-  index,
-}: Readonly<{ url: string; index: number }>) {
-  const [broken, setBroken] = useState(false);
-
-  if (broken) {
-    return (
-      <div className="flex aspect-square w-full items-center justify-center text-xs text-white/60">
-        Image indisponible
-      </div>
-    );
-  }
-  return (
-    <div className="aspect-square w-full">
-      {/* contain, not cover: this view exists to inspect the work uncropped. */}
-      <img
-        src={url}
-        alt={`Publication ${index + 1}`}
-        className="h-full w-full object-contain"
-        onError={() => setBroken(true)}
-      />
-    </div>
   );
 }

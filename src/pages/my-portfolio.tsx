@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { ScreenHeader } from "@/features/employer";
 import { PortfolioHeader } from "@/features/portfolio/components/portfolio-header";
-import { PortfolioGrid } from "@/features/portfolio/components/portfolio-grid";
+import { PortfolioFeed } from "@/features/portfolio/components/portfolio-feed";
 import { RealizationFormSheet } from "@/features/portfolio/components/realization-form-sheet";
 
 const CONTAINER = "mx-auto w-full max-w-xl px-4 pb-10";
@@ -76,7 +76,7 @@ export default function MyPortfolio() {
             </Button>
           </div>
         ) : (
-          <PortfolioGrid
+          <PortfolioFeed
             items={items}
             onOpen={(item) =>
               navigate(`/profile/portfolio/${item.id}`, {

@@ -12,6 +12,8 @@ type Props = {
   readonly onChange: (city: string) => void;
   readonly allLabel?: string;
   readonly container?: HTMLElement | null;
+  /** Rows shown before the list scrolls. Lower it inside a sheet. */
+  readonly maxVisibleItems?: number;
 };
 
 /**
@@ -32,6 +34,7 @@ export function CityFilterCombobox({
   onChange,
   allLabel = "Toutes les villes",
   container,
+  maxVisibleItems,
 }: Props) {
   const { data: profile } = useProfileMe();
   const countryCode = profile?.countryCode || FALLBACK_COUNTRY;
@@ -52,6 +55,7 @@ export function CityFilterCombobox({
       placeholder={allLabel}
       disabled={cities.isPending}
       container={container}
+      maxVisibleItems={maxVisibleItems}
       search={search}
       onSearchChange={setSearch}
       footnote={

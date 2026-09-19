@@ -8,8 +8,8 @@ export type PublicPortfolioImage = {
 
 export type PublicPortfolioItem = {
   id: string;
-  title: string;
-  description: string;
+  /** Null on an images-only publication. Mirrors `PortfolioItem`. */
+  description: string | null;
   position: number;
   createdAt: string;
   images: PublicPortfolioImage[];
