@@ -380,7 +380,6 @@ export default function MissionDetail() {
             ? `Notez ${rateTarget.worker.firstName} ${rateTarget.worker.lastName}`
             : undefined
         }
-        showNote
         onSubmit={handleRate}
         isPending={rate.isPending}
       />
