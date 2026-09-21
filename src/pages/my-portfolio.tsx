@@ -6,7 +6,6 @@ import { Seo } from "@/hooks/use-seo";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ScreenHeader } from "@/features/employer";
@@ -32,9 +31,22 @@ export default function MyPortfolio() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Creation lives in the sticky bar, like /claims: as a full-width
+          button it sat inside the profile wash, cutting the header surface in
+          two and scrolling out of reach the moment the feed moved. */}
       <ScreenHeader
         title="Mes publications"
         onBack={() => navigate("/profile")}
+        action={
+          <button
+            type="button"
+            aria-label="Ajouter une publication"
+            onClick={() => setCreateOpen(true)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-whatsapp text-white transition-colors hover:bg-whatsapp-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        }
       />
       <main className={CONTAINER}>
         <Seo title="Mes publications — Rabotka" noIndex />
@@ -53,38 +65,34 @@ export default function MyPortfolio() {
               completedMissionsCount: null,
             }}
             realizationsCount={items.length}
-            action={
-              <Button onClick={() => setCreateOpen(true)} className="w-full">
+          />
+        )}
+
+        {/* The wash ends in a rounded edge of its own, so the hairline that
+            used to sit here only doubled the seam. Spacing separates them. */}
+        <div className="mt-6">
+          {!itemsLoading && items.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-10 text-center">
+              <p className="text-muted-foreground text-sm">
+                Vous n'avez pas encore de publication. Montrez vos missions pour
+                inspirer confiance aux recruteurs.
+              </p>
+              <Button onClick={() => setCreateOpen(true)} variant="outline">
                 <Plus className="size-4" />
-                Ajouter une publication
+                Ajouter ma première publication
               </Button>
-            }
-          />
-        )}
-
-        <Separator className="my-6" />
-
-        {!itemsLoading && items.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <p className="text-muted-foreground text-sm">
-              Vous n'avez pas encore de publication. Montrez vos missions pour
-              inspirer confiance aux recruteurs.
-            </p>
-            <Button onClick={() => setCreateOpen(true)} variant="outline">
-              <Plus className="size-4" />
-              Ajouter ma première publication
-            </Button>
-          </div>
-        ) : (
-          <PortfolioFeed
-            items={items}
-            onOpen={(item) =>
-              navigate(`/profile/portfolio/${item.id}`, {
-                state: { fromGrid: true },
-              })
-            }
-          />
-        )}
+            </div>
+          ) : (
+            <PortfolioFeed
+              items={items}
+              onOpen={(item) =>
+                navigate(`/profile/portfolio/${item.id}`, {
+                  state: { fromGrid: true },
+                })
+              }
+            />
+          )}
+        </div>
 
         <RealizationFormSheet open={createOpen} onOpenChange={setCreateOpen} />
       </main>
@@ -108,8 +116,6 @@ function HeaderSkeleton() {
         <Skeleton className="h-10 w-16" />
         <Skeleton className="h-10 w-16" />
       </div>
-
-      <Skeleton className="h-10 w-full" />
     </div>
   );
 }
