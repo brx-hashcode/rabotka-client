@@ -16,7 +16,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +29,12 @@ import {
 } from "@/hooks/use-portfolio";
 import type { PortfolioItem } from "../types";
 
-const MAX_IMAGES = 10;
+/**
+ * Per publication. Three reads as a set of photos rather than an album, and
+ * the feed tile only previews one with a "+n" badge anyway. Older items may
+ * already hold more — editing one just offers no way to add another.
+ */
+const MAX_IMAGES = 3;
 const ACCEPT = "image/jpeg,image/png,image/webp";
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -176,29 +180,83 @@ export function RealizationFormSheet({
                 <FormItem>
                   {/* No label: the placeholder asks the question, the way a
                       composer does. A field called "Description" invites a
-                      paragraph about a mission; this invites a sentence. */}
-                  <FormControl>
-                    <Textarea
-                      rows={5}
-                      placeholder="Racontez votre travail, ou dites que vous êtes disponible…"
-                      autoFocus={!isEdit}
-                      {...field}
-                    />
-                  </FormControl>
+                      paragraph about a mission; this invites a sentence.
+
+                      The surrounding box owns the surface and the focus
+                      ring so the thumbnails inside it read as part of what you
+                      are writing, not as a separate list underneath. */}
+                  <div className="bg-card shadow-soft focus-within:ring-whatsapp/30 rounded-lg focus-within:ring-2">
+                    <FormControl>
+                      <Textarea
+                        rows={5}
+                        placeholder="Racontez votre travail, ou dites que vous êtes disponible…"
+                        autoFocus={!isEdit}
+                        className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        {...field}
+                      />
+                    </FormControl>
+
+                    {/* Attachments sit in the corner of the box they belong
+                        to, the way a composer holds them — and the picker is
+                        the next tile in that same row, so adding a photo means
+                        reaching for the place the photos already are.
+
+                        No counter: the tiles are the count, and the trigger
+                        leaving when the row is full says the rest. */}
+                    <input {...getInputProps()} className="sr-only" />
+                    <div className="flex flex-wrap items-center gap-2 px-3 pb-3">
+                      {files.map((f) => (
+                        <div
+                          key={f.id}
+                          className="bg-muted relative size-16 shrink-0 overflow-hidden rounded-md"
+                        >
+                          <img
+                            src={f.preview}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeFile(f.id)}
+                            aria-label="Retirer l'image"
+                            className="bg-foreground/60 text-background absolute right-1 top-1 rounded-full p-0.5"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* Gone once full, not greyed out: a dead tile in the
+                          middle of the composer reads as something broken. */}
+                      {remainingSlots - files.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={openFileDialog}
+                          title="JPG, PNG ou WEBP — 5 Mo maximum"
+                          aria-label="Ajouter des photos"
+                          className="bg-muted text-muted-foreground hover:bg-muted/70 flex size-16 shrink-0 items-center justify-center rounded-md transition-colors"
+                        >
+                          <ImagePlus className="text-whatsapp size-6" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Existing images (edit mode) */}
+            {/* Existing images (edit mode). Kept out of the composer above:
+                removing one of these hits the server immediately, while the
+                thumbnails in the box are still only local files. */}
             {isEdit && item && item.images.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium">Images actuelles</p>
-                <div className="grid grid-cols-3 gap-2">
+                <p className="text-muted-foreground text-xs">Images actuelles</p>
+                <div className="flex flex-wrap gap-2">
                   {item.images.map((img) => (
                     <div
                       key={img.id}
-                      className="bg-muted relative aspect-square overflow-hidden rounded-md"
+                      className="bg-muted relative size-16 shrink-0 overflow-hidden rounded-md"
                     >
                       <img
                         src={img.imageUrl}
@@ -222,7 +280,8 @@ export function RealizationFormSheet({
                             ? "Écrivez un texte pour pouvoir retirer la dernière image"
                             : "Supprimer l'image"
                         }
-                        className="bg-destructive/90 absolute right-1 top-1 rounded-full p-1 text-white disabled:opacity-40"
+                        aria-label="Supprimer l'image"
+                        className="bg-foreground/60 text-background absolute right-1 top-1 rounded-full p-0.5 disabled:opacity-40"
                       >
                         <X className="size-3" />
                       </button>
@@ -232,45 +291,9 @@ export function RealizationFormSheet({
               </div>
             )}
 
-            {/* Uploader */}
+            {/* Whatever the uploader has to report once it has run: the
+                trigger itself lives in the composer above. */}
             <div className="space-y-2">
-              <p className="text-sm font-medium">
-                {isEdit ? "Ajouter des images" : "Images (facultatif)"}
-              </p>
-              <input {...getInputProps()} className="sr-only" />
-              <button
-                type="button"
-                onClick={openFileDialog}
-                className="border-input text-muted-foreground hover:bg-muted/50 flex w-full flex-col items-center gap-1 rounded-lg border border-dashed py-6 text-sm"
-              >
-                <ImagePlus className="size-5" />
-                Choisir des images (JPG, PNG, WEBP — max 5 Mo)
-              </button>
-
-              {files.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {files.map((f) => (
-                    <div
-                      key={f.id}
-                      className="bg-muted relative aspect-square overflow-hidden rounded-md"
-                    >
-                      <img
-                        src={f.preview}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeFile(f.id)}
-                        className="bg-destructive/90 absolute right-1 top-1 rounded-full p-1 text-white"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {/* A file the hook rejected — too large, or not an image —
                   used to disappear without a word. Survivable when a photo was
                   mandatory and the form blocked; now it would quietly publish

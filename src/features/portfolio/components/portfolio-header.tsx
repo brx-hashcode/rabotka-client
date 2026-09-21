@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { MapPin, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,8 +6,6 @@ import type { PortfolioProfile } from "../types";
 type Props = {
   profile: PortfolioProfile;
   realizationsCount: number;
-  /** Optional owner action (e.g. an "Add" button). */
-  action?: ReactNode;
 };
 
 function Stat({ value, label }: Readonly<{ value: string; label: string }>) {
@@ -25,7 +22,6 @@ function Stat({ value, label }: Readonly<{ value: string; label: string }>) {
 export function PortfolioHeader({
   profile,
   realizationsCount,
-  action,
 }: Readonly<Props>) {
   const initials =
     profile.fullName
@@ -84,8 +80,6 @@ export function PortfolioHeader({
           label="Fiabilité"
         />
       </div>
-
-      {action}
     </header>
   );
 }

@@ -35,7 +35,11 @@ export default function Claims() {
         }
       />
 
-      <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col space-y-6 pt-4 pb-8 px-4 md:px-8">
+      {/* Flat px-4, matching ScreenHeader: md:px-8 keys off the viewport, not
+          the shell column, so on a desktop-width window the cards pulled in to
+          32px gutters while the header stayed at 16px. max-w-4xl is likewise
+          dead weight inside AppShell's max-w-lg column. */}
+      <div className="w-full flex-1 flex flex-col space-y-6 pt-4 pb-8 px-4">
         {isLoading && (
           <div className="space-y-4">
             <Skeleton className="h-32 w-full rounded-lg" />

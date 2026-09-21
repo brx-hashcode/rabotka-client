@@ -42,7 +42,7 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
+      <div className="pt-8 lg:pt-10 pb-8 px-4">
         <ProfileSkeleton />
       </div>
     );
@@ -50,7 +50,7 @@ export default function Profile() {
 
   if (error) {
     return (
-      <div className="pt-8 lg:pt-10 pb-8 flex items-center justify-center">
+      <div className="pt-8 lg:pt-10 pb-8 px-4 flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-foreground">Erreur</h1>
           <p className="text-muted-foreground">
@@ -72,9 +72,12 @@ export default function Profile() {
   const isEmployer = profile.profileType === "EMPLOYER";
   const categoryNames = profile.categoryNames ?? [];
 
+  // Flat px-4 like the rest of the app: md:px-8 keys off the viewport, not
+  // AppShell's max-w-lg column, so on a desktop-width window every card sat at
+  // 32px gutters. max-w-2xl inside that column is dead weight.
   return (
-    <div className="pt-8 lg:pt-10 pb-8 px-4 md:px-8">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="pt-8 lg:pt-10 pb-8 px-4">
+      <div className="space-y-6">
         <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
           <div className="absolute top-4 right-4">
             <EditProfileSheetButton profile={profile} />
@@ -403,7 +406,7 @@ const AccountStatusBadge = ({
 
 const ProfileSkeleton = () => {
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div className="bg-muted/20 rounded-2xl pt-8 pb-6 px-6">
         <div className="flex flex-col items-center space-y-3">
           <Skeleton className="h-28 w-28 rounded-full" />

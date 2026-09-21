@@ -169,7 +169,10 @@ export default function Login() {
       </div>
 
       {step !== "3" && (
-        <div className="px-6 pb-10 w-full max-w-sm mx-auto">
+        // PublicShell already holds this page in a max-w-lg column, so the
+        // extra max-w-sm here capped the field and the button at ~336px and
+        // left them stranded mid-screen. The page's own px-6 is the gutter.
+        <div className="px-6 pb-10 w-full">
           {step === "1" && (
             <Step1PhoneForm
               onSubmit={handleStep1Submit}
