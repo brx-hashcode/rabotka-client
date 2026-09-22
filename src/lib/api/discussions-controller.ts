@@ -52,6 +52,11 @@ export type Discussion = {
   applicationId: string | null;
   lastMessageAt: string | null;
   lastMessagePreview: string | null;
+  /** The viewer's own — the list prefixes it with ticks. */
+  lastMessageMine: boolean;
+  lastMessageRead: boolean;
+  /** Own message held back whole: it never arrived. */
+  lastMessageHeld: boolean;
   unreadCount: number;
   closed: boolean;
   /** Both parties have paid; the thread stops masking from here on. */
@@ -111,6 +116,15 @@ class DiscussionsController extends RabotkaBaseController {
     );
   }
 
+  /**
+   * "Supprimer la discussion" — for THIS side only. Nothing is deleted
+   * server-side: the other party keeps their history, and a new message brings
+   * the conversation back from that point on.
+   */
+  hide(id: string): Promise<{ ok: boolean }> {
+    return this.delete<{ ok: boolean }>(`/profile/discussions/${id}`);
+  }
+
   markRead(id: string): Promise<{ ok: boolean; count: number }> {
     return this.post<{ ok: boolean; count: number }>(
       `/profile/discussions/${id}/read`,
@@ -134,4 +148,5 @@ export const openDiscussionWithProfile =
   controller.openWithProfile.bind(controller);
 export const sendDiscussionMessage = controller.send.bind(controller);
 export const markDiscussionRead = controller.markRead.bind(controller);
+export const hideDiscussion = controller.hide.bind(controller);
 export const reportRedaction = controller.report.bind(controller);

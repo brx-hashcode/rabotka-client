@@ -1,10 +1,27 @@
 export const discussionsContent = {
   list: {
-    title: "Discussion",
+    title: "Discussions",
     emptyTitle: "Aucune discussion",
     emptyDescription:
       "Vos échanges avec les employeurs et les travailleurs apparaîtront ici.",
     closed: "Discussion close",
+    searchPlaceholder: "Rechercher",
+    filterAll: "Toutes",
+    filterUnread: "Non lues",
+    noSearchResult: "Aucune discussion ne correspond à votre recherche.",
+    noUnread: "Vous avez tout lu.",
+    longPressHint: "Appui long sur une discussion pour la supprimer",
+    delete: "Supprimer la discussion",
+    deleteConfirm: "Oui, supprimer",
+    /**
+     * Said BEFORE the second tap, because "supprimer" here means what it means
+     * on WhatsApp — for you only — and somebody who does not know that should
+     * not find out afterwards.
+     */
+    deleteExplain:
+      "La discussion disparaîtra de votre liste uniquement. Votre interlocuteur la conserve, et elle réapparaîtra s’il vous écrit de nouveau.",
+    deleted: "Discussion supprimée",
+    deleteFailed: "La discussion n’a pas pu être supprimée",
   },
   thread: {
     unlockCta: "Débloquer les coordonnées",

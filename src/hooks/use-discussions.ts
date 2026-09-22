@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { io } from "socket.io-client";
 import {
+  hideDiscussion,
   listDiscussionMessages,
   listDiscussions,
   markDiscussionRead,
@@ -37,7 +38,10 @@ export function useDiscussions() {
 
   return useQuery({
     queryKey: discussionsKeys.list(),
-    queryFn: () => listDiscussions(),
+    // 100, the server's ceiling, because search and the "Non lues" filter run
+    // over what is loaded. Nobody here has more conversations than that; if
+    // that changes, search moves server-side.
+    queryFn: () => listDiscussions(1, 100),
     enabled,
     refetchInterval: enabled ? POLL_INTERVAL : false,
   });
@@ -131,4 +135,44 @@ export function useDiscussionsSocket(enabled: boolean) {
       socket.disconnect();
     };
   }, [enabled, queryClient]);
+}
+
+/**
+ * "Supprimer la discussion" for this side.
+ *
+ * Optimistic: the row leaves the list at once, the way WhatsApp's does, and
+ * comes back if the server refuses. Waiting on the round trip would leave a
+ * row that was just "deleted" sitting there, which reads as the tap having
+ * failed.
+ */
+export function useHideDiscussion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => hideDiscussion(id),
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: discussionsKeys.list() });
+      const previous = queryClient.getQueryData<
+        Awaited<ReturnType<typeof listDiscussions>>
+      >(discussionsKeys.list());
+      if (previous) {
+        queryClient.setQueryData(discussionsKeys.list(), {
+          ...previous,
+          data: previous.data.filter((d) => d.id !== id),
+          total: Math.max(0, previous.total - 1),
+        });
+      }
+      return { previous };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(discussionsKeys.list(), context.previous);
+      }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: discussionsKeys.all });
+      // The bell may still carry a NEW_MESSAGE row for this thread.
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 }
