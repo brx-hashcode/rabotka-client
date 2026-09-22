@@ -45,8 +45,15 @@ export const discussionsContent = {
    */
   warning: {
     /** Permanent, in the thread header. Known before the first attempt. */
+    /**
+     * Deliberately short. It sits above every conversation, so it is read once
+     * and skimmed forever after; five lines of it pushed the first messages off
+     * the screen. The detail — that they arrive over WhatsApp, that masking
+     * continues after an unlock — is carried by the note under a withheld
+     * fragment, where it is read at the moment it matters.
+     */
     header:
-      "Les coordonnées ne circulent jamais dans la discussion : numéros et emails y sont toujours masqués, même après un déblocage. Pour obtenir celles de votre interlocuteur, utilisez « Débloquer les coordonnées » — elles arrivent par WhatsApp.",
+      "Numéros et emails sont toujours masqués ici. Pour obtenir les coordonnées, utilisez « Débloquer ».",
     /** Under a withheld fragment. The moment the rule is understood. */
     sender:
       "Ce fragment n’a pas été transmis. Les coordonnées ne s’échangent pas dans la discussion.",

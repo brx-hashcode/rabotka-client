@@ -223,8 +223,11 @@ export default function Discussion() {
             because masking stopped there too; masking never stops now, so a
             notice that vanished would leave the rule unexplained exactly
             where people most expect to be able to type a number. */}
-        <div className="mx-auto mb-3 flex max-w-[88%] items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-center text-[12px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
-          <Lock className="mt-0.5 h-3 w-3 shrink-0" />
+        <div className="mb-3 flex items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-[11px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
+          <Lock className="mt-px h-3 w-3 shrink-0" />
+          {/* Left-aligned and full width of the thread: centred inside 88% made
+              every line break in a different place, which reads as a paragraph
+              to parse rather than a rule to glance at. */}
           <span>{warning.header}</span>
         </div>
 
