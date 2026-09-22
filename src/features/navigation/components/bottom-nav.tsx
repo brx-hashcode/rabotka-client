@@ -67,7 +67,13 @@ export function BottomNav() {
                     </>
                   ) : (
                     <>
-                      <Icon className="h-5 w-5 shrink-0" />
+                      {/* 1.75, not lucide's default 2. At 20px a 2px stroke
+                          fills the counters of a glyph and the row reads as
+                          heavy rather than crisp — which is most of what made
+                          the first version look unfinished. Set here rather
+                          than per icon in `tabs.tsx`, so the bar cannot drift
+                          out of step with itself. */}
+                      <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
                       <span className="text-[11px] font-medium leading-none">
                         {label}
                       </span>
