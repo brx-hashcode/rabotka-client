@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Lock, Send, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { discussionsContent } from "@/content/discussions";
@@ -176,26 +176,22 @@ export default function Discussion() {
           </p>
         </div>
 
-        {/* The primary action of the screen, compact but always in reach. It
-            routes into the EXISTING unlock flow — a link, not a second payment
-            path. See `unlockPath` for where, by role. */}
-        {unlocked ? (
-          <span className="flex shrink-0 items-center gap-1 rounded-full bg-whatsapp/10 px-2.5 py-1 text-[11px] font-medium text-whatsapp-dark">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            {content.unlocked}
-          </span>
-        ) : (
-          unlockTo && (
-            <button
-              type="button"
-              onClick={() => navigate(unlockTo)}
-              aria-label={content.unlockCta}
-              className="flex shrink-0 items-center gap-1 rounded-full bg-whatsapp px-3 py-1.5 text-[11px] font-semibold text-white active:bg-whatsapp-dark"
-            >
-              <Lock className="h-3.5 w-3.5" />
-              Débloquer
-            </button>
-          )
+        {/* The primary action of the screen, and it STAYS even once contacts
+            are unlocked. Unlocking is not a one-off: an employer pays again for
+            each new mission, or for a recommendation contact, and swapping the
+            button for a "débloquées" badge cut that path off. It routes into
+            the EXISTING flow — a link, not a second payment path. See
+            `unlockPath` for where, by role. */}
+        {unlockTo && (
+          <button
+            type="button"
+            onClick={() => navigate(unlockTo)}
+            aria-label={content.unlockCta}
+            className="flex shrink-0 items-center gap-1 rounded-full bg-linear-to-b from-whatsapp to-whatsapp-dark px-3 py-1.5 text-[11px] font-semibold text-white shadow-nav-selected inset-shadow-[0_1px_rgb(255_255_255/0.18)] transition active:translate-y-px active:shadow-none motion-reduce:transition-none"
+          >
+            <Lock className="h-3.5 w-3.5" />
+            Débloquer
+          </button>
         )}
       </header>
 
