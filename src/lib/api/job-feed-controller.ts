@@ -40,6 +40,15 @@ export type JobFeedItem = {
   matchScore: number;
   saved: boolean;
   applied: boolean;
+  /**
+   * The worker's LIVE application on this offer, when there is one.
+   *
+   * Not the same question as `applied`, which stays true for a cancelled or
+   * rejected row because those still bar a re-application. A conversation on a
+   * dead application is closed, so this is null there and the chat button is
+   * not offered — a control the API would refuse is worse than no control.
+   */
+  applicationId: string | null;
   // Only the search endpoint supplies the category; the feed endpoints don't.
   categoryId?: string | null;
   categoryName?: string | null;

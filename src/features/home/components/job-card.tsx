@@ -132,21 +132,30 @@ export function JobCard({ job, canApply }: Props) {
         </div>
       </button>
 
-      <Button
-        className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-        disabled={
-          job.applied ||
-          offerClosed ||
-          !canApply ||
-          blocked ||
-          accountBlocked ||
-          apply.isPending
-        }
-        onClick={() => setConfirmOpen(true)}
-      >
-        {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {applyLabel}
-      </Button>
+      {/* Two intents, two controls. Applying and talking are different
+          actions, and a card that swaps its single button depending on state
+          forces a re-read every time. The chat button renders nothing at all
+          when there is no live application, so the row collapses back to the
+          full-width button it has always been. */}
+      <div className="mt-4 flex items-center gap-2">
+        <Button
+          className="w-full flex-1 bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
+          disabled={
+            job.applied ||
+            offerClosed ||
+            !canApply ||
+            blocked ||
+            accountBlocked ||
+            apply.isPending
+          }
+          onClick={() => setConfirmOpen(true)}
+        >
+          {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {applyLabel}
+        </Button>
+
+        <StartChatButton applicationId={job.applicationId} />
+      </div>
 
       <ApplyConfirmDrawer
         open={confirmOpen}
