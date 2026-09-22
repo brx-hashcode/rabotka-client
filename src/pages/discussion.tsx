@@ -280,7 +280,10 @@ export default function Discussion() {
       </div>
 
       {/* ── Composer: a pill and a round send button, on the wallpaper. ── */}
-      <footer className="chat-wallpaper shrink-0 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-1">
+      {/* `+1rem` on top of the inset, the same as BottomNav: half of it left
+          the composer hugging the home indicator on a phone. `pt-2` keeps it
+          off the last bubble. */}
+      <footer className="chat-wallpaper shrink-0 px-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-2">
         {closed ? (
           <p className="mx-auto w-fit rounded-lg bg-chat-bubble-in px-3 py-2 text-center text-xs text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
             {content.closed}
