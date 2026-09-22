@@ -101,7 +101,7 @@ export function RecommendedWorkerCard({
           the platform. */}
       <div className="mt-4 flex items-center gap-2">
         <Button
-          className="w-full flex-1 bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
+          className="flex-1"
           disabled={blocked || accountBlocked}
           onClick={() => setConfirmOpen(true)}
         >

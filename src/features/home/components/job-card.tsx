@@ -6,7 +6,7 @@ import {
   Calendar,
   Coins,
   MapPin,
-  Loader2,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -133,31 +133,46 @@ export function JobCard({ job, canApply }: Props) {
         </div>
       </button>
 
-      {/* Two intents, two controls. Applying and talking are different
-          actions, and a card that swaps its single button depending on state
-          forces a re-read every time. The chat button renders nothing at all
-          when there is no live application, so the row collapses back to the
-          full-width button it has always been. */}
-      <div className="mt-4 flex items-center gap-2">
-        <Button
-          className="w-full flex-1 bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-          disabled={
-            job.applied ||
-            offerClosed ||
-            !canApply ||
-            blocked ||
-            accountBlocked ||
-            apply.isPending
-          }
-          onClick={() => setConfirmOpen(true)}
-        >
-          {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {applyLabel}
-        </Button>
+      {/* Two intents, two controls — and the WEIGHT goes to whichever one is
+          still live.
 
-        <StartChatButton
-          target={{ kind: "application", id: job.applicationId }}
-        />
+          Before applying, "Postuler" is the action and "Discuter" does not
+          exist yet (no application, nothing to talk about).
+
+          After applying, the apply button is dead: a disabled full-width
+          gradient beside a small chat icon put the emphasis exactly backwards,
+          on the one thing you could no longer do. So the roles swap — the
+          application becomes a calm status with a tick, and "Discuter" takes
+          the primary style. */}
+      <div className="mt-4 flex items-center gap-2">
+        {job.applied && job.applicationId ? (
+          <>
+            <div className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md bg-whatsapp/10 text-sm font-semibold text-whatsapp-dark">
+              <Check className="h-4 w-4" strokeWidth={2.25} />
+              {applyLabel}
+            </div>
+            <StartChatButton
+              target={{ kind: "application", id: job.applicationId }}
+              emphasis="primary"
+              className="flex-1"
+            />
+          </>
+        ) : (
+          // No chat button on this branch: `applicationId` only exists for a
+          // LIVE application, and that case is the branch above. Here it is
+          // either not applied yet, or applied and since rejected/cancelled —
+          // in which case the thread, if any, is reached from Discussions.
+          <Button
+            className="flex-1"
+            disabled={
+              job.applied || offerClosed || !canApply || blocked || accountBlocked
+            }
+            loading={apply.isPending}
+            onClick={() => setConfirmOpen(true)}
+          >
+            {applyLabel}
+          </Button>
+        )}
       </div>
 
       <ApplyConfirmDrawer

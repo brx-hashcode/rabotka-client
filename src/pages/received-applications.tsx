@@ -153,6 +153,7 @@ const ApplicationRow = ({
           kind: "application",
           id: chattableApplicationId(app.id, app.status),
         }}
+        compact
         className="absolute bottom-3 right-3"
       />
     </div>

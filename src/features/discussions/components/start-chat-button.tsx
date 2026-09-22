@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
-import { MessageCircle, Loader2 } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tapFeedback } from "@/lib/haptics";
 import {
@@ -12,10 +13,10 @@ import {
 /**
  * Two ways in, and the card picks one.
  *
- * `application` is the ordinary case: a thread about a specific application.
- * `profile` is an employer writing to a recommended worker with no application
- * between them — capped server-side, because it reaches somebody who never
- * asked to be reached.
+ * `application` is the ordinary case. `profile` is an employer writing to a
+ * recommended worker with no application between them — capped server-side,
+ * because it reaches somebody who never asked to be reached. Either way the
+ * server lands in the pair's ONE thread.
  *
  * A discriminated union rather than two optional ids, so a card cannot pass
  * both and leave the button guessing which one it meant.
@@ -24,29 +25,42 @@ type Target =
   | { readonly kind: "application"; readonly id: string | null }
   | { readonly kind: "profile"; readonly id: string };
 
-type Props = {
+type Props = Readonly<{
   /**
    * What to open. An `application` target with a null id renders NOTHING
    * rather than a disabled button: a greyed-out control invites a tap and then
    * explains itself, and on a card that repeats down a feed that is a dozen
    * invitations to be told no.
    */
-  readonly target: Target;
-  readonly className?: string;
-};
+  target: Target;
+  /**
+   * `primary` when talking is the thing left to do on the card — after
+   * applying, the apply button is dead and this is the only live action, so it
+   * takes the weight. `secondary` beside a live primary, so the two do not
+   * compete.
+   */
+  emphasis?: "primary" | "secondary";
+  /** Icon only, for dense list rows where a label does not fit. */
+  compact?: boolean;
+  className?: string;
+}>;
 
 /**
- * "Discuter" — opens the conversation for an application, or creates it.
+ * "Discuter" — opens the conversation, or creates it.
  *
- * Idempotent on the server: a unique index on the application makes a second
- * call return the first result, so this may be tapped from anywhere, as often
- * as anyone likes, without a guard.
- *
- * Sits BESIDE the card's primary action rather than replacing it. Applying and
- * talking are different intents, and a card that swaps its button depending on
- * state makes the user re-read it every time.
+ * Built on `Button` rather than a hand-drawn square. The first version was a
+ * 40px icon beside a 44px button, pale, without a label — it read as an
+ * afterthought, and on an applied card it was the only thing left to tap.
+ * Same height, same press, same highlight as every other action now, and a
+ * word next to the icon: a lone speech bubble is not obviously "talk to the
+ * employer about this job".
  */
-export function StartChatButton({ target, className }: Props) {
+export function StartChatButton({
+  target,
+  emphasis = "secondary",
+  compact = false,
+  className,
+}: Props) {
   const navigate = useNavigate();
 
   const open = useMutation({
@@ -68,33 +82,26 @@ export function StartChatButton({ target, className }: Props) {
   });
 
   if (!target.id) return null;
+  const id = target.id;
 
   return (
-    <button
+    <Button
       type="button"
+      variant={emphasis === "primary" ? "default" : "outline"}
+      size={compact ? "icon" : "default"}
       aria-label="Discuter"
-      disabled={open.isPending}
+      loading={open.isPending}
       onClick={(e) => {
         // The whole card is a navigation target on most screens; without this
         // the tap opens the offer behind the button.
         e.stopPropagation();
         tapFeedback();
-        open.mutate(target.id as string);
+        open.mutate(id);
       }}
-      className={cn(
-        "flex h-10 w-12 shrink-0 items-center justify-center rounded-md",
-        "bg-whatsapp/10 text-whatsapp",
-        "transition duration-100 active:scale-90 active:bg-whatsapp/20",
-        "motion-reduce:transition-none motion-reduce:active:scale-100",
-        "disabled:opacity-50",
-        className,
-      )}
+      className={cn(!compact && "px-5", className)}
     >
-      {open.isPending ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
-      ) : (
-        <MessageCircle className="h-5 w-5" strokeWidth={1.75} />
-      )}
-    </button>
+      <MessageCircle className="size-5!" strokeWidth={1.75} />
+      {!compact && "Discuter"}
+    </Button>
   );
 }
