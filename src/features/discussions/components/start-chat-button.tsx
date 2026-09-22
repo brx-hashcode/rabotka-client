@@ -4,18 +4,34 @@ import { MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { tapFeedback } from "@/lib/haptics";
-import { openDiscussion } from "@/lib/api/discussions-controller";
+import {
+  openDiscussion,
+  openDiscussionWithProfile,
+} from "@/lib/api/discussions-controller";
+
+/**
+ * Two ways in, and the card picks one.
+ *
+ * `application` is the ordinary case: a thread about a specific application.
+ * `profile` is an employer writing to a recommended worker with no application
+ * between them — capped server-side, because it reaches somebody who never
+ * asked to be reached.
+ *
+ * A discriminated union rather than two optional ids, so a card cannot pass
+ * both and leave the button guessing which one it meant.
+ */
+type Target =
+  | { readonly kind: "application"; readonly id: string | null }
+  | { readonly kind: "profile"; readonly id: string };
 
 type Props = {
   /**
-   * The LIVE application this conversation hangs on.
-   *
-   * Null renders nothing at all rather than a disabled button. A greyed-out
-   * control on a card invites a tap and then explains itself — on a card that
-   * appears a dozen times down a feed, that is a dozen invitations to be told
-   * no. Absence says the same thing more quietly.
+   * What to open. An `application` target with a null id renders NOTHING
+   * rather than a disabled button: a greyed-out control invites a tap and then
+   * explains itself, and on a card that repeats down a feed that is a dozen
+   * invitations to be told no.
    */
-  readonly applicationId: string | null;
+  readonly target: Target;
   readonly className?: string;
 };
 
@@ -30,16 +46,28 @@ type Props = {
  * talking are different intents, and a card that swaps its button depending on
  * state makes the user re-read it every time.
  */
-export function StartChatButton({ applicationId, className }: Props) {
+export function StartChatButton({ target, className }: Props) {
   const navigate = useNavigate();
 
   const open = useMutation({
-    mutationFn: (id: string) => openDiscussion(id),
+    mutationFn: (id: string) =>
+      target.kind === "application"
+        ? openDiscussion(id)
+        : openDiscussionWithProfile(id),
     onSuccess: ({ conversation }) => navigate(`/discussions/${conversation.id}`),
-    onError: () => toast.error("La discussion n’a pas pu être ouverte"),
+    onError: (error: unknown) => {
+      // The profile path has a daily cap and says so in French. Showing the
+      // server's sentence beats a generic failure that leaves somebody
+      // retrying a button that will not work again today.
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: unknown }).message)
+          : "";
+      toast.error(message || "La discussion n’a pas pu être ouverte");
+    },
   });
 
-  if (!applicationId) return null;
+  if (!target.id) return null;
 
   return (
     <button
@@ -51,7 +79,7 @@ export function StartChatButton({ applicationId, className }: Props) {
         // the tap opens the offer behind the button.
         e.stopPropagation();
         tapFeedback();
-        open.mutate(applicationId);
+        open.mutate(target.id as string);
       }}
       className={cn(
         "flex h-10 w-12 shrink-0 items-center justify-center rounded-md",

@@ -155,7 +155,9 @@ export function JobCard({ job, canApply }: Props) {
           {applyLabel}
         </Button>
 
-        <StartChatButton applicationId={job.applicationId} />
+        <StartChatButton
+          target={{ kind: "application", id: job.applicationId }}
+        />
       </div>
 
       <ApplyConfirmDrawer

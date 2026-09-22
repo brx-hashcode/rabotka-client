@@ -149,7 +149,10 @@ const ApplicationRow = ({
           control sits where a second action goes without competing with it.
           `pr-16` above keeps the text out from under it. */}
       <StartChatButton
-        applicationId={chattableApplicationId(app.id, app.status)}
+        target={{
+          kind: "application",
+          id: chattableApplicationId(app.id, app.status),
+        }}
         className="absolute bottom-3 right-3"
       />
     </div>

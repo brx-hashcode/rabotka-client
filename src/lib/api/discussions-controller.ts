@@ -86,6 +86,21 @@ class DiscussionsController extends RabotkaBaseController {
     );
   }
 
+  /**
+   * Opens a conversation with a profile that has no application between you —
+   * an employer writing to a recommended worker.
+   *
+   * Idempotent, like `open`, but capped server-side: this is the one call that
+   * reaches somebody who never asked to be reached, so it can legitimately
+   * fail with "trop de discussions aujourd'hui". The caller shows the message
+   * rather than swallowing it.
+   */
+  openWithProfile(profileId: string): Promise<{ conversation: { id: string } }> {
+    return this.post<{ conversation: { id: string } }>(
+      `/profile/discussions/profiles/${profileId}`,
+    );
+  }
+
   send(id: string, body: string): Promise<{ message: DiscussionMessage }> {
     return this.post<{ message: DiscussionMessage }>(
       `/profile/discussions/${id}/messages`,
@@ -112,6 +127,8 @@ const controller = new DiscussionsController();
 export const listDiscussions = controller.list.bind(controller);
 export const listDiscussionMessages = controller.messages.bind(controller);
 export const openDiscussion = controller.open.bind(controller);
+export const openDiscussionWithProfile =
+  controller.openWithProfile.bind(controller);
 export const sendDiscussionMessage = controller.send.bind(controller);
 export const markDiscussionRead = controller.markRead.bind(controller);
 export const reportRedaction = controller.report.bind(controller);
