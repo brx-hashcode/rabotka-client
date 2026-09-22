@@ -114,6 +114,13 @@ type BackendJobFeedItem = {
   created_at: string;
   matchScore: number;
   saved: boolean;
+  /**
+   * The worker's LIVE application, or null. Non-optional like `employmentType`
+   * above and for the same reason: all four endpoints that produce this shape
+   * send it, so a server-side rename should surface here rather than as a
+   * button that quietly stops appearing.
+   */
+  applicationId: string | null;
   applied: boolean;
   categoryId?: string | null;
   categoryName?: string | null;
@@ -150,6 +157,11 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     matchScore: o.matchScore ?? 0,
     saved: o.saved,
     applied: o.applied,
+    // `?? null` although the type says it is always there: an older server
+    // would send `undefined`, and undefined reaching StartChatButton renders
+    // nothing anyway — but null is what the prop is typed as, and a shape that
+    // lies about itself is how the next bug starts.
+    applicationId: o.applicationId ?? null,
     categoryId: o.categoryId ?? null,
     categoryName: o.categoryName ?? null,
     employer: o.employer

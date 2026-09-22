@@ -22,6 +22,7 @@ import { accountShortLabel } from "@/features/account";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
+import { StartChatButton } from "@/features/discussions/components/start-chat-button";
 
 type Props = {
   readonly job: JobFeedItem;
