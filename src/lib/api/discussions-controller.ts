@@ -45,6 +45,9 @@ export type Discussion = {
   id: string;
   counterpartId: string;
   counterpartName: string;
+  counterpartAvatarUrl: string | null;
+  /** Connected right now. Fails closed server-side: false also means "unknown". */
+  counterpartOnline: boolean;
   jobTitle: string | null;
   applicationId: string | null;
   lastMessageAt: string | null;
