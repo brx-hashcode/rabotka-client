@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { io } from "socket.io-client";
 import {
+  getDiscussion,
   hideDiscussion,
   listDiscussionMessages,
   listDiscussions,
@@ -19,6 +20,7 @@ export const discussionsKeys = {
   all: ["discussions"] as const,
   list: () => [...discussionsKeys.all, "list"] as const,
   thread: (id: string) => [...discussionsKeys.all, "thread", id] as const,
+  one: (id: string) => [...discussionsKeys.all, "one", id] as const,
 };
 
 /**
@@ -51,6 +53,29 @@ export function useDiscussions() {
 export function useUnreadDiscussionsCount(): number {
   const { data } = useDiscussions();
   return (data?.data ?? []).reduce((sum, d) => sum + d.unreadCount, 0);
+}
+
+/**
+ * The header of one thread — counterpart, job, presence.
+ *
+ * Its own request rather than a lookup in the list: the list only holds threads
+ * with a message, so a thread opened from a card and not yet written in used
+ * to show "Discussion" and a "D". Seeded from the list when the list already
+ * has it, so an existing thread still paints its header instantly.
+ */
+export function useDiscussion(id: string) {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: discussionsKeys.one(id),
+    queryFn: async () => (await getDiscussion(id)).conversation,
+    enabled: Boolean(id),
+    initialData: () =>
+      queryClient
+        .getQueryData<Awaited<ReturnType<typeof listDiscussions>>>(
+          discussionsKeys.list(),
+        )
+        ?.data.find((d) => d.id === id),
+  });
 }
 
 export function useDiscussionThread(id: string) {

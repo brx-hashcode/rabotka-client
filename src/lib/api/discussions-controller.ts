@@ -77,6 +77,11 @@ class DiscussionsController extends RabotkaBaseController {
     );
   }
 
+  /** One conversation, including one nobody has written in yet. */
+  one(id: string): Promise<{ conversation: Discussion }> {
+    return this.get<{ conversation: Discussion }>(`/profile/discussions/${id}`);
+  }
+
   messages(id: string, page = 1, limit = 50): Promise<Page<DiscussionMessage>> {
     return this.get<Page<DiscussionMessage>>(
       `/profile/discussions/${id}/messages?page=${page}&limit=${limit}`,
@@ -143,6 +148,7 @@ class DiscussionsController extends RabotkaBaseController {
 const controller = new DiscussionsController();
 export const listDiscussions = controller.list.bind(controller);
 export const listDiscussionMessages = controller.messages.bind(controller);
+export const getDiscussion = controller.one.bind(controller);
 export const openDiscussion = controller.open.bind(controller);
 export const openDiscussionWithProfile =
   controller.openWithProfile.bind(controller);

@@ -10,7 +10,6 @@ export const discussionsContent = {
     filterUnread: "Non lues",
     noSearchResult: "Aucune discussion ne correspond à votre recherche.",
     noUnread: "Vous avez tout lu.",
-    longPressHint: "Appui long sur une discussion pour la supprimer",
     delete: "Supprimer la discussion",
     deleteConfirm: "Oui, supprimer",
     /**

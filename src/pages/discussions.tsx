@@ -195,12 +195,6 @@ export default function Discussions() {
         ))}
       </ul>
 
-      {!isLoading && all.length > 0 && (
-        <p className="pb-28 text-center text-[11px] text-muted-foreground">
-          {content.longPressHint}
-        </p>
-      )}
-
       {/* ── Row actions, opened by a long press or a right-click. ── */}
       <Drawer open={actionsFor !== null} onOpenChange={(open) => !open && closeActions()}>
         <DrawerContent>

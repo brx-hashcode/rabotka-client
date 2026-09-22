@@ -14,8 +14,8 @@ import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 import { WorkerUnlockDrawer } from "@/features/discussions/components/worker-unlock-drawer";
 import {
+  useDiscussion,
   useDiscussionThread,
-  useDiscussions,
   useDiscussionsSocket,
   useMarkDiscussionRead,
   useReportRedaction,
@@ -54,7 +54,7 @@ export default function Discussion() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useDiscussionThread(id);
-  const { data: list } = useDiscussions();
+  const { data: discussion } = useDiscussion(id);
   const send = useSendMessage(id);
   const markRead = useMarkDiscussionRead();
   const report = useReportRedaction();
@@ -63,7 +63,6 @@ export default function Discussion() {
   const content = discussionsContent.thread;
   const warning = discussionsContent.warning;
 
-  const discussion = list?.data.find((d) => d.id === id);
   const { data: me } = useProfileMe();
   const location = useLocation();
   const isEmployer = me?.profileType === "EMPLOYER";
@@ -130,7 +129,9 @@ export default function Discussion() {
 
   const closed = discussion?.closed ?? false;
   const unlocked = discussion?.contactsUnlocked ?? false;
-  const name = discussion?.counterpartName ?? "Discussion";
+  // Empty rather than a placeholder word: the header shows a skeleton until
+  // the counterpart is known, instead of "Discussion" and a "D" avatar.
+  const name = discussion?.counterpartName ?? "";
 
   const submit = () => {
     const body = draft.trim();
@@ -161,15 +162,23 @@ export default function Discussion() {
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
         </button>
 
-        <CounterpartAvatar
-          name={name}
-          avatarUrl={discussion?.counterpartAvatarUrl ?? null}
-          online={discussion?.counterpartOnline ?? false}
-          className="h-10 w-10"
-        />
+        {discussion ? (
+          <CounterpartAvatar
+            name={name}
+            avatarUrl={discussion.counterpartAvatarUrl}
+            online={discussion.counterpartOnline}
+            className="h-10 w-10"
+          />
+        ) : (
+          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+        )}
 
         <div className="min-w-0 flex-1 pl-1">
-          <p className="truncate text-[15px] font-semibold leading-tight">{name}</p>
+          {discussion ? (
+            <p className="truncate text-[15px] font-semibold leading-tight">{name}</p>
+          ) : (
+            <Skeleton className="mb-1 h-4 w-32" />
+          )}
           {/* "en ligne" when connected, the job otherwise. Never "hors ligne":
               the server fails closed, so false also means "could not tell", and
               saying offline would claim a certainty nobody has. There is no
