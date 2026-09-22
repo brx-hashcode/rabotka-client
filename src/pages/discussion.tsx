@@ -128,7 +128,6 @@ export default function Discussion() {
   }, [messages.length]);
 
   const closed = discussion?.closed ?? false;
-  const unlocked = discussion?.contactsUnlocked ?? false;
   // Empty rather than a placeholder word: the header shows a skeleton until
   // the counterpart is known, instead of "Discussion" and a "D" avatar.
   const name = discussion?.counterpartName ?? "";
@@ -218,14 +217,16 @@ export default function Discussion() {
         {/* The standing rule, as a system notice at the head of the thread —
             the same place and shape WhatsApp uses for its encryption notice,
             so it reads as part of the conversation's ground rules rather than
-            as an ad in the header. Known before the first attempt; the notice
-            under a withheld fragment carries the rest. */}
-        {!unlocked && (
-          <div className="mx-auto mb-3 flex max-w-[88%] items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-center text-[12px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
-            <Lock className="mt-0.5 h-3 w-3 shrink-0" />
-            <span>{warning.header}</span>
-          </div>
-        )}
+            as an ad in the header.
+
+            ALWAYS shown. It used to disappear once the pair had unlocked,
+            because masking stopped there too; masking never stops now, so a
+            notice that vanished would leave the rule unexplained exactly
+            where people most expect to be able to type a number. */}
+        <div className="mx-auto mb-3 flex max-w-[88%] items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-center text-[12px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
+          <Lock className="mt-0.5 h-3 w-3 shrink-0" />
+          <span>{warning.header}</span>
+        </div>
 
         {isLoading && (
           <div className="space-y-2">

@@ -59,8 +59,6 @@ export type Discussion = {
   lastMessageHeld: boolean;
   unreadCount: number;
   closed: boolean;
-  /** Both parties have paid; the thread stops masking from here on. */
-  contactsUnlocked: boolean;
 };
 
 export type Page<T> = {

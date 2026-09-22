@@ -46,13 +46,13 @@ export const discussionsContent = {
   warning: {
     /** Permanent, in the thread header. Known before the first attempt. */
     header:
-      "Vos coordonnées restent protégées. N’envoyez jamais votre numéro ou votre email ici : ils sont automatiquement masqués. Pour les échanger, utilisez « Débloquer les coordonnées ».",
+      "Les coordonnées ne circulent jamais dans la discussion : numéros et emails y sont toujours masqués, même après un déblocage. Pour obtenir celles de votre interlocuteur, utilisez « Débloquer les coordonnées » — elles arrivent par WhatsApp.",
     /** Under a withheld fragment. The moment the rule is understood. */
     sender:
       "Ce fragment n’a pas été transmis. Les coordonnées ne s’échangent pas dans la discussion.",
     /** Once per thread, under the first hole. Not a bug, a rule. */
     recipient:
-      "Les coordonnées sont masquées tant qu’elles n’ont pas été débloquées.",
+      "Les coordonnées sont toujours masquées ici. Elles s’obtiennent en débloquant, et arrivent par WhatsApp.",
     /** A message withheld whole. */
     held: "Ce message n’a pas été transmis : il contenait des coordonnées.",
     reportCta: "Signaler une erreur",
