@@ -16,6 +16,7 @@ import {
 import { discussionsContent } from "@/content/discussions";
 import { DiscussionRow } from "@/features/discussions/components/discussion-row";
 import { tapFeedback } from "@/lib/haptics";
+import { useScroll } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
 import type { Discussion } from "@/lib/api/discussions-controller";
 import {
@@ -53,6 +54,7 @@ export default function Discussions() {
   const hide = useHideDiscussion();
   useDiscussionsSocket(true);
 
+  const scrolled = useScroll(0);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [actionsFor, setActionsFor] = useState<Discussion | null>(null);
@@ -96,8 +98,19 @@ export default function Discussions() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* ── Large title, search, filters: the WhatsApp head. ── */}
-      <header className="px-4 pb-2 pt-4">
+      {/* ── Large title, search, filters: the WhatsApp head. ──
+          Sticky, with the same tokens as ScreenHeader: fully opaque (a
+          translucent bar let rows show through), z-40, and a shadow that only
+          appears once something has scrolled under it. The rest of the app
+          keeps its header in place; this one scrolled away with the list, so
+          search and the filters left the screen just when a long list needs
+          them. */}
+      <header
+        className={cn(
+          "sticky top-0 z-40 bg-background px-4 pb-2 pt-4 transition-shadow",
+          scrolled && "shadow-soft",
+        )}
+      >
         <h1 className="text-[28px] font-bold leading-tight tracking-tight">
           {content.title}
         </h1>
