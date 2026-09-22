@@ -7,6 +7,10 @@ import {
   Coins,
   MapPin,
   Check,
+  X,
+  Ban,
+  CircleCheck,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,9 +24,29 @@ import { kycShortLabel } from "@/features/kyc";
 import { useAccountGate } from "@/hooks/use-account-gate";
 import { accountShortLabel } from "@/features/account";
 import { useApplyToJob, useToggleSaveJob } from "@/hooks/use-jobs";
-import type { JobFeedItem } from "@/lib/api/job-feed-controller";
+import type {
+  ApplicationState,
+  JobFeedItem,
+} from "@/lib/api/job-feed-controller";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 import { StartChatButton } from "@/features/discussions/components/start-chat-button";
+
+/**
+ * One label per situation, from the server's `applicationState`. NONE and
+ * CAN_REAPPLY are absent on purpose: those are not statuses, they are "you may
+ * apply", and get the apply button instead.
+ */
+const APPLICATION_STATUS: Partial<
+  Record<
+    ApplicationState,
+    { label: string; icon: LucideIcon; tone: "positive" | "neutral" }
+  >
+> = {
+  LIVE: { label: "Déjà postulé", icon: Check, tone: "positive" },
+  REJECTED: { label: "Candidature refusée", icon: X, tone: "neutral" },
+  ENDED: { label: "Mission terminée", icon: CircleCheck, tone: "neutral" },
+  SELF_CANCELLED: { label: "Candidature annulée", icon: Ban, tone: "neutral" },
+};
 
 type Props = {
   readonly job: JobFeedItem;
@@ -52,13 +76,22 @@ export function JobCard({ job, canApply }: Props) {
   // offer can never accept the application, whatever the worker's quota says.
   const offerClosed = isClosedToApplications(job);
 
-  let applyLabel = "Postuler";
-  if (job.applied) applyLabel = "Déjà postulé";
-  // "Offre pourvue" se lisait comme un statut de SA candidature, alors que la
-  // branche « Déjà postulé » au-dessus a déjà pris la main dans ce cas : ce
-  // libellé ne s'affiche qu'à quelqu'un qui n'a pas postulé. Il parle donc du
-  // poste, pas de la personne, et doit le dire.
-  else if (offerClosed) applyLabel = "Plus de place disponible";
+  /**
+   * The application's situation, when there is one to report. Each of these
+   * used to render as the same disabled "Déjà postulé" — including a cancelled
+   * application the worker was allowed to re-apply to. Now each says what is
+   * true, and all of them share ONE calm look: a status is information, and a
+   * disabled gradient reads as a broken or loading button.
+   */
+  const status = APPLICATION_STATUS[job.applicationState];
+
+  // Only consulted when there is no status above, i.e. the worker can apply.
+  let applyLabel =
+    job.applicationState === "CAN_REAPPLY" ? "Postuler à nouveau" : "Postuler";
+  // "Offre pourvue" se lisait comme un statut de SA candidature. Ce libellé ne
+  // s'affiche qu'à quelqu'un qui n'a pas de candidature en cours : il parle
+  // donc du poste, pas de la personne, et doit le dire.
+  if (offerClosed) applyLabel = "Plus de place disponible";
   else if (accountBlocked && accountReason)
     applyLabel = accountShortLabel(accountReason);
   else if (blocked && reason) applyLabel = kycShortLabel(reason);
@@ -145,12 +178,22 @@ export function JobCard({ job, canApply }: Props) {
           application becomes a calm status with a tick, and "Discuter" takes
           the primary style. */}
       <div className="mt-4 flex items-center gap-2">
-        {job.applied && job.applicationId ? (
+        {status ? (
           <>
-            <div className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md bg-whatsapp/10 text-sm font-semibold text-whatsapp-dark">
-              <Check className="h-4 w-4" strokeWidth={2.25} />
-              {applyLabel}
+            <div
+              className={cn(
+                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md text-sm font-semibold",
+                status.tone === "positive"
+                  ? "bg-whatsapp/10 text-whatsapp-dark"
+                  : "bg-muted text-muted-foreground",
+              )}
+            >
+              <status.icon className="h-4 w-4" strokeWidth={2.25} />
+              {status.label}
             </div>
+            {/* Talking takes the primary style when it is the live action
+                left. Only a LIVE application carries an id, so every other
+                status simply has no button here. */}
             <StartChatButton
               target={{ kind: "application", id: job.applicationId }}
               emphasis="primary"
@@ -158,15 +201,9 @@ export function JobCard({ job, canApply }: Props) {
             />
           </>
         ) : (
-          // No chat button on this branch: `applicationId` only exists for a
-          // LIVE application, and that case is the branch above. Here it is
-          // either not applied yet, or applied and since rejected/cancelled —
-          // in which case the thread, if any, is reached from Discussions.
           <Button
             className="flex-1"
-            disabled={
-              job.applied || offerClosed || !canApply || blocked || accountBlocked
-            }
+            disabled={offerClosed || !canApply || blocked || accountBlocked}
             loading={apply.isPending}
             onClick={() => setConfirmOpen(true)}
           >

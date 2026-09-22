@@ -12,6 +12,14 @@ export type JobFeedEmployer = {
   ratingCount: number;
 };
 
+export type ApplicationState =
+  | "NONE"
+  | "LIVE"
+  | "REJECTED"
+  | "ENDED"
+  | "SELF_CANCELLED"
+  | "CAN_REAPPLY";
+
 export type JobFeedItem = {
   id: string;
   reference: string;
@@ -49,6 +57,15 @@ export type JobFeedItem = {
    * not offered — a control the API would refuse is worse than no control.
    */
   applicationId: string | null;
+  /**
+   * What is actually true about this worker's application to the offer,
+   * derived server-side from the SAME rule the apply endpoint enforces.
+   *
+   * `applied` alone lied: it was true for a cancelled application the worker
+   * was allowed to re-apply to, and the card showed "Déjà postulé", disabled,
+   * on something the server would accept.
+   */
+  applicationState: ApplicationState;
   // Only the search endpoint supplies the category; the feed endpoints don't.
   categoryId?: string | null;
   categoryName?: string | null;
@@ -121,6 +138,7 @@ type BackendJobFeedItem = {
    * button that quietly stops appearing.
    */
   applicationId: string | null;
+  applicationState: ApplicationState;
   applied: boolean;
   categoryId?: string | null;
   categoryName?: string | null;
@@ -162,6 +180,9 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     // nothing anyway — but null is what the prop is typed as, and a shape that
     // lies about itself is how the next bug starts.
     applicationId: o.applicationId ?? null,
+    // An older server sends nothing here; "NONE" there would offer "Postuler"
+    // on offers already applied to, so fall back on the legacy boolean.
+    applicationState: o.applicationState ?? (o.applied ? "LIVE" : "NONE"),
     categoryId: o.categoryId ?? null,
     categoryName: o.categoryName ?? null,
     employer: o.employer

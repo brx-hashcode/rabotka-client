@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { ArrowLeft, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,11 +8,11 @@ import { MessageBubble } from "@/features/discussions/components/message-bubble"
 import { CounterpartAvatar } from "@/features/discussions/components/counterpart-avatar";
 import { tapFeedback } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
-import type {
-  Discussion as DiscussionSummary,
-  DiscussionMessage,
-} from "@/lib/api/discussions-controller";
+import type { DiscussionMessage } from "@/lib/api/discussions-controller";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
+import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
+import { WorkerUnlockDrawer } from "@/features/discussions/components/worker-unlock-drawer";
 import {
   useDiscussionThread,
   useDiscussions,
@@ -24,29 +24,6 @@ import {
 
 /** Matches the server's DTO bound, so the counter and the 400 agree. */
 const MAX_LENGTH = 2000;
-
-/**
- * Where "Débloquer" leads, or null when there is nothing this viewer can pay.
- *
- * Depends on the ROLE, which the first version ignored and so sent employers to
- * the worker's route:
- * - through an application, each side unlocks from its own view of it —
- *   `/applications/:id` for the worker, `/candidatures/:id` for the employer;
- * - in a direct conversation there is no application, and the only unlock is
- *   the recommendation contact, which the EMPLOYER pays alone. A worker there
- *   has nothing to pay, so no button rather than one that leads nowhere.
- */
-function unlockPath(
-  discussion: DiscussionSummary,
-  isEmployer: boolean,
-): string | null {
-  if (discussion.applicationId) {
-    return isEmployer
-      ? `/candidatures/${discussion.applicationId}`
-      : `/applications/${discussion.applicationId}`;
-  }
-  return isEmployer ? `/recommandations/${discussion.counterpartId}` : null;
-}
 
 function dayKey(iso: string): string {
   const d = new Date(iso);
@@ -88,9 +65,41 @@ export default function Discussion() {
 
   const discussion = list?.data.find((d) => d.id === id);
   const { data: me } = useProfileMe();
-  const unlockTo = discussion
-    ? unlockPath(discussion, me?.profileType === "EMPLOYER")
-    : null;
+  const location = useLocation();
+  const isEmployer = me?.profileType === "EMPLOYER";
+  const [unlockOpen, setUnlockOpen] = useState(false);
+
+  /**
+   * "Débloquer" opens a SHEET, never a page — the fee and the rules are shown
+   * before the tap that costs money, not after a navigation.
+   *
+   * EMPLOYER: always. The contact sheet, for this worker — the same one the
+   * recommended-profile card opens, and it works for any worker, not only
+   * recommended ones (the detail endpoint skips eligibility). An employer may
+   * unlock as many times as they like: one mission, another, a recommendation.
+   *
+   * WORKER: only when the thread is about a job AND their share is actually
+   * owed. The worker never pays to contact an employer out of the blue — their
+   * only unlock is their share of a mission, which exists once the employer
+   * has accepted them. Anything else was a button leading to a page with
+   * nothing to pay.
+   */
+  const workerUnlockQuery = useWorkerUnlock(
+    !isEmployer && discussion?.applicationId ? discussion.applicationId : undefined,
+  );
+  const workerUnlock = workerUnlockQuery.data?.unlock ?? null;
+  const workerOwes = Boolean(workerUnlock && !workerUnlock.workerPaid);
+  const showUnlock = isEmployer ? Boolean(discussion) : workerOwes;
+
+  /**
+   * Back goes where the person came FROM — a job card, a candidate, the bell —
+   * not always to the list. `location.key` is "default" only for the first
+   * entry of the session: a thread opened from a WhatsApp nudge or a pasted
+   * link has nothing behind it, and going back there would leave the app, so
+   * that case falls back to the conversation list.
+   */
+  const goBack = () =>
+    location.key === "default" ? navigate("/discussions") : navigate(-1);
 
   // The API returns newest-first for pagination; a thread reads oldest-first.
   const messages = useMemo<DiscussionMessage[]>(
@@ -146,7 +155,7 @@ export default function Discussion() {
         <button
           type="button"
           aria-label="Retour"
-          onClick={() => navigate("/discussions")}
+          onClick={goBack}
           className="flex h-10 w-9 shrink-0 items-center justify-center rounded-md active:bg-muted"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
@@ -179,13 +188,13 @@ export default function Discussion() {
         {/* The primary action of the screen, and it STAYS even once contacts
             are unlocked. Unlocking is not a one-off: an employer pays again for
             each new mission, or for a recommendation contact, and swapping the
-            button for a "débloquées" badge cut that path off. It routes into
-            the EXISTING flow — a link, not a second payment path. See
-            `unlockPath` for where, by role. */}
-        {unlockTo && (
+            button for a "débloquées" badge cut that path off. It opens a sheet
+            that then continues into the EXISTING payment flow — not a second
+            payment path. See `showUnlock` for who sees it, by role. */}
+        {showUnlock && (
           <button
             type="button"
-            onClick={() => navigate(unlockTo)}
+            onClick={() => setUnlockOpen(true)}
             aria-label={content.unlockCta}
             className="flex shrink-0 items-center gap-1 rounded-full bg-linear-to-b from-whatsapp to-whatsapp-dark px-3 py-1.5 text-[11px] font-semibold text-white shadow-nav-selected inset-shadow-[0_1px_rgb(255_255_255/0.18)] transition active:translate-y-px active:shadow-none motion-reduce:transition-none"
           >
@@ -298,6 +307,30 @@ export default function Discussion() {
           </div>
         )}
       </footer>
+
+      {discussion && isEmployer && (
+        <ContactConfirmDrawer
+          open={unlockOpen}
+          onOpenChange={setUnlockOpen}
+          workerId={discussion.counterpartId}
+          workerName={discussion.counterpartName}
+          onConfirm={() =>
+            navigate(`/recommandations/${discussion.counterpartId}/contact`)
+          }
+        />
+      )}
+
+      {discussion && !isEmployer && workerUnlock && discussion.applicationId && (
+        <WorkerUnlockDrawer
+          open={unlockOpen}
+          onOpenChange={setUnlockOpen}
+          employerName={discussion.counterpartName}
+          unlock={workerUnlock}
+          onConfirm={() =>
+            navigate(`/applications/${discussion.applicationId}/paiement`)
+          }
+        />
+      )}
     </div>
   );
 }
