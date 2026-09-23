@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { ArrowLeft, Loader2, Lock, Send } from "lucide-react";
+import { ArrowLeft, ChevronDown, Loader2, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { discussionsContent } from "@/content/discussions";
@@ -18,6 +18,8 @@ import { serverMessage } from "@/lib/api/errors";
 import { tapFeedback } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import type { DiscussionMessage } from "@/lib/api/discussions-controller";
+import { useAutoGrowTextarea } from "@/hooks/use-auto-grow-textarea";
+import { useViewportHeight } from "@/hooks/use-viewport-height";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
@@ -34,6 +36,15 @@ import {
 
 /** Matches the server's DTO bound, so the counter and the 400 agree. */
 const MAX_LENGTH = 2000;
+
+/**
+ * The ceiling the composer grows to — about five lines. Mirrored by
+ * `max-h-33` on the textarea so the measure and the class cannot drift.
+ */
+const COMPOSER_MAX_PX = 132;
+
+/** Past this far from the bottom, the way back stops being a flick. */
+const SCROLL_PILL_PX = 240;
 
 function dayKey(iso: string): string {
   const d = new Date(iso);
@@ -56,6 +67,44 @@ function dayLabel(iso: string): string {
   });
 }
 
+/**
+ * The avatar-and-name block of the header, tappable or not.
+ *
+ * One component rather than a ternary around the whole block, so the two
+ * branches cannot drift apart — and so the inert case is a plain `div` rather
+ * than a disabled button, which would still announce itself to a screen reader
+ * as something that ought to do something.
+ */
+function ProfileLink({
+  enabled,
+  name,
+  onOpen,
+  children,
+}: Readonly<{
+  enabled: boolean;
+  name: string;
+  onOpen: () => void;
+  children: React.ReactNode;
+}>) {
+  const shared = "flex min-w-0 flex-1 items-center gap-2";
+
+  if (!enabled) return <div className={shared}>{children}</div>;
+
+  return (
+    <button
+      type="button"
+      aria-label={name ? `Voir le profil de ${name}` : "Voir le profil"}
+      onClick={() => {
+        tapFeedback();
+        onOpen();
+      }}
+      className={cn(shared, "rounded-md transition active:opacity-60 motion-reduce:transition-none")}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function Discussion() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
@@ -63,6 +112,25 @@ export default function Discussion() {
   const [reported, setReported] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useAutoGrowTextarea(draft, COMPOSER_MAX_PX);
+
+  /**
+   * Messages sent but not yet answered for, shown greyed with a clock so the
+   * thread reacts to the tap instead of sitting still until the round trip
+   * ends. Dropped on success — the server's own version takes their place —
+   * and on failure, where the toast explains.
+   */
+  const [pending, setPending] = useState<{ key: string; body: string }[]>([]);
+  const pendingSeq = useRef(0);
+
+  /** Far enough up the thread that the way down should be offered. */
+  const [showScrollPill, setShowScrollPill] = useState(false);
+
+  /**
+   * The keyboard does not shrink `100dvh` on iOS — it is drawn over the page —
+   * so a composer at the bottom of a `h-dvh` column ends up behind it.
+   */
+  const viewportHeight = useViewportHeight();
 
   /**
    * History is loaded on demand, never on opening: a thread reads from where it
@@ -86,6 +154,16 @@ export default function Discussion() {
   const location = useLocation();
   const isEmployer = me?.profileType === "EMPLOYER";
   const [unlockOpen, setUnlockOpen] = useState(false);
+
+  /**
+   * The header opens the counterpart's profile — in one direction only.
+   *
+   * An employer's counterpart is always a worker, and the detail page already
+   * exists for them. A worker's counterpart is an employer, whose profile is
+   * not a page anyone browses; the endpoint behind it asserts EMPLOYER anyway,
+   * so a link there would be a 403 waiting to happen.
+   */
+  const canOpenProfile = isEmployer && Boolean(discussion?.counterpartId);
 
   /**
    * "Débloquer" opens a SHEET, never a page — the fee and the rules are shown
@@ -231,6 +309,10 @@ export default function Discussion() {
     opened.current = false;
     anchor.current = null;
     setHistoryOpen(false);
+    setShowScrollPill(false);
+    // A bubble left in flight would otherwise reappear at the bottom of the
+    // NEXT thread, attributed to the wrong person.
+    setPending([]);
   }, [id]);
 
   /**
@@ -272,9 +354,26 @@ export default function Discussion() {
     const body = draft.trim();
     if (!body || send.isPending) return;
     tapFeedback();
+
+    // Cleared here rather than in `onSuccess`: the pending bubble already shows
+    // what was typed, and leaving the text in the box for the length of the
+    // round trip reads as a send that did not take.
+    setDraft("");
+    pendingSeq.current += 1;
+    const key = `pending-${pendingSeq.current}`;
+    setPending((queue) => [...queue, { key, body }]);
+    const settle = () => setPending((queue) => queue.filter((p) => p.key !== key));
+
+    // The effect that follows the thread is keyed on the newest SERVER message,
+    // which has not arrived yet — so the bubble just added would otherwise
+    // appear below the fold on a full screen.
+    requestAnimationFrame(() =>
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+    );
+
     send.mutate(body, {
       onSuccess: ({ message }) => {
-        setDraft("");
+        settle();
         // Said plainly rather than left to the strike-through alone: the author
         // needs to know the message did not arrive whole before they wait for a
         // reply that is never coming.
@@ -285,13 +384,47 @@ export default function Discussion() {
       // moment. A generic failure would have the person retry a thread that is
       // never going to accept another message. Transport failures return null
       // rather than the SDK's untranslated English, so those keep our copy.
-      onError: (error) =>
-        toast.error(serverMessage(error) ?? "Le message n’a pas pu être envoyé"),
+      onError: (error) => {
+        settle();
+        // Given back rather than lost — but only if nothing new was typed in
+        // the meantime, which would otherwise be overwritten.
+        setDraft((current) => current || body);
+        toast.error(serverMessage(error) ?? "Le message n’a pas pu être envoyé");
+      },
     });
   };
 
+  /**
+   * Whether the pill that goes back down should be showing. Coalesced into a
+   * frame: this fires on every scroll event, and a `setState` per event on a
+   * cheap phone is how a thread starts to stutter under the thumb.
+   */
+  const pillFrame = useRef<number | null>(null);
+  const onThreadScroll = () => {
+    if (pillFrame.current !== null) return;
+    pillFrame.current = requestAnimationFrame(() => {
+      pillFrame.current = null;
+      const el = scrollRef.current;
+      if (!el) return;
+      const fromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollPill(fromBottom > SCROLL_PILL_PX);
+    });
+  };
+
+  useEffect(
+    () => () => {
+      if (pillFrame.current !== null) cancelAnimationFrame(pillFrame.current);
+    },
+    [],
+  );
+
   return (
-    <div className="flex h-dvh flex-col">
+    <div
+      className="flex h-dvh flex-col"
+      // `h-dvh` stays as the fallback; where the visual viewport is known it
+      // wins, and the composer sits on top of the keyboard instead of behind it.
+      style={viewportHeight ? { height: viewportHeight } : undefined}
+    >
       {/* ── Header: who you are talking to, and whether they are there. ── */}
       <header className="z-10 flex shrink-0 items-center gap-2 bg-card px-2 py-2 shadow-soft">
         <button
@@ -303,37 +436,53 @@ export default function Discussion() {
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
         </button>
 
-        {discussion ? (
-          <CounterpartAvatar
-            name={name}
-            avatarUrl={discussion.counterpartAvatarUrl}
-            online={discussion.counterpartOnline}
-            className="h-10 w-10"
-          />
-        ) : (
-          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-        )}
-
-        <div className="min-w-0 flex-1 pl-1">
+        {/* Tappable ONE WAY ONLY. An employer opens the worker they are talking
+            to — the same profile the recommendation card opens. A worker gets a
+            plain div: an employer's profile is not theirs to browse, and a
+            button that refuses is worse than nothing to press. */}
+        <ProfileLink
+          enabled={canOpenProfile}
+          name={name}
+          onOpen={() => navigate(`/recommandations/${discussion?.counterpartId}`)}
+        >
           {discussion ? (
-            <p className="truncate text-[15px] font-semibold leading-tight">{name}</p>
+            <CounterpartAvatar
+              name={name}
+              avatarUrl={discussion.counterpartAvatarUrl}
+              online={discussion.counterpartOnline}
+              className="h-10 w-10"
+            />
           ) : (
-            <Skeleton className="mb-1 h-4 w-32" />
+            <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
           )}
-          {/* "en ligne" when connected, the job otherwise. Never "hors ligne":
-              the server fails closed, so false also means "could not tell", and
-              saying offline would claim a certainty nobody has. There is no
-              "vu à" either — last-seen is a privacy setting everywhere it
-              exists, and that decision has not been made here. */}
-          <p
-            className={cn(
-              "truncate text-xs leading-tight",
-              discussion?.counterpartOnline ? "text-whatsapp" : "text-muted-foreground",
+
+          <div className="min-w-0 flex-1 pl-1 text-left">
+            {discussion ? (
+              <p className="truncate text-[15px] font-semibold leading-tight">
+                {name}
+              </p>
+            ) : (
+              <Skeleton className="mb-1 h-4 w-32" />
             )}
-          >
-            {discussion?.counterpartOnline ? "en ligne" : (discussion?.jobTitle ?? "")}
-          </p>
-        </div>
+            {/* "en ligne" when connected, the job otherwise. Never "hors ligne":
+                the server fails closed, so false also means "could not tell", and
+                saying offline would claim a certainty nobody has. There is no
+                "vu à" either — last-seen is a privacy setting everywhere it
+                exists, and that decision has not been made here. */}
+            <p
+              className={cn(
+                "truncate text-xs leading-tight",
+                discussion?.counterpartOnline
+                  ? "text-whatsapp"
+                  : "text-muted-foreground",
+              )}
+            >
+              {discussion?.counterpartOnline
+                ? "en ligne"
+                : (discussion?.jobTitle ?? "")}
+            </p>
+          </div>
+        </ProfileLink>
 
         {/* The primary action of the screen, and it STAYS even once contacts
             are unlocked. Unlocking is not a one-off: an employer pays again for
@@ -355,98 +504,158 @@ export default function Discussion() {
       </header>
 
       {/* ── Thread, on the wallpaper. ── */}
-      <div
-        ref={scrollRef}
-        className="chat-wallpaper flex-1 overflow-y-auto px-3 pb-2 pt-3"
-      >
-        {/* The standing rule, as a system notice at the head of the thread —
-            the same place and shape WhatsApp uses for its encryption notice,
-            so it reads as part of the conversation's ground rules rather than
-            as an ad in the header.
+      {/* `relative` so the way-down pill can sit over the last bubbles rather
+          than take a row of its own in the column. */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <div
+          ref={scrollRef}
+          onScroll={onThreadScroll}
+          // `overscroll-contain`: without it, dragging past the top of the thread
+          // rubber-bands the whole page, which is the clearest tell that this is
+          // a web page and not an app.
+          className="chat-wallpaper flex-1 overflow-y-auto overscroll-contain px-3 pb-2 pt-3"
+        >
+          {/* The standing rule, as a system notice at the head of the thread —
+              the same place and shape WhatsApp uses for its encryption notice,
+              so it reads as part of the conversation's ground rules rather than
+              as an ad in the header.
 
-            ALWAYS shown. It used to disappear once the pair had unlocked,
-            because masking stopped there too; masking never stops now, so a
-            notice that vanished would leave the rule unexplained exactly
-            where people most expect to be able to type a number. */}
-        <div className="mb-3 flex items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-[11px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
-          <Lock className="mt-px h-3 w-3 shrink-0" />
-          {/* Left-aligned and full width of the thread: centred inside 88% made
-              every line break in a different place, which reads as a paragraph
-              to parse rather than a rule to glance at. */}
-          <span>{warning.header}</span>
+              ALWAYS shown. It used to disappear once the pair had unlocked,
+              because masking stopped there too; masking never stops now, so a
+              notice that vanished would leave the rule unexplained exactly
+              where people most expect to be able to type a number. */}
+          <div className="mb-3 flex items-start gap-1.5 rounded-lg bg-chat-notice px-3 py-2 text-[11px] leading-snug text-chat-notice-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
+            <Lock className="mt-px h-3 w-3 shrink-0" />
+            {/* Left-aligned and full width of the thread: centred inside 88% made
+                every line break in a different place, which reads as a paragraph
+                to parse rather than a rule to glance at. */}
+            <span>{warning.header}</span>
+          </div>
+
+          {isLoading && (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-3/5 rounded-lg" />
+              <Skeleton className="ml-auto h-10 w-1/2 rounded-lg" />
+            </div>
+          )}
+
+          {!isLoading && messages.length === 0 && (
+            <p className="mx-auto mt-6 w-fit rounded-lg bg-chat-bubble-in px-3 py-1.5 text-xs text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
+              {content.empty}
+            </p>
+          )}
+
+          {/* The way back into a long thread. A button rather than a fetch on
+              scrolling up: on a slow connection an accidental flick would start
+              a request nobody asked for, and this audience pays for it. */}
+          {!isLoading && hasOlder && (
+            <div className="mb-3 flex justify-center">
+              <button
+                type="button"
+                onClick={loadOlder}
+                disabled={loadingOlder}
+                className="flex items-center gap-1.5 rounded-full bg-chat-bubble-in px-3 py-1.5 text-[11px] font-medium text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)] transition active:translate-y-px disabled:opacity-60 motion-reduce:transition-none"
+              >
+                {loadingOlder && (
+                  <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" />
+                )}
+                {loadingOlder ? content.olderLoading : content.older}
+              </button>
+            </div>
+          )}
+
+          {messages.map((message, index) => {
+            const previous = messages[index - 1];
+            const newDay = !previous || dayKey(previous.createdAt) !== dayKey(message.createdAt);
+            const firstOfGroup = newDay || previous.senderId !== message.senderId;
+
+            return (
+              <Fragment key={message.id}>
+                {newDay && (
+                  <div className="my-3 flex justify-center">
+                    <span className="rounded-md bg-chat-bubble-in px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
+                      {dayLabel(message.createdAt)}
+                    </span>
+                  </div>
+                )}
+                <MessageBubble
+                  message={message}
+                  firstOfGroup={firstOfGroup}
+                  showRecipientNotice={message.id === firstRedactedFromOther}
+                  // The server's flag, with the just-tapped ones layered on top:
+                  // `reported` here is only the optimistic half, for the gap
+                  // between the tap and the refetch.
+                  reported={message.reported || reported.includes(message.id)}
+                  onReport={(messageId) =>
+                    report.mutate(
+                      { messageId },
+                      {
+                        onSuccess: () => {
+                          setReported((ids) => [...ids, messageId]);
+                          toast.success(warning.reportDone);
+                        },
+                      },
+                    )
+                  }
+                />
+              </Fragment>
+            );
+          })}
+
+          {/* Sent, not yet answered for. Rendered as real bubbles so the thread
+              does not visibly jump when the server's version replaces them —
+              same shape, same place, only the clock becomes a tick. */}
+          {pending.map((item) => (
+            <MessageBubble
+              key={item.key}
+              pending
+              message={{
+                id: item.key,
+                conversationId: id,
+                // Never read for a pending bubble — `mine` is what the bubble
+                // branches on, and grouping is decided above, not from this.
+                senderId: "",
+                mine: true,
+                body: item.body,
+                status: "CLEAN",
+                redactions: [],
+                reported: false,
+                createdAt: new Date().toISOString(),
+                readAt: null,
+              }}
+              // Always its own group: it is the newest thing in the thread, and
+              // the tail belongs on it rather than on the bubble above.
+              firstOfGroup={!last?.mine}
+              showRecipientNotice={false}
+              reported={false}
+              onReport={() => undefined}
+            />
+          ))}
+
+          <div ref={bottomRef} />
         </div>
 
-        {isLoading && (
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-3/5 rounded-lg" />
-            <Skeleton className="ml-auto h-10 w-1/2 rounded-lg" />
-          </div>
+        {/* The way back down, once the thread has been scrolled away from. */}
+        {showScrollPill && (
+          <button
+            type="button"
+            aria-label="Revenir au dernier message"
+            onClick={() => {
+              tapFeedback();
+              bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-card text-muted-foreground shadow-soft transition active:translate-y-px motion-reduce:transition-none"
+          >
+            <ChevronDown className="h-5 w-5" strokeWidth={2} />
+            {/* The count the list screen already shows, carried here so the pill
+                says WHY to go down, not only that you can. */}
+            {Boolean(discussion?.unreadCount) && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-whatsapp px-1 text-[10px] font-semibold text-white tabular-nums">
+                {discussion?.unreadCount}
+              </span>
+            )}
+          </button>
         )}
-
-        {!isLoading && messages.length === 0 && (
-          <p className="mx-auto mt-6 w-fit rounded-lg bg-chat-bubble-in px-3 py-1.5 text-xs text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
-            {content.empty}
-          </p>
-        )}
-
-        {/* The way back into a long thread. A button rather than a fetch on
-            scrolling up: on a slow connection an accidental flick would start
-            a request nobody asked for, and this audience pays for it. */}
-        {!isLoading && hasOlder && (
-          <div className="mb-3 flex justify-center">
-            <button
-              type="button"
-              onClick={loadOlder}
-              disabled={loadingOlder}
-              className="flex items-center gap-1.5 rounded-full bg-chat-bubble-in px-3 py-1.5 text-[11px] font-medium text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)] transition active:translate-y-px disabled:opacity-60 motion-reduce:transition-none"
-            >
-              {loadingOlder && (
-                <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" />
-              )}
-              {loadingOlder ? content.olderLoading : content.older}
-            </button>
-          </div>
-        )}
-
-        {messages.map((message, index) => {
-          const previous = messages[index - 1];
-          const newDay = !previous || dayKey(previous.createdAt) !== dayKey(message.createdAt);
-          const firstOfGroup = newDay || previous.senderId !== message.senderId;
-
-          return (
-            <Fragment key={message.id}>
-              {newDay && (
-                <div className="my-3 flex justify-center">
-                  <span className="rounded-md bg-chat-bubble-in px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-[0_1px_0.5px_rgb(0_0_0/0.1)]">
-                    {dayLabel(message.createdAt)}
-                  </span>
-                </div>
-              )}
-              <MessageBubble
-                message={message}
-                firstOfGroup={firstOfGroup}
-                showRecipientNotice={message.id === firstRedactedFromOther}
-                // The server's flag, with the just-tapped ones layered on top:
-                // `reported` here is only the optimistic half, for the gap
-                // between the tap and the refetch.
-                reported={message.reported || reported.includes(message.id)}
-                onReport={(messageId) =>
-                  report.mutate(
-                    { messageId },
-                    {
-                      onSuccess: () => {
-                        setReported((ids) => [...ids, messageId]);
-                        toast.success(warning.reportDone);
-                      },
-                    },
-                  )
-                }
-              />
-            </Fragment>
-          );
-        })}
-
-        <div ref={bottomRef} />
       </div>
 
       {/* ── Composer: a pill and a round send button, on the wallpaper. ── */}
@@ -460,30 +669,58 @@ export default function Discussion() {
           </p>
         ) : (
           <div className="flex items-end gap-2">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value.slice(0, MAX_LENGTH))}
-              placeholder={content.placeholder}
-              rows={1}
-              // Grows with the text up to about five lines, then scrolls —
-              // `field-sizing` does it natively where supported, and the
-              // max-height is the ceiling everywhere else.
-              className="max-h-32 min-h-11 flex-1 resize-none rounded-3xl bg-card px-4 py-2.5 text-[15px] leading-snug shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] outline-none field-sizing-content placeholder:text-muted-foreground"
-              onKeyDown={(e) => {
-                // Enter sends, Shift+Enter breaks the line — the shape people
-                // already have in their fingers from WhatsApp.
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submit();
-                }
-              }}
-            />
+            <div className="relative flex-1">
+              <textarea
+                ref={composerRef}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value.slice(0, MAX_LENGTH))}
+                onFocus={() => {
+                  // The keyboard opening shortens the thread under the composer;
+                  // without this the last bubble ends up behind it. A frame
+                  // later, once the viewport has actually resized.
+                  requestAnimationFrame(() =>
+                    bottomRef.current?.scrollIntoView({ block: "end" }),
+                  );
+                }}
+                placeholder={content.placeholder}
+                rows={1}
+                // Grows with the text up to `COMPOSER_MAX_PX`, then scrolls.
+                // The measuring is in `useAutoGrowTextarea`, not in CSS: Safari
+                // does not support `field-sizing`, which left this box frozen at
+                // its min-height on the iPhones most of this audience uses.
+                className="max-h-33 w-full resize-none rounded-3xl bg-card px-4 py-2.5 text-[15px] leading-snug shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] outline-none placeholder:text-muted-foreground"
+                onKeyDown={(e) => {
+                  // Enter sends, Shift+Enter breaks the line — the shape people
+                  // already have in their fingers from WhatsApp.
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submit();
+                  }
+                }}
+              />
+              {/* Only near the ceiling. `slice(0, MAX_LENGTH)` above is a hard
+                  truncation, and without a warning it is a silent one — text
+                  simply stops appearing under the thumb. */}
+              {draft.length > MAX_LENGTH - 100 && (
+                <span className="pointer-events-none absolute -top-5 right-3 rounded-full bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground shadow-soft tabular-nums">
+                  {draft.length} / {MAX_LENGTH}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               aria-label={content.send}
               onClick={submit}
               disabled={!draft.trim() || send.isPending}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] transition active:scale-90 disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
+              className={cn(
+                "flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-whatsapp text-white shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
+                // Slides away when there is nothing to send rather than sitting
+                // there greyed out. The width collapses with it: a disabled
+                // button holding 44px of empty space is the one thing WhatsApp
+                // never shows, because that corner always has something in it —
+                // and here there is no microphone to put back.
+                draft.trim() ? "w-11 scale-100 opacity-100" : "w-0 scale-0 opacity-0",
+              )}
             >
               <Send className="h-5 w-5 -translate-x-px translate-y-px" strokeWidth={1.75} />
             </button>
