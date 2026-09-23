@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { discussionsContent } from "@/content/discussions";
 import { MessageBubble } from "@/features/discussions/components/message-bubble";
-import { MessageActionsSheet } from "@/features/discussions/components/message-actions-sheet";
+import { DeleteMessageSheet } from "@/features/discussions/components/delete-message-sheet";
 import { mergeThread } from "@/features/discussions/merge-thread";
 import { CounterpartAvatar } from "@/features/discussions/components/counterpart-avatar";
 import { TypingBubble } from "@/features/discussions/components/typing-bubble";
@@ -180,9 +180,15 @@ export default function Discussion() {
   const deleteMessage = useDeleteDiscussionMessage(id);
   useDiscussionsSocket(true);
 
-  /** The bubble whose actions sheet is open, and whether Supprimer is armed. */
-  const [actionsFor, setActionsFor] = useState<DiscussionMessage | null>(null);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  /**
+   * The bubble swiped open, and the one whose deletion is being confirmed.
+   *
+   * One open at a time, like the notifications list: a thread full of
+   * half-open bubbles is a thread nobody can read.
+   */
+  const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] =
+    useState<DiscussionMessage | null>(null);
 
   const { counterpartTyping, notifyTyping } = useDiscussionTyping(id, true);
 
@@ -354,8 +360,8 @@ export default function Discussion() {
     setPending([]);
     // And a sheet left open would be acting on a message from the thread the
     // person has just left.
-    setActionsFor(null);
-    setConfirmingDelete(false);
+    setSwipeOpenId(null);
+    setConfirmingDelete(null);
   }, [id]);
 
   /**
@@ -435,41 +441,11 @@ export default function Discussion() {
     });
   };
 
-  const closeActions = () => {
-    setActionsFor(null);
-    setConfirmingDelete(false);
-  };
-
-  /**
-   * Copy the text, as the READER sees it.
-   *
-   * `message.body` is already what this side is allowed to have — the recipient
-   * gets the version with "[masqué]" in it — so there is nothing to strip here.
-   * The clipboard API needs a secure context; inside a WhatsApp webview over
-   * plain http it simply is not there, hence the fallback message rather than
-   * an unhandled rejection.
-   */
-  const copyMessage = async (message: DiscussionMessage) => {
-    try {
-      await navigator.clipboard.writeText(message.body);
-      toast.success(content.actionsCopied);
-    } catch {
-      toast.error(content.actionsCopyFailed);
-    }
-    closeActions();
-  };
-
   const confirmDelete = () => {
-    const message = actionsFor;
+    const message = confirmingDelete;
     if (!message) return;
-    if (!confirmingDelete) {
-      // Two taps, like the conversation-level delete: this one reaches the
-      // other person's screen, and a stray tap should not.
-      setConfirmingDelete(true);
-      return;
-    }
     tapFeedback();
-    closeActions();
+    setConfirmingDelete(null);
     deleteMessage.mutate(message.id, {
       onSuccess: () => toast.success(content.actionsDeleted),
       onError: (error) =>
@@ -492,6 +468,10 @@ export default function Discussion() {
       const fromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
       setShowScrollPill(fromBottom > SCROLL_PILL_PX);
     });
+    // Scrolling the thread closes an open bubble, as it does on the
+    // notifications list and on WhatsApp. Outside the frame, so it happens on
+    // the first event rather than one frame late.
+    setSwipeOpenId(null);
   };
 
   useEffect(
@@ -675,10 +655,17 @@ export default function Discussion() {
                   // `reported` here is only the optimistic half, for the gap
                   // between the tap and the refetch.
                   reported={message.reported || reported.includes(message.id)}
-                  onActions={(target) => {
+                  swipeOpen={swipeOpenId === message.id}
+                  onSwipeOpenChange={(messageId, open) =>
+                    setSwipeOpenId((current) => {
+                      if (open) return messageId;
+                      return current === messageId ? null : current;
+                    })
+                  }
+                  onDelete={(target) => {
                     tapFeedback();
-                    setConfirmingDelete(false);
-                    setActionsFor(target);
+                    setSwipeOpenId(null);
+                    setConfirmingDelete(target);
                   }}
                   onReport={(messageId) =>
                     report.mutate(
@@ -857,26 +844,12 @@ export default function Discussion() {
         />
       )}
 
-      {/* ── Message actions, opened by a long press or a right-click. ── */}
-      <MessageActionsSheet
-        message={actionsFor}
-        confirmingDelete={confirmingDelete}
+      {/* ── "Are you sure?", after the revealed Supprimer is tapped. ── */}
+      <DeleteMessageSheet
+        message={confirmingDelete}
         deleting={deleteMessage.isPending}
-        onClose={closeActions}
-        onCopy={(message) => void copyMessage(message)}
-        onDelete={confirmDelete}
-        onReport={(messageId) => {
-          closeActions();
-          report.mutate(
-            { messageId },
-            {
-              onSuccess: () => {
-                setReported((ids) => [...ids, messageId]);
-                toast.success(warning.reportDone);
-              },
-            },
-          );
-        }}
+        onClose={() => setConfirmingDelete(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );
