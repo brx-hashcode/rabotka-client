@@ -72,6 +72,8 @@ const RecommendationContact = lazy(
 );
 const WorkerSearch = lazy(() => import("@/pages/worker-search"));
 const Claims = lazy(() => import("@/pages/claims"));
+const Discussions = lazy(() => import("@/pages/discussions"));
+const Discussion = lazy(() => import("@/pages/discussion"));
 
 function PageLoader() {
   return (
@@ -382,6 +384,32 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <RealizationDetail />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/discussions"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <Discussions />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/discussions/:id"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              {/* Full-screen thread, like the claim conversation next door:
+                  the tab bar would eat the composer on a short screen. */}
+              <AppShell withNav={false}>
+                <Discussion />
               </AppShell>
             </AuthGuard>
           </Suspense>

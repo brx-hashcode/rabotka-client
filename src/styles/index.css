@@ -156,6 +156,11 @@
   --color-sand: hsl(var(--sand));
   --color-earth: hsl(var(--earth));
   --color-app-surround: hsl(var(--app-surround));
+  --color-chat-wallpaper: hsl(var(--chat-wallpaper));
+  --color-chat-bubble-out: hsl(var(--chat-bubble-out));
+  --color-chat-bubble-in: hsl(var(--chat-bubble-in));
+  --color-chat-notice: hsl(var(--chat-notice));
+  --color-chat-notice-foreground: hsl(var(--chat-notice-foreground));
 }
 
 @layer base {
@@ -164,6 +169,18 @@
     --whatsapp: 142 70% 49%;
     --whatsapp-dark: 142 72% 42%;
     --whatsapp-light: 142 60% 95%;
+
+    /* Messaging. Its own tokens rather than reused ones: a thread needs a
+       wallpaper distinct from every other surface, and two bubble tones that
+       read as "mine" and "theirs" at a glance. Warm beige like WhatsApp's, so
+       the screen is instantly legible as a chat — but the pattern drawn on it
+       is ours (see .chat-wallpaper), not a copy of theirs. */
+    --chat-wallpaper: 36 33% 92%;
+    --chat-pattern: 33 20% 78%;
+    --chat-bubble-out: 111 80% 91%;
+    --chat-bubble-in: 0 0% 100%;
+    --chat-notice: 48 90% 88%;
+    --chat-notice-foreground: 35 40% 28%;
 
     /* Warm African accents */
     --terracotta: 16 65% 55%;
@@ -234,6 +251,13 @@
   }
 
   .dark {
+    --chat-wallpaper: 200 25% 8%;
+    --chat-pattern: 200 15% 14%;
+    --chat-bubble-out: 162 100% 19%;
+    --chat-bubble-in: 202 20% 17%;
+    --chat-notice: 43 35% 20%;
+    --chat-notice-foreground: 43 60% 80%;
+
     /* Same hues re-stepped for the dark card surface (#261d17) and re-validated
        as a set — all checks pass there, including contrast, so no relief owed.
        Not an automatic flip of the light values. */
@@ -398,4 +422,32 @@
   select {
     font-size: 16px;
   }
+}
+
+
+/*
+ * The thread wallpaper.
+ *
+ * A tiled SVG drawn for Rabotka — small outlined tools and speech marks — not
+ * WhatsApp's doodle sheet, which is their artwork. The colour comes from
+ * --chat-pattern through a CSS mask, so the same tile serves light and dark
+ * without shipping two images.
+ */
+.chat-wallpaper {
+  position: relative;
+  background-color: hsl(var(--chat-wallpaper));
+  isolation: isolate;
+}
+.chat-wallpaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: hsl(var(--chat-pattern));
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 18h16a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-9l-5 4v-4h-2a4 4 0 0 1-4-4v-8a4 4 0 0 1 4-4z'/%3E%3Cpath d='M74 14l10 10m-3-13l6 6-14 14-6-6z'/%3E%3Ccircle cx='96' cy='70' r='6'/%3E%3Cpath d='M96 64v-4m0 20v-4m6-6h4m-20 0h4'/%3E%3Cpath d='M20 80h14l-2 14H22z'/%3E%3Cpath d='M24 80v-4a3 3 0 0 1 6 0v4'/%3E%3Cpath d='M58 96l6 6 12-12'/%3E%3Cpath d='M60 48c0-4 3-6 6-6s6 2 6 6-6 8-6 8-6-4-6-8z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 18h16a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-9l-5 4v-4h-2a4 4 0 0 1-4-4v-8a4 4 0 0 1 4-4z'/%3E%3Cpath d='M74 14l10 10m-3-13l6 6-14 14-6-6z'/%3E%3Ccircle cx='96' cy='70' r='6'/%3E%3Cpath d='M96 64v-4m0 20v-4m6-6h4m-20 0h4'/%3E%3Cpath d='M20 80h14l-2 14H22z'/%3E%3Cpath d='M24 80v-4a3 3 0 0 1 6 0v4'/%3E%3Cpath d='M58 96l6 6 12-12'/%3E%3Cpath d='M60 48c0-4 3-6 6-6s6 2 6 6-6 8-6 8-6-4-6-8z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 120px 120px;
+  mask-size: 120px 120px;
+  opacity: 0.55;
 }

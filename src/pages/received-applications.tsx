@@ -3,6 +3,8 @@ import { Inbox, Calendar, Loader2, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StartChatButton } from "@/features/discussions/components/start-chat-button";
+import { chattableApplicationId } from "@/features/discussions/chattable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployerApplicationsInfinite } from "@/hooks/use-employer-applications-infinite";
 import {
@@ -89,11 +91,17 @@ const ApplicationRow = ({
   const undecided = app.status === "PENDING" || app.status === "VIEWED";
   const offerClosed = isClosedToNewCandidates(app.jobOffer.status);
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-start gap-3 rounded-xl shadow-soft bg-card p-4 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
-    >
+    // A relative wrapper so the chat control can be a SIBLING of the row
+    // button. It cannot be nested inside it — a button inside a button is
+    // invalid, and the browser resolves it by dropping the inner one's
+    // activation, so the tap would silently open the row instead. The bookmark
+    // on `job-card.tsx` is arranged the same way for the same reason.
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex w-full items-start gap-3 rounded-xl shadow-soft bg-card p-4 pr-16 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+      >
       <Avatar className="h-12 w-12 shrink-0">
         {app.worker.avatarUrl && (
           <AvatarImage
@@ -133,7 +141,21 @@ const ApplicationRow = ({
             Offre pourvue — acceptation impossible
           </p>
         )}
-      </div>
-    </button>
+        </div>
+      </button>
+
+      {/* Bottom-right rather than beside the name: the row has no primary
+          button of its own — the whole row IS the primary action — so the chat
+          control sits where a second action goes without competing with it.
+          `pr-16` above keeps the text out from under it. */}
+      <StartChatButton
+        target={{
+          kind: "application",
+          id: chattableApplicationId(app.id, app.status),
+        }}
+        compact
+        className="absolute bottom-3 right-3"
+      />
+    </div>
   );
 };

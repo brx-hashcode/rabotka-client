@@ -8,6 +8,7 @@ import { kycShortLabel } from "@/features/kyc";
 import { accountShortLabel } from "@/features/account";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
+import { StartChatButton } from "@/features/discussions/components/start-chat-button";
 
 export function RecommendedWorkerCard({
   worker,
@@ -93,13 +94,26 @@ export function RecommendedWorkerCard({
         else opens the profile. "Voir profil" went with the card becoming
         tappable — a second route to the same place is just clutter on a phone.
       */}
-      <Button
-        className="mt-4 w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-        disabled={blocked || accountBlocked}
-        onClick={() => setConfirmOpen(true)}
-      >
-        {contactLabel}
-      </Button>
+      {/* Two actions, and the rule stays unambiguous because they say
+          different things: Contacter CHARGES you and hands over the real
+          coordinates; the chat button is free and hands over nothing. That is
+          the whole funnel — talk first, pay when you want to reach them off
+          the platform. */}
+      <div className="mt-4 flex items-center gap-2">
+        <Button
+          className="flex-1"
+          disabled={blocked || accountBlocked}
+          onClick={() => setConfirmOpen(true)}
+        >
+          {contactLabel}
+        </Button>
+
+        {/* Not gated on KYC or suspension the way Contacter is: those gates
+            exist because that button spends wallet credit. This one spends
+            nothing. It IS capped server-side per day, since it reaches
+            somebody who never asked to be reached. */}
+        <StartChatButton target={{ kind: "profile", id: worker.id }} />
+      </div>
 
       <ContactConfirmDrawer
         open={confirmOpen}

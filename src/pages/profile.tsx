@@ -22,6 +22,7 @@ import {
   LayoutDashboard,
   UsersRound,
   Wallet,
+  Clock,
 } from "lucide-react";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
@@ -287,10 +288,15 @@ export default function Profile() {
                     onClick={() => navigate("/profils-contactes")}
                   />
                 </div>
-                {/* Workers reach claims from their tab bar, but an employer's
-                    five slots are already full — so without this row there is
-                    no way into /claims at all, even though the endpoint has
-                    never been role-gated. */}
+                {/* Both rows exist because an employer's five tab slots are
+                    full. Claims never had one; Missions gave its slot up to
+                    Discussion, and this is where it went — added BEFORE the
+                    tab was removed, so the route was never unreachable. */}
+                <ActionRow
+                  icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+                  label="Missions"
+                  onClick={() => navigate("/missions")}
+                />
                 <ActionRow
                   icon={
                     <AlertCircle className="h-4 w-4 text-muted-foreground" />

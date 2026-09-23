@@ -12,6 +12,14 @@ export type JobFeedEmployer = {
   ratingCount: number;
 };
 
+export type ApplicationState =
+  | "NONE"
+  | "LIVE"
+  | "REJECTED"
+  | "ENDED"
+  | "SELF_CANCELLED"
+  | "CAN_REAPPLY";
+
 export type JobFeedItem = {
   id: string;
   reference: string;
@@ -40,6 +48,24 @@ export type JobFeedItem = {
   matchScore: number;
   saved: boolean;
   applied: boolean;
+  /**
+   * The worker's LIVE application on this offer, when there is one.
+   *
+   * Not the same question as `applied`, which stays true for a cancelled or
+   * rejected row because those still bar a re-application. A conversation on a
+   * dead application is closed, so this is null there and the chat button is
+   * not offered — a control the API would refuse is worse than no control.
+   */
+  applicationId: string | null;
+  /**
+   * What is actually true about this worker's application to the offer,
+   * derived server-side from the SAME rule the apply endpoint enforces.
+   *
+   * `applied` alone lied: it was true for a cancelled application the worker
+   * was allowed to re-apply to, and the card showed "Déjà postulé", disabled,
+   * on something the server would accept.
+   */
+  applicationState: ApplicationState;
   // Only the search endpoint supplies the category; the feed endpoints don't.
   categoryId?: string | null;
   categoryName?: string | null;
@@ -105,6 +131,14 @@ type BackendJobFeedItem = {
   created_at: string;
   matchScore: number;
   saved: boolean;
+  /**
+   * The worker's LIVE application, or null. Non-optional like `employmentType`
+   * above and for the same reason: all four endpoints that produce this shape
+   * send it, so a server-side rename should surface here rather than as a
+   * button that quietly stops appearing.
+   */
+  applicationId: string | null;
+  applicationState: ApplicationState;
   applied: boolean;
   categoryId?: string | null;
   categoryName?: string | null;
@@ -141,6 +175,14 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     matchScore: o.matchScore ?? 0,
     saved: o.saved,
     applied: o.applied,
+    // `?? null` although the type says it is always there: an older server
+    // would send `undefined`, and undefined reaching StartChatButton renders
+    // nothing anyway — but null is what the prop is typed as, and a shape that
+    // lies about itself is how the next bug starts.
+    applicationId: o.applicationId ?? null,
+    // An older server sends nothing here; "NONE" there would offer "Postuler"
+    // on offers already applied to, so fall back on the legacy boolean.
+    applicationState: o.applicationState ?? (o.applied ? "LIVE" : "NONE"),
     categoryId: o.categoryId ?? null,
     categoryName: o.categoryName ?? null,
     employer: o.employer

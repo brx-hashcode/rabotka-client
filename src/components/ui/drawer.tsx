@@ -53,7 +53,20 @@ const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DrawerHeader.displayName = "DrawerHeader";
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+  <div
+    className={cn(
+      "mt-auto flex flex-col gap-2 p-4",
+      // The last button sat flush against the bottom edge on a phone: `p-4`
+      // clears the sheet, not the device. ADDING to the inset rather than
+      // max()-ing it, because `env(safe-area-inset-bottom)` is 0 on most
+      // Android handsets and in a desktop browser — max() would leave those
+      // exactly as broken as before. Same reasoning, same expression, as
+      // `BottomNav`.
+      "pb-[calc(env(safe-area-inset-bottom)+1rem)]",
+      className,
+    )}
+    {...props}
+  />
 );
 DrawerFooter.displayName = "DrawerFooter";
 

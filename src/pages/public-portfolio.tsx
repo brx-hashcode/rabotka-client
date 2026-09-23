@@ -134,9 +134,6 @@ export default function PublicPortfolio() {
         />
       )}
 
-      <p className="text-muted-foreground mt-10 text-center text-xs">
-        Propulsé par Rabotka
-      </p>
       </main>
     </>
   );
