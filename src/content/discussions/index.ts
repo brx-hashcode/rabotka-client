@@ -37,11 +37,14 @@ export const discussionsContent = {
     typing: "en train d’écrire…",
     /** In place of the body, once a message has been taken back. */
     deleted: "Ce message a été supprimé",
-    /** The long-press sheet. */
-    actionsCopy: "Copier le texte",
-    actionsCopied: "Texte copié",
-    actionsCopyFailed: "Le texte n’a pas pu être copié",
-    actionsDelete: "Supprimer le message",
+    /**
+     * On the red strip a swipe reveals, so it has about ten characters to
+     * work with. No "Copier" beside it: a press-and-hold on a bubble raises
+     * the browser's own select-and-copy, which is better than anything we
+     * would draw — and trying to take that gesture over is what put text
+     * selection in people's way in the first place.
+     */
+    actionsDeleteShort: "Supprimer",
     actionsDeleteConfirm: "Oui, supprimer",
     /**
      * Said BEFORE the second tap, like the conversation-level one — and it has

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { discussionsContent } from "@/content/discussions";
 import type { DiscussionMessage } from "@/lib/api/discussions-controller";
 import { redactionSegments } from "../redaction-segments";
-import { useLongPress } from "../use-long-press";
+import { SwipeToDelete } from "./swipe-to-delete";
 
 function time(iso: string): string {
   return new Date(iso).toLocaleTimeString("fr-FR", {
@@ -28,12 +28,14 @@ type Props = Readonly<{
    * lets this exist at all (see `useSendMessage`).
    */
   pending?: boolean;
+  /** This is the one bubble swiped open. The thread allows one at a time. */
+  swipeOpen?: boolean;
+  onSwipeOpenChange?: (messageId: string, open: boolean) => void;
   /**
-   * Hold the bubble to open the actions sheet. Absent on a pending bubble —
-   * there is nothing to copy, report or delete about a message the server has
-   * not acknowledged yet.
+   * Tapping the revealed Supprimer. Absent on a message the server has not
+   * acknowledged yet, and never offered on somebody else's.
    */
-  onActions?: (message: DiscussionMessage) => void;
+  onDelete?: (message: DiscussionMessage) => void;
 }>;
 
 /**
@@ -130,7 +132,9 @@ export function MessageBubble({
   onReport,
   reported,
   pending = false,
-  onActions,
+  swipeOpen = false,
+  onSwipeOpenChange,
+  onDelete,
 }: Props) {
   const warning = discussionsContent.warning;
   const content = discussionsContent.thread;
@@ -140,11 +144,9 @@ export function MessageBubble({
   const hasRedactions = message.redactions.length > 0;
   const mine = message.mine;
 
-  // Nothing to act on once it is gone, and nothing to act on before it exists.
-  const actionable = Boolean(onActions) && !pending && !deleted;
-  const { handlers } = useLongPress(() => {
-    if (actionable) onActions?.(message);
-  });
+  // Yours, still there, and acknowledged by the server. Nothing to delete
+  // before it exists or after it is gone.
+  const deletable = Boolean(onDelete) && mine && !pending && !deleted;
 
   return (
     <div
@@ -158,60 +160,71 @@ export function MessageBubble({
         firstOfGroup ? "mt-3" : "mt-1",
       )}
     >
-      <div
-        // Hold to open the actions sheet — the same gesture, and the same
-        // hook, as a row on the conversation list.
-        {...(actionable ? handlers : {})}
-        className={cn(
-          "relative max-w-[82%] rounded-lg px-2.5 pb-1.5 pt-1.5 shadow-[0_1px_0.5px_rgb(0_0_0/0.13)]",
-          mine ? "bg-chat-bubble-out" : "bg-chat-bubble-in",
-          // The tail: the corner nearest the speaker goes square on the first
-          // bubble of a group, and a small triangle fills it.
-          firstOfGroup && (mine ? "rounded-tr-none" : "rounded-tl-none"),
-          (held || pending) && "opacity-70",
-          // A tombstone is quieter than the thread around it: it is there to
-          // be seen and skipped, not read.
-          deleted && "bg-chat-bubble-in/70",
-          actionable && "select-none",
-        )}
+      {/* Swipe left to reveal Supprimer. NOT a long press: that is the
+          browser's own gesture on a phone — iOS starts selecting text and
+          raises its callout — and leaving it alone is also what keeps the
+          native "select and copy" working on a message. */}
+      <SwipeToDelete
+        enabled={deletable}
+        isOpen={swipeOpen}
+        onOpenChange={(open) => onSwipeOpenChange?.(message.id, open)}
+        onDelete={() => onDelete?.(message)}
+        label={content.actionsDeleteShort}
       >
-        {firstOfGroup && (
-          <span
-            aria-hidden
-            className={cn(
-              "absolute top-0 h-3 w-2",
-              mine
-                ? "-right-2 bg-chat-bubble-out [clip-path:polygon(0_0,100%_0,0_100%)]"
-                : "-left-2 bg-chat-bubble-in [clip-path:polygon(0_0,100%_0,100%_100%)]",
-            )}
-          />
-        )}
+        <div
+          className={cn(
+            "relative max-w-[82%] rounded-lg px-2.5 pb-1.5 pt-1.5 shadow-[0_1px_0.5px_rgb(0_0_0/0.13)]",
+            mine ? "bg-chat-bubble-out" : "bg-chat-bubble-in",
+            // The tail: the corner nearest the speaker goes square on the first
+            // bubble of a group, and a small triangle fills it.
+            firstOfGroup && (mine ? "rounded-tr-none" : "rounded-tl-none"),
+            (held || pending) && "opacity-70",
+            // A tombstone is quieter than the thread around it: it is there to
+            // be seen and skipped, not read.
+            deleted && "bg-chat-bubble-in/70",
+            // Inside the swipe wrapper the bubble is already capped, and a second
+            // 82% would compound to 67%.
+            deletable && "max-w-full",
+          )}
+        >
+          {firstOfGroup && (
+            <span
+              aria-hidden
+              className={cn(
+                "absolute top-0 h-3 w-2",
+                mine
+                  ? "-right-2 bg-chat-bubble-out [clip-path:polygon(0_0,100%_0,0_100%)]"
+                  : "-left-2 bg-chat-bubble-in [clip-path:polygon(0_0,100%_0,100%_100%)]",
+              )}
+            />
+          )}
 
-        {/* The time floats in the last line, WhatsApp-style: a trailing spacer
-            reserves its width so a short message stays one line instead of
-            dropping the time onto a line of its own. */}
-        <BubbleBody message={message} deleted={deleted} />
+          {/* The time floats in the last line, WhatsApp-style: a trailing spacer
+              reserves its width so a short message stays one line instead of
+              dropping the time onto a line of its own. */}
+          <BubbleBody message={message} deleted={deleted} />
 
-        <span className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[11px] leading-none text-muted-foreground tabular-nums">
-          {time(message.createdAt)}
-          {/* Read ticks on the author's side only. Two ticks once the other
-              party has opened the thread — `readAt` is set by markRead. A held
-              message gets none: it was never delivered, and a tick would say
-              otherwise. A message still in flight gets a clock, for the same
-              reason, and a deleted one gets neither: there is nothing left for
-              a tick to be about. */}
-          {mine && pending && <Clock className="h-3 w-3" />}
-          {mine &&
-            !pending &&
-            !held &&
-            !deleted &&
-            (message.readAt ? (
-              <CheckCheck className="h-3.5 w-3.5 text-sky-500" />
-            ) : (
-              <Check className="h-3.5 w-3.5" />
-            ))}
-        </span>
-      </div>
+          <span className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[11px] leading-none text-muted-foreground tabular-nums">
+            {time(message.createdAt)}
+            {/* Read ticks on the author's side only. Two ticks once the other
+                party has opened the thread — `readAt` is set by markRead. A held
+                message gets none: it was never delivered, and a tick would say
+                otherwise. A message still in flight gets a clock, for the same
+                reason, and a deleted one gets neither: there is nothing left for
+                a tick to be about. */}
+            {mine && pending && <Clock className="h-3 w-3" />}
+            {mine &&
+              !pending &&
+              !held &&
+              !deleted &&
+              (message.readAt ? (
+                <CheckCheck className="h-3.5 w-3.5 text-sky-500" />
+              ) : (
+                <Check className="h-3.5 w-3.5" />
+              ))}
+          </span>
+        </div>
+      </SwipeToDelete>
 
       {/* No notice under a tombstone: "ce fragment n'a pas été transmis" about
           a message that no longer exists is an explanation of nothing. */}
