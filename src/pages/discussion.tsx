@@ -22,7 +22,6 @@ import { tapFeedback } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import type { DiscussionMessage } from "@/lib/api/discussions-controller";
 import { useAutoGrowTextarea } from "@/hooks/use-auto-grow-textarea";
-import { useViewportHeight } from "@/hooks/use-viewport-height";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useWorkerUnlock } from "@/hooks/use-worker-unlock";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
@@ -139,6 +138,21 @@ export default function Discussion() {
   const composerRef = useAutoGrowTextarea(draft, COMPOSER_MAX_PX);
 
   /**
+   * Scroll the THREAD to its end — never the page.
+   *
+   * `bottomRef.scrollIntoView()` walks up EVERY scrollable ancestor, and in an
+   * iOS in-app webview with the keyboard open the document itself becomes one
+   * of them. It scrolled the whole screen away and left a page of white under
+   * the composer. Setting the container's own scroll position cannot touch the
+   * window, whatever the keyboard has done to the document.
+   */
+  const scrollThreadToBottom = (smooth = false) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  };
+
+  /**
    * Messages sent but not yet answered for, shown greyed with a clock so the
    * thread reacts to the tap instead of sitting still until the round trip
    * ends. Dropped on success — the server's own version takes their place —
@@ -149,12 +163,6 @@ export default function Discussion() {
 
   /** Far enough up the thread that the way down should be offered. */
   const [showScrollPill, setShowScrollPill] = useState(false);
-
-  /**
-   * The keyboard does not shrink `100dvh` on iOS — it is drawn over the page —
-   * so a composer at the bottom of a `h-dvh` column ends up behind it.
-   */
-  const viewportHeight = useViewportHeight();
 
   /**
    * History is loaded on demand, never on opening: a thread reads from where it
@@ -365,7 +373,7 @@ export default function Discussion() {
 
     if (!opened.current) {
       opened.current = true;
-      bottomRef.current?.scrollIntoView();
+      scrollThreadToBottom();
       return;
     }
 
@@ -374,7 +382,7 @@ export default function Discussion() {
       ? el.scrollHeight - el.scrollTop - el.clientHeight < 120
       : true;
     if (nearBottom || last?.mine) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      scrollThreadToBottom(true);
     }
     // `last` is only read for `mine`, which is fixed for a given id.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -402,9 +410,7 @@ export default function Discussion() {
     // The effect that follows the thread is keyed on the newest SERVER message,
     // which has not arrived yet — so the bubble just added would otherwise
     // appear below the fold on a full screen.
-    requestAnimationFrame(() =>
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-    );
+    requestAnimationFrame(() => scrollThreadToBottom(true));
 
     send.mutate(body, {
       onSuccess: ({ message }) => {
@@ -495,13 +501,20 @@ export default function Discussion() {
     [],
   );
 
+  /**
+   * `h-dvh` and nothing else.
+   *
+   * This was briefly pinned to `visualViewport.height`, so the composer would
+   * sit above the keyboard. Inside the WhatsApp in-app browser — where most of
+   * this audience opens the app — that shrank the column to the space above the
+   * keyboard while the webview scrolled the document underneath it, leaving the
+   * thread squeezed into the top of the screen and a page of white below.
+   *
+   * Doing it properly needs `position: fixed` plus `visualViewport.offsetTop`,
+   * and that is not something to guess at from a laptop.
+   */
   return (
-    <div
-      className="flex h-dvh flex-col"
-      // `h-dvh` stays as the fallback; where the visual viewport is known it
-      // wins, and the composer sits on top of the keyboard instead of behind it.
-      style={viewportHeight ? { height: viewportHeight } : undefined}
-    >
+    <div className="flex h-dvh flex-col">
       {/* ── Header: who you are talking to, and whether they are there. ── */}
       <header className="z-10 flex shrink-0 items-center gap-2 bg-card px-2 py-2 shadow-soft">
         <button
@@ -728,7 +741,7 @@ export default function Discussion() {
             aria-label="Revenir au dernier message"
             onClick={() => {
               tapFeedback();
-              bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+              scrollThreadToBottom(true);
             }}
             className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-card text-muted-foreground shadow-soft transition active:translate-y-px motion-reduce:transition-none"
           >
@@ -770,9 +783,9 @@ export default function Discussion() {
                   // The keyboard opening shortens the thread under the composer;
                   // without this the last bubble ends up behind it. A frame
                   // later, once the viewport has actually resized.
-                  requestAnimationFrame(() =>
-                    bottomRef.current?.scrollIntoView({ block: "end" }),
-                  );
+                  // Wrapped, not passed by reference: rAF hands its callback a
+                  // timestamp, which would arrive as `smooth`.
+                  requestAnimationFrame(() => scrollThreadToBottom());
                 }}
                 placeholder={content.placeholder}
                 rows={1}
