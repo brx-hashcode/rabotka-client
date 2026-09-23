@@ -29,6 +29,10 @@ export const discussionsContent = {
     send: "Envoyer",
     closed: "Cette discussion est close, vous ne pouvez plus écrire.",
     empty: "Écrivez le premier message.",
+    // "Messages précédents" rather than "Charger plus": it names what arrives,
+    // not what the app is about to do.
+    older: "Messages précédents",
+    olderLoading: "Chargement…",
   },
 
   /**

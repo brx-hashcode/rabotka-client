@@ -37,6 +37,12 @@ export type DiscussionMessage = {
   /** Widened: a status added server-side must still render. */
   status: MessageStatus | (string & {});
   redactions: Redaction[];
+  /**
+   * This profile has already reported this message — the author's own flag,
+   * like `redactions`. Server-side, so "déjà signalé" survives leaving the
+   * thread; component state alone put the link back on every remount.
+   */
+  reported: boolean;
   createdAt: string;
   readAt: string | null;
 };

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -21,6 +22,20 @@ export const discussionsKeys = {
   list: () => [...discussionsKeys.all, "list"] as const,
   thread: (id: string) => [...discussionsKeys.all, "thread", id] as const,
   one: (id: string) => [...discussionsKeys.all, "one", id] as const,
+  /**
+   * DELIBERATELY OUTSIDE `all`.
+   *
+   * The socket invalidates `all` on every message that arrives, which is right
+   * for the list and the live page and wrong for history: a message already
+   * sent does not change, and somebody who had opened five pages of it would
+   * refetch all five each time the other party typed a line.
+   *
+   * The cost is that ticks on history go stale while the screen stays open —
+   * an old message of yours that the other side reads just now keeps one tick
+   * until the history is fetched again. A tick on a message from last week,
+   * against five refetches a minute.
+   */
+  history: (id: string) => ["discussions-history", id] as const,
 };
 
 /**
@@ -29,6 +44,18 @@ export const discussionsKeys = {
  * audience opens the app.
  */
 const POLL_INTERVAL = 60 * 1000;
+
+/**
+ * Faster for the thread that is open, because that is the screen where a
+ * missing message reads as the app being broken rather than as being a minute
+ * behind. React Query pauses an interval while the tab is in the background
+ * (`refetchIntervalInBackground` defaults to false), so this costs nothing on a
+ * screen nobody is looking at.
+ */
+const THREAD_POLL_INTERVAL = 15 * 1000;
+
+/** The live page, and where history picks up: message 51 and older. */
+export const THREAD_PAGE_SIZE = 50;
 
 function useMessagingEnabled() {
   const { data: profile } = useProfileMe();
@@ -69,6 +96,9 @@ export function useDiscussion(id: string) {
     queryKey: discussionsKeys.one(id),
     queryFn: async () => (await getDiscussion(id)).conversation,
     enabled: Boolean(id),
+    // Same fallback as the list: without it the header's presence dot is
+    // whatever it was when the screen opened, for as long as it stays open.
+    refetchInterval: id ? POLL_INTERVAL : false,
     initialData: () =>
       queryClient
         .getQueryData<Awaited<ReturnType<typeof listDiscussions>>>(
@@ -78,11 +108,57 @@ export function useDiscussion(id: string) {
   });
 }
 
+/**
+ * The open thread.
+ *
+ * Polls, like the list. The socket is the fast path, but `POLL_INTERVAL` on the
+ * list only covers the screen you LEFT: invalidating the list key does not
+ * touch this one, and with the app's default `staleTime` of five minutes and
+ * `refetchOnWindowFocus` off, a session whose socket never connected — the
+ * WhatsApp webview this fallback exists for — sat in a conversation and saw
+ * nothing arrive at all.
+ */
 export function useDiscussionThread(id: string) {
   return useQuery({
     queryKey: discussionsKeys.thread(id),
-    queryFn: () => listDiscussionMessages(id),
+    queryFn: () => listDiscussionMessages(id, 1, THREAD_PAGE_SIZE),
     enabled: Boolean(id),
+    refetchInterval: id ? THREAD_POLL_INTERVAL : false,
+  });
+}
+
+/**
+ * What is BEHIND the live page, a page at a time, on request.
+ *
+ * The thread used to be one call for the newest 50 with no way back: past that
+ * the history was simply cut off at the top, silently, in a conversation people
+ * keep for the record of what was agreed.
+ *
+ * Its own query rather than making the thread infinite, because the thread
+ * polls: React Query refetches EVERY loaded page of an infinite query on each
+ * interval, so an open history would have multiplied the poll by the number of
+ * pages. This one never polls and is never invalidated by an arriving message —
+ * see `discussionsKeys.history`.
+ *
+ * Offsets drift under a live thread: a message that arrives after the first
+ * load pushes everything down by one, so page 2 hands back a message page 1
+ * already had. Callers MUST merge by id. The drift only ever duplicates, never
+ * skips, because new messages enter at the newest end and the window moves the
+ * other way.
+ */
+export function useDiscussionHistory(id: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: discussionsKeys.history(id),
+    queryFn: ({ pageParam }) =>
+      listDiscussionMessages(id, pageParam, THREAD_PAGE_SIZE),
+    // Page 1 is the live query's; history starts after it.
+    initialPageParam: 2,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded =
+        THREAD_PAGE_SIZE + allPages.reduce((n, page) => n + page.data.length, 0);
+      return loaded < lastPage.total ? allPages.length + 2 : undefined;
+    },
+    enabled: Boolean(id) && enabled,
   });
 }
 

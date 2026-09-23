@@ -80,7 +80,9 @@ export function MessageBubble({
         mine ? "items-end" : "items-start",
         // Consecutive messages from one side sit close together, a new speaker
         // gets air above — the grouping that makes a WhatsApp thread scannable.
-        firstOfGroup ? "mt-2" : "mt-0.5",
+        // A hairline between grouped bubbles read as one block; `mt-1` separates
+        // them without breaking the run.
+        firstOfGroup ? "mt-3" : "mt-1",
       )}
     >
       <div
