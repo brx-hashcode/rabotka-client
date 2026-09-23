@@ -3,6 +3,7 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tapFeedback } from "@/lib/haptics";
 import { getTabsForProfileType } from "../config/tabs";
 
 export function BottomNav() {
@@ -32,9 +33,28 @@ export function BottomNav() {
               <NavLink
                 to={to}
                 end
+                // Fired on every tap, including one on the already-active tab:
+                // a real button clicks whether or not it changes anything, and
+                // swallowing the feedback there would read as the tap having
+                // missed. No-ops on iOS and on desktop — see `haptics.ts`.
+                onClick={tapFeedback}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center gap-1 py-2 transition-colors",
+                    "flex flex-col items-center justify-center gap-1 py-2",
+                    // `transition`, not `transition-transform` alongside
+                    // `transition-colors`: both set the same CSS property, so
+                    // tailwind-merge keeps only the last and the dip would snap
+                    // instead of animating. The shorthand covers colour and
+                    // transform together.
+                    //
+                    // `active:` is the touch-DOWN state, so the press happens
+                    // under the thumb rather than once the route has changed.
+                    // Feedback that arrives after the thing it confirms is not
+                    // feedback.
+                    "transition duration-100 active:scale-90",
+                    // Vestibular safety. The colour still changes, so nothing
+                    // here is carried by motion alone.
+                    "motion-reduce:transition-none motion-reduce:active:scale-100",
                     isActive
                       ? "text-whatsapp"
                       : "text-muted-foreground hover:text-foreground",
@@ -67,7 +87,13 @@ export function BottomNav() {
                     </>
                   ) : (
                     <>
-                      <Icon className="h-5 w-5 shrink-0" />
+                      {/* 1.75, not lucide's default 2. At 20px a 2px stroke
+                          fills the counters of a glyph and the row reads as
+                          heavy rather than crisp — which is most of what made
+                          the first version look unfinished. Set here rather
+                          than per icon in `tabs.tsx`, so the bar cannot drift
+                          out of step with itself. */}
+                      <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
                       <span className="text-[11px] font-medium leading-none">
                         {label}
                       </span>

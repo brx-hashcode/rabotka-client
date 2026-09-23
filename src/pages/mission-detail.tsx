@@ -2,6 +2,7 @@ import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
 import { EMPLOYMENT_TYPE_LABELS, closesOnFill } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
+import { tapFeedback } from "@/lib/haptics";
 import {
   Calendar,
   MapPin,
@@ -417,12 +418,27 @@ const InfoRow = ({
   </div>
 );
 
+/**
+ * One hired or applying worker. The whole tile opens their profile — the
+ * employer-side worker page, which takes an id and works for any worker, not
+ * only recommended ones. It was a dead tile before: the natural next question
+ * about a worker on your offer is "who is this person", and nothing answered it.
+ */
 const WorkerCard = ({ item }: Readonly<{ item: JobOfferWorkerItem }>) => {
+  const navigate = useNavigate();
   const { worker } = item;
   const initials =
     `${worker.firstName?.[0] ?? ""}${worker.lastName?.[0] ?? ""}`.toUpperCase();
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
+    <button
+      type="button"
+      onClick={() => {
+        tapFeedback();
+        navigate(`/recommandations/${worker.id}`);
+      }}
+      aria-label={`Voir le profil de ${worker.firstName} ${worker.lastName}`}
+      className="flex flex-col items-center gap-2 rounded-xl p-1 text-center transition active:scale-[0.97] active:bg-muted/50 motion-reduce:transition-none motion-reduce:active:scale-100"
+    >
       <Avatar className="size-16">
         {worker.avatarUrl && (
           <AvatarImage
@@ -444,7 +460,7 @@ const WorkerCard = ({ item }: Readonly<{ item: JobOfferWorkerItem }>) => {
       <StatusChip className={getApplicationStatusChipClass(item.status)}>
         {APPLICATION_STATUS_LABELS[item.status] ?? item.status}
       </StatusChip>
-    </div>
+    </button>
   );
 };
 
