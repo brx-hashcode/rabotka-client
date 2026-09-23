@@ -171,10 +171,16 @@ export function useSendMessage(conversationId: string) {
     // becomes — clean, redacted, or held — and showing the raw text first would
     // flash the author's number on screen as delivered before replacing it.
     // That reads as "it went through, then it didn't".
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
+    // AWAITED, and that matters: react-query runs this before the callbacks
+    // passed to `mutate`, so awaiting the thread refetch is what lets the caller
+    // hold its pending bubble until the server's own version is in the cache.
+    // Without it the bubble is dropped the instant the POST returns and the
+    // message blinks out of the thread and back in.
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: discussionsKeys.thread(conversationId),
       });
+      // The list is a different screen; nothing is waiting on it.
       void queryClient.invalidateQueries({ queryKey: discussionsKeys.list() });
     },
   });

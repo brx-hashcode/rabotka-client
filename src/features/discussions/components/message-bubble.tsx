@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, CheckCheck, Flag } from "lucide-react";
+import { AlertTriangle, Check, CheckCheck, Clock, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { discussionsContent } from "@/content/discussions";
 import type { DiscussionMessage } from "@/lib/api/discussions-controller";
@@ -20,6 +20,13 @@ type Props = Readonly<{
   showRecipientNotice: boolean;
   onReport: (messageId: string) => void;
   reported: boolean;
+  /**
+   * Still in flight — the draft, shown the instant it is sent so the thread
+   * answers the tap instead of waiting for the round trip. A clock takes the
+   * place of the ticks: it says "sending", never "delivered", which is what
+   * lets this exist at all (see `useSendMessage`).
+   */
+  pending?: boolean;
 }>;
 
 /**
@@ -66,6 +73,7 @@ export function MessageBubble({
   showRecipientNotice,
   onReport,
   reported,
+  pending = false,
 }: Props) {
   const warning = discussionsContent.warning;
 
@@ -92,7 +100,7 @@ export function MessageBubble({
           // The tail: the corner nearest the speaker goes square on the first
           // bubble of a group, and a small triangle fills it.
           firstOfGroup && (mine ? "rounded-tr-none" : "rounded-tl-none"),
-          held && "opacity-70",
+          (held || pending) && "opacity-70",
         )}
       >
         {firstOfGroup && (
@@ -133,8 +141,11 @@ export function MessageBubble({
           {/* Read ticks on the author's side only. Two ticks once the other
               party has opened the thread — `readAt` is set by markRead. A held
               message gets none: it was never delivered, and a tick would say
-              otherwise. */}
+              otherwise. A message still in flight gets a clock, for the same
+              reason. */}
+          {mine && pending && <Clock className="h-3 w-3" />}
           {mine &&
+            !pending &&
             !held &&
             (message.readAt ? (
               <CheckCheck className="h-3.5 w-3.5 text-sky-500" />
