@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { AlertTriangle, Check, CheckCheck, Clock, Flag } from "lucide-react";
+import { AlertTriangle, Ban, Check, CheckCheck, Clock, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { discussionsContent } from "@/content/discussions";
 import type { DiscussionMessage } from "@/lib/api/discussions-controller";
 import { redactionSegments } from "../redaction-segments";
+import { useLongPress } from "../use-long-press";
 
 function time(iso: string): string {
   return new Date(iso).toLocaleTimeString("fr-FR", {
@@ -27,6 +28,12 @@ type Props = Readonly<{
    * lets this exist at all (see `useSendMessage`).
    */
   pending?: boolean;
+  /**
+   * Hold the bubble to open the actions sheet. Absent on a pending bubble —
+   * there is nothing to copy, report or delete about a message the server has
+   * not acknowledged yet.
+   */
+  onActions?: (message: DiscussionMessage) => void;
 }>;
 
 /**
@@ -67,6 +74,55 @@ function AuthorNotice({
   );
 }
 
+/**
+ * What the bubble actually says — the text, or the fact that there is no
+ * longer any text.
+ *
+ * Its own component so `MessageBubble` stays about the bubble's shape: the
+ * redaction splitting and the tombstone are two different renderings of the
+ * same slot, and inlining both made one function hard to read.
+ */
+function BubbleBody({
+  message,
+  deleted,
+}: Readonly<{ message: DiscussionMessage; deleted: boolean }>) {
+  if (deleted) {
+    // A tombstone, not a gap. The other party keeps seeing that something was
+    // there and is gone — a message that simply vanished would read as a bug,
+    // and would let a thread be quietly rewritten.
+    return (
+      <p className="flex items-center gap-1.5 text-[15px] italic leading-snug text-muted-foreground">
+        <Ban className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+        {discussionsContent.thread.deleted}
+        <span aria-hidden className="inline-block w-9" />
+      </p>
+    );
+  }
+
+  return (
+    <p className="whitespace-pre-wrap break-words text-[15px] leading-snug text-foreground">
+      {redactionSegments(message.body, message.redactions).map((segment, i) =>
+        segment.withheld ? (
+          // Readable to its author, struck through IN PLACE — decision 3.1:
+          // they must see WHICH of their numbers did not go through.
+          <span
+            key={i}
+            className="rounded bg-destructive/15 px-0.5 line-through decoration-destructive/60"
+          >
+            {segment.text}
+          </span>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        ),
+      )}
+      <span
+        aria-hidden
+        className={cn("inline-block", message.mine ? "w-16" : "w-11")}
+      />
+    </p>
+  );
+}
+
 export function MessageBubble({
   message,
   firstOfGroup,
@@ -74,12 +130,21 @@ export function MessageBubble({
   onReport,
   reported,
   pending = false,
+  onActions,
 }: Props) {
   const warning = discussionsContent.warning;
+  const content = discussionsContent.thread;
 
+  const deleted = message.deletedAt !== null;
   const held = message.status === "HELD";
   const hasRedactions = message.redactions.length > 0;
   const mine = message.mine;
+
+  // Nothing to act on once it is gone, and nothing to act on before it exists.
+  const actionable = Boolean(onActions) && !pending && !deleted;
+  const { handlers } = useLongPress(() => {
+    if (actionable) onActions?.(message);
+  });
 
   return (
     <div
@@ -94,6 +159,9 @@ export function MessageBubble({
       )}
     >
       <div
+        // Hold to open the actions sheet — the same gesture, and the same
+        // hook, as a row on the conversation list.
+        {...(actionable ? handlers : {})}
         className={cn(
           "relative max-w-[82%] rounded-lg px-2.5 pb-1.5 pt-1.5 shadow-[0_1px_0.5px_rgb(0_0_0/0.13)]",
           mine ? "bg-chat-bubble-out" : "bg-chat-bubble-in",
@@ -101,6 +169,10 @@ export function MessageBubble({
           // bubble of a group, and a small triangle fills it.
           firstOfGroup && (mine ? "rounded-tr-none" : "rounded-tl-none"),
           (held || pending) && "opacity-70",
+          // A tombstone is quieter than the thread around it: it is there to
+          // be seen and skipped, not read.
+          deleted && "bg-chat-bubble-in/70",
+          actionable && "select-none",
         )}
       >
         {firstOfGroup && (
@@ -118,23 +190,7 @@ export function MessageBubble({
         {/* The time floats in the last line, WhatsApp-style: a trailing spacer
             reserves its width so a short message stays one line instead of
             dropping the time onto a line of its own. */}
-        <p className="whitespace-pre-wrap break-words text-[15px] leading-snug text-foreground">
-          {redactionSegments(message.body, message.redactions).map((segment, i) =>
-            segment.withheld ? (
-              // Readable to its author, struck through IN PLACE — decision 3.1:
-              // they must see WHICH of their numbers did not go through.
-              <span
-                key={i}
-                className="rounded bg-destructive/15 px-0.5 line-through decoration-destructive/60"
-              >
-                {segment.text}
-              </span>
-            ) : (
-              <span key={i}>{segment.text}</span>
-            ),
-          )}
-          <span aria-hidden className={cn("inline-block", mine ? "w-16" : "w-11")} />
-        </p>
+        <BubbleBody message={message} deleted={deleted} />
 
         <span className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[11px] leading-none text-muted-foreground tabular-nums">
           {time(message.createdAt)}
@@ -142,11 +198,13 @@ export function MessageBubble({
               party has opened the thread — `readAt` is set by markRead. A held
               message gets none: it was never delivered, and a tick would say
               otherwise. A message still in flight gets a clock, for the same
-              reason. */}
+              reason, and a deleted one gets neither: there is nothing left for
+              a tick to be about. */}
           {mine && pending && <Clock className="h-3 w-3" />}
           {mine &&
             !pending &&
             !held &&
+            !deleted &&
             (message.readAt ? (
               <CheckCheck className="h-3.5 w-3.5 text-sky-500" />
             ) : (
@@ -155,7 +213,9 @@ export function MessageBubble({
         </span>
       </div>
 
-      {mine && (held || hasRedactions) && (
+      {/* No notice under a tombstone: "ce fragment n'a pas été transmis" about
+          a message that no longer exists is an explanation of nothing. */}
+      {mine && !deleted && (held || hasRedactions) && (
         <AuthorNotice
           held={held}
           reported={reported}

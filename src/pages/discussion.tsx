@@ -12,8 +12,11 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { discussionsContent } from "@/content/discussions";
 import { MessageBubble } from "@/features/discussions/components/message-bubble";
+import { MessageActionsSheet } from "@/features/discussions/components/message-actions-sheet";
 import { mergeThread } from "@/features/discussions/merge-thread";
 import { CounterpartAvatar } from "@/features/discussions/components/counterpart-avatar";
+import { TypingBubble } from "@/features/discussions/components/typing-bubble";
+import { useDiscussionTyping } from "@/features/discussions/use-discussion-typing";
 import { serverMessage } from "@/lib/api/errors";
 import { tapFeedback } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
@@ -28,6 +31,7 @@ import {
   useDiscussion,
   useDiscussionHistory,
   useDiscussionThread,
+  useDeleteDiscussionMessage,
   useDiscussionsSocket,
   useMarkDiscussionRead,
   useReportRedaction,
@@ -65,6 +69,26 @@ function dayLabel(iso: string): string {
     day: "numeric",
     month: "long",
   });
+}
+
+/**
+ * The line under the counterpart's name.
+ *
+ * Typing wins over "en ligne": it is the more specific of the two, and it is
+ * what somebody scrolled up the thread — who cannot see the dots at the bottom
+ * — is waiting to read. Never "hors ligne": the server fails closed, so false
+ * also means "could not tell", and saying offline would claim a certainty
+ * nobody has. No "vu à" either — last-seen is a privacy setting everywhere it
+ * exists, and that decision has not been made here.
+ */
+function headerSubtitle(
+  typing: boolean,
+  online: boolean,
+  jobTitle: string | null | undefined,
+): string {
+  if (typing) return discussionsContent.thread.typing;
+  if (online) return "en ligne";
+  return jobTitle ?? "";
 }
 
 /**
@@ -145,7 +169,14 @@ export default function Discussion() {
   const send = useSendMessage(id);
   const markRead = useMarkDiscussionRead();
   const report = useReportRedaction();
+  const deleteMessage = useDeleteDiscussionMessage(id);
   useDiscussionsSocket(true);
+
+  /** The bubble whose actions sheet is open, and whether Supprimer is armed. */
+  const [actionsFor, setActionsFor] = useState<DiscussionMessage | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  const { counterpartTyping, notifyTyping } = useDiscussionTyping(id, true);
 
   const content = discussionsContent.thread;
   const warning = discussionsContent.warning;
@@ -313,6 +344,10 @@ export default function Discussion() {
     // A bubble left in flight would otherwise reappear at the bottom of the
     // NEXT thread, attributed to the wrong person.
     setPending([]);
+    // And a sheet left open would be acting on a message from the thread the
+    // person has just left.
+    setActionsFor(null);
+    setConfirmingDelete(false);
   }, [id]);
 
   /**
@@ -394,6 +429,48 @@ export default function Discussion() {
     });
   };
 
+  const closeActions = () => {
+    setActionsFor(null);
+    setConfirmingDelete(false);
+  };
+
+  /**
+   * Copy the text, as the READER sees it.
+   *
+   * `message.body` is already what this side is allowed to have — the recipient
+   * gets the version with "[masqué]" in it — so there is nothing to strip here.
+   * The clipboard API needs a secure context; inside a WhatsApp webview over
+   * plain http it simply is not there, hence the fallback message rather than
+   * an unhandled rejection.
+   */
+  const copyMessage = async (message: DiscussionMessage) => {
+    try {
+      await navigator.clipboard.writeText(message.body);
+      toast.success(content.actionsCopied);
+    } catch {
+      toast.error(content.actionsCopyFailed);
+    }
+    closeActions();
+  };
+
+  const confirmDelete = () => {
+    const message = actionsFor;
+    if (!message) return;
+    if (!confirmingDelete) {
+      // Two taps, like the conversation-level delete: this one reaches the
+      // other person's screen, and a stray tap should not.
+      setConfirmingDelete(true);
+      return;
+    }
+    tapFeedback();
+    closeActions();
+    deleteMessage.mutate(message.id, {
+      onSuccess: () => toast.success(content.actionsDeleted),
+      onError: (error) =>
+        toast.error(serverMessage(error) ?? content.actionsDeleteFailed),
+    });
+  };
+
   /**
    * Whether the pill that goes back down should be showing. Coalesced into a
    * frame: this fires on every scroll event, and a `setState` per event on a
@@ -464,22 +541,21 @@ export default function Discussion() {
             ) : (
               <Skeleton className="mb-1 h-4 w-32" />
             )}
-            {/* "en ligne" when connected, the job otherwise. Never "hors ligne":
-                the server fails closed, so false also means "could not tell", and
-                saying offline would claim a certainty nobody has. There is no
-                "vu à" either — last-seen is a privacy setting everywhere it
-                exists, and that decision has not been made here. */}
+            {/* See `headerSubtitle` for what this says, and what it never
+                says. */}
             <p
               className={cn(
                 "truncate text-xs leading-tight",
-                discussion?.counterpartOnline
+                counterpartTyping || discussion?.counterpartOnline
                   ? "text-whatsapp"
                   : "text-muted-foreground",
               )}
             >
-              {discussion?.counterpartOnline
-                ? "en ligne"
-                : (discussion?.jobTitle ?? "")}
+              {headerSubtitle(
+                counterpartTyping,
+                discussion?.counterpartOnline ?? false,
+                discussion?.jobTitle,
+              )}
             </p>
           </div>
         </ProfileLink>
@@ -586,6 +662,11 @@ export default function Discussion() {
                   // `reported` here is only the optimistic half, for the gap
                   // between the tap and the refetch.
                   reported={message.reported || reported.includes(message.id)}
+                  onActions={(target) => {
+                    tapFeedback();
+                    setConfirmingDelete(false);
+                    setActionsFor(target);
+                  }}
                   onReport={(messageId) =>
                     report.mutate(
                       { messageId },
@@ -620,6 +701,7 @@ export default function Discussion() {
                 status: "CLEAN",
                 redactions: [],
                 reported: false,
+                deletedAt: null,
                 createdAt: new Date().toISOString(),
                 readAt: null,
               }}
@@ -631,6 +713,10 @@ export default function Discussion() {
               onReport={() => undefined}
             />
           ))}
+
+          {/* Below everything, including a message still in flight: the reply
+              being written is the newest thing in the thread. */}
+          {counterpartTyping && <TypingBubble />}
 
           <div ref={bottomRef} />
         </div>
@@ -673,7 +759,13 @@ export default function Discussion() {
               <textarea
                 ref={composerRef}
                 value={draft}
-                onChange={(e) => setDraft(e.target.value.slice(0, MAX_LENGTH))}
+                onChange={(e) => {
+                  setDraft(e.target.value.slice(0, MAX_LENGTH));
+                  // Throttled inside, to one emit every couple of seconds: a
+                  // two-line message is a hundred keystrokes, and this
+                  // audience pays for the connection by the megabyte.
+                  notifyTyping();
+                }}
                 onFocus={() => {
                   // The keyboard opening shortens the thread under the composer;
                   // without this the last bubble ends up behind it. A frame
@@ -751,6 +843,28 @@ export default function Discussion() {
           }
         />
       )}
+
+      {/* ── Message actions, opened by a long press or a right-click. ── */}
+      <MessageActionsSheet
+        message={actionsFor}
+        confirmingDelete={confirmingDelete}
+        deleting={deleteMessage.isPending}
+        onClose={closeActions}
+        onCopy={(message) => void copyMessage(message)}
+        onDelete={confirmDelete}
+        onReport={(messageId) => {
+          closeActions();
+          report.mutate(
+            { messageId },
+            {
+              onSuccess: () => {
+                setReported((ids) => [...ids, messageId]);
+                toast.success(warning.reportDone);
+              },
+            },
+          );
+        }}
+      />
     </div>
   );
 }
