@@ -19,6 +19,7 @@ function message(
     status: "CLEAN",
     redactions: [],
     reported: false,
+    deletedAt: null,
     createdAt: `2026-09-23T10:${String(minute).padStart(2, "0")}:00.000Z`,
     readAt: null,
     ...extra,

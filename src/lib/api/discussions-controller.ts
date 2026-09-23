@@ -43,6 +43,13 @@ export type DiscussionMessage = {
    * thread; component state alone put the link back on every remount.
    */
   reported: boolean;
+  /**
+   * Taken back by its author. The server then sends a tombstone — empty body,
+   * no offsets — to BOTH sides, and the bubble draws "Ce message a été
+   * supprimé" in its place. The row itself is not emptied server-side, so
+   * moderation still reads what was written.
+   */
+  deletedAt: string | null;
   createdAt: string;
   readAt: string | null;
 };
@@ -140,6 +147,21 @@ class DiscussionsController extends RabotkaBaseController {
     );
   }
 
+  /**
+   * Takes one of your own messages back, for BOTH sides — unlike `hide`, which
+   * clears a whole conversation for you alone.
+   *
+   * What is left is a tombstone, not a gap: the other party keeps seeing that
+   * something was there and is gone. Server-side the row survives with its
+   * text, so moderation can still answer "did they send a number and then
+   * delete it?".
+   */
+  deleteMessage(messageId: string): Promise<{ ok: boolean }> {
+    return this.delete<{ ok: boolean }>(
+      `/profile/discussions/messages/${messageId}`,
+    );
+  }
+
   /** « Ce n'était pas un numéro » — only the author of a message may say it. */
   report(messageId: string, note?: string): Promise<{ ok: boolean }> {
     return this.post<{ ok: boolean }>(
@@ -159,4 +181,6 @@ export const openDiscussionWithProfile =
 export const sendDiscussionMessage = controller.send.bind(controller);
 export const markDiscussionRead = controller.markRead.bind(controller);
 export const hideDiscussion = controller.hide.bind(controller);
+export const deleteDiscussionMessage =
+  controller.deleteMessage.bind(controller);
 export const reportRedaction = controller.report.bind(controller);

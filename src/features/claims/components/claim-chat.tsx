@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { cn, formatDateTime } from "@/lib/utils";
+import { useAutoGrowTextarea } from "@/hooks/use-auto-grow-textarea";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import {
   useClaimComments,
@@ -40,6 +41,9 @@ import {
 } from "@/lib/image-upload";
 import { AttachmentThumb } from "./attachment-thumb";
 import { AttachmentViewer } from "./attachment-viewer";
+
+/** Mirrored by `max-h-35` on the textarea, so the two cannot drift. */
+const COMPOSER_MAX_PX = 140;
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   CREATED: { label: "Créée", className: "bg-yellow-100 text-yellow-800" },
@@ -282,7 +286,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useAutoGrowTextarea(message, COMPOSER_MAX_PX);
 
   const { mutateAsync: uploadClaimFiles, isPending: isUploading } =
     useUploadClaimFiles();
@@ -312,13 +316,6 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [comments]);
-
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
-  }, [message]);
 
   const isSending = isAddingComment || isUploading || isPreparing;
   // Either half is enough: a photo with no caption is the ordinary thing to
@@ -525,7 +522,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             onKeyDown={handleKeyDown}
             disabled={isClaimClosed || isSending}
             rows={1}
-            className="max-h-[140px] flex-1 resize-none rounded-2xl bg-card px-4 py-2.5 text-sm leading-snug placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-whatsapp/40 disabled:opacity-60"
+            className="max-h-35 flex-1 resize-none rounded-2xl bg-card px-4 py-2.5 text-sm leading-snug placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-whatsapp/40 disabled:opacity-60"
           />
           <button
             type="submit"

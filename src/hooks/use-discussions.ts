@@ -5,8 +5,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { io } from "socket.io-client";
 import {
+  acquireDiscussionSocket,
+  releaseDiscussionSocket,
+} from "@/features/discussions/discussion-socket";
+import {
+  deleteDiscussionMessage,
   getDiscussion,
   hideDiscussion,
   listDiscussionMessages,
@@ -171,10 +175,16 @@ export function useSendMessage(conversationId: string) {
     // becomes — clean, redacted, or held — and showing the raw text first would
     // flash the author's number on screen as delivered before replacing it.
     // That reads as "it went through, then it didn't".
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
+    // AWAITED, and that matters: react-query runs this before the callbacks
+    // passed to `mutate`, so awaiting the thread refetch is what lets the caller
+    // hold its pending bubble until the server's own version is in the cache.
+    // Without it the bubble is dropped the instant the POST returns and the
+    // message blinks out of the thread and back in.
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: discussionsKeys.thread(conversationId),
       });
+      // The list is a different screen; nothing is waiting on it.
       void queryClient.invalidateQueries({ queryKey: discussionsKeys.list() });
     },
   });
@@ -194,6 +204,74 @@ export function useMarkDiscussionRead() {
   });
 }
 
+/**
+ * Takes one of your own messages back, for both sides.
+ *
+ * Optimistic, and this one is safe to be: unlike sending, there is no verdict
+ * to wait for — the server either accepts or refuses, and the tombstone looks
+ * the same whoever draws it. The bubble turning to "supprimé" under the thumb
+ * is the whole point; a round trip's delay would read as the tap having
+ * missed.
+ *
+ * Written into the LIVE page only. History pages are a separate key and are
+ * never invalidated by the socket, so `onSettled` refetches the thread rather
+ * than trying to find the message across both.
+ */
+export function useDeleteDiscussionMessage(conversationId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (messageId: string) => deleteDiscussionMessage(messageId),
+    onMutate: async (messageId: string) => {
+      const key = discussionsKeys.thread(conversationId);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous =
+        queryClient.getQueryData<
+          Awaited<ReturnType<typeof listDiscussionMessages>>
+        >(key);
+
+      if (previous) {
+        queryClient.setQueryData(key, {
+          ...previous,
+          data: previous.data.map((message) =>
+            message.id === messageId
+              ? // The same shape the server sends back, so the bubble does not
+                // change twice — once now and once on the refetch.
+                {
+                  ...message,
+                  body: "",
+                  redactions: [],
+                  reported: false,
+                  deletedAt: new Date().toISOString(),
+                }
+              : message,
+          ),
+        });
+      }
+
+      return { previous };
+    },
+    onError: (_error, _messageId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          discussionsKeys.thread(conversationId),
+          context.previous,
+        );
+      }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: discussionsKeys.thread(conversationId),
+      });
+      // The row preview falls back to the previous message.
+      void queryClient.invalidateQueries({ queryKey: discussionsKeys.list() });
+      void queryClient.invalidateQueries({
+        queryKey: discussionsKeys.history(conversationId),
+      });
+    },
+  });
+}
+
 export function useReportRedaction() {
   const queryClient = useQueryClient();
 
@@ -209,9 +287,9 @@ export function useReportRedaction() {
 /**
  * Live updates.
  *
- * Listen-only, matching the server: the namespace declares no inbound handler
- * at all, and the room is derived from the auth cookie, so there is nothing to
- * emit. Sending goes over REST, where the message is validated and moderated.
+ * Listening only. The server takes exactly one inbound event, `typing`, which
+ * stores nothing and has a hook of its own — everything that writes a row goes
+ * over REST, where the message is validated and moderated.
  */
 export function useDiscussionsSocket(enabled: boolean) {
   const queryClient = useQueryClient();
@@ -219,21 +297,25 @@ export function useDiscussionsSocket(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
 
-    const socket = io("/messagerie", {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-
-    socket.on("message:new", () => {
+    const socket = acquireDiscussionSocket();
+    const refresh = () => {
       void queryClient.invalidateQueries({ queryKey: discussionsKeys.all });
-    });
+    };
 
-    socket.on("message:read", () => {
-      void queryClient.invalidateQueries({ queryKey: discussionsKeys.all });
-    });
+    socket.on("message:new", refresh);
+    socket.on("message:read", refresh);
+    // A message was taken back, by either side. The refetch replaces it with
+    // the server's tombstone; the payload carries only ids, so there is
+    // nothing to write into the cache directly.
+    socket.on("message:deleted", refresh);
 
     return () => {
-      socket.disconnect();
+      // By reference, not `off("message:new")`: another mount of this hook may
+      // still be listening on the same shared socket.
+      socket.off("message:new", refresh);
+      socket.off("message:read", refresh);
+      socket.off("message:deleted", refresh);
+      releaseDiscussionSocket();
     };
   }, [enabled, queryClient]);
 }

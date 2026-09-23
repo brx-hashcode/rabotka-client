@@ -424,6 +424,14 @@
   }
 }
 
+/* The grey rectangle mobile WebKit paints over anything tapped. Every press
+   state in the app is already drawn deliberately — this one arrives late,
+   covers the wrong area, and is the clearest sign that a screen is a web page
+   rather than an app. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 
 /*
  * The thread wallpaper.
