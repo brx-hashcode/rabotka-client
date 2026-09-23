@@ -33,6 +33,26 @@ export const discussionsContent = {
     // not what the app is about to do.
     older: "Messages précédents",
     olderLoading: "Chargement…",
+    /** Replaces "en ligne" in the header while the other person writes. */
+    typing: "en train d’écrire…",
+    /** In place of the body, once a message has been taken back. */
+    deleted: "Ce message a été supprimé",
+    /** The long-press sheet. */
+    actionsCopy: "Copier le texte",
+    actionsCopied: "Texte copié",
+    actionsCopyFailed: "Le texte n’a pas pu être copié",
+    actionsDelete: "Supprimer le message",
+    actionsDeleteConfirm: "Oui, supprimer",
+    /**
+     * Said BEFORE the second tap, like the conversation-level one — and it has
+     * to say the opposite of it. "Supprimer la discussion" clears a thread for
+     * you alone; this reaches the other person's screen too, and somebody who
+     * knows the first rule would otherwise assume the same here.
+     */
+    actionsDeleteExplain:
+      "Le message sera retiré des deux côtés. Votre interlocuteur verra qu’un message a été supprimé.",
+    actionsDeleted: "Message supprimé",
+    actionsDeleteFailed: "Le message n’a pas pu être supprimé",
   },
 
   /**
