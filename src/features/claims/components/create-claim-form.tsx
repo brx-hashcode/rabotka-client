@@ -108,8 +108,12 @@ export const CreateClaimForm = () => {
   const isSubmitting = isPending || isUploading || isCompressing;
 
   return (
-    <div className="bg-white rounded-lg lg:p-8 p-4 max-w-2xl">
-      <h2 className="text-2xl font-bold mb-6">Créer une Réclamation</h2>
+    // Square and edge to edge, at every width. It fills `AppShell`'s column,
+    // which is 512px on a desktop just as on a phone — so rounding it drew a
+    // card floating inside a card, and `lg:p-8` doubled the gutter the page
+    // was already paying. One 16px padding, once. `max-w-2xl` was dead.
+    <div className="bg-white p-4">
+      <h2 className="mb-6 text-2xl font-bold">Créer une Réclamation</h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -219,9 +223,13 @@ export const CreateClaimForm = () => {
               {isSubmitting ? "Création..." : "Créer la Réclamation"}
             </Button>
 
+            {/* Neutral, not the green tint `outline` carries in this app.
+                Cancelling is the way OUT of the form — dressing it in the
+                submit button's colour gives the two equal weight, on a screen
+                where only one of them is the point. */}
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={isSubmitting}
               onClick={() => navigate("/claims")}
             >

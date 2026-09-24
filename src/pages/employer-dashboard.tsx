@@ -94,7 +94,11 @@ export default function EmployerDashboard() {
   const spend = monthlySpend(invoices ?? []);
 
   return (
-    <div className="pt-8 lg:pt-10 pb-12 px-4 md:px-8 max-w-2xl mx-auto space-y-8">
+    // Flat px-4, like claims and profile: `md:px-8` keys off the viewport,
+    // but `AppShell` pins this to a 512px column on a desktop exactly as on a
+    // phone, so the breakpoint only ever doubled the gutter. `max-w-2xl`
+    // (672px) inside that column is dead weight that misleads the next reader.
+    <div className="mx-auto w-full space-y-8 px-4 pb-12 pt-8">
       <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
 
       {/* KPIs */}

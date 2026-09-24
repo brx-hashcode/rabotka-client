@@ -101,8 +101,12 @@ export default function Onboarding() {
       <div className="min-h-screen bg-background flex items-center justify-center py-8">
         {/* No max-width of its own: PublicShell caps the column at 512px, and
             a wider constraint here would only be dead weight that misleads. */}
-        <div className="w-full p-4 lg:p-0">
-          <div className="bg-white rounded-lg lg:p-8 p-4">{renderStep()}</div>
+        {/* One 16px gutter, on the card, once. This was `p-4` out here AND
+            `p-4 lg:p-8` on the card, so the most important form in the product
+            paid 32px a side on a phone — on the screen where every pixel of
+            field width matters most. */}
+        <div className="w-full">
+          <div className="bg-white p-4">{renderStep()}</div>
         </div>
       </div>
     </>
