@@ -57,10 +57,15 @@ type Props = Readonly<{
  *
  * Built on `Button` rather than a hand-drawn square. The first version was a
  * 40px icon beside a 44px button, pale, without a label — it read as an
- * afterthought, and on an applied card it was the only thing left to tap.
- * Same height, same press, same highlight as every other action now, and a
- * word next to the icon: a lone speech bubble is not obviously "talk to the
- * employer about this job".
+ * afterthought, and on an applied card it was the only thing left to tap. Same
+ * height, same press, same highlight as every other action now.
+ *
+ * The fix for that was a word NEXT TO the icon, because a lone speech bubble is
+ * not obviously "talk to the employer about this job". The word turned out to
+ * be the part that did the work: with a label there, the icon only made this
+ * button a different shape from the primary beside it. So the label is the
+ * whole button now, and the icon is kept for `compact`, where there is no
+ * label to carry the meaning.
  */
 export function StartChatButton({
   target,
@@ -107,8 +112,16 @@ export function StartChatButton({
       }}
       className={cn(!compact && "px-5", className)}
     >
-      <MessageCircle className="size-5!" strokeWidth={1.75} />
-      {!compact && "Discuter"}
+      {/* The icon belongs to the COMPACT form only, where it is the whole
+          control and a label would not fit. Beside a word it earned nothing:
+          "Discuter" already says what the button does, and the glyph only made
+          this button a different shape from the one next to it — which is the
+          other half of why the pair looked wrong. */}
+      {compact ? (
+        <MessageCircle className="size-5!" strokeWidth={1.75} />
+      ) : (
+        "Discuter"
+      )}
     </Button>
   );
 }
