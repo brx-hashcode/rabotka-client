@@ -6,12 +6,18 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * The PRESS, shared by every button that has a surface.
+ * The raised look: a one-pixel highlight along the top edge that flips into a
+ * one-pixel shadow on press, so the button reads as sinking in rather than
+ * just changing colour.
  *
- * Ported from rabotka-admin's button, which is where the product's buttons
- * first got depth: a one-pixel highlight along the top edge, and on press that
- * highlight flips into a one-pixel shadow while the outer glow goes away — the
- * button reads as sinking in rather than just changing colour.
+ * Ported from rabotka-admin, and it used to be on every button with a surface.
+ * IT IS NOW THE LANDING HERO'S ALONE. In the app it made every primary look
+ * lit from within — fine once, plastic on a card repeating down a feed — and
+ * it fought this app's own flat, borderless house style. The hero is one
+ * button on a marketing page with room to be showy, so it keeps it.
+ *
+ * Every other button still answers a thumb: `active:translate-y-px` and the
+ * brightness shift are in the shared base below, not here.
  *
  * Written with plain rgb() where admin uses `--theme(--color-white/16%)`. Both
  * work on this app's Tailwind — checked against the build output, not assumed —
@@ -43,19 +49,38 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // The primary. Gradient top to bottom, green glow underneath.
-        default: `bg-linear-to-b from-whatsapp to-whatsapp-dark text-primary-foreground shadow-nav-selected hover:brightness-95 ${RAISED}`,
-        whatsapp: `bg-linear-to-b from-whatsapp to-whatsapp-dark text-primary-foreground shadow-nav-selected hover:brightness-95 ${RAISED}`,
+        // The primary: ONE FLAT GREEN. No gradient, no glow underneath, no
+        // inset highlight along the top.
+        //
+        // It had all three, and together they made every primary button look
+        // lit from within. On a card that repeats down a feed it read as
+        // plastic, and the glow in particular bled a green halo onto the
+        // surface behind it, which is why two of these side by side looked
+        // heavier than the sum of their parts. Flat is this app's house
+        // style — borderless surfaces, `shadow-soft`, no gradients — and the
+        // button was the last thing not following it.
+        //
+        // The press stays: `active:translate-y-px` and the brightness shift
+        // live in the shared base, so the button still answers a thumb. What
+        // is gone is the decoration it wore at rest.
+        default: "bg-whatsapp text-primary-foreground hover:brightness-95",
+        whatsapp: "bg-whatsapp text-primary-foreground hover:brightness-95",
+        // The landing hero keeps its depth. It is one button on a marketing
+        // page with room to be showy, not one of a pair on a card in a feed.
         hero: `bg-linear-to-b from-whatsapp to-whatsapp-dark text-base text-primary-foreground shadow-nav-selected hover:brightness-95 ${RAISED}`,
-        destructive: `bg-destructive text-destructive-foreground shadow-sm shadow-destructive/25 hover:brightness-95 ${RAISED}`,
+        destructive:
+          "bg-destructive text-destructive-foreground hover:brightness-95",
 
-        // Tinted, and still BORDERLESS — this app's convention, kept on
-        // purpose rather than taking admin's bordered outline. They get the
-        // same highlight and press, just no glow: a secondary action should
-        // not shine like the primary one next to it.
-        outline: `bg-whatsapp/10 text-whatsapp hover:bg-whatsapp/15 active:bg-whatsapp/20 ${RAISED}`,
-        "destructive-soft": `bg-destructive/10 text-destructive hover:bg-destructive/15 active:bg-destructive/20 ${RAISED}`,
-        secondary: `bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/85 ${RAISED}`,
+        // Tinted and neutral surfaces. BORDERLESS, as this app has always had
+        // them, and now flat like the primary above — a secondary that still
+        // wore an inset highlight after the primary lost its gradient was the
+        // odd one out in exactly the pair this change exists to settle.
+        outline:
+          "bg-whatsapp/10 text-whatsapp hover:bg-whatsapp/15 active:bg-whatsapp/20",
+        "destructive-soft":
+          "bg-destructive/10 text-destructive hover:bg-destructive/15 active:bg-destructive/20",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/85",
 
         // These two had a border before this change and keep it: they sit on
         // photos and coloured heroes, where a tint alone disappears.

@@ -38,6 +38,13 @@ type Props = Readonly<{
    * applying, the apply button is dead and this is the only live action, so it
    * takes the weight. `secondary` beside a live primary, so the two do not
    * compete.
+   *
+   * `secondary` is NEUTRAL, not a green tint. It used to be `outline`, which
+   * in this app is `bg-whatsapp/10 text-whatsapp` — green on green beside a
+   * green primary. One card carried two green blobs, and a feed of them was a
+   * wall of green in which the page's own "Créer une offre" had no more weight
+   * than a per-card action. A secondary that shares the primary's hue is not a
+   * secondary.
    */
   emphasis?: "primary" | "secondary";
   /** Icon only, for dense list rows where a label does not fit. */
@@ -50,10 +57,15 @@ type Props = Readonly<{
  *
  * Built on `Button` rather than a hand-drawn square. The first version was a
  * 40px icon beside a 44px button, pale, without a label — it read as an
- * afterthought, and on an applied card it was the only thing left to tap.
- * Same height, same press, same highlight as every other action now, and a
- * word next to the icon: a lone speech bubble is not obviously "talk to the
- * employer about this job".
+ * afterthought, and on an applied card it was the only thing left to tap. Same
+ * height, same press, same highlight as every other action now.
+ *
+ * The fix for that was a word NEXT TO the icon, because a lone speech bubble is
+ * not obviously "talk to the employer about this job". The word turned out to
+ * be the part that did the work: with a label there, the icon only made this
+ * button a different shape from the primary beside it. So the label is the
+ * whole button now, and the icon is kept for `compact`, where there is no
+ * label to carry the meaning.
  */
 export function StartChatButton({
   target,
@@ -87,7 +99,7 @@ export function StartChatButton({
   return (
     <Button
       type="button"
-      variant={emphasis === "primary" ? "default" : "outline"}
+      variant={emphasis === "primary" ? "default" : "secondary"}
       size={compact ? "icon" : "default"}
       aria-label="Discuter"
       loading={open.isPending}
@@ -100,8 +112,16 @@ export function StartChatButton({
       }}
       className={cn(!compact && "px-5", className)}
     >
-      <MessageCircle className="size-5!" strokeWidth={1.75} />
-      {!compact && "Discuter"}
+      {/* The icon belongs to the COMPACT form only, where it is the whole
+          control and a label would not fit. Beside a word it earned nothing:
+          "Discuter" already says what the button does, and the glyph only made
+          this button a different shape from the one next to it — which is the
+          other half of why the pair looked wrong. */}
+      {compact ? (
+        <MessageCircle className="size-5!" strokeWidth={1.75} />
+      ) : (
+        "Discuter"
+      )}
     </Button>
   );
 }
