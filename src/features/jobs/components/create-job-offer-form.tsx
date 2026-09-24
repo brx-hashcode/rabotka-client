@@ -249,12 +249,24 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               explanation is three lines long, and in half the width it would
               have left the two columns wildly uneven. */}
           <div className="space-y-2">
-            <div className="grid grid-cols-2 items-start gap-3">
+            {/* `items-end`, not `items-start`. "Date de la mission" and
+                "Ouverte jusqu'au" both wrap to two lines in half a column
+                while "Heure" stays on one, so aligning the tops left the two
+                inputs at different heights. Aligning the bottoms puts the
+                fields on one line and lets the labels sit where they fall. */}
+            <div className="grid grid-cols-2 items-end gap-3">
               <FormField
                 control={form.control}
                 name="scheduledDate"
                 render={({ field }) => (
-                  <FormItem>
+                  // `min-w-0` because THIS is the grid child, and a grid child
+                  // is `min-width: auto` by default — it refuses to shrink
+                  // below its content's intrinsic width. A native date input
+                  // reports a wide one (iOS renders "24.09.2026 г."), so the
+                  // column pushed past its track and the whole page became
+                  // pannable sideways. The `min-w-0` already on the Input
+                  // could not help: the overflow was one level up.
+                  <FormItem className="min-w-0">
                     <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
                     <FormControl>
                       <Input
@@ -282,7 +294,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 control={form.control}
                 name="scheduledTime"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Heure</FormLabel>
                     <FormControl>
                       <Input

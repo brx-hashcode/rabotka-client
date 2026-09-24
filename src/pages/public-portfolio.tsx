@@ -115,6 +115,24 @@ export default function PublicPortfolio() {
         realizationsCount={worker.portfolio.length}
       />
 
+      {/* The description was FETCHED and thrown away — used to build the SEO
+          meta tags and never shown to a human. So an employer opening a
+          candidate's profile saw a face, three numbers and some photos, and
+          nothing saying what the person actually does.
+
+          Same card as the worker detail screen, so the two profile surfaces
+          describe somebody the same way. */}
+      {worker.description && (
+        <div className="mt-6 rounded-xl bg-card p-4 shadow-soft">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            À propos
+          </p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+            {worker.description}
+          </p>
+        </div>
+      )}
+
       <Separator className="my-6" />
 
       {worker.portfolio.length === 0 ? (

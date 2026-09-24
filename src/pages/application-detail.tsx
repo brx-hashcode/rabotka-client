@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorState } from "@/components/common/query-error-state";
 import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
+import { StartChatButton } from "@/features/discussions/components/start-chat-button";
+import { chattableApplicationId } from "@/features/discussions/chattable";
 import {
   useApplication,
   useAcceptApplication,
@@ -78,17 +80,7 @@ export default function ApplicationDetail() {
 
       {!isLoading && data && (
         <div className="space-y-4 px-4 py-4">
-          <WorkerCard app={data.application} />
-
-          {data.workerSlug && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate(`/p/${data.workerSlug}?back=1`)}
-            >
-              Voir le profil du candidat
-            </Button>
-          )}
+          <WorkerCard app={data.application} workerSlug={data.workerSlug} />
 
           <OfferCard app={data.application} />
 
@@ -108,7 +100,7 @@ export default function ApplicationDetail() {
               <div className="flex gap-3">
                 {!offerClosed && (
                   <Button
-                    className="flex-1 bg-whatsapp text-white hover:bg-whatsapp-dark"
+                    className="flex-1"
                     onClick={() => setConfirmAccept(true)}
                   >
                     Accepter
@@ -128,7 +120,7 @@ export default function ApplicationDetail() {
           {data.application.status === "WAITING_PAYMENT" &&
             !data.unlock?.employerPaid && (
               <Button
-                className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+                className="w-full"
                 onClick={goToPayment}
               >
                 Finaliser le paiement
@@ -215,7 +207,14 @@ export default function ApplicationDetail() {
 
 const WorkerCard = ({
   app,
-}: Readonly<{ app: ApplicationDetailApplication }>) => {
+  workerSlug,
+}: Readonly<{
+  app: ApplicationDetailApplication;
+  /** Absent for a worker with no public portfolio — then there is no profile
+      to open, and the button is not drawn rather than drawn dead. */
+  workerSlug: string | null;
+}>) => {
+  const navigate = useNavigate();
   const { worker, status } = app;
   const initials =
     `${worker.firstName?.[0] ?? ""}${worker.lastName?.[0] ?? ""}`.toUpperCase();
@@ -256,6 +255,38 @@ const WorkerCard = ({
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {worker.description}
         </p>
+      )}
+
+      {/* The two ways to look into this candidate, at the bottom of the card
+          they act on — the way every other card in the app carries its own
+          actions. "Voir le profil" used to float between this card and the
+          offer, belonging to neither.
+
+          BOTH NEUTRAL, and equal widths. The real decisions on this screen are
+          Accepter and Refuser further down; a green button up here would
+          outrank them. */}
+      {(workerSlug || chattableApplicationId(app.id, status)) && (
+        <div className="mt-4 flex items-center gap-2">
+          {workerSlug && (
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() => navigate(`/p/${workerSlug}?back=1`)}
+            >
+              Voir le profil
+            </Button>
+          )}
+          {/* Nothing here for a dead application: `chattableApplicationId`
+              returns null and the button renders nothing, rather than a
+              disabled control that invites a tap and then explains itself. */}
+          <StartChatButton
+            target={{
+              kind: "application",
+              id: chattableApplicationId(app.id, status),
+            }}
+            className="flex-1"
+          />
+        </div>
       )}
     </div>
   );
