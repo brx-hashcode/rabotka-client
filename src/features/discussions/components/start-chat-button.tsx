@@ -38,6 +38,13 @@ type Props = Readonly<{
    * applying, the apply button is dead and this is the only live action, so it
    * takes the weight. `secondary` beside a live primary, so the two do not
    * compete.
+   *
+   * `secondary` is NEUTRAL, not a green tint. It used to be `outline`, which
+   * in this app is `bg-whatsapp/10 text-whatsapp` — green on green beside a
+   * green primary. One card carried two green blobs, and a feed of them was a
+   * wall of green in which the page's own "Créer une offre" had no more weight
+   * than a per-card action. A secondary that shares the primary's hue is not a
+   * secondary.
    */
   emphasis?: "primary" | "secondary";
   /** Icon only, for dense list rows where a label does not fit. */
@@ -87,7 +94,7 @@ export function StartChatButton({
   return (
     <Button
       type="button"
-      variant={emphasis === "primary" ? "default" : "outline"}
+      variant={emphasis === "primary" ? "default" : "secondary"}
       size={compact ? "icon" : "default"}
       aria-label="Discuter"
       loading={open.isPending}

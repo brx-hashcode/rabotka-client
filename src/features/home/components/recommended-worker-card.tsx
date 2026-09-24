@@ -89,16 +89,20 @@ export function RecommendedWorkerCard({
       )}
       </button>
 
-      {/*
-        One button, so the rule is unambiguous: this charges you, everything
-        else opens the profile. "Voir profil" went with the card becoming
-        tappable — a second route to the same place is just clutter on a phone.
-      */}
       {/* Two actions, and the rule stays unambiguous because they say
           different things: Contacter CHARGES you and hands over the real
           coordinates; the chat button is free and hands over nothing. That is
           the whole funnel — talk first, pay when you want to reach them off
-          the platform. */}
+          the platform.
+
+          ONE of them is green. Contacter is the card's primary and carries the
+          colour; the chat button is neutral beside it. Both were green before,
+          which made a feed of these cards a wall of green where the page's own
+          "Créer une offre" had no more weight than a per-card action.
+
+          Equal widths, both `flex-1`. The chat button used to size to its own
+          text, so the pair sat lopsided — and an eye reads that as one button
+          mattering more than it does, on top of the colour already saying so. */}
       <div className="mt-4 flex items-center gap-2">
         <Button
           className="flex-1"
@@ -112,7 +116,10 @@ export function RecommendedWorkerCard({
             exist because that button spends wallet credit. This one spends
             nothing. It IS capped server-side per day, since it reaches
             somebody who never asked to be reached. */}
-        <StartChatButton target={{ kind: "profile", id: worker.id }} />
+        <StartChatButton
+          target={{ kind: "profile", id: worker.id }}
+          className="flex-1"
+        />
       </div>
 
       <ContactConfirmDrawer
