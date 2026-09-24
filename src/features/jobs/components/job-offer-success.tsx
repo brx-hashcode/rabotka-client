@@ -68,7 +68,7 @@ export function JobOfferSuccess({
     // is that branch's sibling, and it was the one left without any, so its
     // label/value rows landed flush against both edges. Same shape as the
     // form's root so the two branches stay visibly paired.
-    <div className="flex w-full flex-col rounded-none bg-white p-4 md:rounded-lg lg:p-8">
+    <div className="flex w-full flex-col bg-white p-4">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-green-100">
           <Check className="size-8 text-green-600" strokeWidth={3} />
