@@ -35,6 +35,11 @@ import {
   scheduledAtLabel,
   scheduledAtHelpText,
 } from "@/lib/employment-type";
+import {
+  composeScheduledAt,
+  minTimeFor,
+  toDateInput,
+} from "@/lib/scheduled-at";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
   CreateJobOfferPayload,
@@ -47,14 +52,12 @@ import {
   PAYMENT_FLOW_LABELS,
 } from "@/lib/validations/job-offer";
 
-// Earliest selectable value for the datetime-local picker, in local time
-// (YYYY-MM-DDTHH:mm). Mirrors the "at least 4h ahead" validation so the native
-// picker itself blocks invalid dates.
+// The earliest instant the picker may offer. Mirrors the "at least 4h ahead"
+// rule in the schema and in the service, so a day or an hour that the server
+// would refuse is never presented in the first place.
 const MIN_HOURS_AHEAD = 4;
-function minScheduledAt(): string {
-  const d = new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function minScheduledAt(): Date {
+  return new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
 }
 
 type Props = {
@@ -77,7 +80,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
       title: "",
       description: "",
       employmentType: "MISSION",
-      scheduledAt: "",
+      scheduledDate: "",
+      scheduledTime: "",
       isRemote: false,
       countryCode: "",
       countryName: "",
@@ -94,6 +98,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
   const isRemote = form.watch("isRemote");
   const employmentType = form.watch("employmentType");
+  // The time field is disabled and bounded by whichever day is chosen.
+  const scheduledDate = form.watch("scheduledDate");
 
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
@@ -108,16 +114,28 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
         ? { isRemote: true }
         : {
             isRemote: false,
-            address: data.address.trim(),
+            // Omitted rather than sent blank when there is none: the field is
+            // optional now, and "" would ask the server to store an address
+            // that says nothing.
+            ...(data.address.trim() ? { address: data.address.trim() } : {}),
             countryCode: data.countryCode,
             countryName: data.countryName,
             city: data.city,
           }),
       // Conditional, like every other optional field: an unconditional
-      // `new Date("").toISOString()` throws RangeError the moment the field is
+      // `new Date("").toISOString()` throws RangeError the moment the date is
       // legitimately left empty.
-      ...(data.scheduledAt
-        ? { scheduled_at: new Date(data.scheduledAt).toISOString() }
+      //
+      // The two fields become one instant here, at the boundary — a missing
+      // hour becomes the END of the chosen day, because "le 30" means
+      // applications stay open through the 30th rather than shutting at
+      // midnight before it began.
+      ...(data.scheduledDate
+        ? {
+            scheduled_at: new Date(
+              composeScheduledAt(data.scheduledDate, data.scheduledTime),
+            ).toISOString(),
+          }
         : {}),
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
@@ -130,11 +148,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   };
 
   return (
-    // Square on mobile, where it runs edge to edge and rounded corners would
-    // read as a card that overflowed. Rounds from md up, where the page gutter
-    // gives it somewhere to sit.
-    <div className="rounded-none bg-white p-4 md:rounded-lg lg:p-8">
-      <h2 className="text-2xl font-bold mb-6">Créer une offre</h2>
+    // Square and edge to edge, at every width. It fills `AppShell`'s column,
+    // which is 512px on a desktop just as on a phone — so rounding it from md
+    // up drew a card floating inside a card, and `lg:p-8` doubled the gutter
+    // the page was already paying. One 16px padding, once. See the page.
+    <div className="bg-white p-4">
+      <h2 className="mb-6 text-2xl font-bold">Créer une offre</h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -224,28 +243,71 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               on a CDI/CDD/stage, which left them with no date at all, and every
               scan that retires or closes an offer keys off it. They could never
               expire and never close. */}
-          <FormField
-            control={form.control}
-            name="scheduledAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    min={minScheduledAt()}
-                    className="w-full min-w-0 max-w-full"
-                    disabled={isPending}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  {scheduledAtHelpText(employmentType)}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Side by side: they are two halves of one answer, and the hour is
+              the narrower question of the two. The shared help line sits under
+              the pair rather than inside either column — the date's
+              explanation is three lines long, and in half the width it would
+              have left the two columns wildly uneven. */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 items-start gap-3">
+              <FormField
+                control={form.control}
+                name="scheduledDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        // The native control blocks the days the server would
+                        // refuse, so an invalid one is never offered rather
+                        // than rejected after the fact.
+                        min={toDateInput(minScheduledAt())}
+                        className="w-full min-w-0"
+                        disabled={isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Its own field, and optional. `datetime-local` demanded both
+                  halves; an employer often knows the day and settles the time
+                  with whoever answers. Native, like the date beside it: on a
+                  phone that is the platform's own wheel, already known and
+                  already translated. */}
+              <FormField
+                control={form.control}
+                name="scheduledTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Heure</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="time"
+                        // Only on the floor's own day — on any later one every
+                        // hour is allowed, and a min there would be present
+                        // and meaningless.
+                        min={minTimeFor(scheduledDate, minScheduledAt())}
+                        className="w-full min-w-0"
+                        // Which hours are still legal depends on which day it
+                        // is, so there is nothing to answer before the date.
+                        disabled={isPending || !scheduledDate}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {scheduledAtHelpText(employmentType)}
+            </p>
+          </div>
 
           <FormField
             control={form.control}
@@ -296,7 +358,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Adresse *</FormLabel>
+                    {/* No asterisk. Optional on purpose — see the schema: a
+                        tailor, a mechanic or a hairdresser works at their own
+                        place and the client comes to them, so there is often
+                        no address to give. The city above carries the
+                        geography. */}
+                    <FormLabel>Adresse</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex : 123 Avenue de la Paix, Poto-Poto"
@@ -304,6 +371,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Facultatif. Laissez vide si le client vient sur votre lieu
+                      de travail.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
