@@ -87,7 +87,10 @@ export function scheduledAtLabel(
 export function scheduledAtHelpText(
   type: EmploymentTypeValue | string | null | undefined,
 ): string {
+  // Both mention the optional hour: the picker accepts a day on its own, and
+  // an employer who does not know the time yet should read that here rather
+  // than discover it by tapping.
   return isDatedMission(type)
-    ? "Le jour où la mission a lieu. Les candidatures se ferment à cette date."
-    : "Dernier jour pour recevoir des candidatures. L'offre expire ensuite si personne n'a été recruté.";
+    ? "Le jour où la mission a lieu. L'heure est facultative. Les candidatures se ferment à cette date."
+    : "Dernier jour pour recevoir des candidatures. L'heure est facultative. L'offre expire ensuite si personne n'a été recruté.";
 }

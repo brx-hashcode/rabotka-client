@@ -61,11 +61,18 @@ export default function CreateJobOffer() {
   }
 
   return (
-    // No horizontal padding on mobile: the card below already carries a p-4
-    // gutter, so having both cost 32px a side — 64px of a 390px screen, and the
-    // form fields were paying for it. The page gutter comes back from md up,
-    // where there is width to spare and the card should read as a card.
-    <div className="mx-auto flex w-full max-w-2xl flex-col px-0 pt-4 pb-8 md:px-8 lg:pt-10">
+    // NO horizontal padding, at any width, and no `max-w` of its own.
+    //
+    // Both used to be responsive — `md:px-8` here, `lg:p-8` on the card — which
+    // looks right until you remember what this page sits in. `AppShell` pins
+    // every screen to a `max-w-lg` column, 512px on a desktop exactly as on a
+    // phone, so a viewport breakpoint says nothing about the space this page
+    // actually has. On a wide screen both fired at once: a 32px page gutter
+    // around a card with 32px of its own padding, 64px a side out of 512, and
+    // the fields paid for all of it.
+    //
+    // `max-w-2xl` (672px) was dead for the same reason — the column is 512.
+    <div className="flex w-full flex-col pt-4 pb-8">
       <Seo title="Créer une offre — Rabotka" noIndex />
       {body}
     </div>

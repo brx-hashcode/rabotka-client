@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import { CountryCityFields } from "@/components/common/country-city-fields";
+import { DateTimePicker } from "@/components/common/date-time-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeselectableSelectItem } from "@/components/ui/deselectable-select-item";
 import { getCategories } from "@/lib/api/job-category-controller";
@@ -47,14 +48,12 @@ import {
   PAYMENT_FLOW_LABELS,
 } from "@/lib/validations/job-offer";
 
-// Earliest selectable value for the datetime-local picker, in local time
-// (YYYY-MM-DDTHH:mm). Mirrors the "at least 4h ahead" validation so the native
-// picker itself blocks invalid dates.
+// The earliest instant the picker may offer. Mirrors the "at least 4h ahead"
+// rule in the schema and in the service, so a day or an hour that the server
+// would refuse is never presented in the first place.
 const MIN_HOURS_AHEAD = 4;
-function minScheduledAt(): string {
-  const d = new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function minScheduledAt(): Date {
+  return new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
 }
 
 type Props = {
@@ -108,7 +107,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
         ? { isRemote: true }
         : {
             isRemote: false,
-            address: data.address.trim(),
+            // Omitted rather than sent blank when there is none: the field is
+            // optional now, and "" would ask the server to store an address
+            // that says nothing.
+            ...(data.address.trim() ? { address: data.address.trim() } : {}),
             countryCode: data.countryCode,
             countryName: data.countryName,
             city: data.city,
@@ -130,11 +132,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   };
 
   return (
-    // Square on mobile, where it runs edge to edge and rounded corners would
-    // read as a card that overflowed. Rounds from md up, where the page gutter
-    // gives it somewhere to sit.
-    <div className="rounded-none bg-white p-4 md:rounded-lg lg:p-8">
-      <h2 className="text-2xl font-bold mb-6">Créer une offre</h2>
+    // Square and edge to edge, at every width. It fills `AppShell`'s column,
+    // which is 512px on a desktop just as on a phone — so rounding it from md
+    // up drew a card floating inside a card, and `lg:p-8` doubled the gutter
+    // the page was already paying. One 16px padding, once. See the page.
+    <div className="bg-white p-4">
+      <h2 className="mb-6 text-2xl font-bold">Créer une offre</h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -231,12 +234,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               <FormItem>
                 <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
                 <FormControl>
-                  <Input
-                    type="datetime-local"
+                  <DateTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
                     min={minScheduledAt()}
-                    className="w-full min-w-0 max-w-full"
                     disabled={isPending}
-                    {...field}
                   />
                 </FormControl>
                 <FormDescription>
@@ -296,7 +299,12 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Adresse *</FormLabel>
+                    {/* No asterisk. Optional on purpose — see the schema: a
+                        tailor, a mechanic or a hairdresser works at their own
+                        place and the client comes to them, so there is often
+                        no address to give. The city above carries the
+                        geography. */}
+                    <FormLabel>Adresse</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex : 123 Avenue de la Paix, Poto-Poto"
@@ -304,6 +312,10 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Facultatif. Laissez vide si le client vient sur votre lieu
+                      de travail.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
