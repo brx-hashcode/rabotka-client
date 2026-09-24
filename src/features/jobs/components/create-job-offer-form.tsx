@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/select";
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import { CountryCityFields } from "@/components/common/country-city-fields";
-import { DateTimePicker } from "@/components/common/date-time-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeselectableSelectItem } from "@/components/ui/deselectable-select-item";
 import { getCategories } from "@/lib/api/job-category-controller";
@@ -36,6 +35,11 @@ import {
   scheduledAtLabel,
   scheduledAtHelpText,
 } from "@/lib/employment-type";
+import {
+  composeScheduledAt,
+  minTimeFor,
+  toDateInput,
+} from "@/lib/scheduled-at";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
 import type {
   CreateJobOfferPayload,
@@ -76,7 +80,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
       title: "",
       description: "",
       employmentType: "MISSION",
-      scheduledAt: "",
+      scheduledDate: "",
+      scheduledTime: "",
       isRemote: false,
       countryCode: "",
       countryName: "",
@@ -93,6 +98,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
 
   const isRemote = form.watch("isRemote");
   const employmentType = form.watch("employmentType");
+  // The time field is disabled and bounded by whichever day is chosen.
+  const scheduledDate = form.watch("scheduledDate");
 
   const onSubmit = (data: CreateJobOfferFormData) => {
     const payload: CreateJobOfferPayload = {
@@ -116,10 +123,19 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             city: data.city,
           }),
       // Conditional, like every other optional field: an unconditional
-      // `new Date("").toISOString()` throws RangeError the moment the field is
+      // `new Date("").toISOString()` throws RangeError the moment the date is
       // legitimately left empty.
-      ...(data.scheduledAt
-        ? { scheduled_at: new Date(data.scheduledAt).toISOString() }
+      //
+      // The two fields become one instant here, at the boundary — a missing
+      // hour becomes the END of the chosen day, because "le 30" means
+      // applications stay open through the 30th rather than shutting at
+      // midnight before it began.
+      ...(data.scheduledDate
+        ? {
+            scheduled_at: new Date(
+              composeScheduledAt(data.scheduledDate, data.scheduledTime),
+            ).toISOString(),
+          }
         : {}),
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
@@ -227,28 +243,71 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
               on a CDI/CDD/stage, which left them with no date at all, and every
               scan that retires or closes an offer keys off it. They could never
               expire and never close. */}
-          <FormField
-            control={form.control}
-            name="scheduledAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
-                <FormControl>
-                  <DateTimePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    min={minScheduledAt()}
-                    disabled={isPending}
-                  />
-                </FormControl>
-                <FormDescription>
-                  {scheduledAtHelpText(employmentType)}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Side by side: they are two halves of one answer, and the hour is
+              the narrower question of the two. The shared help line sits under
+              the pair rather than inside either column — the date's
+              explanation is three lines long, and in half the width it would
+              have left the two columns wildly uneven. */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 items-start gap-3">
+              <FormField
+                control={form.control}
+                name="scheduledDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{scheduledAtLabel(employmentType)} *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        // The native control blocks the days the server would
+                        // refuse, so an invalid one is never offered rather
+                        // than rejected after the fact.
+                        min={toDateInput(minScheduledAt())}
+                        className="w-full min-w-0"
+                        disabled={isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Its own field, and optional. `datetime-local` demanded both
+                  halves; an employer often knows the day and settles the time
+                  with whoever answers. Native, like the date beside it: on a
+                  phone that is the platform's own wheel, already known and
+                  already translated. */}
+              <FormField
+                control={form.control}
+                name="scheduledTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Heure</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="time"
+                        // Only on the floor's own day — on any later one every
+                        // hour is allowed, and a min there would be present
+                        // and meaningless.
+                        min={minTimeFor(scheduledDate, minScheduledAt())}
+                        className="w-full min-w-0"
+                        // Which hours are still legal depends on which day it
+                        // is, so there is nothing to answer before the date.
+                        disabled={isPending || !scheduledDate}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {scheduledAtHelpText(employmentType)}
+            </p>
+          </div>
 
           <FormField
             control={form.control}

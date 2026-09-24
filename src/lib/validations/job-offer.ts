@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EMPLOYMENT_TYPE_VALUES, isDatedMission } from "@/lib/employment-type";
+import { composeScheduledAt } from "@/lib/scheduled-at";
 
 export const PAYMENT_FLOW_VALUES = ["HOURLY", "DAILY", "MONTHLY"] as const;
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
@@ -26,10 +27,22 @@ export const createJobOfferSchema = z.object({
     .min(20, "La description doit contenir entre 20 et 1000 caractères")
     .max(1000, "La description doit contenir entre 20 et 1000 caractères"),
   employmentType: z.enum(EMPLOYMENT_TYPE_VALUES).default("MISSION"),
-  // Required only for a MISSION — enforced in the superRefine below, which is
-  // the only place that can see employmentType alongside it. A CDI has no
-  // single closing date, so demanding one here would make it unpostable.
-  scheduledAt: z.string().default(""),
+  /**
+   * The day, `YYYY-MM-DD`. Required — checked in the superRefine below, which
+   * is the only place that can see `employmentType` alongside it, because the
+   * message has to name the right thing: asking for "la date de la mission" on
+   * a CDI is how you get an employer inventing one.
+   */
+  scheduledDate: z.string().default(""),
+  /**
+   * The hour, `HH:mm`, or "" for none — OPTIONAL.
+   *
+   * Its own field rather than half of a `datetime-local` string: an employer
+   * often knows the day and settles the time with whoever answers, and there
+   * is no way to leave the hour out of a single combined value without
+   * inventing a sentinel that a native time input can then type.
+   */
+  scheduledTime: z.string().default(""),
   isRemote: z.boolean().default(false),
   countryCode: z.string().default(""),
   countryName: z.string().default(""),
@@ -81,29 +94,34 @@ export const createJobOfferSchema = z.object({
     // because this is the only place that can see employmentType alongside it,
     // and the message has to name the right one: asking for "la date de la
     // mission" on a CDI is how you get an employer inventing one.
-    if (!data.scheduledAt) {
+    if (!data.scheduledDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["scheduledAt"],
+        path: ["scheduledDate"],
         message: isDatedMission(data.employmentType)
           ? "La date de la mission est requise"
           : "La date de clôture des candidatures est requise",
       });
-    } else if (Number.isNaN(Date.parse(data.scheduledAt))) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["scheduledAt"],
-        message: "Date invalide",
-      });
-    } else if (
-      Date.parse(data.scheduledAt) <
-      Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["scheduledAt"],
-        message: "La date doit être au moins 4 heures dans le futur",
-      });
+    } else {
+      const instant = Date.parse(
+        composeScheduledAt(data.scheduledDate, data.scheduledTime),
+      );
+      if (Number.isNaN(instant)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["scheduledDate"],
+          message: "Date invalide",
+        });
+      } else if (instant < Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000) {
+        // Blamed on whichever field the person can act on. With an hour given
+        // it is usually the hour that is too early — pointing at the date
+        // would have them change a day that was fine.
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [data.scheduledTime ? "scheduledTime" : "scheduledDate"],
+          message: "La date doit être au moins 4 heures dans le futur",
+        });
+      }
     }
 
     // Checked for EVERY offer, remote or not, because the rule is about the

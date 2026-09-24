@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { REMOTE_LOCATION_LABEL } from "@/lib/job-location";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
+import { composeScheduledAt } from "@/lib/scheduled-at";
 import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,13 +28,20 @@ export function JobOfferSuccess({
 
   // Guarded: a CDI/CDD/STAGE has no closing date, and `new Date("")` renders
   // the literal string "Invalid Date" straight into the recap.
-  const dateLabel = recap.scheduledAt
-    ? new Date(recap.scheduledAt).toLocaleDateString("fr-FR", {
+  //
+  // The hour is shown only when one was actually given. Echoing the 23:59 the
+  // payload falls back to would tell the employer they chose a time they never
+  // chose — the recap is meant to confirm what they typed.
+  const dateLabel = recap.scheduledDate
+    ? new Date(
+        composeScheduledAt(recap.scheduledDate, recap.scheduledTime),
+      ).toLocaleDateString("fr-FR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+        ...(recap.scheduledTime
+          ? ({ hour: "2-digit", minute: "2-digit" } as const)
+          : {}),
       })
     : null;
   const amountLabel =
