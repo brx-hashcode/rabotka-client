@@ -4,18 +4,19 @@ import { describe, expect, it } from "vitest";
 
 import { createJobOfferSchema } from "@/lib/validations/job-offer";
 
-/** Four hours and a bit ahead, so the date rule is never what fails. */
-const soon = () => {
-  const d = new Date(Date.now() + 5 * 60 * 60 * 1000);
+/** Tomorrow, so the "4 hours ahead" rule is never what fails. */
+const tomorrow = () => {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
 const base = {
   title: "Plombier pour réparation",
   description: "Une description suffisamment longue pour passer la validation.",
   employmentType: "MISSION" as const,
-  scheduledAt: soon(),
+  scheduledDate: tomorrow(),
+  scheduledTime: "",
   isRemote: false,
   countryCode: "CG",
   countryName: "Congo",
@@ -77,5 +78,31 @@ describe("city and country", () => {
     });
     expect(paths).not.toContain("countryCode");
     expect(paths).not.toContain("city");
+  });
+});
+
+describe("the date and the hour", () => {
+  it("accepts a day with no hour — the hour is optional", () => {
+    expect(errorPaths({ ...base, scheduledTime: "" })).toEqual([]);
+  });
+
+  it("accepts a day with an hour", () => {
+    expect(errorPaths({ ...base, scheduledTime: "08:30" })).toEqual([]);
+  });
+
+  it("still requires the day", () => {
+    expect(errorPaths({ ...base, scheduledDate: "" })).toContain(
+      "scheduledDate",
+    );
+  });
+
+  it("blames the HOUR when the hour is what is too early", () => {
+    // Pointing at the date would have the employer change a day that was fine.
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const now = new Date();
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    expect(
+      errorPaths({ ...base, scheduledDate: today, scheduledTime: "00:01" }),
+    ).toContain("scheduledTime");
   });
 });
