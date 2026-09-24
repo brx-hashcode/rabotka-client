@@ -34,8 +34,14 @@ export const createJobOfferSchema = z.object({
   countryCode: z.string().default(""),
   countryName: z.string().default(""),
   city: z.string().default(""),
-  // Validated against isRemote by the superRefine below: a remote job has no
-  // site, so requiring an address here would make it impossible to post one.
+  /**
+   * NEVER REQUIRED — only well-formed when given. See the superRefine.
+   *
+   * It used to be mandatory for on-site work, which assumed on-site means the
+   * worker travels to a street address. Most of the informal work here is the
+   * other way round: a tailor, a mechanic, a hairdresser works at their own
+   * place and the client comes to them.
+   */
   address: z.string().trim().default(""),
   quantity: z.coerce
     .number({ invalid_type_error: "Nombre de personnes requis" })
@@ -61,12 +67,12 @@ export const createJobOfferSchema = z.object({
   categoryId: z.string().optional(),
 })
   /**
-   * Location is required only for on-site work.
+   * The city and country are required only for on-site work.
    *
    * As a superRefine rather than per-field rules because the requirement spans
-   * four fields and one flag — no single field can decide on its own whether it
-   * is needed, and expressing it here is what keeps a remote job from being
-   * blocked by an address it will never have.
+   * several fields and one flag — no single field can decide on its own whether
+   * it is needed, and expressing it here is what keeps a remote job from being
+   * blocked by a location it will never have.
    */
   .superRefine((data, ctx) => {
     // Every type needs this date — it is the day the offer stops being open.
@@ -100,15 +106,23 @@ export const createJobOfferSchema = z.object({
       });
     }
 
-    if (data.isRemote) return;
-
-    if (data.address.trim().length < 10) {
+    // Checked for EVERY offer, remote or not, because the rule is about the
+    // text and not about the site: an address may be left out, but half an
+    // address helps nobody. Mirrors the server, which validates the same way.
+    const address = data.address.trim();
+    if (address.length > 0 && address.length < 10) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["address"],
         message: "L'adresse doit contenir au moins 10 caractères",
       });
     }
+
+    // The country and city are still required on site. They are what the
+    // proximity term reads — an offer with neither an address nor a city is
+    // an offer nobody can be matched to.
+    if (data.isRemote) return;
+
     if (!data.countryCode) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
