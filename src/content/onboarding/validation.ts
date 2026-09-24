@@ -19,6 +19,12 @@ export const validationMessages = {
     // only when something was actually typed.
     invalid: "Numéro de téléphone invalide pour le pays sélectionné",
     sameAsPhone: "Ce numéro est déjà votre numéro WhatsApp",
+    /**
+     * The WhatsApp number may be from anywhere — people sign up from the
+     * diaspora. The direct line is the one somebody on the ground is expected
+     * to CALL, so for now it has to be reachable locally.
+     */
+    notCongolese: "Le numéro direct doit être un numéro congolais (+242)",
   },
   country: {
     required: "Sélectionnez un pays",

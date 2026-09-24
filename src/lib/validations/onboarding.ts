@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from "react-phone-number-input";
 import { validationMessages } from "@/content/onboarding";
 import {
   KYC_DOCUMENT_TYPES,
@@ -20,6 +23,22 @@ const optionalPhone = z
   .refine(
     (value) => !value || isValidPhoneNumber(value),
     validationMessages.directPhone.invalid,
+  )
+  /**
+   * CONGOLESE ONLY, unlike the WhatsApp number above.
+   *
+   * The two answer different questions. The WhatsApp number is the identity
+   * signup proves and reaches somebody wherever they are, including the
+   * diaspora — it stays open to every country. The direct line is the one an
+   * employer on the ground is expected to dial, so an international number
+   * there is a call nobody local will place.
+   *
+   * Checked on the parsed country rather than a `+242` prefix match, so a
+   * number written 00242 or with spaces is judged on what it IS.
+   */
+  .refine(
+    (value) => !value || parsePhoneNumber(value)?.country === "CG",
+    validationMessages.directPhone.notCongolese,
   );
 
 /**
