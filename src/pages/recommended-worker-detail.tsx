@@ -20,6 +20,7 @@ import { KycNotice, kycShortLabel } from "@/features/kyc";
 import { useAccountGate } from "@/hooks/use-account-gate";
 import { AccountNotice, accountShortLabel } from "@/features/account";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
+import { StartChatButton } from "@/features/discussions/components/start-chat-button";
 
 export default function RecommendedWorkerDetail() {
   const navigate = useNavigate();
@@ -179,17 +180,36 @@ export default function RecommendedWorkerDetail() {
             <KycNotice reason={reason} />
           )}
 
+          {/* Three tiers, and they read top to bottom in that order.
+              Contacter CHARGES you and takes the colour; Discuter is free and
+              is the step most people want first; the portfolio is a look, not
+              an action.
+
+              The first two used to hand-roll their colours — `bg-whatsapp
+              text-white`, `bg-whatsapp/10 shadow-none` — which put this page
+              outside the variant system, so it kept its own look whenever the
+              buttons changed everywhere else. They use the variants now. */}
           <Button
-            className="w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
+            className="w-full"
             disabled={blocked || accountBlocked}
             onClick={() => setConfirmOpen(true)}
           >
             {contactLabel}
           </Button>
 
+          {/* The same button the recommendation card carries, and not gated
+              the way Contacter is: those gates exist because that one spends
+              wallet credit. This one spends nothing. It is capped server-side
+              per day instead, since it reaches somebody who never asked. */}
+          <StartChatButton
+            target={{ kind: "profile", id: worker.id }}
+            className="w-full"
+          />
+
           {worker.portfolioSlug && (
             <Button
-              className="w-full bg-whatsapp/10 text-whatsapp shadow-none hover:bg-whatsapp/20"
+              variant="ghost"
+              className="w-full"
               onClick={() => navigate(`/p/${worker.portfolioSlug}?back=1`)}
             >
               <Briefcase className="mr-2 h-4 w-4" />
