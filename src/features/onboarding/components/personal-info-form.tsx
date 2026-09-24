@@ -177,6 +177,10 @@ export function PersonalInfoForm({
                   <FormControl>
                     <PhoneInput
                       defaultCountry="CG"
+                      // Locked to Congo, matching the rule the schema
+                      // enforces. Offering every flag on a field that only
+                      // accepts +242 is an invitation to be told no.
+                      countries={["CG"]}
                       placeholder={content.fields.directPhone.placeholder}
                       value={field.value ?? ""}
                       onChange={field.onChange}
