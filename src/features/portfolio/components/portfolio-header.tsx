@@ -71,10 +71,13 @@ export function PortfolioHeader({
             label="Missions"
           />
         )}
+        {/* With the `%`. Every other surface in the app writes "Fiabilité :
+            86%" — this one printed a bare "100", which reads as a count of
+            something rather than a score out of a hundred. */}
         <Stat
           value={
             profile.reliabilityScore != null
-              ? String(profile.reliabilityScore)
+              ? `${profile.reliabilityScore}%`
               : "—"
           }
           label="Fiabilité"
