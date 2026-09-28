@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { BrowserRouter } from "react-router";
+import { useEffect, type ReactNode } from "react";
+import { BrowserRouter, useLocation } from "react-router";
 import { Providers } from "./providers";
 import { AppRoutes } from "./routes";
 import {
@@ -50,6 +50,19 @@ function ReferralCapture() {
   return null;
 }
 
+/**
+ * A second boundary, inside the router, that clears itself on navigation.
+ *
+ * With only the outer one, a page that throws took the whole app with it and
+ * the way out was a full reload. Keyed on the pathname, leaving the broken
+ * page — back, a tab, a link — renders the next one normally. The outer
+ * boundary stays for what fails outside the routes.
+ */
+function RouteErrorBoundary({ children }: Readonly<{ children: ReactNode }>) {
+  const { pathname } = useLocation();
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>;
+}
+
 /*
  * The boundary sits inside Providers and around the router: a failed lazy
  * chunk (every route is lazy, and a deploy renames them) would otherwise
@@ -62,7 +75,9 @@ const App = () => (
         <ChunkGuardReset />
         <AnalyticsTracker />
         <ReferralCapture />
-        <AppRoutes />
+        <RouteErrorBoundary>
+          <AppRoutes />
+        </RouteErrorBoundary>
       </BrowserRouter>
     </ErrorBoundary>
   </Providers>
