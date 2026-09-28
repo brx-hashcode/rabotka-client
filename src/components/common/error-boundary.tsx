@@ -2,9 +2,35 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { RotateCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  buildClientErrorReport,
+  reportClientError,
+} from "@/lib/report-client-error";
 
 /** Survives the reload, so one retry cannot become a loop. */
 const RELOAD_FLAG = "rabotka:chunk-reload";
+
+/*
+ * sessionStorage can throw rather than be absent — blocked site data, some
+ * in-app browsers. The boundary is the last line of defence, so its own
+ * bookkeeping must never be what crashes.
+ */
+function readReloadFlag(): string | null {
+  try {
+    return globalThis.sessionStorage?.getItem(RELOAD_FLAG) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function writeReloadFlag(set: boolean) {
+  try {
+    if (set) globalThis.sessionStorage?.setItem(RELOAD_FLAG, "1");
+    else globalThis.sessionStorage?.removeItem(RELOAD_FLAG);
+  } catch {
+    // Without storage the guard cannot persist; the error screen still shows.
+  }
+}
 
 /**
  * A dynamic import that 404s. Every route in this app is lazy, and a deploy
@@ -25,8 +51,28 @@ function isChunkLoadError(error: unknown): boolean {
   ].some((needle) => message.toLowerCase().includes(needle.toLowerCase()));
 }
 
-type Props = { readonly children: ReactNode };
-type State = { readonly failed: boolean };
+type Props = {
+  readonly children: ReactNode;
+  /**
+   * When this changes, a failed boundary tries its children again. The route
+   * boundary passes the pathname, so leaving a broken page — back, a tab —
+   * recovers without a reload.
+   */
+  readonly resetKey?: string;
+};
+type State = {
+  readonly error: Error | null;
+  readonly componentStack: string | null;
+};
+
+/** The top of a stack is where the answer is; the rest is framework frames. */
+const firstLines = (text: string | null | undefined, n: number) =>
+  (text ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, n)
+    .join("\n");
 
 /**
  * Catches what would otherwise be a blank page.
@@ -40,37 +86,57 @@ type State = { readonly failed: boolean };
  * a second failure, gets a real screen with a way out.
  */
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { failed: false };
+  state: State = { error: null, componentStack: null };
 
-  static getDerivedStateFromError(): State {
-    return { failed: true };
+  static getDerivedStateFromError(error: unknown): Partial<State> {
+    return {
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     if (isChunkLoadError(error)) {
       // Only ever once — if the reload lands on the same failure, the problem
       // is not a stale chunk and reloading again would spin forever.
-      if (globalThis.sessionStorage?.getItem(RELOAD_FLAG) !== "1") {
-        globalThis.sessionStorage?.setItem(RELOAD_FLAG, "1");
+      if (readReloadFlag() !== "1") {
+        writeReloadFlag(true);
         globalThis.location.reload();
         return;
       }
     }
     console.error("Unhandled render error:", error, info.componentStack);
+    this.setState({ componentStack: info.componentStack ?? null });
+    // The app lives in WhatsApp's in-app browser, where nobody can open a
+    // console — this is the only way the error reaches us.
+    reportClientError(
+      buildClientErrorReport(
+        error,
+        info.componentStack,
+        globalThis.location?.pathname ?? "",
+        __APP_VERSION__,
+      ),
+    );
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (this.state.error && prev.resetKey !== this.props.resetKey) {
+      this.setState({ error: null, componentStack: null });
+    }
   }
 
   private readonly retry = () => {
-    globalThis.sessionStorage?.removeItem(RELOAD_FLAG);
+    writeReloadFlag(false);
     globalThis.location.reload();
   };
 
   private readonly goHome = () => {
-    globalThis.sessionStorage?.removeItem(RELOAD_FLAG);
+    writeReloadFlag(false);
     globalThis.location.assign("/home");
   };
 
   render() {
-    if (!this.state.failed) return this.props.children;
+    const { error, componentStack } = this.state;
+    if (!error) return this.props.children;
 
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
@@ -96,6 +162,25 @@ export class ErrorBoundary extends Component<Props, State> {
             Aller à l'accueil
           </Button>
         </div>
+
+        {/* Readable on the phone itself: in WhatsApp's browser there is no
+            console, and a screenshot of this is a usable bug report. */}
+        <details className="w-full max-w-xs text-left">
+          <summary className="text-muted-foreground cursor-pointer text-center text-xs">
+            Détails techniques
+          </summary>
+          <pre className="bg-muted text-muted-foreground mt-2 max-h-60 overflow-auto rounded-md p-3 text-[11px] leading-snug whitespace-pre-wrap break-words select-text">
+            {[
+              `${error.name}: ${error.message}`,
+              `Page : ${globalThis.location?.pathname ?? ""}`,
+              `Version : ${__APP_VERSION__}`,
+              firstLines(error.stack, 5),
+              firstLines(componentStack, 5),
+            ]
+              .filter(Boolean)
+              .join("\n\n")}
+          </pre>
+        </details>
       </div>
     );
   }
@@ -106,5 +191,5 @@ export class ErrorBoundary extends Component<Props, State> {
  * chunk weeks from now still gets its automatic reload.
  */
 export function clearChunkReloadGuard() {
-  globalThis.sessionStorage?.removeItem(RELOAD_FLAG);
+  writeReloadFlag(false);
 }

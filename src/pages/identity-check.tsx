@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Check, Loader2, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -166,13 +166,17 @@ function PendingBody({
 
       <div className="text-muted-foreground space-y-1.5 text-center text-xs leading-relaxed">
         <p>{content.notMe}</p>
-        <p>
-          {content.expiresAt(
-            format(new Date(request.expiresAt), "d MMMM 'à' HH:mm", {
-              locale: fr,
-            }),
-          )}
-        </p>
+        {/* date-fns `format` throws on an invalid date, and a throw here takes
+            the whole page down — a missing expiry just drops the line. */}
+        {isValid(new Date(request.expiresAt)) && (
+          <p>
+            {content.expiresAt(
+              format(new Date(request.expiresAt), "d MMMM 'à' HH:mm", {
+                locale: fr,
+              }),
+            )}
+          </p>
+        )}
       </div>
     </>
   );
