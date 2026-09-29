@@ -6,6 +6,7 @@ import {
   closesOnFill,
   isCompletable,
   isDatedMission,
+  isMissionNotStarted,
   scheduledAtLabel,
 } from "@/lib/employment-type";
 import {
@@ -89,5 +90,33 @@ describe("closedToCandidatesReason", () => {
     expect(closedToCandidatesReason("COMPLETED", "MISSION")).toMatch(
       /terminée/i,
     );
+  });
+});
+
+describe("isMissionNotStarted", () => {
+  const now = new Date("2026-09-29T12:00:00Z");
+
+  it("is true for an ACCEPTED mission scheduled later — the 24h reminder case", () => {
+    expect(isMissionNotStarted("ACCEPTED", "2026-09-30T08:00:00Z", now)).toBe(
+      true,
+    );
+  });
+
+  it("is false once the date has passed, even before auto-start flips the status", () => {
+    expect(isMissionNotStarted("ACCEPTED", "2026-09-29T11:50:00Z", now)).toBe(
+      false,
+    );
+  });
+
+  it("is false for STARTED and END whatever the date", () => {
+    expect(isMissionNotStarted("STARTED", "2026-09-30T08:00:00Z", now)).toBe(
+      false,
+    );
+    expect(isMissionNotStarted("END", "2026-09-30T08:00:00Z", now)).toBe(false);
+  });
+
+  it("does not block when there is no usable date", () => {
+    expect(isMissionNotStarted("ACCEPTED", null, now)).toBe(false);
+    expect(isMissionNotStarted("ACCEPTED", "not-a-date", now)).toBe(false);
   });
 });
