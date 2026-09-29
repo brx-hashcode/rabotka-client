@@ -3,6 +3,7 @@ import { jobLocationDetail, REMOTE_LOCATION_LABEL } from "@/lib/job-location";
 import {
   EMPLOYMENT_TYPE_LABELS,
   isCompletable,
+  isMissionNotStarted,
 } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
 import {
@@ -97,6 +98,15 @@ export default function WorkerMissionDetail() {
     (completesOnRate
       ? COMPLETABLE_STATUSES.has(mission.applicationStatus)
       : mission.applicationStatus === "END");
+
+  // Shown but disabled until the mission's date: the reminder lands here the
+  // day before, and finishing a job that hasn't happened is not reversible.
+  const notStartedYet =
+    completesOnRate &&
+    isMissionNotStarted(
+      mission.applicationStatus,
+      mission.jobOffer.scheduledAt,
+    );
 
   const cancellable =
     !!mission && CANCELLABLE_STATUSES.has(mission.applicationStatus);
@@ -310,14 +320,25 @@ export default function WorkerMissionDetail() {
               on an ongoing engagement it only rates — the employer already
               closed the offer. */}
           {canRate && (
-            <Button
-              className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-              onClick={() => setRateOpen(true)}
-            >
-              {completesOnRate
-                ? "Terminer & noter le recruteur"
-                : "Noter le recruteur"}
-            </Button>
+            <div className="space-y-1.5">
+              <Button
+                className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
+                disabled={notStartedYet}
+                onClick={() => {
+                  if (!notStartedYet) setRateOpen(true);
+                }}
+              >
+                {completesOnRate
+                  ? "Terminer & noter le recruteur"
+                  : "Noter le recruteur"}
+              </Button>
+              {notStartedYet && mission.jobOffer.scheduledAt && (
+                <p className="text-center text-xs text-muted-foreground">
+                  Disponible à partir du{" "}
+                  {formatDateTime(mission.jobOffer.scheduledAt)}
+                </p>
+              )}
+            </div>
           )}
 
           {mission.ratedEmployer && (

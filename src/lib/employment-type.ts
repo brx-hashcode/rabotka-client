@@ -73,6 +73,27 @@ export function closesOnFill(
 export const isCompletable = isDatedMission;
 
 /**
+ * Whether a hired worker's mission is still ahead of them — too early to mark
+ * finished.
+ *
+ * The 24h reminder opens the mission page the day before, and "Terminer" was
+ * live there: a worker tapping it to confirm they would come completed a job
+ * they had not done. Keyed on the date as well as the status because the
+ * auto-start scan that flips ACCEPTED to STARTED runs every 15 minutes, so a
+ * mission can still read ACCEPTED just after it began. The API refuses the same
+ * case; this only decides whether to offer the button.
+ */
+export function isMissionNotStarted(
+  status: string,
+  scheduledAt: string | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  if (status !== "ACCEPTED" || !scheduledAt) return false;
+  const start = new Date(scheduledAt).getTime();
+  return !Number.isNaN(start) && start > now.getTime();
+}
+
+/**
  * What to call the date on the create form and the detail screens.
  *
  * One field, two meanings, and the wrong label is not cosmetic: asking an
