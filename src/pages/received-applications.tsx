@@ -90,72 +90,69 @@ const ApplicationRow = ({
   // candidate can no longer be accepted, only declined.
   const undecided = app.status === "PENDING" || app.status === "VIEWED";
   const offerClosed = isClosedToNewCandidates(app.jobOffer.status);
+  const chatId = chattableApplicationId(app.id, app.status);
   return (
-    // A relative wrapper so the chat control can be a SIBLING of the row
-    // button. It cannot be nested inside it — a button inside a button is
-    // invalid, and the browser resolves it by dropping the inner one's
-    // activation, so the tap would silently open the row instead. The bookmark
-    // on `job-card.tsx` is arranged the same way for the same reason.
-    <div className="relative">
+    // One card: the row button opens the application, and the chat action is
+    // a full-width button UNDER it — a sibling, never nested (a button inside
+    // a button loses its own tap to the outer one). It used to be a lone
+    // speech-bubble tile in the corner, which read as decoration rather than
+    // "write to this candidate".
+    <div className="overflow-hidden rounded-xl bg-card shadow-soft">
       <button
         type="button"
         onClick={onClick}
-        className="flex w-full items-start gap-3 rounded-xl shadow-soft bg-card p-4 pr-16 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+        className="flex w-full items-start gap-3 p-4 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-whatsapp/40"
       >
-      <Avatar className="h-12 w-12 shrink-0">
-        {app.worker.avatarUrl && (
-          <AvatarImage
-            src={app.worker.avatarUrl}
-            alt={`${app.worker.firstName} ${app.worker.lastName}`}
-            className="object-cover"
-          />
-        )}
-        <AvatarFallback className="bg-muted text-sm font-semibold text-muted-foreground">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
+        <Avatar className="h-12 w-12 shrink-0">
+          {app.worker.avatarUrl && (
+            <AvatarImage
+              src={app.worker.avatarUrl}
+              alt={`${app.worker.firstName} ${app.worker.lastName}`}
+              className="object-cover"
+            />
+          )}
+          <AvatarFallback className="bg-muted text-sm font-semibold text-muted-foreground">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <p className="truncate font-semibold text-foreground">
-            {app.worker.firstName} {app.worker.lastName}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <p className="truncate font-semibold text-foreground">
+              {app.worker.firstName} {app.worker.lastName}
+            </p>
+            <Badge
+              variant={getApplicationStatusVariant(app.status)}
+              className="shrink-0 text-xs"
+            >
+              {APPLICATION_STATUS_LABELS[app.status] ?? app.status}
+            </Badge>
+          </div>
+          <p className="mt-0.5 truncate text-sm text-muted-foreground">
+            {app.jobOffer.title}
           </p>
-          <Badge
-            variant={getApplicationStatusVariant(app.status)}
-            className="shrink-0 text-xs"
-          >
-            {APPLICATION_STATUS_LABELS[app.status] ?? app.status}
-          </Badge>
-        </div>
-        <p className="mt-0.5 truncate text-sm text-muted-foreground">
-          {app.jobOffer.title}
-        </p>
-        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          {formatDate(app.createdAt)}
-        </p>
-
-        {undecided && offerClosed && (
           <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
-            Offre pourvue — acceptation impossible
+            <Calendar className="h-3.5 w-3.5" />
+            {formatDate(app.createdAt)}
           </p>
-        )}
+
+          {undecided && offerClosed && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" />
+              Offre pourvue — acceptation impossible
+            </p>
+          )}
         </div>
       </button>
 
-      {/* Bottom-right rather than beside the name: the row has no primary
-          button of its own — the whole row IS the primary action — so the chat
-          control sits where a second action goes without competing with it.
-          `pr-16` above keeps the text out from under it. */}
-      <StartChatButton
-        target={{
-          kind: "application",
-          id: chattableApplicationId(app.id, app.status),
-        }}
-        compact
-        className="absolute bottom-3 right-3"
-      />
+      {chatId && (
+        <div className="px-4 pb-4">
+          <StartChatButton
+            target={{ kind: "application", id: chatId }}
+            className="w-full"
+          />
+        </div>
+      )}
     </div>
   );
 };
