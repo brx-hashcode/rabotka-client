@@ -55,6 +55,7 @@ const WorkerMissionPayment = lazy(
 const JobDetailWorker = lazy(() => import("@/pages/job-detail-worker"));
 const SavedJobs = lazy(() => import("@/pages/saved-jobs"));
 const Notifications = lazy(() => import("@/pages/notifications"));
+const AgentInvitation = lazy(() => import("@/pages/agent-invitation"));
 const WalletTopUp = lazy(() => import("@/pages/wallet-top-up"));
 const Jobs = lazy(() => import("@/pages/jobs"));
 const Missions = lazy(() => import("@/pages/missions"));
@@ -175,6 +176,20 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <Notifications />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      {/* The link a Rabotka field agent sends after calling a worker. Guarded:
+          a signed-out worker logs in and comes straight back here. */}
+      <Route
+        path="/invitations/:token"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <AgentInvitation />
               </AppShell>
             </AuthGuard>
           </Suspense>
