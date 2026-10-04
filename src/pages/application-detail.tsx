@@ -2,7 +2,14 @@ import { useState } from "react";
 import { jobLocationDetail } from "@/lib/job-location";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
-import { Ban, Calendar, MapPin, Coins, ShieldCheck } from "lucide-react";
+import {
+  Ban,
+  Calendar,
+  ChevronRight,
+  MapPin,
+  Coins,
+  ShieldCheck,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,7 +89,10 @@ export default function ApplicationDetail() {
         <div className="space-y-4 px-4 py-4">
           <WorkerCard app={data.application} workerSlug={data.workerSlug} />
 
-          <OfferCard app={data.application} />
+          <OfferCard
+            app={data.application}
+            onOpen={() => navigate(`/job-offers/${data.application.jobOffer.id}`)}
+          />
 
           {pendingDecision && (
             <>
@@ -327,11 +337,26 @@ const CancellationCard = ({
   </div>
 );
 
-const OfferCard = ({ app }: Readonly<{ app: ApplicationDetailApplication }>) => (
-  <div className="rounded-xl shadow-soft bg-card p-4">
-    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-      Offre
-    </p>
+/** The offer this candidate applied to; tapping it opens the offer — the
+ * same screen as from "Mes offres". */
+const OfferCard = ({
+  app,
+  onOpen,
+}: Readonly<{ app: ApplicationDetailApplication; onOpen: () => void }>) => (
+  <button
+    type="button"
+    onClick={onOpen}
+    className="block w-full rounded-xl shadow-soft bg-card p-4 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+  >
+    <div className="mb-3 flex items-center justify-between">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Offre
+      </p>
+      <span className="flex items-center gap-0.5 text-xs font-medium text-whatsapp">
+        Voir l'offre
+        <ChevronRight className="h-4 w-4" />
+      </span>
+    </div>
     <p className="font-semibold text-foreground">{app.jobOffer.title}</p>
     <div className="mt-2 space-y-1.5 text-sm text-muted-foreground">
       <p className="flex items-center gap-2">
@@ -355,7 +380,7 @@ const OfferCard = ({ app }: Readonly<{ app: ApplicationDetailApplication }>) => 
         <span className="truncate">{jobLocationDetail(app.jobOffer)}</span>
       </p>
     </div>
-  </div>
+  </button>
 );
 
 const DetailSkeleton = () => (
