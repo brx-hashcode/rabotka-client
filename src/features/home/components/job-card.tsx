@@ -42,10 +42,22 @@ const APPLICATION_STATUS: Partial<
     { label: string; icon: LucideIcon; tone: "positive" | "neutral" }
   >
 > = {
-  LIVE: { label: "Déjà postulé", icon: Check, tone: "positive" },
-  REJECTED: { label: "Candidature refusée", icon: X, tone: "neutral" },
+  LIVE: {
+    label: "Vous avez postulé à cette offre",
+    icon: Check,
+    tone: "positive",
+  },
+  REJECTED: {
+    label: "Votre candidature a été refusée",
+    icon: X,
+    tone: "neutral",
+  },
   ENDED: { label: "Mission terminée", icon: CircleCheck, tone: "neutral" },
-  SELF_CANCELLED: { label: "Candidature annulée", icon: Ban, tone: "neutral" },
+  SELF_CANCELLED: {
+    label: "Vous avez annulé votre candidature",
+    icon: Ban,
+    tone: "neutral",
+  },
 };
 
 type Props = {
@@ -166,51 +178,47 @@ export function JobCard({ job, canApply }: Props) {
         </div>
       </button>
 
-      {/* Two intents, two controls — and the WEIGHT goes to whichever one is
-          still live.
-
-          Before applying, "Postuler" is the action and "Discuter" does not
-          exist yet (no application, nothing to talk about).
-
-          After applying, the apply button is dead: a disabled full-width
-          gradient beside a small chat icon put the emphasis exactly backwards,
-          on the one thing you could no longer do. So the roles swap — the
-          application becomes a calm status with a tick, and "Discuter" takes
-          the primary style. */}
-      <div className="mt-4 flex items-center gap-2">
-        {status ? (
-          <>
-            <div
-              className={cn(
-                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md text-sm font-semibold",
-                status.tone === "positive"
-                  ? "bg-whatsapp/10 text-whatsapp-dark"
-                  : "bg-muted text-muted-foreground",
-              )}
-            >
-              <status.icon className="h-4 w-4" strokeWidth={2.25} />
-              {status.label}
-            </div>
-            {/* Talking takes the primary style when it is the live action
-                left. Only a LIVE application carries an id, so every other
-                status simply has no button here. */}
+      {/* One live action at most. Before applying it is "Postuler". After,
+          the application is shown as a label up top, and the only thing left
+          to do is talk — so "Discuter" takes the full width. Only a LIVE
+          application carries an id: a refused, cancelled or finished one has
+          no button at all. */}
+      {status ? (
+        <div className="mt-4 space-y-2">
+          {/* A sentence, left-aligned on a light tint — not centred and
+              button-high, which is what made the old "Déjà postulé" look like
+              something to press. */}
+          <p
+            className={cn(
+              "flex items-center gap-2 rounded-md px-3 py-2 text-sm",
+              status.tone === "positive"
+                ? "bg-whatsapp/10 text-whatsapp-dark"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            <status.icon className="h-4 w-4 shrink-0" strokeWidth={2.25} />
+            {status.label}
+          </p>
+          {job.applicationId && (
             <StartChatButton
               target={{ kind: "application", id: job.applicationId }}
               emphasis="primary"
-              className="flex-1"
+              className="w-full"
             />
-          </>
-        ) : (
+          )}
+        </div>
+      ) : (
+        <div className="mt-4">
           <Button
-            className="flex-1"
+            className="w-full"
             disabled={offerClosed || !canApply || blocked || accountBlocked}
             loading={apply.isPending}
             onClick={() => setConfirmOpen(true)}
           >
             {applyLabel}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       <ApplyConfirmDrawer
         open={confirmOpen}
