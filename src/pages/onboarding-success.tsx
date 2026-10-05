@@ -21,9 +21,10 @@ export default function OnboardingSuccess() {
     <>
       <Seo title="Compte créé - Rabotka" noIndex />
       <div className="min-h-dvh bg-background">
-        {/* One column for everything: the text, the credit card and the button
-            share a width and a gutter, so their edges line up on every screen. */}
-        <div className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        {/* One column for everything, the shell's full width with the same
+            gutter as login: the text, the credit card and the button share
+            their edges instead of each being capped at its own width. */}
+        <div className="flex min-h-dvh w-full flex-col px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <div className="flex flex-1 flex-col items-center justify-center py-8">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
