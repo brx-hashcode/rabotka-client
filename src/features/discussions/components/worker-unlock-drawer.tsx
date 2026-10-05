@@ -46,7 +46,7 @@ export function WorkerUnlockDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+        <div className="mx-auto flex max-h-[85vh] w-full flex-col">
           <DrawerHeader className="text-center">
             <DrawerTitle>Débloquer le contact de {employerName} ?</DrawerTitle>
             <DrawerDescription>
@@ -54,7 +54,7 @@ export function WorkerUnlockDrawer({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-2">
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 pb-2">
             <dl className="space-y-2 rounded-xl bg-card p-3 text-left text-sm shadow-soft">
               <div className="flex items-baseline justify-between gap-3">
                 <dt className="text-muted-foreground">Votre part</dt>

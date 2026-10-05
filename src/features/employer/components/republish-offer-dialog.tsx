@@ -67,7 +67,7 @@ export function RepublishOfferDialog({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full">
           <DrawerHeader className="text-center">
             <DrawerTitle>Republier cette offre ?</DrawerTitle>
             <DrawerDescription>
@@ -76,7 +76,7 @@ export function RepublishOfferDialog({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="space-y-1.5 px-4 pb-2 text-left">
+          <div className="space-y-1.5 px-6 pb-2 text-left">
             <Label htmlFor="republish-date" className="text-sm font-medium">
               Nouvelle date et heure
             </Label>

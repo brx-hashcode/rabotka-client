@@ -211,7 +211,7 @@ export default function Discussions() {
       {/* ── Row actions, opened by a long press or a right-click. ── */}
       <Drawer open={actionsFor !== null} onOpenChange={(open) => !open && closeActions()}>
         <DrawerContent>
-          <div className="mx-auto w-full max-w-md">
+          <div className="mx-auto w-full">
             <DrawerHeader className="text-center">
               <DrawerTitle>{actionsFor?.counterpartName}</DrawerTitle>
               <DrawerDescription>

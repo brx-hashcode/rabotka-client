@@ -12,9 +12,11 @@ import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { PaymentReceipt } from "@/features/payments";
 import type { PaymentGateway } from "@/lib/api/payment-controller";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
+import { useGoBack } from "@/hooks/use-go-back";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
 import { getQueryClient } from "@/app/providers";
 import {
+  ArrowLeft,
   Check,
   AlertCircle,
   Loader2,
@@ -33,6 +35,7 @@ export default function Pay() {
   // Present only when the pay page was opened from inside the app (not an
   // external WhatsApp link) — lets us offer a "Retour" button back into the app.
   const returnTo = searchParams.get("return");
+  const goBack = useGoBack("/home");
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
 
@@ -186,7 +189,7 @@ export default function Pay() {
   if (isLoading) {
     return (
       <PageWrapper>
-        <div className="w-full max-w-sm space-y-4">
+        <div className="w-full space-y-4">
           <div className="space-y-2">
             <Skeleton className="h-8 w-8 rounded-full" />
             <Skeleton className="h-8 w-40" />
@@ -298,8 +301,26 @@ export default function Pay() {
 
   return (
     <PageWrapper align="top">
-      <div className="w-full max-w-sm space-y-5">
-        <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
+      <div className="w-full space-y-5">
+        {/* The way out. Opened from the app, it returns to the screen that
+            sent the user here; from a WhatsApp link there may be no history
+            at all, and useGoBack falls back to /home instead of doing
+            nothing. Same button as the in-app payment chooser. */}
+        {/* At the far end of the logo row, so the logo keeps its place on
+            the column's edge. Labelled, since on its own an arrow beside a
+            logo reads as decoration. */}
+        <div className="flex items-center justify-between gap-3">
+          <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
+          <button
+            type="button"
+            onClick={() => (returnTo ? navigate(returnTo) : goBack())}
+            disabled={isPending}
+            className="-mr-2 flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 disabled:opacity-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </button>
+        </div>
 
         <div className="space-y-0.5">
           <h1 className="text-2xl font-bold text-foreground">Paiement</h1>
@@ -440,7 +461,7 @@ function PageWrapper({
     // message is the whole screen.
     <div
       className={cn(
-        "flex min-h-dvh flex-col overflow-hidden bg-background px-4",
+        "flex min-h-dvh flex-col overflow-hidden bg-background px-6",
         align === "top"
           ? "items-center justify-start pb-16 pt-8"
           : "items-center justify-center py-12",

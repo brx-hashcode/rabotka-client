@@ -41,7 +41,7 @@ export function DeleteMessageSheet({
   return (
     <Drawer open={message !== null} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full">
           <DrawerHeader className="text-center">
             {/* The message itself, so there is no doubt which one this is —
                 clamped, because a long one would push the buttons off screen. */}

@@ -654,7 +654,9 @@ export function AppRoutes() {
         path="/pay/:token"
         element={
           <Suspense fallback={<PageLoader />}>
-            <Pay />
+            <PublicShell>
+              <Pay />
+            </PublicShell>
           </Suspense>
         }
       />

@@ -51,7 +51,7 @@ export function ContactConfirmDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+        <div className="mx-auto flex max-h-[85vh] w-full flex-col">
           <DrawerHeader className="text-center">
             <DrawerTitle>Contacter {workerName} ?</DrawerTitle>
             <DrawerDescription>
@@ -59,7 +59,7 @@ export function ContactConfirmDrawer({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-2">
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 pb-2">
             {isLoading ? (
               <Skeleton className="h-20 w-full rounded-xl" />
             ) : (

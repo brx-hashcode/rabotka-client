@@ -80,7 +80,7 @@ export function PaymentMethodChooser({
   const pay = () => (method === "wallet" ? onPayWallet() : onPayMobile());
 
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className="w-full space-y-6">
       {/* Action bar. The back arrow duplicates the Annuler button on purpose:
           this route is reachable by direct URL, and the top-left arrow is where
           a thumb goes first. */}
