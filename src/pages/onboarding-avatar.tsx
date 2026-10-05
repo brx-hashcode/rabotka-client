@@ -27,8 +27,10 @@ export default function OnboardingAvatar() {
   return (
     <>
       <Seo title="Photo de profil - Rabotka" noIndex />
-      <div className="min-h-dvh flex flex-col bg-background">
-        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-6">
+      {/* The shell's full width with login's gutter, like the other
+          onboarding steps: the text and the button share their edges. */}
+      <div className="flex min-h-dvh w-full flex-col bg-background px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-1 flex-col items-center justify-center py-8">
           <AvatarUpload
             defaultAvatar={profile?.avatarUrl}
             onAvatarChange={() => setUploaded(true)}
@@ -36,13 +38,13 @@ export default function OnboardingAvatar() {
           <h1 className="text-2xl font-bold text-foreground mt-6 mb-1">
             Photo de profil
           </h1>
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
+          <p className="w-full text-center text-sm text-muted-foreground">
             Ajoutez une photo pour vous identifier. Vous pouvez le faire plus
             tard depuis votre profil.
           </p>
         </div>
 
-        <div className="px-6 pb-10 w-full max-w-sm mx-auto flex flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           <Button
             variant={uploaded ? "default" : "outline"}
             onClick={goToHome}
