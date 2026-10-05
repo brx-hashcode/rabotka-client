@@ -186,7 +186,7 @@ export default function Pay() {
   if (isLoading) {
     return (
       <PageWrapper>
-        <div className="w-full max-w-sm space-y-4">
+        <div className="w-full space-y-4">
           <div className="space-y-2">
             <Skeleton className="h-8 w-8 rounded-full" />
             <Skeleton className="h-8 w-40" />
@@ -298,7 +298,7 @@ export default function Pay() {
 
   return (
     <PageWrapper align="top">
-      <div className="w-full max-w-sm space-y-5">
+      <div className="w-full space-y-5">
         <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
 
         <div className="space-y-0.5">
@@ -440,7 +440,7 @@ function PageWrapper({
     // message is the whole screen.
     <div
       className={cn(
-        "flex min-h-dvh flex-col overflow-hidden bg-background px-4",
+        "flex min-h-dvh flex-col overflow-hidden bg-background px-6",
         align === "top"
           ? "items-center justify-start pb-16 pt-8"
           : "items-center justify-center py-12",
