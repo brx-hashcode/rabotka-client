@@ -306,17 +306,20 @@ export default function Pay() {
             sent the user here; from a WhatsApp link there may be no history
             at all, and useGoBack falls back to /home instead of doing
             nothing. Same button as the in-app payment chooser. */}
-        <div className="flex items-center gap-2">
+        {/* At the far end of the logo row, so the logo keeps its place on
+            the column's edge. Labelled, since on its own an arrow beside a
+            logo reads as decoration. */}
+        <div className="flex items-center justify-between gap-3">
+          <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
           <button
             type="button"
             onClick={() => (returnTo ? navigate(returnTo) : goBack())}
             disabled={isPending}
-            aria-label={returnTo ? "Retour à l'application" : "Retour"}
-            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 disabled:opacity-50"
+            className="-mr-2 flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 disabled:opacity-50"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
+            Retour
           </button>
-          <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
         </div>
 
         <div className="space-y-0.5">
