@@ -19,7 +19,7 @@ export function PaymentScreen({
   return (
     <div
       className={cn(
-        "relative flex min-h-dvh flex-col items-center overflow-hidden bg-background px-4",
+        "relative flex min-h-dvh flex-col items-center overflow-hidden bg-background px-6",
         align === "top" ? "justify-start pb-16 pt-8" : "justify-center py-12",
       )}
     >
@@ -32,7 +32,7 @@ export function PaymentScreenSkeleton() {
   // Mirrors the real layout's shapes and rhythm, so the swap to content does
   // not jump. Kept in step with PaymentMethodChooser.
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col items-center space-y-3">
         <Skeleton className="h-12 w-12 rounded-full" />
         <Skeleton className="h-6 w-48 rounded-md" />

@@ -50,13 +50,13 @@ export function SupportContactDrawer({ open, onOpenChange, message }: Props) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+        <div className="mx-auto flex max-h-[85vh] w-full flex-col">
           <DrawerHeader className="text-center">
             <DrawerTitle>{content.title}</DrawerTitle>
             <DrawerDescription>{content.description}</DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-2">
+          <div className="flex-1 space-y-3 overflow-y-auto px-6 pb-2">
             {isLoading && (
               <>
                 <Skeleton className="h-14 w-full rounded-xl" />

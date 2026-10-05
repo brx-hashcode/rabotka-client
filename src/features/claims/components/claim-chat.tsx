@@ -208,7 +208,7 @@ function ClaimInfoPanel({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col">
+        <div className="mx-auto flex max-h-[85vh] w-full flex-col">
           <DrawerHeader className="text-left">
             <div className="flex items-start justify-between gap-3">
               <DrawerTitle>Détails de la réclamation</DrawerTitle>
@@ -219,7 +219,7 @@ function ClaimInfoPanel({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-2">
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 pb-2">
             <div>
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Titre

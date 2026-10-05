@@ -53,7 +53,7 @@ export function CancelApplicationDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full">
           <DrawerHeader className="text-center">
             <DrawerTitle>Annuler cette candidature ?</DrawerTitle>
             <DrawerDescription>
@@ -61,7 +61,7 @@ export function CancelApplicationDrawer({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="space-y-4 px-4 pb-2">
+          <div className="space-y-4 px-6 pb-2">
             {isPreviewLoading && (
               <Skeleton className="h-20 w-full rounded-xl" />
             )}

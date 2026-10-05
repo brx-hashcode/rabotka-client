@@ -65,11 +65,11 @@ export function SearchFiltersSheet({
     // into the sheet so it scrolls with it.
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent ref={setContainer} className="max-h-[88vh]">
-        <DrawerHeader className="px-4 pb-0 text-left">
+        <DrawerHeader className="px-6 pb-0 text-left">
           <DrawerTitle>Filtres</DrawerTitle>
         </DrawerHeader>
 
-        <div className="space-y-5 overflow-y-auto px-4 py-4">
+        <div className="space-y-5 overflow-y-auto px-6 py-4">
           {/* City first: where the work is decides whether any of the rest
               matters, and it was the one filter sitting below the fold.
               Picked from the real list, so the value always matches what is

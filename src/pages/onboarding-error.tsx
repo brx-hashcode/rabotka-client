@@ -15,8 +15,9 @@ export default function OnboardingError() {
   return (
     <>
       <Seo title="Erreur - Rabotka" noIndex />
-      <div className="min-h-dvh flex flex-col bg-background">
-        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-6">
+      {/* Same full-width column as the other onboarding steps. */}
+      <div className="flex min-h-dvh w-full flex-col bg-background px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-1 flex-col items-center justify-center py-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -30,7 +31,7 @@ export default function OnboardingError() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.4 }}
-            className="text-center max-w-xs"
+            className="w-full text-center"
           >
             <h1 className="text-2xl font-bold text-foreground mb-2">
               {content.title}
@@ -39,7 +40,7 @@ export default function OnboardingError() {
           </motion.div>
         </div>
 
-        <div className="px-6 pb-10 w-full max-w-sm mx-auto">
+        <div className="w-full">
           <Button
             className="w-full"
             size="lg"

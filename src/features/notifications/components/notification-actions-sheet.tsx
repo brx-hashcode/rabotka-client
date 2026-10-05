@@ -32,8 +32,8 @@ export function NotificationActionsSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="border-0">
-        <div className="mx-auto w-full max-w-md px-4 pb-6">
-          <DrawerHeader className="text-center">
+        <div className="mx-auto w-full px-6 pb-6">
+          <DrawerHeader className="px-0 text-center">
             <DrawerTitle>{copy.menuTitle}</DrawerTitle>
             <DrawerDescription>{copy.menuDescription}</DrawerDescription>
           </DrawerHeader>
