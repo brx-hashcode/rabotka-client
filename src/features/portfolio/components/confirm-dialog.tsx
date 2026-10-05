@@ -41,7 +41,7 @@ export function ConfirmDialog({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full">
           <DrawerHeader className="text-center">
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>

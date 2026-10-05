@@ -48,14 +48,15 @@ const DrawerContent = React.forwardRef<
 DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)} {...props} />
+  <div className={cn("grid gap-1.5 px-6 py-4 text-center sm:text-left", className)} {...props} />
 );
 DrawerHeader.displayName = "DrawerHeader";
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "mt-auto flex flex-col gap-2 p-4",
+      // px-6: the same 24px gutter as the page column the sheet sits over.
+      "mt-auto flex flex-col gap-2 px-6 pt-4",
       // The last button sat flush against the bottom edge on a phone: `p-4`
       // clears the sheet, not the device. ADDING to the inset rather than
       // max()-ing it, because `env(safe-area-inset-bottom)` is 0 on most

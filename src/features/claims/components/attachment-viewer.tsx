@@ -30,7 +30,7 @@ export function AttachmentViewer({
   return (
     <Drawer open={url !== null} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto flex max-h-[90vh] w-full max-w-md flex-col">
+        <div className="mx-auto flex max-h-[90vh] w-full flex-col">
           <DrawerHeader className="text-left">
             <DrawerTitle className="truncate text-base">
               {url ? fileNameFromUrl(url, "Pièce jointe") : "Pièce jointe"}
