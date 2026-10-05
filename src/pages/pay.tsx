@@ -12,9 +12,11 @@ import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { PaymentReceipt } from "@/features/payments";
 import type { PaymentGateway } from "@/lib/api/payment-controller";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
+import { useGoBack } from "@/hooks/use-go-back";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
 import { getQueryClient } from "@/app/providers";
 import {
+  ArrowLeft,
   Check,
   AlertCircle,
   Loader2,
@@ -33,6 +35,7 @@ export default function Pay() {
   // Present only when the pay page was opened from inside the app (not an
   // external WhatsApp link) — lets us offer a "Retour" button back into the app.
   const returnTo = searchParams.get("return");
+  const goBack = useGoBack("/home");
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
 
@@ -299,7 +302,22 @@ export default function Pay() {
   return (
     <PageWrapper align="top">
       <div className="w-full space-y-5">
-        <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
+        {/* The way out. Opened from the app, it returns to the screen that
+            sent the user here; from a WhatsApp link there may be no history
+            at all, and useGoBack falls back to /home instead of doing
+            nothing. Same button as the in-app payment chooser. */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => (returnTo ? navigate(returnTo) : goBack())}
+            disabled={isPending}
+            aria-label={returnTo ? "Retour à l'application" : "Retour"}
+            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 disabled:opacity-50"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <img src={rabotkaLogo} alt="Rabotka" className="h-10 w-auto" />
+        </div>
 
         <div className="space-y-0.5">
           <h1 className="text-2xl font-bold text-foreground">Paiement</h1>
