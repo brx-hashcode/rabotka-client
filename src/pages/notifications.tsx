@@ -19,6 +19,7 @@ import { notificationsContent as copy } from "@/content/notifications";
 import { NotificationCard } from "@/features/notifications/components/notification-card";
 import { NotificationActionsSheet } from "@/features/notifications/components/notification-actions-sheet";
 import { groupNotificationsByDay } from "@/features/notifications/read-state";
+import { onPageScroll } from "@/lib/app-scroll";
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -44,9 +45,7 @@ export default function Notifications() {
   // Scrolling the list closes an open row, as it does on WhatsApp.
   useEffect(() => {
     if (!openRowId) return;
-    const close = () => setOpenRowId(null);
-    window.addEventListener("scroll", close, { passive: true, once: true });
-    return () => window.removeEventListener("scroll", close);
+    return onPageScroll(() => setOpenRowId(null), { once: true });
   }, [openRowId]);
 
   const notifications = useMemo(

@@ -2,6 +2,7 @@ import { BottomNav } from "../components/bottom-nav";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
+import { APP_SCROLL_ID } from "@/lib/app-scroll";
 
 type AppShellProps = {
   readonly children: React.ReactNode;
@@ -39,14 +40,33 @@ export function AppShell({
     // headers, the claim-chat header and composer, the two search bars) paint
     // themselves bg-background to blend into the column; recolouring the
     // column seams every one of them.
-    <div className="sm:bg-app-surround">
-      <div className="relative mx-auto min-h-svh w-full max-w-md bg-background sm:max-w-lg sm:shadow-soft">
-        {/* Clears the fixed nav with room to spare. pb-20 was a hair under the
-            bar's real height, so the last card in a list sat half-hidden behind
-            it — and raising the bar made that worse. */}
-        <main className={withNav ? "pb-28" : undefined}>{children}</main>
-        {withNav && <BottomNav />}
+    withNav ? (
+      // Tab-bar screens behave like the native app: the shell fills the
+      // screen and only <main> scrolls, with the bar laid out under it rather
+      // than `position: fixed` over the page. The document itself never
+      // scrolls, so iPhone Safari's toolbar never collapses mid-scroll — that
+      // collapse is what made a fixed bar lag and show a gap under it on a
+      // fast scroll. See lib/app-scroll for the scroll helpers this implies.
+      <div className="fixed inset-0 overflow-hidden sm:bg-app-surround">
+        <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background sm:max-w-lg sm:shadow-soft">
+          <main
+            id={APP_SCROLL_ID}
+            className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-6"
+          >
+            {children}
+          </main>
+          <BottomNav />
+        </div>
       </div>
-    </div>
+    ) : (
+      // Without the bar (chats, payment flows) the document scrolls as before:
+      // the chat screens are tuned to it, keyboard included, inside the
+      // WhatsApp in-app browser.
+      <div className="sm:bg-app-surround">
+        <div className="relative mx-auto min-h-svh w-full max-w-md bg-background sm:max-w-lg sm:shadow-soft">
+          <main>{children}</main>
+        </div>
+      </div>
+    )
   );
 }
