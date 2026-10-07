@@ -45,7 +45,7 @@ export function ConsentStep({
               className="size-9 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+            <div className="bg-lime text-lime-foreground flex size-9 shrink-0 items-center justify-center rounded-xl text-xs font-semibold">
               {initials}
             </div>
           )}
