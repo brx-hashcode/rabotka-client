@@ -337,6 +337,18 @@
     display: none;
   }
 
+  /*
+   * Inside the tab-bar shell the scroller is <main id="app-scroll">, which is
+   * shorter than the screen by the bar's height. A page that asks for
+   * "at least a screen" means "fill the content area": without this it would
+   * scroll by the bar's height on an empty page.
+   */
+  .app-scroll > .min-h-screen,
+  .app-scroll > .min-h-svh,
+  .app-scroll > .min-h-dvh {
+    min-height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Poppins", "Gilroy", sans-serif;

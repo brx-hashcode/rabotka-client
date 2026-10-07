@@ -1,29 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+
+import { onPageScroll, scrollTop } from "@/lib/app-scroll";
 
 /**
- * Hook to detect scroll position
- * @param threshold - Scroll threshold in pixels (default: 50)
- * @returns Boolean indicating if user has scrolled past threshold
+ * Whether the page has scrolled past `threshold` pixels — the document, or
+ * the tab-bar shell's scroller (see lib/app-scroll).
  */
 export function useScroll(threshold: number = 50): boolean {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || window.pageYOffset;
-      setIsScrolled(scrollY > threshold);
-    };
-
-    // Check initial scroll position
+    const handleScroll = () => setIsScrolled(scrollTop() > threshold);
     handleScroll();
-
-    // Add scroll event listener
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return onPageScroll(handleScroll);
   }, [threshold]);
 
   return isScrolled;

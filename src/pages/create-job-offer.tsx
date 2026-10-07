@@ -10,6 +10,7 @@ import { AccountNotice } from "@/features/account";
 import { CreateJobOfferForm } from "@/features/jobs/components/create-job-offer-form";
 import { JobOfferSuccess } from "@/features/jobs/components/job-offer-success";
 import type { CreateJobOfferFormData } from "@/lib/validations/job-offer";
+import { scrollToTop } from "@/lib/app-scroll";
 
 type Created = { reference: string; recap: CreateJobOfferFormData };
 
@@ -26,7 +27,7 @@ export default function CreateJobOffer() {
   // The confirmation replaces the form inside the same page, so it needs its
   // own scroll to top. Arriving on the page is handled by ScrollRestoration.
   useEffect(() => {
-    if (created) window.scrollTo({ top: 0 });
+    if (created) scrollToTop();
   }, [created]);
 
   if (!profileLoading && profile && profile.profileType !== "EMPLOYER") {
