@@ -16,21 +16,13 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      // The safe-area inset alone is 0 on most Android phones and in the
-      // browser, which left the labels sitting flush against the bottom edge.
-      // Adding to it rather than max()-ing lifts the bar everywhere while
-      // still clearing an iPhone home indicator.
-      // Width and breakpoint track AppShell's column exactly — change one and
-      // the bar detaches from the content above it. The surface stays
-      // bg-background at every width, like the column itself.
-      //
-      // iPhone Safari moves fixed bars a frame late while its toolbar
-      // collapses or expands mid-scroll, and the page showed through the gap
-      // under the bar. The ::after paints the bar's background below its own
-      // edge — off-screen at rest, filling that gap while it moves. Centred
-      // with inset-x-0 + mx-auto rather than a translate: a transformed fixed
-      // element gets its own layer on iOS and lags (and jitters) more.
-      className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md border-t border-border bg-background pb-[calc(env(safe-area-inset-bottom)+1rem)] after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-32 after:bg-background after:content-[''] sm:max-w-lg"
+      // Part of AppShell's column, under the scrolling <main> — not fixed —
+      // so it never moves while the page scrolls. The safe-area inset alone is
+      // 0 on most Android phones and in the browser, which left the labels
+      // flush against the bottom edge; adding a little to it rather than
+      // max()-ing lifts the bar everywhere while still clearing an iPhone home
+      // indicator. Kept small: on top of the inset, a full rem read as a gap.
+      className="z-50 w-full shrink-0 border-t border-border bg-background pb-[calc(env(safe-area-inset-bottom)+0.25rem)]"
     >
       <ul className="flex items-stretch">
         {tabs.map(({ to, label, icon: Icon }) => {

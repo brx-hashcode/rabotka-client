@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router";
 
+import { maxScrollTop, onPageScroll, scrollToTop, scrollTop } from "@/lib/app-scroll";
+
 /**
  * Scroll position per history entry, keyed by `location.key`.
  *
@@ -58,11 +60,13 @@ export function ScrollRestoration() {
   // One listener for the app's lifetime; it always writes to whichever entry
   // is current. `pagehide` covers a tab closed before any scroll event fired.
   useEffect(() => {
-    const record = () => positions.set(activeKey.current, globalThis.scrollY);
-    globalThis.addEventListener("scroll", record, { passive: true });
+    // The document or the tab-bar shell's scroller, whichever this page uses
+    // (lib/app-scroll).
+    const record = () => positions.set(activeKey.current, scrollTop());
+    const stopRecording = onPageScroll(record);
     globalThis.addEventListener("pagehide", record);
     return () => {
-      globalThis.removeEventListener("scroll", record);
+      stopRecording();
       globalThis.removeEventListener("pagehide", record);
     };
   }, []);
@@ -75,7 +79,7 @@ export function ScrollRestoration() {
     // Anything that is not a back/forward is a new page, and a new page starts
     // at the top — including a PUSH to a route already visited.
     if (navigationType !== "POP" || saved == null || saved === 0) {
-      globalThis.scrollTo(0, 0);
+      scrollToTop(0);
       return;
     }
 
@@ -90,19 +94,20 @@ export function ScrollRestoration() {
 
     const attempt = () => {
       if (stopped) return;
-      const maxScroll =
-        document.documentElement.scrollHeight - globalThis.innerHeight;
+      // Read each frame: the page's scroller may only mount once the lazy
+      // route has rendered.
+      const maxScroll = maxScrollTop();
 
       // Tall enough to honour the offset: land on it and stop.
       if (maxScroll >= saved) {
-        globalThis.scrollTo(0, saved);
+        scrollToTop(saved);
         return;
       }
 
       // Not yet — the list is still rendering or its data is still in flight.
       // Go as far as we can so the page is not left at the top if we run out
       // of frames, and try again next frame.
-      globalThis.scrollTo(0, Math.max(0, maxScroll));
+      scrollToTop(Math.max(0, maxScroll));
       frame += 1;
       if (frame < MAX_RESTORE_FRAMES) {
         raf = requestAnimationFrame(attempt);
