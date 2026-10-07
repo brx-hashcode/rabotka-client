@@ -337,7 +337,7 @@ export default function Pay() {
             description. The purpose moves below it: useful for confirming you
             are on the right payment, but not the thing you read first. */}
         <div className="rounded-xl bg-card px-5 py-4 shadow-soft">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             Montant à payer
           </p>
           <p className="mt-1 text-4xl font-bold leading-none text-foreground">
@@ -430,7 +430,7 @@ export default function Pay() {
         </div>
 
         <Button
-          className="w-full h-12 text-base font-semibold rounded-md"
+          className="w-full h-12 text-base font-semibold"
           onClick={handlePay}
           disabled={isPending}
         >

@@ -6,6 +6,7 @@ import {
   Loader2,
   Plus,
   Briefcase,
+  BriefcaseBusiness,
   Inbox,
   Clock,
   ChevronRight,
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkerFeed } from "@/hooks/use-recommendations";
 import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
+import { BrandHero } from "./brand-hero";
 import { HomeHeader } from "./home-header";
 import { RecommendedWorkerCard } from "./recommended-worker-card";
 import { SponsoredCard } from "@/features/sponsored/sponsored-card";
@@ -24,6 +26,7 @@ import { useKycGate } from "@/hooks/use-kyc-gate";
 import { AccountNotice } from "@/features/account";
 import { KycNotice } from "@/features/kyc";
 import { NotificationBell } from "@/features/notifications";
+import { useProfileMe } from "@/hooks/use-profile-me";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
@@ -34,6 +37,7 @@ const NO_WORKERS: RecommendedWorker[] = [];
 
 export function EmployerHome() {
   const navigate = useNavigate();
+  const { data: profile } = useProfileMe();
   // Remembered across a worker-detail round trip: see `useRestoredFeedSize`.
   const [limit, setLimit] = useRestoredFeedSize(
     "feed:employer-home",
@@ -55,7 +59,12 @@ export function EmployerHome() {
 
   return (
     <div className="flex flex-col">
-      <HomeHeader trailing={<NotificationBell />} />
+      <BrandHero
+        greeting={profile?.firstName ? `Bonjour ${profile.firstName}` : "Bonjour"}
+        title="Trouvez les bons profils"
+        trailing={<NotificationBell tone="onLime" />}
+        search={<HomeHeader variant="onLime" />}
+      />
 
       <QuickActions />
 
@@ -69,8 +78,8 @@ export function EmployerHome() {
 
       {!isLoading && list.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-          <div className="mb-4 rounded-full bg-whatsapp/10 p-6">
-            <Users className="h-10 w-10 text-whatsapp" />
+          <div className="mb-4 rounded-2xl bg-lime p-5">
+            <Users className="h-10 w-10 text-lime-foreground" />
           </div>
           <p className="mb-4 max-w-xs text-sm text-muted-foreground">
             Aucun profil recommandé pour le moment. Publiez une offre pour
@@ -106,7 +115,7 @@ export function EmployerHome() {
       )}
 
       {!isLoading && list.length > 0 && (
-        <section className="space-y-3 py-4">
+        <section className="space-y-3 pb-4 pt-6">
           <SectionHeader
             title="Profils recommandés"
             actionLabel="Voir tout"
@@ -145,40 +154,46 @@ export function EmployerHome() {
 function QuickActions() {
   const navigate = useNavigate();
   return (
-    <section className="space-y-3 px-4 pt-3">
-      {/* Hero CTA */}
-      <button
-        type="button"
-        onClick={() => navigate("/job-offers/new")}
-        className="flex w-full items-center justify-between gap-3 rounded-xl bg-whatsapp px-4 py-3.5 text-left text-white shadow-soft active:bg-whatsapp-dark"
-      >
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">Créer une offre</p>
-          <p className="text-xs text-white/80">Publiez un job en 2 minutes</p>
-        </div>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20">
-          <Plus className="h-5 w-5" />
-        </div>
-      </button>
-
-      {/* Shortcuts */}
+    <section className="relative z-10 -mt-10 space-y-3 px-4">
+      {/* Shortcuts, straddling the lime band's rounded edge. */}
       <div className="grid grid-cols-3 gap-3">
         <Shortcut
-          icon={<Briefcase className="h-5 w-5 text-whatsapp" />}
+          icon={<Briefcase className="h-5 w-5" />}
           label="Mes offres"
           onClick={() => navigate("/jobs")}
         />
         <Shortcut
-          icon={<Inbox className="h-5 w-5 text-whatsapp" />}
+          icon={<Inbox className="h-5 w-5" />}
           label="Candidatures"
           onClick={() => navigate("/candidatures")}
         />
         <Shortcut
-          icon={<Clock className="h-5 w-5 text-whatsapp" />}
+          icon={<Clock className="h-5 w-5" />}
           label="Missions"
           onClick={() => navigate("/missions")}
         />
       </div>
+
+      {/* A white card like the shortcuts above, so the screen reads as one
+          set; the green — the action colour — is only on the button. The
+          whole card is the tap target, the pill just says what it does. */}
+      <button
+        type="button"
+        onClick={() => navigate("/job-offers/new")}
+        className="flex w-full items-center gap-3 rounded-2xl bg-card p-3 pr-3.5 text-left shadow-soft transition-transform duration-100 active:scale-[0.98] motion-reduce:active:scale-100"
+      >
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime text-lime-foreground">
+          <BriefcaseBusiness className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">Publier une offre</p>
+          <p className="truncate text-xs text-muted-foreground">Prête en 2 minutes</p>
+        </div>
+        <span className="flex h-9 shrink-0 items-center gap-1 rounded-full bg-whatsapp pl-2.5 pr-3.5 text-sm font-semibold text-white">
+          <Plus className="h-4 w-4" />
+          Créer
+        </span>
+      </button>
     </section>
   );
 }
@@ -192,9 +207,9 @@ function Shortcut({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-xl bg-card p-3 shadow-soft active:bg-secondary/40"
+      className="flex flex-col items-center gap-2 rounded-2xl bg-card px-2 py-3.5 shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-whatsapp/10">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime text-lime-foreground">
         {icon}
       </div>
       <span className="text-xs font-medium text-foreground">{label}</span>
@@ -213,7 +228,7 @@ function SectionHeader({
 }>) {
   return (
     <div className="flex items-center justify-between px-4">
-      <h2 className="text-base font-bold text-foreground">{title}</h2>
+      <h2 className="text-lg text-foreground">{title}</h2>
       {actionLabel && onAction && (
         <button
           type="button"

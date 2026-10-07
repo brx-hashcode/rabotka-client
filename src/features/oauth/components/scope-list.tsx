@@ -54,7 +54,7 @@ export function ScopeList({ scopes }: Readonly<ScopeListProps>) {
       <ul className="mt-3 space-y-3.5">
         {described.map(({ key, Icon, label, detail }) => (
           <li key={key} className="flex gap-3">
-            <span className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full">
+            <span className="bg-lime text-lime-foreground flex size-8 shrink-0 items-center justify-center rounded-lg">
               <Icon aria-hidden className="size-4" />
             </span>
             <div className="min-w-0 space-y-0.5 pt-0.5">

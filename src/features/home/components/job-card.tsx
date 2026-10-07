@@ -116,7 +116,7 @@ export function JobCard({ job, canApply }: Props) {
         type="button"
         aria-label={job.saved ? "Retirer des favoris" : "Enregistrer"}
         onClick={() => toggleSave.mutate({ jobOfferId: job.id, saved: job.saved })}
-        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-whatsapp/10 text-whatsapp active:bg-whatsapp/20"
+        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-lime/60 text-lime-foreground transition-transform duration-100 active:scale-95"
       >
         <Bookmark
           className={cn("h-5 w-5", job.saved && "fill-whatsapp")}

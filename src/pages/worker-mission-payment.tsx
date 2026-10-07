@@ -162,8 +162,8 @@ export default function WorkerMissionPayment() {
     <PaymentScreen align="top">
       <PaymentMethodChooser
         icon={
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-whatsapp/10">
-            <UserRound className="h-6 w-6 text-whatsapp" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime">
+            <UserRound className="h-6 w-6 text-lime-foreground" />
           </div>
         }
         title="Déverrouiller le contact"

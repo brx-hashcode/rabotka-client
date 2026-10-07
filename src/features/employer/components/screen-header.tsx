@@ -32,13 +32,13 @@ export function ScreenHeader({
             type="button"
             aria-label="Retour"
             onClick={onBack}
-            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-soft transition-transform duration-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-foreground/25 motion-reduce:active:scale-100"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold text-foreground">
+          <h1 className="truncate text-lg font-semibold text-foreground">
             {title}
           </h1>
           {subtitle && (

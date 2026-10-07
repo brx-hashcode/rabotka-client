@@ -38,8 +38,8 @@ export function JobOfferList({
   if (offers.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-        <div className="mb-4 rounded-full bg-muted p-6">
-          <Briefcase className="h-10 w-10 text-muted-foreground" />
+        <div className="mb-4 rounded-2xl bg-lime p-5">
+          <Briefcase className="h-10 w-10 text-lime-foreground" />
         </div>
         <p className="max-w-xs text-sm text-muted-foreground">{emptyMessage}</p>
       </div>

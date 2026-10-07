@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
  * it fought this app's own flat, borderless house style. The hero is one
  * button on a marketing page with room to be showy, so it keeps it.
  *
- * Every other button still answers a thumb: `active:translate-y-px` and the
- * brightness shift are in the shared base below, not here.
+ * Every other button still answers a thumb: the press shrink is in the shared
+ * base below, not here.
  *
  * Written with plain rgb() where admin uses `--theme(--color-white/16%)`. Both
  * work on this app's Tailwind — checked against the build output, not assumed —
@@ -29,14 +29,15 @@ const RAISED =
 
 const buttonVariants = cva(
   [
-    "relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold ring-offset-background",
+    // Pills, like the agent app: cards, chips and buttons are one family.
+    "relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold ring-offset-background",
     // Background, shadow, filter and transform together: the press animates
     // all four, and listing only colours would make the rest snap.
     "transition-[background-color,box-shadow,filter,transform,color] duration-200 ease-out",
-    // A hair of travel on press. Small on purpose — the shadow flip carries the
-    // effect, this only makes it feel physical under a thumb.
-    "active:translate-y-px",
-    "motion-reduce:transition-none motion-reduce:active:translate-y-0",
+    // The press is a slight shrink, the same as the home cards — what a
+    // native app does under a thumb — rather than a nudge down.
+    "active:scale-[0.97]",
+    "motion-reduce:transition-none motion-reduce:active:scale-100",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
     // A 44px hit area on touch screens whatever the drawn size, centred on the
@@ -60,9 +61,9 @@ const buttonVariants = cva(
         // style — borderless surfaces, `shadow-soft`, no gradients — and the
         // button was the last thing not following it.
         //
-        // The press stays: `active:translate-y-px` and the brightness shift
-        // live in the shared base, so the button still answers a thumb. What
-        // is gone is the decoration it wore at rest.
+        // The press stays (the shrink lives in the shared base), so the
+        // button still answers a thumb. What is gone is the decoration it
+        // wore at rest.
         default: "bg-whatsapp text-primary-foreground hover:brightness-95",
         whatsapp: "bg-whatsapp text-primary-foreground hover:brightness-95",
         // The landing hero keeps its depth. It is one button on a marketing
@@ -79,8 +80,10 @@ const buttonVariants = cva(
           "bg-whatsapp/10 text-whatsapp hover:bg-whatsapp/15 active:bg-whatsapp/20",
         "destructive-soft":
           "bg-destructive/10 text-destructive hover:bg-destructive/15 active:bg-destructive/20",
+        // The agent app's secondary: a light lime pill with its dark-green
+        // ink (it was the old beige, which looked muddy beside the lime).
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/85",
+          "bg-lime/60 text-lime-foreground hover:bg-lime/80",
 
         // These two had a border before this change and keep it: they sit on
         // photos and coloured heroes, where a tint alone disappears.
@@ -91,8 +94,8 @@ const buttonVariants = cva(
 
         // No surface, so no depth: a raised ghost or a raised link is a
         // contradiction.
-        ghost: "hover:bg-muted hover:text-foreground active:translate-y-0",
-        link: "text-primary underline-offset-4 hover:underline active:translate-y-0",
+        ghost: "hover:bg-muted hover:text-foreground",
+        link: "text-primary underline-offset-4 hover:underline active:scale-100",
       },
       size: {
         default: "h-11 px-6 py-2",

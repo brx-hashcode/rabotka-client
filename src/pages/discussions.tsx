@@ -180,8 +180,8 @@ export default function Discussions() {
 
       {!isLoading && all.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-          <div className="mb-4 rounded-full bg-muted p-6">
-            <MessagesSquare className="h-12 w-12 text-muted-foreground" />
+          <div className="mb-4 rounded-2xl bg-lime p-5">
+            <MessagesSquare className="h-12 w-12 text-lime-foreground" />
           </div>
           <p className="mb-1 text-lg font-semibold">{content.emptyTitle}</p>
           <p className="max-w-sm text-muted-foreground">{content.emptyDescription}</p>

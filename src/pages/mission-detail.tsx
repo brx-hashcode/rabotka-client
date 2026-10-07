@@ -303,7 +303,7 @@ export default function MissionDetail() {
           {/* Contracts — one per hired worker that has one */}
           {workers?.some((w) => w.contractId) && (
             <div className="space-y-2">
-              <p className="px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="px-1 text-xs font-medium text-muted-foreground">
                 Contrats
               </p>
               {workers
@@ -393,7 +393,7 @@ const Section = ({
   children,
 }: Readonly<{ title: string; children: React.ReactNode }>) => (
   <section className="rounded-xl shadow-soft bg-card p-4">
-    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <p className="mb-3 text-xs font-medium text-muted-foreground">
       {title}
     </p>
     {children}

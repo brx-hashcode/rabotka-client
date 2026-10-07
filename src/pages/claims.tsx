@@ -49,8 +49,8 @@ export default function Claims() {
         )}
         {!isLoading && !hasClaims && (
           <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-            <div className="bg-muted rounded-full p-6 mb-4">
-              <Inbox className="h-12 w-12 text-muted-foreground" />
+            <div className="bg-lime rounded-2xl p-5 mb-4">
+              <Inbox className="h-12 w-12 text-lime-foreground" />
             </div>
             <p className="font-semibold text-lg mb-1">{content.emptyTitle}</p>
             {/* No CTA here: the header already carries a + button for exactly

@@ -124,7 +124,7 @@ export default function PublicPortfolio() {
           describe somebody the same way. */}
       {worker.description && (
         <div className="mt-6 rounded-xl bg-card p-4 shadow-soft">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
             À propos
           </p>
           <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">

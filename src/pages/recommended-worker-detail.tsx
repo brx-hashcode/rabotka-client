@@ -155,7 +155,7 @@ export default function RecommendedWorkerDetail() {
           {/* Domains — every one, not just the first. */}
           {domains.length > 0 && (
             <div className="rounded-xl bg-card p-4 shadow-soft">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="mb-3 text-xs font-medium text-muted-foreground">
                 Domaines
               </p>
               <DomainBadges names={domains} />
@@ -164,7 +164,7 @@ export default function RecommendedWorkerDetail() {
 
           {worker.description && (
             <div className="rounded-xl bg-card p-4 shadow-soft">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
                 À propos
               </p>
               <p className="text-sm leading-relaxed text-foreground">

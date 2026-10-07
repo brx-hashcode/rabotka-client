@@ -28,10 +28,20 @@ const ICONS: Record<string, LucideIcon> = {
   CLAIM_STATUS_CHANGED: MessageSquare,
 };
 
-/** Tints that carry meaning; everything else stays neutral. */
+/**
+ * Tints by meaning, as in the agent app's bell: work (offers, applications,
+ * missions) on the brand lime, money green or red, ratings and claims amber.
+ */
 const TONES: Record<string, string> = {
-  PAYMENT_SUCCEEDED: "bg-whatsapp/10 text-whatsapp",
+  PAYMENT_SUCCEEDED: "bg-whatsapp/15 text-whatsapp-dark",
+  CONTACT_UNLOCKED: "bg-whatsapp/15 text-whatsapp-dark",
   PAYMENT_FAILED: "bg-destructive/10 text-destructive",
+  APPLICATION_REJECTED: "bg-destructive/10 text-destructive",
+  HIRE_CANCELLED: "bg-destructive/10 text-destructive",
+  APPLICATION_CANCELLED: "bg-destructive/10 text-destructive",
+  MISSION_RATED: "bg-amber-100 text-amber-700",
+  CLAIM_COMMENTED: "bg-amber-100 text-amber-700",
+  CLAIM_STATUS_CHANGED: "bg-amber-100 text-amber-700",
 };
 
 /**
@@ -46,12 +56,12 @@ export function NotificationAvatar({
   notification,
 }: Readonly<{ notification: AppNotification }>) {
   const Icon = ICONS[notification.type] ?? Bell;
-  const tone = TONES[notification.type] ?? "bg-secondary text-secondary-foreground";
+  const tone = TONES[notification.type] ?? "bg-lime text-lime-foreground";
 
   const icon = (
     <span
       className={cn(
-        "flex size-11 shrink-0 items-center justify-center rounded-full",
+        "flex size-10 shrink-0 items-center justify-center rounded-xl",
         tone,
       )}
     >
@@ -62,7 +72,7 @@ export function NotificationAvatar({
   if (!notification.actorAvatarUrl) return icon;
 
   return (
-    <Avatar className="size-11">
+    <Avatar className="size-10">
       {/* Decorative: the sentence beside it says what happened. */}
       <AvatarImage src={notification.actorAvatarUrl} alt="" />
       <AvatarFallback className="bg-transparent p-0">{icon}</AvatarFallback>

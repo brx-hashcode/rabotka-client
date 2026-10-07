@@ -108,7 +108,7 @@ export function CategoryCombobox({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50",
+            "flex h-12 w-full items-center justify-between rounded-2xl border-0 bg-card px-4 text-base ring-1 ring-inset ring-border disabled:opacity-50 md:text-sm",
             !selected && "text-muted-foreground",
             triggerClassName,
           )}
@@ -127,7 +127,7 @@ export function CategoryCombobox({
           // `w-(--var)` is Tailwind v4 syntax. This was `w-[--var]`, the v3
           // form, which v4 does not compile — so the popover had no width at
           // all and sat narrower than the field that opened it.
-          className="z-50 w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          className="z-50 w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] rounded-2xl bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
           {/* `filter` rather than cmdk's default: its built-in scorer compares
               raw code points, so typing "maraichage" scored 0 against

@@ -68,8 +68,8 @@ export function SponsoredCard({ ad }: Readonly<{ ad: InAppAd }>) {
           in that slot means «Sponsorisé» is visible whether or not the advert
           has an image, in the place the eye already goes. */}
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-whatsapp/10">
-          <Megaphone className="h-5 w-5 text-whatsapp" />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lime">
+          <Megaphone className="h-5 w-5 text-lime-foreground" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold leading-snug text-foreground">
