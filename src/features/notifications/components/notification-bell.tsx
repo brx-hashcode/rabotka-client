@@ -25,7 +25,7 @@ export function NotificationBell({
       className={cn(
         "relative flex h-11 w-11 shrink-0 items-center justify-center",
         tone === "onLime"
-          ? "rounded-2xl bg-lime-foreground/10 text-lime-foreground active:bg-lime-foreground/20"
+          ? "rounded-2xl bg-lime-foreground/10 text-lime-foreground transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
           : "rounded-md bg-secondary text-secondary-foreground active:bg-secondary/70",
       )}
     >

@@ -60,7 +60,7 @@ export function HomeHeader({
           type="button"
           aria-label="Filtres"
           onClick={goToSearch}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-lime/70 text-lime-foreground active:bg-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-lime/70 text-lime-foreground transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
         >
           <SlidersHorizontal className="h-4 w-4" />
         </button>

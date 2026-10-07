@@ -177,7 +177,7 @@ function QuickActions() {
       <button
         type="button"
         onClick={() => navigate("/job-offers/new")}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl bg-whatsapp p-4 text-left text-white shadow-soft active:bg-whatsapp-dark"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl bg-whatsapp p-4 text-left text-white shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
       >
         <div className="min-w-0">
           <p className="font-semibold">Créer une offre</p>
@@ -200,7 +200,7 @@ function Shortcut({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-2xl bg-card px-2 py-3.5 shadow-soft active:bg-secondary/40"
+      className="flex flex-col items-center gap-2 rounded-2xl bg-card px-2 py-3.5 shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
     >
       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime text-lime-foreground">
         {icon}

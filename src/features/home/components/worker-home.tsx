@@ -50,7 +50,7 @@ function QuickCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft active:bg-secondary/40"
+      className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
         {icon}
