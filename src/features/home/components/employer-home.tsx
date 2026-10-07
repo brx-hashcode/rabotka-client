@@ -6,6 +6,7 @@ import {
   Loader2,
   Plus,
   Briefcase,
+  BriefcaseBusiness,
   Inbox,
   Clock,
   ChevronRight,
@@ -173,19 +174,25 @@ function QuickActions() {
         />
       </div>
 
-      {/* The action stays WhatsApp green: lime is for brand surfaces. */}
+      {/* A white card like the shortcuts above, so the screen reads as one
+          set; the green — the action colour — is only on the button. The
+          whole card is the tap target, the pill just says what it does. */}
       <button
         type="button"
         onClick={() => navigate("/job-offers/new")}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl bg-whatsapp p-4 text-left text-white shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
+        className="flex w-full items-center gap-3 rounded-2xl bg-card p-3 pr-3.5 text-left shadow-soft transition-transform duration-100 active:scale-[0.98] motion-reduce:active:scale-100"
       >
-        <div className="min-w-0">
-          <p className="font-semibold">Créer une offre</p>
-          <p className="text-xs text-white/85">Publiez un job en 2 minutes</p>
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime text-lime-foreground">
+          <BriefcaseBusiness className="h-5 w-5" />
         </div>
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20">
-          <Plus className="h-5 w-5" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">Publier une offre</p>
+          <p className="truncate text-xs text-muted-foreground">Prête en 2 minutes</p>
         </div>
+        <span className="flex h-9 shrink-0 items-center gap-1 rounded-full bg-whatsapp pl-2.5 pr-3.5 text-sm font-semibold text-white">
+          <Plus className="h-4 w-4" />
+          Créer
+        </span>
       </button>
     </section>
   );
