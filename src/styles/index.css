@@ -358,6 +358,30 @@
     min-height: 100%;
   }
 
+  /*
+   * iPhone Safari gives native date/time inputs an intrinsic minimum width and
+   * ignores `width: 100%` while its own appearance is on, so two of them side
+   * by side (the job form's date + time) each overflowed their half and
+   * pushed the page sideways — `min-w-0` on the grid cells could not help.
+   * Dropping the native appearance makes them size like any input; tapping
+   * still opens the platform's date/time wheel.
+   */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    display: block;
+  }
+
+  /* Safari centres the value once the appearance is gone; inputs read left. */
+  input::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Poppins", "Gilroy", sans-serif;
