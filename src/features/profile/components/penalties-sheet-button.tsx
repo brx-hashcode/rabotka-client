@@ -70,8 +70,8 @@ export const PenaltiesSheetButton = ({ asRow = false }: { asRow?: boolean }) => 
             )}
             {!isLoading && !hasPenalties && (
               <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                <div className="bg-muted rounded-full p-6">
-                  <FileWarning className="h-12 w-12 text-muted-foreground" />
+                <div className="bg-lime rounded-2xl p-5">
+                  <FileWarning className="h-12 w-12 text-lime-foreground" />
                 </div>
                 <p className="text-muted-foreground text-center">
                   {content.empty}

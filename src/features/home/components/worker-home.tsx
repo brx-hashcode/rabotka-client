@@ -204,8 +204,8 @@ export function WorkerHome() {
 
       {!isLoading && list.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-whatsapp/10">
-            <Briefcase className="h-8 w-8 text-whatsapp" />
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-lime">
+            <Briefcase className="h-8 w-8 text-lime-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
             Aucune offre pour le moment. Revenez plus tard ou essayez une autre

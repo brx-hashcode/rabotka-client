@@ -26,7 +26,7 @@ export function PolicyShell({
     <main className="mx-auto w-full max-w-4xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pt-28">
       <Seo title={title} description={description} canonical={canonical} />
       <div className="mb-5 sm:px-6">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           Document légal
         </span>
       </div>

@@ -221,7 +221,7 @@ function ClaimInfoPanel({
 
           <div className="flex-1 space-y-4 overflow-y-auto px-6 pb-2">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-1 text-xs font-semibold text-muted-foreground">
                 Titre
               </p>
               <p className="text-sm font-medium text-foreground">
@@ -229,7 +229,7 @@ function ClaimInfoPanel({
               </p>
             </div>
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-1 text-xs font-semibold text-muted-foreground">
                 Description
               </p>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
@@ -238,7 +238,7 @@ function ClaimInfoPanel({
             </div>
             {claim.attachmentUrls.length > 0 && (
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="mb-2 text-xs font-semibold text-muted-foreground">
                   Pièces jointes ({claim.attachmentUrls.length})
                 </p>
                 {/* Claims accepted PDF and DOC until recently, so these rows
@@ -410,8 +410,8 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
         )}
         {!commentsLoading && (!comments || comments.length === 0) && (
           <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 px-4 text-center text-muted-foreground">
-            <div className="mb-1 rounded-full bg-whatsapp/10 p-4">
-              <MessageCircle className="h-7 w-7 text-whatsapp" />
+            <div className="mb-1 rounded-2xl bg-lime p-4">
+              <MessageCircle className="h-7 w-7 text-lime-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
               Aucun message pour le moment

@@ -234,8 +234,9 @@
     --muted: 210 33% 95%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 16 65% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Menu highlights: neutral, not the old terracotta. */
+    --accent: 213 30% 93%;
+    --accent-foreground: 134 41% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -279,6 +280,8 @@
    * agent app's cool grey, ink and lime.
    */
   .theme-classic {
+    --accent: 16 65% 55%;
+    --accent-foreground: 0 0% 100%;
     --background: 40 30% 98%;
     --foreground: 25 35% 15%;
     --app-surround: 40 20% 92%;

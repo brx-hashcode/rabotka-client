@@ -122,7 +122,7 @@ function TableOfContents() {
           than the word above them, which reads as a misalignment rather than as
           indentation.
         */}
-        <p className="text-muted-foreground mb-3 px-2.5 text-xs font-semibold uppercase tracking-wide">
+        <p className="text-muted-foreground mb-3 px-2.5 text-xs font-semibold">
           Sommaire
         </p>
         {GROUPS.map((group) => {
@@ -252,7 +252,7 @@ export default function DevelopersApiDocumentation() {
       <TableOfContents />
 
       <article className="min-w-0 max-w-3xl flex-1">
-        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+        <span className="text-muted-foreground text-xs font-medium">
           Documentation développeur
         </span>
 
@@ -1113,7 +1113,7 @@ function Section({
       <h2 className="text-xl font-semibold">{title}</h2>
       {plain && (
         <div className="bg-secondary text-secondary-foreground mt-3 rounded-lg p-4 text-sm leading-relaxed">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide">
+          <p className="mb-1 text-xs font-semibold">
             En clair
           </p>
           <p>{plain}</p>

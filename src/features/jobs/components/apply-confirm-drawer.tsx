@@ -103,7 +103,7 @@ export function ApplyConfirmDrawer({
 
             {me && (
               <div className="space-y-2 rounded-xl bg-card p-3 text-left shadow-soft">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="text-xs font-medium text-muted-foreground">
                   Votre profil sera envoyé
                 </p>
                 <dl className="space-y-2 text-sm">

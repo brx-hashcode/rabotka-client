@@ -411,7 +411,7 @@ const Section = ({
   children,
 }: Readonly<{ title: string; children: React.ReactNode }>) => (
   <section className="rounded-xl bg-card p-4 shadow-soft">
-    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <p className="mb-3 text-xs font-medium text-muted-foreground">
       {title}
     </p>
     {children}

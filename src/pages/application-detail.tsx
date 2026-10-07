@@ -349,7 +349,7 @@ const OfferCard = ({
     className="block w-full rounded-xl shadow-soft bg-card p-4 text-left active:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
   >
     <div className="mb-3 flex items-center justify-between">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         Offre
       </p>
       <span className="flex items-center gap-0.5 text-xs font-medium text-whatsapp">

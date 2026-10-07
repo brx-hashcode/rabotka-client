@@ -117,8 +117,8 @@ export default function WorkerSearch() {
 
       {!isLoading && list.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-          <div className="mb-4 rounded-full bg-muted p-6">
-            <Users className="h-10 w-10 text-muted-foreground" />
+          <div className="mb-4 rounded-2xl bg-lime p-5">
+            <Users className="h-10 w-10 text-lime-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
             Aucun travailleur trouvé. Essayez d'autres mots-clés ou filtres.

@@ -181,7 +181,7 @@ export const ReferralSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
                 onClick={() => copy(data.code, "code")}
                 className="bg-whatsapp w-full rounded-2xl px-5 py-6 text-center transition-opacity active:opacity-90"
               >
-                <p className="text-primary-foreground/80 text-[11px] font-medium uppercase tracking-wider">
+                <p className="text-primary-foreground/80 text-[11px] font-medium tracking-wider">
                   {content.yourCode}
                 </p>
                 <p className="text-primary-foreground mt-3 font-mono text-4xl font-bold tracking-[0.25em]">
@@ -247,7 +247,7 @@ export const ReferralSheetButton = ({ asRow = false }: { asRow?: boolean }) => {
                   it reads as a program that does not work. */}
               {hasReferrals ? (
                 <div className="bg-card shadow-soft rounded-lg p-4">
-                  <p className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wide">
+                  <p className="text-muted-foreground mb-3 text-xs font-medium">
                     {content.stats.title}
                   </p>
                   <div className="grid grid-cols-3 gap-2 text-center">

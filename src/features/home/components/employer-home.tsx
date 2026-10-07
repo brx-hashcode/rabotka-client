@@ -78,8 +78,8 @@ export function EmployerHome() {
 
       {!isLoading && list.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-          <div className="mb-4 rounded-full bg-whatsapp/10 p-6">
-            <Users className="h-10 w-10 text-whatsapp" />
+          <div className="mb-4 rounded-2xl bg-lime p-5">
+            <Users className="h-10 w-10 text-lime-foreground" />
           </div>
           <p className="mb-4 max-w-xs text-sm text-muted-foreground">
             Aucun profil recommandé pour le moment. Publiez une offre pour

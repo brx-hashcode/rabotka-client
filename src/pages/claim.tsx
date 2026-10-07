@@ -21,8 +21,8 @@ export default function Claim() {
   if (error || !claim) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="rounded-full bg-muted p-6">
-          <AlertCircle className="h-10 w-10 text-muted-foreground" />
+        <div className="rounded-2xl bg-lime p-5">
+          <AlertCircle className="h-10 w-10 text-lime-foreground" />
         </div>
         <p className="max-w-xs text-sm text-muted-foreground">
           {error instanceof Error
