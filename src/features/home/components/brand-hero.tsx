@@ -94,7 +94,11 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-lime-muted">{greeting}</p>
-            <h1 className="mt-0.5 text-xl leading-tight">{title}</h1>
+            {/* Poppins semibold, not the headings' Gilroy: Gilroy ships only
+                ExtraBold, which read too heavy at this size. */}
+            <h1 className="mt-0.5 font-[Poppins,sans-serif] text-xl font-semibold leading-tight">
+              {title}
+            </h1>
           </div>
           {trailing}
         </div>
