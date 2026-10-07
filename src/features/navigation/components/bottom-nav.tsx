@@ -23,7 +23,14 @@ export function BottomNav() {
       // Width and breakpoint track AppShell's column exactly — change one and
       // the bar detaches from the content above it. The surface stays
       // bg-background at every width, like the column itself.
-      className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 border-t border-border bg-background pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:max-w-lg"
+      //
+      // iPhone Safari moves fixed bars a frame late while its toolbar
+      // collapses or expands mid-scroll, and the page showed through the gap
+      // under the bar. The ::after paints the bar's background below its own
+      // edge — off-screen at rest, filling that gap while it moves. Centred
+      // with inset-x-0 + mx-auto rather than a translate: a transformed fixed
+      // element gets its own layer on iOS and lags (and jitters) more.
+      className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md border-t border-border bg-background pb-[calc(env(safe-area-inset-bottom)+1rem)] after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-32 after:bg-background after:content-[''] sm:max-w-lg"
     >
       <ul className="flex items-stretch">
         {tabs.map(({ to, label, icon: Icon }) => {
