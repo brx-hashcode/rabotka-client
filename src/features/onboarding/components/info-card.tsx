@@ -54,7 +54,7 @@ export function InfoCard({
           <Icon className={`size-5 ${iconColorClasses}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground mb-1">
             {label}
           </p>
           {children || (

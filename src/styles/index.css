@@ -152,6 +152,15 @@
   --color-whatsapp: hsl(var(--whatsapp));
   --color-whatsapp-dark: hsl(var(--whatsapp-dark));
   --color-whatsapp-light: hsl(var(--whatsapp-light));
+  --color-chip-green: hsl(var(--chip-green));
+  --color-chip-green-foreground: hsl(var(--chip-green-foreground));
+  --color-chip-amber: hsl(var(--chip-amber));
+  --color-chip-amber-foreground: hsl(var(--chip-amber-foreground));
+  --color-chip-violet: hsl(var(--chip-violet));
+  --color-chip-violet-foreground: hsl(var(--chip-violet-foreground));
+  --color-lime: hsl(var(--lime));
+  --color-lime-foreground: hsl(var(--lime-foreground));
+  --color-lime-muted: hsl(var(--lime-muted));
   --color-terracotta: hsl(var(--terracotta));
   --color-sand: hsl(var(--sand));
   --color-earth: hsl(var(--earth));
@@ -169,6 +178,20 @@
     --whatsapp: 142 70% 49%;
     --whatsapp-dark: 142 72% 42%;
     --whatsapp-light: 142 60% 95%;
+
+    /* The agent app's brand band (rabotka-agent globals.css): #CBFFA5 with
+       its dark-green ink. Brand surfaces only — actions stay WhatsApp green. */
+    /* The agent app's status chips (rabotka-agent globals.css). */
+    --chip-green: 141 52% 94%;
+    --chip-green-foreground: 145 60% 30%;
+    --chip-amber: 32 87% 94%;
+    --chip-amber-foreground: 28 72% 37%;
+    --chip-violet: 258 81% 96%;
+    --chip-violet-foreground: 258 50% 52%;
+
+    --lime: 95 100% 82%;
+    --lime-foreground: 134 41% 10%;
+    --lime-muted: 112 24% 30%;
 
     /* Messaging. Its own tokens rather than reused ones: a thread needs a
        wallpaper distinct from every other surface, and two bubble tones that
@@ -188,37 +211,38 @@
     --earth: 25 35% 25%;
 
     /* Core palette */
-    --background: 40 30% 98%;
-    --foreground: 25 35% 15%;
+    --background: 216 33% 96%;
+    --foreground: 134 41% 10%;
 
     /* The field behind the app column on tablets and up. Must sit *under*
        --background in both themes so the column reads as raised; no existing
        token does (--muted is darker in light but lighter in dark). */
-    --app-surround: 40 20% 92%;
+    --app-surround: 215 29% 92%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 35% 15%;
+    --card-foreground: 134 41% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 35% 15%;
+    --popover-foreground: 134 41% 10%;
 
     --primary: 142 70% 49%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 35 45% 90%;
-    --secondary-foreground: 25 35% 25%;
+    --secondary: 213 30% 93%;
+    --secondary-foreground: 134 41% 10%;
 
-    --muted: 40 20% 94%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 210 33% 95%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 16 65% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Menu highlights: neutral, not the old terracotta. */
+    --accent: 213 30% 93%;
+    --accent-foreground: 134 41% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
+    --border: 215 27% 91%;
+    --input: 215 27% 91%;
     --ring: 142 70% 49%;
 
     --radius: 1rem;
@@ -247,7 +271,33 @@
     --chart-stage-staffed: #eb6834;
     --chart-stage-done: #1baf7a;
     --chart-stage-closed: #eda100;
-    --chart-track: hsl(40 20% 91%);
+    --chart-track: hsl(213 30% 93%);
+  }
+
+  /*
+   * The public landing keeps the app's original warm palette and Gilroy
+   * headings (LandingLayout carries this class); the app itself moved to the
+   * agent app's cool grey, ink and lime.
+   */
+  .theme-classic {
+    --accent: 16 65% 55%;
+    --accent-foreground: 0 0% 100%;
+    --background: 40 30% 98%;
+    --foreground: 25 35% 15%;
+    --app-surround: 40 20% 92%;
+    --card-foreground: 25 35% 15%;
+    --popover-foreground: 25 35% 15%;
+    --secondary: 35 45% 90%;
+    --secondary-foreground: 25 35% 25%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 25 15% 45%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+  }
+
+  .theme-classic :is(h1, h2, h3, h4, h5, h6) {
+    font-family: "Gilroy", sans-serif;
+    font-weight: 800;
   }
 
   .dark {
@@ -349,6 +399,30 @@
     min-height: 100%;
   }
 
+  /*
+   * iPhone Safari gives native date/time inputs an intrinsic minimum width and
+   * ignores `width: 100%` while its own appearance is on, so two of them side
+   * by side (the job form's date + time) each overflowed their half and
+   * pushed the page sideways — `min-w-0` on the grid cells could not help.
+   * Dropping the native appearance makes them size like any input; tapping
+   * still opens the platform's date/time wheel.
+   */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    display: block;
+  }
+
+  /* Safari centres the value once the appearance is gone; inputs read left. */
+  input::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Poppins", "Gilroy", sans-serif;
@@ -366,14 +440,17 @@
    * choice. Utilities still win over this — `font-medium` on a heading gives
    * Gilroy Light, which is a deliberate look, not an accident.
    */
+  /* Poppins semibold, like the agent app: Gilroy ships only ExtraBold and
+     read too heavy across the app. Gilroy stays for the logo (font-display)
+     and the landing (.theme-classic). */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: "Gilroy", sans-serif;
-    font-weight: 800;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
   }
 
   img {

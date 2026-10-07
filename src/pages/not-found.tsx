@@ -1,60 +1,87 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import { ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { useLimeChrome } from "@/hooks/use-lime-chrome";
 import notFoundImage from "@/assets/not-found.png?format=webp";
+import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
 
+/** The agent app's 14-point starburst photo frame, as a CSS polygon. */
+const STARBURST = (() => {
+  const spikes = 14;
+  const points: string[] = [];
+  for (let i = 0; i < spikes * 2; i++) {
+    const r = i % 2 === 0 ? 50 : 41;
+    const a = (Math.PI * i) / spikes - Math.PI / 2;
+    points.push(`${(50 + r * Math.cos(a)).toFixed(2)}% ${(50 + r * Math.sin(a)).toFixed(2)}%`);
+  }
+  return `polygon(${points.join(", ")})`;
+})();
+
+/**
+ * 404 in the agent app's look: a lime band with the brand and the lost
+ * traveller in the starburst frame, then a short explanation and two ways
+ * out. "Page précédente" only when there is somewhere to go back to — a link
+ * opened cold has no history inside the app.
+ */
 export default function NotFound() {
+  useLimeChrome();
+  const navigate = useNavigate();
+  const canGoBack =
+    typeof window !== "undefined" && (window.history.state?.idx ?? 0) > 0;
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <img
+    <div className="flex min-h-svh flex-col bg-background">
+      <div className="rounded-b-[32px] bg-lime px-6 pb-10 pt-[max(1.25rem,calc(env(safe-area-inset-top)+0.75rem))] text-lime-foreground">
+        <Link to="/" className="inline-flex items-center gap-2" aria-label="Rabotka — accueil">
+          <img src={rabotkaLogo} alt="" className="size-9" />
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-lg font-extrabold">Rabotka</span>
+            <span className="text-[10px] text-lime-muted">Job Matching</span>
+          </span>
+        </Link>
+
+        <motion.img
           src={notFoundImage}
-          alt="Page non trouvée - Erreur 404"
-          className="w-full h-full object-cover"
+          alt=""
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mx-auto mt-6 aspect-square w-56 object-cover sm:w-64"
+          style={{ clipPath: STARBURST }}
         />
-        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
+      <motion.main
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto"
+        transition={{ delay: 0.15, duration: 0.4 }}
+        className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 text-center"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="space-y-6"
-        >
-          <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white mb-4 drop-shadow-lg">
-            404
-          </h1>
+        <span className="rounded-full bg-lime/60 px-3 py-1 text-xs font-medium text-lime-foreground">
+          Erreur 404
+        </span>
+        <h1 className="mt-3 text-2xl text-foreground">Page introuvable</h1>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          Cette page n&apos;existe pas ou a été déplacée. Revenez à l&apos;accueil
+          pour retrouver votre chemin.
+        </p>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">
-            Vous semblez perdu...
-          </h2>
-
-          <p className="text-lg sm:text-xl text-white/90 mb-8 drop-shadow-sm max-w-xl mx-auto">
-            Cette page n'existe pas ou a été déplacée. Ne vous inquiétez pas,
-            nous pouvons vous aider à retrouver votre chemin.
-          </p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Button variant="whatsapp" size="lg" asChild>
-              <Link to="/">
-                <Home className="w-5 h-5" />
-                Retourner à l'accueil
-              </Link>
+        <div className="mt-8 flex w-full flex-col gap-3">
+          <Button size="lg" asChild>
+            <Link to="/">
+              <Home />
+              Retour à l&apos;accueil
+            </Link>
+          </Button>
+          {canGoBack && (
+            <Button size="lg" variant="secondary" onClick={() => navigate(-1)}>
+              <ArrowLeft />
+              Page précédente
             </Button>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+          )}
+        </div>
+      </motion.main>
     </div>
   );
 }

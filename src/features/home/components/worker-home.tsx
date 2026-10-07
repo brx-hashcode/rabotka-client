@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
+import { BrandHero } from "./brand-hero";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
@@ -49,9 +50,9 @@ function QuickCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-28 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft active:bg-secondary/40"
+      className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft transition-transform duration-100 active:scale-[0.97] motion-reduce:active:scale-100"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-whatsapp/10">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
         {icon}
       </div>
       <div>
@@ -98,28 +99,35 @@ export function WorkerHome() {
 
   const selectChip = (id: string | null) => {
     setCategoryId(id);
-    // A different category is a different list, so it starts at one page —
-    // and the remembered size is cleared with it rather than reapplied.
     resetLimit();
   };
 
   return (
     <div className="flex flex-col pb-4">
-      <HomeHeader
-        to="/recherche-offres"
-        placeholder="Poste, domaine, adresse, réf…"
-        // Saved offers are reached from the "Offres enregistrées" card below,
-        // so the header keeps only filters and notifications.
-        trailing={<NotificationBell />}
+      {/* Saved offers are reached from the "Offres enregistrées" card below,
+          so the band keeps only search, filters and notifications. */}
+      <BrandHero
+        greeting={profile?.firstName ? `Bonjour ${profile.firstName}` : "Bonjour"}
+        title="Offres près de chez vous"
+        trailing={<NotificationBell tone="onLime" />}
+        search={
+          <HomeHeader
+            variant="onLime"
+            to="/recherche-offres"
+            placeholder="Poste, domaine, adresse, réf…"
+          />
+        }
       />
 
-      <div className="flex gap-3 overflow-x-auto px-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Straddles the lime band's rounded edge. py-2 gives the cards'
+          shadows room: a horizontal scroller clips vertically too. */}
+      <div className="relative z-10 -mt-12 flex gap-3 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {(() => {
           // Guard on the quota itself, not on a nested field. It used to key
           // off `quota.concurrent`, so removing that server-side would have
           // left this skeleton on screen forever rather than failing visibly.
           if (!quota) {
-            return <Skeleton className="h-28 w-40 shrink-0 rounded-2xl" />;
+            return <Skeleton className="h-30 w-40 shrink-0 rounded-2xl" />;
           }
           const qLimit = quota.limit;
           const remaining = quota.remaining;
@@ -127,19 +135,22 @@ export function WorkerHome() {
           const pct = qLimit ? Math.min(100, (used / qLimit) * 100) : 0;
 
           return (
-            <div className="flex h-28 w-40 shrink-0 flex-col justify-between rounded-2xl bg-whatsapp p-3 text-white">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                <Send className="h-4 w-4 text-white" />
+            // White like the cards beside it: the band is the brand surface,
+            // the rail is plain cards. The bar carries the green.
+            <div className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 shadow-soft">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
+                <Send className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xl font-bold leading-none">{remaining}</p>
-                <p className="mt-0.5 text-[11px] leading-tight text-white/85">
-                  candidature{remaining > 1 ? "s" : ""} restante
-                  {remaining > 1 ? "s" : ""}
+                <p className="text-sm font-semibold leading-tight text-foreground">
+                  {remaining} candidature{remaining > 1 ? "s" : ""}
                 </p>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/25">
+                <p className="text-xs text-muted-foreground">
+                  restante{remaining > 1 ? "s" : ""}
+                </p>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-lime/60">
                   <div
-                    className="h-full rounded-full bg-white transition-all"
+                    className="h-full rounded-full bg-whatsapp transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -148,20 +159,20 @@ export function WorkerHome() {
           );
         })()}
         <QuickCard
-          icon={<Bookmark className="h-5 w-5 text-whatsapp" />}
+          icon={<Bookmark className="h-5 w-5" />}
           title="Offres"
           subtitle="enregistrées"
           onClick={() => navigate("/favoris")}
         />
         <QuickCard
-          icon={<ClipboardList className="h-5 w-5 text-whatsapp" />}
+          icon={<ClipboardList className="h-5 w-5" />}
           title="Mes"
           subtitle="candidatures"
           onClick={() => navigate("/mes-candidatures")}
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-2 overflow-x-auto px-4 pb-3 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {chips.map((chip) => {
           const active = chip.id === categoryId;
 
@@ -173,8 +184,8 @@ export function WorkerHome() {
               className={cn(
                 "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-whatsapp text-white"
-                  : "bg-whatsapp/10 text-whatsapp",
+                  ? "bg-lime-foreground text-lime"
+                  : "bg-lime/60 text-lime-foreground",
               )}
             >
               {chip.name}
@@ -193,8 +204,8 @@ export function WorkerHome() {
 
       {!isLoading && list.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-whatsapp/10">
-            <Briefcase className="h-8 w-8 text-whatsapp" />
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-lime">
+            <Briefcase className="h-8 w-8 text-lime-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
             Aucune offre pour le moment. Revenez plus tard ou essayez une autre

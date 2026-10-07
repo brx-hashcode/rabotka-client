@@ -35,12 +35,12 @@ const DrawerContent = React.forwardRef<
         // whole tablet — same breakpoint as the column itself. Centred with
         // auto margins rather than a translate, because vaul writes an inline
         // transform here while dragging and would clobber a -translate-x-1/2.
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background sm:mx-auto sm:max-w-lg",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-3xl bg-card sm:mx-auto sm:max-w-lg",
         className,
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+      <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-secondary" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

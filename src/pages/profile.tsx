@@ -142,7 +142,7 @@ export default function Profile() {
         {profile.description && (
           <div className="bg-card rounded-xl shadow-soft overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-muted/30">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs font-medium text-muted-foreground">
                 A propos
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function Profile() {
 
         <div className="bg-card rounded-xl shadow-soft overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="text-xs font-medium text-muted-foreground">
               Domaines
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function Profile() {
 
         <div className="bg-card rounded-xl shadow-soft overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="text-xs font-medium text-muted-foreground">
               Informations
             </p>
           </div>

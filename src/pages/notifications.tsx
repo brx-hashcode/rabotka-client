@@ -108,8 +108,8 @@ export default function Notifications() {
 
         {!isLoading && !isError && notifications.length === 0 && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-20 text-center">
-            <span className="flex size-20 items-center justify-center rounded-full bg-secondary">
-              <BellOff className="size-9 text-muted-foreground" />
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-lime text-lime-foreground">
+              <BellOff className="size-7" />
             </span>
             <p className="max-w-xs text-sm text-muted-foreground">
               {copy.empty}
@@ -121,10 +121,11 @@ export default function Notifications() {
           <div className="space-y-5 px-4 py-4">
             {sections.map((section) => (
               <section key={section.bucket} aria-label={section.label}>
-                <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="mb-2 px-1 text-xs font-semibold text-muted-foreground">
                   {section.label}
                 </h2>
-                <div className="space-y-3">
+                {/* One card per day, rows inside — the agent app's list. */}
+                <div className="space-y-1 rounded-3xl bg-card p-1.5 shadow-soft">
                   {section.items.map((notification) => (
                     <NotificationCard
                       key={notification.id}
@@ -151,7 +152,7 @@ export default function Notifications() {
             ))}
             {hasNextPage && (
               <Button
-                variant="outline"
+                variant="secondary"
                 className="w-full"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}

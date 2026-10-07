@@ -190,7 +190,7 @@ function Outcome({ request }: Readonly<{ request: IdentityCheckRequest }>) {
 
   return (
     <div className="flex flex-col items-center gap-3 py-2 text-center">
-      <div className="bg-primary/10 text-primary flex size-11 items-center justify-center rounded-full">
+      <div className="bg-lime text-lime-foreground flex size-11 items-center justify-center rounded-xl">
         <Icon aria-hidden className="size-5" />
       </div>
       <p className="font-medium">{outcome.title}</p>

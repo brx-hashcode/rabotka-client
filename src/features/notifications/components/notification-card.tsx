@@ -109,10 +109,10 @@ export function NotificationCard({
   };
 
   return (
-    <div ref={rowRef} className="relative overflow-hidden rounded-xl">
+    <div ref={rowRef} className="relative overflow-hidden rounded-2xl">
       <motion.div
         style={{ width: stripWidth }}
-        className="absolute inset-y-0 right-0 flex justify-end overflow-hidden rounded-r-xl bg-destructive"
+        className="absolute inset-y-0 right-0 flex justify-end overflow-hidden rounded-r-2xl bg-destructive"
       >
         <button
           type="button"
@@ -158,8 +158,12 @@ export function NotificationCard({
         }}
         aria-description={`${copy.delete} : glisser vers la gauche`}
         className={cn(
-          // Opaque on purpose: the red strip sits right underneath.
-          "relative flex w-full items-start gap-3 rounded-xl bg-card p-4 text-left shadow-soft",
+          // Opaque on purpose: the red strip sits right underneath — hence a
+          // lime MIXED into white for unread, not a translucent lime.
+          "relative flex w-full items-start gap-3 rounded-2xl p-3 text-left",
+          unread
+            ? "bg-[color-mix(in_oklab,hsl(var(--lime))_28%,hsl(var(--card)))]"
+            : "bg-card",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40",
         )}
       >
@@ -167,23 +171,23 @@ export function NotificationCard({
         <span className="min-w-0 flex-1">
           <span
             className={cn(
-              "block text-sm leading-tight text-foreground",
+              "block text-sm leading-snug text-foreground",
               unread ? "font-semibold" : "font-medium",
             )}
           >
             {notification.title}
           </span>
-          <span className="mt-1 block text-sm text-muted-foreground">
+          <span className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
             {notification.body}
           </span>
-          <span className="mt-1 block text-xs text-muted-foreground">
+          <span className="mt-1 block text-[11px] text-muted-foreground/80">
             {relativeTime(notification.createdAt)}
           </span>
         </span>
         {unread && (
           <span
             aria-label="Non lue"
-            className="mt-1.5 size-2.5 shrink-0 rounded-full bg-whatsapp"
+            className="mt-1.5 size-2 shrink-0 rounded-full bg-whatsapp"
           />
         )}
       </motion.button>

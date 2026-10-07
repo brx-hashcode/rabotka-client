@@ -51,8 +51,8 @@ export default function WalletTopUp() {
       <div className="space-y-5 px-4 py-4">
         {/* Balance */}
         <div className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-soft">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-whatsapp/10">
-            <Wallet className="h-5 w-5 text-whatsapp" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lime">
+            <Wallet className="h-5 w-5 text-lime-foreground" />
           </div>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Solde actuel</p>

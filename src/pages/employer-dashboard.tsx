@@ -40,9 +40,9 @@ function KpiCard({
   loading?: boolean;
 }>) {
   return (
-    <div className="bg-card shadow-soft rounded-xl p-3 flex items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <Icon className="size-4 text-primary" />
+    <div className="bg-card shadow-soft rounded-2xl p-3 flex items-center gap-3">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-lime">
+        <Icon className="size-5 text-lime-foreground" />
       </div>
       <div className="min-w-0">
         {loading ? (
