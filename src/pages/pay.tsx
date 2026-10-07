@@ -430,7 +430,7 @@ export default function Pay() {
         </div>
 
         <Button
-          className="w-full h-12 text-base font-semibold rounded-md"
+          className="w-full h-12 text-base font-semibold"
           onClick={handlePay}
           disabled={isPending}
         >
