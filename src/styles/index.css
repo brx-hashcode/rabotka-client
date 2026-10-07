@@ -152,6 +152,9 @@
   --color-whatsapp: hsl(var(--whatsapp));
   --color-whatsapp-dark: hsl(var(--whatsapp-dark));
   --color-whatsapp-light: hsl(var(--whatsapp-light));
+  --color-lime: hsl(var(--lime));
+  --color-lime-foreground: hsl(var(--lime-foreground));
+  --color-lime-muted: hsl(var(--lime-muted));
   --color-terracotta: hsl(var(--terracotta));
   --color-sand: hsl(var(--sand));
   --color-earth: hsl(var(--earth));
@@ -169,6 +172,12 @@
     --whatsapp: 142 70% 49%;
     --whatsapp-dark: 142 72% 42%;
     --whatsapp-light: 142 60% 95%;
+
+    /* The agent app's brand band (rabotka-agent globals.css): #CBFFA5 with
+       its dark-green ink. Brand surfaces only — actions stay WhatsApp green. */
+    --lime: 95 100% 82%;
+    --lime-foreground: 134 41% 10%;
+    --lime-muted: 112 24% 30%;
 
     /* Messaging. Its own tokens rather than reused ones: a thread needs a
        wallpaper distinct from every other surface, and two bubble tones that

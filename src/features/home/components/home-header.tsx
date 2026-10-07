@@ -22,6 +22,11 @@ type Props = {
   readonly placeholder?: string;
   /** Extra action rendered after the filter button (e.g. saved offers). */
   readonly trailing?: React.ReactNode;
+  /**
+   * `onLime`: just the white search pill, filters inside it, for BrandHero —
+   * which owns the sticky bar and the trailing action, so neither is here.
+   */
+  readonly variant?: "default" | "onLime";
 };
 
 /**
@@ -33,11 +38,35 @@ export function HomeHeader({
   to = "/recherche",
   placeholder = "Nom, mots-clés...",
   trailing,
+  variant = "default",
 }: Readonly<Props>) {
   const navigate = useNavigate();
   const scrolled = useScrolled();
 
   const goToSearch = () => navigate(to);
+
+  if (variant === "onLime") {
+    return (
+      <div className="flex h-12 items-center rounded-2xl bg-card pl-1 pr-1 shadow-soft">
+        <button
+          type="button"
+          onClick={goToSearch}
+          className="flex h-full min-w-0 flex-1 items-center gap-2.5 rounded-xl pl-3 text-left text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 truncate">{placeholder}</span>
+        </button>
+        <button
+          type="button"
+          aria-label="Filtres"
+          onClick={goToSearch}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime/70 text-lime-foreground active:bg-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <header
