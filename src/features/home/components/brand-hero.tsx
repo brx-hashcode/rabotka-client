@@ -1,28 +1,33 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { onPageScroll, scrollTop } from "@/lib/app-scroll";
 import { cn } from "@/lib/utils";
 
 /** The lime as a hex string, for the places CSS variables cannot reach. */
 const LIME_HEX = "#CBFFA5";
 
+/** The app's defaults, put back when the hero leaves. */
+const DEFAULT_THEME_COLOR = "#25D366";
+
 /**
  * Lime status bar while the hero is on screen. iPhone Safari (26+) tints its
  * bar from the page background and ignores theme-color; Android Chrome reads
- * theme-color. Both are put back on the way out, so other screens keep theirs.
+ * theme-color.
+ *
+ * A layout effect, so it lands before the first paint of a client-side
+ * navigation to home; a full load of /home is covered earlier still by the
+ * inline script in index.html. On the way out the defaults are restored —
+ * not "what was there", which after that script is already lime.
  */
 function useLimeChrome() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
-    const previousBackground = root.style.backgroundColor;
     root.style.backgroundColor = LIME_HEX;
-
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    const previousTheme = meta?.content;
     meta?.setAttribute("content", LIME_HEX);
 
     return () => {
-      root.style.backgroundColor = previousBackground;
-      if (meta && previousTheme) meta.setAttribute("content", previousTheme);
+      root.style.backgroundColor = "";
+      meta?.setAttribute("content", DEFAULT_THEME_COLOR);
     };
   }, []);
 }
@@ -89,20 +94,20 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
 
       <div
         ref={band}
-        className="rounded-b-[28px] bg-lime px-4 pb-14 pt-[max(1rem,env(safe-area-inset-top))] text-lime-foreground"
+        className="rounded-b-[32px] bg-lime px-4 pb-16 pt-[max(1.75rem,calc(env(safe-area-inset-top)+0.75rem))] text-lime-foreground"
       >
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-lime-muted">{greeting}</p>
             {/* Poppins semibold, not the headings' Gilroy: Gilroy ships only
                 ExtraBold, which read too heavy at this size. */}
-            <h1 className="mt-0.5 font-[Poppins,sans-serif] text-xl font-semibold leading-tight">
+            <h1 className="mt-1 font-[Poppins,sans-serif] text-[22px] font-semibold leading-tight">
               {title}
             </h1>
           </div>
           {trailing}
         </div>
-        <div className="mt-5">{search}</div>
+        <div className="mt-7">{search}</div>
       </div>
     </>
   );
