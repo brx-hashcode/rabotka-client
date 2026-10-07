@@ -17,7 +17,7 @@ export function LandingLayout({ children }: Readonly<LandingLayoutProps>) {
   return (
     // A column, so a short page stretches its content and the footer sits at
     // the bottom of the window instead of leaving empty space below it.
-    <div className="min-h-screen bg-background flex w-full flex-col">
+    <div className="theme-classic min-h-screen bg-background text-foreground flex w-full flex-col">
       <Header />
       <main className="w-full flex-1">{children}</main>
       <Footer />
