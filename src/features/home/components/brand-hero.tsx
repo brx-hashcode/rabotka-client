@@ -94,7 +94,7 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-lime-muted">{greeting}</p>
-            <h1 className="mt-1 text-[26px] leading-[1.1] tracking-tight">{title}</h1>
+            <h1 className="mt-0.5 text-xl leading-tight">{title}</h1>
           </div>
           {trailing}
         </div>

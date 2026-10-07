@@ -47,7 +47,7 @@ export function HomeHeader({
 
   if (variant === "onLime") {
     return (
-      <div className="flex h-12 items-center rounded-2xl bg-card pl-1 pr-1 shadow-soft">
+      <div className="flex h-12 items-center gap-2 rounded-2xl bg-card pl-1 pr-1.5 shadow-soft">
         <button
           type="button"
           onClick={goToSearch}
@@ -60,7 +60,7 @@ export function HomeHeader({
           type="button"
           aria-label="Filtres"
           onClick={goToSearch}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime/70 text-lime-foreground active:bg-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-lime/70 text-lime-foreground active:bg-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
         >
           <SlidersHorizontal className="h-4 w-4" />
         </button>
