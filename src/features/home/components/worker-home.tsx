@@ -50,7 +50,7 @@ function QuickCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-28 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft active:bg-secondary/40"
+      className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 text-left shadow-soft active:bg-secondary/40"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
         {icon}
@@ -127,7 +127,7 @@ export function WorkerHome() {
           // off `quota.concurrent`, so removing that server-side would have
           // left this skeleton on screen forever rather than failing visibly.
           if (!quota) {
-            return <Skeleton className="h-28 w-40 shrink-0 rounded-2xl" />;
+            return <Skeleton className="h-30 w-40 shrink-0 rounded-2xl" />;
           }
           const qLimit = quota.limit;
           const remaining = quota.remaining;
@@ -135,19 +135,22 @@ export function WorkerHome() {
           const pct = qLimit ? Math.min(100, (used / qLimit) * 100) : 0;
 
           return (
-            <div className="flex h-28 w-40 shrink-0 flex-col justify-between rounded-2xl bg-whatsapp p-3 text-white shadow-soft">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                <Send className="h-4 w-4 text-white" />
+            // White like the cards beside it: the band is the brand surface,
+            // the rail is plain cards. The bar carries the green.
+            <div className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 shadow-soft">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
+                <Send className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xl font-bold leading-none">{remaining}</p>
-                <p className="mt-0.5 text-[11px] leading-tight text-white/85">
-                  candidature{remaining > 1 ? "s" : ""} restante
-                  {remaining > 1 ? "s" : ""}
+                <p className="text-sm font-semibold leading-tight text-foreground">
+                  {remaining} candidature{remaining > 1 ? "s" : ""}
                 </p>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/25">
+                <p className="text-xs text-muted-foreground">
+                  restante{remaining > 1 ? "s" : ""}
+                </p>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-lime/60">
                   <div
-                    className="h-full rounded-full bg-white transition-all"
+                    className="h-full rounded-full bg-whatsapp transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
