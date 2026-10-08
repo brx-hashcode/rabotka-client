@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   MessageSquare,
   Star,
+  TrendingUp,
   Unlock,
   XCircle,
   type LucideIcon,
@@ -26,6 +27,7 @@ const ICONS: Record<string, LucideIcon> = {
   PAYMENT_FAILED: XCircle,
   CLAIM_COMMENTED: MessageSquare,
   CLAIM_STATUS_CHANGED: MessageSquare,
+  SIMILAR_PROFILE_HIRED: TrendingUp,
 };
 
 /**
