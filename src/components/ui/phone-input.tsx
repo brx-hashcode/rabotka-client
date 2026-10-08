@@ -55,7 +55,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
         <PhoneNumberInputRoot
           ref={ref}
           className={cn(
-            "flex overflow-hidden rounded-2xl bg-card ring-1 ring-inset ring-border focus-within:ring-2 focus-within:ring-lime-foreground/25",
+            "flex h-12 items-stretch overflow-hidden rounded-2xl bg-card ring-1 ring-inset ring-border focus-within:ring-2 focus-within:ring-lime-foreground/25",
             className,
           )}
           countries={countries}
@@ -87,7 +87,10 @@ const InputComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Input
     className={cn(
-      "h-10 rounded-e-lg rounded-s-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+      // The root draws the field (white, rounded, one ring). This inner
+      // input is plain: no ring, background or rounding of its own, or it
+      // drew a second pill inside the first.
+      "h-full rounded-none border-0 bg-transparent pl-1 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0",
       className,
     )}
     {...props}
@@ -127,7 +130,7 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="outline"
-          className="flex h-12 gap-1 rounded-none border-0 bg-transparent shadow-none ring-0 px-3 focus:z-10"
+          className="flex h-full gap-1 rounded-none border-0 bg-transparent px-3 shadow-none ring-0 hover:bg-transparent active:scale-100 focus:z-10"
           disabled={disabled}
         >
           <FlagComponent
