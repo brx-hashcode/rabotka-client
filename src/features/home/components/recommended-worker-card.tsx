@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { MATCH_TONE_CLASS, matchBand } from "@/lib/match";
 import { useNavigate } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,7 @@ export function RecommendedWorkerCard({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const initials =
     `${worker.firstName?.[0] ?? ""}${worker.lastName?.[0] ?? ""}`.toUpperCase();
-  const aiScore = Math.round(worker.score * 100);
+  const match = matchBand(worker.matchScore);
 
   // Same precedence job-card uses for the apply button: account first, then
   // KYC. A suspension is the more severe problem and has a different remedy.
@@ -71,8 +73,15 @@ export function RecommendedWorkerCard({
               Fiabilité : {worker.reliabilityScore}%
             </p>
           )}
-          {aiScore > 0 && (
-            <p className="text-sm text-muted-foreground">Score IA : {aiScore}%</p>
+          {match && (
+            <span
+              className={cn(
+                "mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
+                MATCH_TONE_CLASS[match.tone],
+              )}
+            >
+              {match.label} · {match.percent} %
+            </span>
           )}
           {worker.completedMissions > 0 && (
             <p className="text-sm text-muted-foreground">

@@ -23,7 +23,13 @@ export type RecommendedWorker = {
   isVerified?: boolean;
   completedMissions: number;
   portfolioSlug: string | null;
+  /** Ranking order only — not a percentage to show. */
   score: number;
+  /**
+   * Fit for display, 0–1 (see `lib/match`). Null or absent: no evidence of fit,
+   * show nothing. Optional while older backends do not send it.
+   */
+  matchScore?: number | null;
 };
 
 export type RecommendedWorkerDetail = {
