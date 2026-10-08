@@ -21,6 +21,7 @@ import { useAccountGate } from "@/hooks/use-account-gate";
 import { AccountNotice, accountShortLabel } from "@/features/account";
 import { ContactConfirmDrawer } from "@/features/employer/components/contact-confirm-drawer";
 import { StartChatButton } from "@/features/discussions/components/start-chat-button";
+import { matchBand } from "@/lib/match";
 
 export default function RecommendedWorkerDetail() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function RecommendedWorkerDetail() {
   else if (blocked && reason) contactLabel = kycShortLabel(reason);
 
   const worker = data?.worker;
-  const aiScore = Math.round((worker?.score ?? 0) * 100);
+  const match = matchBand(worker?.matchScore);
   // `categoryNames` is absent on an older backend; fall back to the single
   // category rather than showing nothing.
   const domains =
@@ -124,13 +125,13 @@ export default function RecommendedWorkerDetail() {
                       label="fiabilité"
                     />
                   )}
-                  {/* The card that led here shows Score IA, so dropping it on
-                      the detail reads as a loading failure. */}
-                  {aiScore > 0 && (
+                  {/* The card that led here shows the compatibility, so
+                      dropping it on the detail reads as a loading failure. */}
+                  {match && (
                     <Stat
                       icon={<Sparkles className="h-3.5 w-3.5 text-whatsapp" />}
-                      value={`${aiScore}%`}
-                      label="score IA"
+                      value={`${match.percent}%`}
+                      label={match.label.toLowerCase()}
                     />
                   )}
                   <Stat
