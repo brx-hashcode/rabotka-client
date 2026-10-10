@@ -23,6 +23,7 @@ const base = {
   city: "Brazzaville",
   address: "",
   quantity: 1,
+  categoryId: "cat-plomberie",
 };
 
 /** The paths zod complained about, for readable assertions. */
@@ -104,5 +105,12 @@ describe("the date and the hour", () => {
     expect(
       errorPaths({ ...base, scheduledDate: today, scheduledTime: "00:01" }),
     ).toContain("scheduledTime");
+  });
+});
+
+describe("domaine", () => {
+  it("is required — it decides who hears about the offer", () => {
+    expect(errorPaths({ ...base, categoryId: "" })).toContain("categoryId");
+    expect(errorPaths(base)).not.toContain("categoryId");
   });
 });

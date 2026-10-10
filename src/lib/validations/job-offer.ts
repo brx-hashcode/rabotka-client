@@ -77,7 +77,9 @@ export const createJobOfferSchema = z.object({
     .trim()
     .max(500, "La note ne doit pas dépasser 500 caractères")
     .optional(),
-  categoryId: z.string().optional(),
+  // Required: the trade is what decides who hears about the offer. Without it
+  // the suggestions could only guess from the title. « Autre » remains.
+  categoryId: z.string().min(1, "Choisissez un domaine"),
 })
   /**
    * The city and country are required only for on-site work.
