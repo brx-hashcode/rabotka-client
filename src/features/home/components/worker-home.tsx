@@ -68,7 +68,6 @@ function QuickCard({
 export function WorkerHome() {
   const navigate = useNavigate();
   const { data: profile } = useProfileMe();
-  // Remembered across a job-detail round trip: see `useRestoredFeedSize`.
   const [limit, setLimit, resetLimit] = useRestoredFeedSize(
     "feed:worker-home",
     INITIAL_LIMIT,
@@ -84,9 +83,6 @@ export function WorkerHome() {
   const canLoadMore = isFetching || list.length >= limit;
 
   const ads = useFeedSlots();
-  // Memoised so the entries keep their identity across the re-renders this
-  // screen gets from the quota and KYC caches — otherwise an ad card remounts
-  // and its impression timer restarts before it can finish.
   const entries = useMemo(() => interleaveAds(list, ads), [list, ads]);
 
   const chips: Chip[] = [

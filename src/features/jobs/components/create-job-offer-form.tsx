@@ -140,7 +140,7 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
       ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
       ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
       ...(data.note?.trim() ? { note: data.note.trim() } : {}),
-      ...(data.categoryId ? { category_id: data.categoryId } : {}),
+      category_id: data.categoryId,
     };
     createOffer(payload, {
       onSuccess: (offer) => onCreated(offer, data),
@@ -471,27 +471,27 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
             )}
           />
 
-          {categories.length > 0 && (
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Domaine (optionnel)</FormLabel>
-                  <FormControl>
-                    <CategoryCombobox
-                      options={categories}
-                      value={field.value || null}
-                      onChange={(id) => field.onChange(id ?? "")}
-                      placeholder="Choisir un domaine…"
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          {/* Always shown, even before the list loads: it is required, and a
+              hidden required field would block the form without saying why. */}
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Domaine</FormLabel>
+                <FormControl>
+                  <CategoryCombobox
+                    options={categories}
+                    value={field.value || null}
+                    onChange={(id) => field.onChange(id ?? "")}
+                    placeholder="Choisir un domaine…"
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
