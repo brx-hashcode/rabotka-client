@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Info, Loader2, ShieldAlert } from "lucide-react";
 
 import {
   Drawer,
@@ -15,6 +15,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CancellationPreview } from "@/lib/api/worker-mission-controller";
+import {
+  COMPATIBILITY_NOTICE,
+  suspensionWarning,
+} from "@/lib/cancellation-warning";
 
 type Props = {
   readonly open: boolean;
@@ -44,6 +48,7 @@ export function CancelApplicationDrawer({
   onConfirm,
 }: Props) {
   const [reason, setReason] = useState("");
+  const suspension = suspensionWarning(preview);
 
   // Reset each time the sheet opens.
   useEffect(() => {
@@ -83,6 +88,31 @@ export function CancelApplicationDrawer({
                     {preview.scoreDeduction} points.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Repeated cancellations suspend the account — said before the
+                last one, and plainly on the one that does it. */}
+            {!isPreviewLoading && suspension.level !== "none" && (
+              <div className="flex gap-3 rounded-xl bg-destructive/10 p-3 text-left">
+                <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-destructive">
+                    {suspension.level === "suspends"
+                      ? "Votre compte sera suspendu"
+                      : "Risque de suspension"}
+                  </p>
+                  <p className="text-muted-foreground">{suspension.text}</p>
+                </div>
+              </div>
+            )}
+
+            {!isPreviewLoading && preview?.affectsCompatibility && (
+              <div className="flex gap-3 rounded-xl bg-muted p-3 text-left">
+                <Info className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {COMPATIBILITY_NOTICE}
+                </p>
               </div>
             )}
 

@@ -30,6 +30,19 @@ export type CancellationPreview = {
   penaltyFcfa: number;
   thresholdHours: number;
   scoreDeduction: number;
+  /** Every cancellation lowers the compatibility with this employer. */
+  affectsCompatibility?: boolean;
+  /**
+   * The repeated-cancellation rule. Optional: a server older than the rule
+   * leaves them out, and then nothing about suspension is shown.
+   */
+  countsTowardSuspension?: boolean;
+  cancellationsInWindow?: number;
+  suspensionThreshold?: number;
+  windowDays?: number;
+  wouldSuspend?: boolean;
+  /** Counted cancellations left after this one, or null when the rule is off. */
+  remainingBeforeSuspension?: number | null;
 };
 
 /** What it actually cost. `penaltyAmount` is null when none was applied. */
@@ -37,6 +50,8 @@ export type CancelResult = {
   success: boolean;
   penaltyApplied: boolean;
   penaltyAmount: number | null;
+  /** This cancellation suspended the account (repeated cancellations). */
+  suspended?: boolean;
 };
 
 export type WorkerMissionApplicationStatus =
