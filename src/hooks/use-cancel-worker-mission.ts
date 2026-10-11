@@ -42,6 +42,16 @@ export function useCancelWorkerMission() {
     // which invalidates the whole cache after any successful mutation. The keys
     // listed here previously matched no query at all.
     onSuccess: (result) => {
+      // A suspension outranks the penalty note. The MutationCache refetch
+      // then reloads the profile, and the account gate takes over the app.
+      if (result.suspended) {
+        toast({
+          variant: "destructive",
+          description:
+            "Candidature annulée. Votre compte a été suspendu suite à des annulations répétées.",
+        });
+        return;
+      }
       toast({
         description: result.penaltyApplied
           ? `Candidature annulée. Une pénalité de ${result.penaltyAmount?.toLocaleString("fr-FR")} FCFA a été appliquée.`
