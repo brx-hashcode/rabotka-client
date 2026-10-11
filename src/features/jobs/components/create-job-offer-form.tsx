@@ -91,6 +91,8 @@ type JobOfferFormProps = {
   pendingLabel: string;
   /** Where « Annuler » goes — a fixed page, never back one entry. */
   cancelTo: string;
+  /** Replaces `cancelTo` when the caller knows the way back better. */
+  onCancel?: () => void;
   isPending: boolean;
   onSubmit: (data: CreateJobOfferFormData) => void;
 };
@@ -103,6 +105,7 @@ export function JobOfferForm({
   submitLabel,
   pendingLabel,
   cancelTo,
+  onCancel,
   isPending,
   onSubmit,
 }: Readonly<JobOfferFormProps>) {
@@ -500,7 +503,7 @@ export function JobOfferForm({
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate(cancelTo)}
+              onClick={() => (onCancel ? onCancel() : navigate(cancelTo))}
             >
               Annuler
             </Button>
