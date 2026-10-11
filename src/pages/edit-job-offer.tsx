@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { Loader2 } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
@@ -20,6 +20,7 @@ import { jobOfferSchema } from "@/lib/validations/job-offer";
 export default function EditJobOffer() {
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: offer, isLoading } = useJobOffer(id);
   const { mutate: updateOffer, isPending } = useUpdateJobOffer(id);
   const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
@@ -42,6 +43,15 @@ export default function EditJobOffer() {
       }),
     [initialValues],
   );
+
+  // Back to the detail that opened this form, so the detail's own « ← »
+  // leaves the offer instead of landing here again — pushing a new detail
+  // entry would leave this page in the history behind it. Opened directly,
+  // there is no such entry: then replace this page with the detail.
+  const backToDetail = () => {
+    if (location.key !== "default") navigate(-1);
+    else navigate(`/job-offers/${id}`, { replace: true });
+  };
 
   let body: React.ReactNode;
   if (accountBlocked && accountReason) {
@@ -69,10 +79,11 @@ export default function EditJobOffer() {
         submitLabel="Enregistrer"
         pendingLabel="Enregistrement…"
         cancelTo={`/job-offers/${id}`}
+        onCancel={backToDetail}
         isPending={isPending}
         onSubmit={(data) =>
           updateOffer(toUpdatePayload(data, initialValues), {
-            onSuccess: () => navigate(`/job-offers/${id}`, { replace: true }),
+            onSuccess: backToDetail,
           })
         }
       />
