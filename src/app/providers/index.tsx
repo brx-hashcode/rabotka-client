@@ -24,7 +24,12 @@ type ProvidersProps = {
 
 export const queryClient = new QueryClient({
   mutationCache: new MutationCache({
-    onSuccess: () => {
+    onSuccess: (_data, _variables, _context, mutation) => {
+      // A mutation that removes the thing a mounted page is showing (deleting
+      // an offer) opts out: refetching everything would re-request what no
+      // longer exists, and 404 before the page has navigated away. It cleans
+      // up its own queries instead.
+      if (mutation.meta?.skipGlobalInvalidation) return;
       queryClient.invalidateQueries();
     },
   }),

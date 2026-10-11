@@ -130,7 +130,9 @@ export default function MissionDetail() {
     deleteOffer(id, {
       onSuccess: () => {
         setConfirmOpen(false);
-        goBack();
+        // To the offers list, replacing this page: back would otherwise
+        // return to an offer that no longer exists.
+        navigate("/jobs", { replace: true });
       },
     });
   };
