@@ -45,6 +45,10 @@ import {
 } from "@/features/employer";
 import type { JobOfferWorkerItem } from "@/lib/api/job-offer-controller";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
+import {
+  isOfferDeletable,
+  waitingApplicantCount,
+} from "@/lib/job-offer-delete";
 
 export default function MissionDetail() {
   const navigate = useNavigate();
@@ -72,15 +76,15 @@ export default function MissionDetail() {
 
   const goBack = () => navigate(-1);
 
-  // An offer can be removed only while it carries no engagement: still open
-  // (ACTIVE) or dead (EXPIRED), with no hired workers and no candidates. The
-  // backend re-verifies authoritatively.
+  // An offer can be removed while nobody is engaged on it — see
+  // isOfferDeletable. Waiting candidates are closed with it and notified.
+  const applicationStatuses = workers?.map((w) => w.status) ?? [];
   const deletable =
     !!offer &&
-    (offer.status === "ACTIVE" || offer.status === "EXPIRED") &&
     offer.acceptedCount === 0 &&
     !workersLoading &&
-    (workers?.length ?? 0) === 0;
+    isOfferDeletable(offer.status, applicationStatuses);
+  const waitingCount = waitingApplicantCount(applicationStatuses);
 
   // The employer rates; they no longer close anything. Only a worker who has
   // confirmed their own mission (application → END) can be rated, which is the
@@ -366,7 +370,11 @@ export default function MissionDetail() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Supprimer cette offre ?"
-        description="Cette action est irréversible."
+        description={
+          waitingCount > 0
+            ? `${waitingCount} candidat${waitingCount > 1 ? "s" : ""} en attente ${waitingCount > 1 ? "seront prévenus" : "sera prévenu"} que l'offre est fermée. Cette action est irréversible.`
+            : "Cette action est irréversible."
+        }
         actionLabel="Supprimer"
         onConfirm={handleDelete}
         isPending={isDeleting}
