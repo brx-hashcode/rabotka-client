@@ -10,6 +10,7 @@ import {
   Hash,
   StickyNote,
   RefreshCw,
+  Pencil,
   Trash2,
   Star,
   FileText,
@@ -120,6 +121,9 @@ export default function MissionDetail() {
   const { blocked: accountBlocked, reason: accountReason } = useAccountGate();
   const cannotRepublish = accountBlocked || kycBlocked;
   const republishable = !!offer && offer.status === "EXPIRED";
+  // Editable while still recruiting from scratch. The backend re-checks, and
+  // tells the candidates when the pay, date or place changes.
+  const editable = !!offer && offer.status === "ACTIVE" && !accountBlocked;
 
   const handleDelete = () => {
     if (!id) return;
@@ -341,6 +345,17 @@ export default function MissionDetail() {
             >
               <RefreshCw className="mr-2 h-4 w-4" />
               Republier l'offre
+            </Button>
+          )}
+
+          {editable && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate(`/job-offers/${id}/edit`)}
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Modifier l'offre
             </Button>
           )}
 

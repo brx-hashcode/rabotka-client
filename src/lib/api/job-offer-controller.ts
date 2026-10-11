@@ -60,7 +60,11 @@ export type JobOfferDetail = {
   address: string | null;
   isRemote: boolean;
   countryName?: string | null;
+  /** ISO code behind `countryName` — the edit form needs the id, not the label. */
+  countryCode?: string | null;
   city?: string | null;
+  /** Null for an offer with no category. */
+  categoryId?: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -157,7 +161,9 @@ type BackendJobOfferDetail = {
   address: string | null;
   is_remote: boolean;
   country_name: string | null;
+  country_code?: string | null;
   city: string | null;
+  category_id?: string | null;
   note: string | null;
   quantity: number;
   acceptedCount: number;
@@ -222,6 +228,18 @@ export type CreateJobOfferPayload = {
   payment_flow?: "HOURLY" | "DAILY" | "MONTHLY";
   note?: string;
   category_id?: string;
+};
+
+/**
+ * An edit of an ACTIVE offer (PATCH /profile/job-offers/:id). Every field is
+ * optional — an omitted one is left alone — and the optional ones accept an
+ * empty value to clear them, which the create payload never needs.
+ */
+export type UpdateJobOfferPayload = Partial<
+  Omit<CreateJobOfferPayload, "amount" | "payment_flow">
+> & {
+  amount?: number | null;
+  payment_flow?: CreateJobOfferPayload["payment_flow"] | null;
 };
 
 // The create endpoint returns the full offer; we only rely on id + reference
@@ -339,6 +357,8 @@ class JobOfferController extends RabotkaBaseController {
         isRemote: o.is_remote,
         city: o.city,
         countryName: o.country_name,
+        countryCode: o.country_code ?? null,
+        categoryId: o.category_id ?? null,
         note: o.note,
         quantity: o.quantity,
         acceptedCount: o.acceptedCount,
@@ -407,8 +427,22 @@ class JobOfferController extends RabotkaBaseController {
     }
   }
 
+  // Backend: PATCH /profile/job-offers/:id → edit one of the employer's own
+  // offers while it is ACTIVE. Candidates are told when the pay, date or place
+  // changes.
+  async update(id: string, payload: UpdateJobOfferPayload): Promise<void> {
+    try {
+      await this.patch<unknown>(
+        `/profile/job-offers/${id}`,
+        payload as unknown as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   // Backend: DELETE /profile/job-offers/:id → soft-delete one of the employer's
-  // own offers (only allowed while ACTIVE with no candidates).
+  // own offers (only allowed while nobody is engaged on it).
   async remove(id: string): Promise<void> {
     try {
       await this.delete<{ success: boolean }>(`/profile/job-offers/${id}`);
@@ -444,6 +478,7 @@ export const {
   getJobOffer,
   getJobOfferApplications,
   create: createJobOffer,
+  update: updateJobOffer,
   remove: deleteJobOffer,
   confirmHire,
 } = new JobOfferController();
