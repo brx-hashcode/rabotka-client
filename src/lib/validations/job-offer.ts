@@ -15,7 +15,7 @@ export const PAYMENT_FLOW_LABELS: Record<PaymentFlowValue, string> = {
 // (MIN_SCHEDULED_HOURS_FROM_NOW in job-offer.service.ts).
 const MIN_HOURS_AHEAD = 4;
 
-export const createJobOfferSchema = z.object({
+const jobOfferFields = z.object({
   title: z
     .string()
     .trim()
@@ -80,7 +80,16 @@ export const createJobOfferSchema = z.object({
   // Required: the trade is what decides who hears about the offer. Without it
   // the suggestions could only guess from the title. « Autre » remains.
   categoryId: z.string().min(1, "Choisissez un domaine"),
-})
+});
+
+/**
+ * The offer form's rules. `keepSchedule` is the date an edited offer already
+ * has, as `composeScheduledAt` writes it: keeping it unchanged is always
+ * allowed, however close it now is — only a NEW date must be 4h ahead, as on
+ * the server.
+ */
+export function jobOfferSchema(options?: { keepSchedule?: string }) {
+  return jobOfferFields
   /**
    * The city and country are required only for on-site work.
    *
@@ -114,7 +123,11 @@ export const createJobOfferSchema = z.object({
           path: ["scheduledDate"],
           message: "Date invalide",
         });
-      } else if (instant < Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000) {
+      } else if (
+        composeScheduledAt(data.scheduledDate, data.scheduledTime) !==
+          options?.keepSchedule &&
+        instant < Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000
+      ) {
         // Blamed on whichever field the person can act on. With an hour given
         // it is usually the hour that is too early — pointing at the date
         // would have them change a day that was fine.
@@ -158,5 +171,9 @@ export const createJobOfferSchema = z.object({
       });
     }
   });
+
+}
+
+export const createJobOfferSchema = jobOfferSchema();
 
 export type CreateJobOfferFormData = z.infer<typeof createJobOfferSchema>;
