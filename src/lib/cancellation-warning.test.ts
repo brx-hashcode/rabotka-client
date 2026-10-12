@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import type { CancellationPreview } from "@/lib/api/worker-mission-controller";
-import { suspensionWarning } from "./cancellation-warning";
+import { reliabilityLoss, suspensionWarning } from "./cancellation-warning";
 
 const base: CancellationPreview = {
   wouldPenalize: false,
@@ -62,5 +62,33 @@ describe("suspensionWarning", () => {
         scoreDeduction: 5,
       }).level,
     ).toBe("none");
+  });
+});
+
+describe("reliabilityLoss", () => {
+  it("uses the total the server computed", () => {
+    expect(reliabilityLoss({ ...base, totalScoreDeduction: 3 })).toBe(3);
+  });
+
+  it("falls back to the late deduction on an older server", () => {
+    expect(
+      reliabilityLoss({
+        wouldPenalize: true,
+        penaltyFcfa: 5000,
+        thresholdHours: 4,
+        scoreDeduction: 5,
+      }),
+    ).toBe(5);
+  });
+
+  it("is nothing for an early cancellation on an older server", () => {
+    expect(
+      reliabilityLoss({
+        wouldPenalize: false,
+        penaltyFcfa: 5000,
+        thresholdHours: 4,
+        scoreDeduction: 5,
+      }),
+    ).toBe(0);
   });
 });

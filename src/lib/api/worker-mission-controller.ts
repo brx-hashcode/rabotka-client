@@ -30,6 +30,12 @@ export type CancellationPreview = {
   penaltyFcfa: number;
   thresholdHours: number;
   scoreDeduction: number;
+  /**
+   * Reliability points THIS cancellation costs: the late deduction if late,
+   * plus the any-cancellation one if the mission was accepted. Absent from an
+   * older API — fall back to `scoreDeduction` when late.
+   */
+  totalScoreDeduction?: number;
   /** Every cancellation lowers the compatibility with this employer. */
   affectsCompatibility?: boolean;
   /**
