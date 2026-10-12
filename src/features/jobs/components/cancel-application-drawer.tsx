@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Info, Loader2, ShieldAlert } from "lucide-react";
 
 import {
   Drawer,
@@ -15,6 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CancellationPreview } from "@/lib/api/worker-mission-controller";
+import {
+  COMPATIBILITY_NOTICE,
+  reliabilityLoss,
+  suspensionWarning,
+} from "@/lib/cancellation-warning";
 
 type Props = {
   readonly open: boolean;
@@ -44,6 +49,8 @@ export function CancelApplicationDrawer({
   onConfirm,
 }: Props) {
   const [reason, setReason] = useState("");
+  const suspension = suspensionWarning(preview);
+  const pointsLost = reliabilityLoss(preview);
 
   // Reset each time the sheet opens.
   useEffect(() => {
@@ -80,9 +87,63 @@ export function CancelApplicationDrawer({
                       {preview.penaltyFcfa.toLocaleString("fr-FR")} FCFA
                     </span>{" "}
                     sera appliquée et votre score de fiabilité baissera de{" "}
-                    {preview.scoreDeduction} points.
+                    {pointsLost} points.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Not late, but the mission was accepted: it still costs
+                reliability points when the platform is set to charge them. */}
+            {!isPreviewLoading && !preview?.wouldPenalize && pointsLost > 0 && (
+              <div className="flex gap-3 rounded-xl bg-destructive/10 p-3 text-left">
+                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <p className="text-sm text-muted-foreground">
+                  Annuler une mission acceptée fait baisser votre score de
+                  fiabilité de{" "}
+                  <span className="font-medium text-foreground">
+                    {pointsLost} points
+                  </span>
+                  .
+                </p>
+              </div>
+            )}
+
+            {/* Repeated cancellations suspend the account — said before the
+                last one, and plainly on the one that does it. */}
+            {/* Every cancellation counts toward a suspension: say where this
+                one puts them, quietly while there is room left. */}
+            {!isPreviewLoading && suspension.level === "counted" && (
+              <div className="flex gap-3 rounded-xl bg-amber-50 p-3 text-left">
+                <Info className="mt-0.5 size-5 shrink-0 text-amber-600" />
+                <p className="text-sm text-muted-foreground">
+                  {suspension.text}
+                </p>
+              </div>
+            )}
+
+            {!isPreviewLoading &&
+              (suspension.level === "last-chance" ||
+                suspension.level === "suspends") && (
+              <div className="flex gap-3 rounded-xl bg-destructive/10 p-3 text-left">
+                <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-destructive">
+                    {suspension.level === "suspends"
+                      ? "Votre compte sera suspendu"
+                      : "Risque de suspension"}
+                  </p>
+                  <p className="text-muted-foreground">{suspension.text}</p>
+                </div>
+              </div>
+            )}
+
+            {!isPreviewLoading && preview?.affectsCompatibility && (
+              <div className="flex gap-3 rounded-xl bg-muted p-3 text-left">
+                <Info className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {COMPATIBILITY_NOTICE}
+                </p>
               </div>
             )}
 

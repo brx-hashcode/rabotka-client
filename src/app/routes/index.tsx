@@ -39,6 +39,7 @@ const RealizationDetail = lazy(() => import("@/pages/realization-detail"));
 const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
 const ContactedProfiles = lazy(() => import("@/pages/contacted-profiles"));
 const CreateJobOffer = lazy(() => import("@/pages/create-job-offer"));
+const EditJobOffer = lazy(() => import("@/pages/edit-job-offer"));
 const Claim = lazy(() => import("@/pages/claim"));
 const CreateClaim = lazy(() => import("@/pages/create-claim"));
 const OnboardingAvatar = lazy(() => import("@/pages/onboarding-avatar"));
@@ -545,6 +546,18 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <CreateJobOffer />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/job-offers/:id/edit"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <EditJobOffer />
               </AppShell>
             </AuthGuard>
           </Suspense>

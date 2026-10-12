@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
@@ -18,6 +18,8 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { CountryCityFields } from "@/components/common/country-city-fields";
+import { isSignupVerified } from "@/lib/signup-verification";
+import { PhoneVerificationDrawer } from "./phone-verification-drawer";
 
 type PersonalInfoFormProps = {
   onNext: () => void;
@@ -28,6 +30,13 @@ export function PersonalInfoForm({
 }: Readonly<PersonalInfoFormProps>) {
   const personalInfo = useOnboardingStore((state) => state.personalInfo);
   const setPersonalInfo = useOnboardingStore((state) => state.setPersonalInfo);
+  const signupVerification = useOnboardingStore(
+    (state) => state.signupVerification,
+  );
+  const setSignupVerification = useOnboardingStore(
+    (state) => state.setSignupVerification,
+  );
+  const [verifyPhone, setVerifyPhone] = useState<string | null>(null);
 
   const [profileTypeParam] = useQueryState<"WORKER" | "EMPLOYER" | "">(
     "profileType",
@@ -57,9 +66,16 @@ export function PersonalInfoForm({
   const charCount = description?.length || 0;
   const isOverLimit = charCount > 500;
 
+  // The number is checked by WhatsApp code before going on — once, unless it
+  // changes or the check expires. The API refuses the documents and the
+  // account without it.
   const onSubmit = (data: Step1FormData) => {
     setPersonalInfo(data);
-    onNext();
+    if (isSignupVerified(signupVerification, data.phone)) {
+      onNext();
+      return;
+    }
+    setVerifyPhone(data.phone);
   };
 
   const content = personalInfoContent;
@@ -261,6 +277,18 @@ export function PersonalInfoForm({
           </Button>
         </form>
       </Form>
+      <PhoneVerificationDrawer
+        open={verifyPhone !== null}
+        onOpenChange={(open) => {
+          if (!open) setVerifyPhone(null);
+        }}
+        phone={verifyPhone ?? ""}
+        onVerified={(verification) => {
+          setSignupVerification(verification);
+          setVerifyPhone(null);
+          onNext();
+        }}
+      />
     </div>
   );
 }

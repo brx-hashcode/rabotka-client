@@ -4,6 +4,8 @@ import { RabotkaBaseController } from "./base-controller";
 import { config } from "@/config";
 
 export type CreateProfilePayload = {
+  /** From the phone verification (verifySignupOtp), for this `phone`. */
+  signupToken: string;
   firstName: string;
   lastName: string;
   /**
@@ -202,14 +204,46 @@ class ProfileController extends RabotkaBaseController {
    * object key. The endpoint used to return only `url`, which is why
    * `storage_key` was NULL on every KYC row ever written.
    */
-  async uploadKycFile(file: File): Promise<{ url: string; key: string }> {
+  async uploadKycFile(
+    file: File,
+    signupToken: string,
+  ): Promise<{ url: string; key: string }> {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
+      // The API refuses KYC uploads without the token from the phone
+      // verification: the route is open to anyone, and files are 10 MB.
       return await this.post<{ url: string; key: string }>(
         "/profile/kyc-upload",
         formData as unknown as Record<string, unknown>,
+        { "x-signup-token": signupToken },
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /** Signup step 1: a WhatsApp code to the number being registered. */
+  async sendSignupOtp(phone: string): Promise<{ success: boolean }> {
+    try {
+      return await this.post<{ success: boolean }>("/auth/signup/send-otp", {
+        phone,
+      });
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /** Signup step 2: the code checks out → the token uploads and creation need. */
+  async verifySignupOtp(
+    phone: string,
+    code: string,
+  ): Promise<{ signupToken: string; expiresIn: number }> {
+    try {
+      return await this.post<{ signupToken: string; expiresIn: number }>(
+        "/auth/signup/verify-otp",
+        { phone, code },
       );
     } catch (error) {
       this.handleError(error);
@@ -445,6 +479,8 @@ export const {
   confirmPhoneChange,
   createProfile,
   uploadKycFile,
+  sendSignupOtp,
+  verifySignupOtp,
   getApplications,
   agreementDownloadUrl,
   resumeDownloadUrl,

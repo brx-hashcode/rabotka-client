@@ -35,18 +35,13 @@ import {
   scheduledAtLabel,
   scheduledAtHelpText,
 } from "@/lib/employment-type";
-import {
-  composeScheduledAt,
-  minTimeFor,
-  toDateInput,
-} from "@/lib/scheduled-at";
+import { minTimeFor, toDateInput } from "@/lib/scheduled-at";
 import { useCreateJobOffer } from "@/hooks/use-create-job-offer";
-import type {
-  CreateJobOfferPayload,
-  CreatedJobOffer,
-} from "@/lib/api/job-offer-controller";
+import type { CreatedJobOffer } from "@/lib/api/job-offer-controller";
+import { EMPTY_JOB_OFFER_FORM, toCreatePayload } from "@/lib/job-offer-form";
 import {
   createJobOfferSchema,
+  type jobOfferSchema,
   type CreateJobOfferFormData,
   PAYMENT_FLOW_VALUES,
   PAYMENT_FLOW_LABELS,
@@ -65,8 +60,56 @@ type Props = {
 };
 
 export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
-  const navigate = useNavigate();
   const { mutate: createOffer, isPending } = useCreateJobOffer();
+
+  return (
+    <JobOfferForm
+      heading="Créer une offre"
+      initialValues={EMPTY_JOB_OFFER_FORM}
+      schema={createJobOfferSchema}
+      submitLabel="Publier l'offre"
+      pendingLabel="Publication…"
+      // The missions list, NOT back one entry. `navigate(-1)` assumes the user
+      // arrived from inside the app; opened from WhatsApp the entry behind this
+      // form is the login hop, and going back to it bounces straight here.
+      cancelTo="/missions"
+      isPending={isPending}
+      onSubmit={(data) =>
+        createOffer(toCreatePayload(data), {
+          onSuccess: (offer) => onCreated(offer, data),
+        })
+      }
+    />
+  );
+}
+
+type JobOfferFormProps = {
+  heading: string;
+  initialValues: CreateJobOfferFormData;
+  schema: ReturnType<typeof jobOfferSchema>;
+  submitLabel: string;
+  pendingLabel: string;
+  /** Where « Annuler » goes — a fixed page, never back one entry. */
+  cancelTo: string;
+  /** Replaces `cancelTo` when the caller knows the way back better. */
+  onCancel?: () => void;
+  isPending: boolean;
+  onSubmit: (data: CreateJobOfferFormData) => void;
+};
+
+/** The offer form itself, shared by creating and editing an offer. */
+export function JobOfferForm({
+  heading,
+  initialValues,
+  schema,
+  submitLabel,
+  pendingLabel,
+  cancelTo,
+  onCancel,
+  isPending,
+  onSubmit,
+}: Readonly<JobOfferFormProps>) {
+  const navigate = useNavigate();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["job-categories"],
@@ -75,24 +118,8 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   });
 
   const form = useForm<CreateJobOfferFormData>({
-    resolver: zodResolver(createJobOfferSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      employmentType: "MISSION",
-      scheduledDate: "",
-      scheduledTime: "",
-      isRemote: false,
-      countryCode: "",
-      countryName: "",
-      city: "",
-      address: "",
-      quantity: 1,
-      amount: "",
-      paymentFlow: "",
-      note: "",
-      categoryId: "",
-    },
+    resolver: zodResolver(schema),
+    defaultValues: initialValues,
     mode: "onChange",
   });
 
@@ -101,59 +128,13 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
   // The time field is disabled and bounded by whichever day is chosen.
   const scheduledDate = form.watch("scheduledDate");
 
-  const onSubmit = (data: CreateJobOfferFormData) => {
-    const payload: CreateJobOfferPayload = {
-      title: data.title.trim(),
-      description: data.description.trim(),
-      employment_type: data.employmentType,
-      quantity: data.quantity,
-      // A remote job sends no location at all. Sending empty strings would
-      // store a country the server then has to reject, and sending the fields
-      // for an on-site job is what puts it in the right city.
-      ...(data.isRemote
-        ? { isRemote: true }
-        : {
-            isRemote: false,
-            // Omitted rather than sent blank when there is none: the field is
-            // optional now, and "" would ask the server to store an address
-            // that says nothing.
-            ...(data.address.trim() ? { address: data.address.trim() } : {}),
-            countryCode: data.countryCode,
-            countryName: data.countryName,
-            city: data.city,
-          }),
-      // Conditional, like every other optional field: an unconditional
-      // `new Date("").toISOString()` throws RangeError the moment the date is
-      // legitimately left empty.
-      //
-      // The two fields become one instant here, at the boundary — a missing
-      // hour becomes the END of the chosen day, because "le 30" means
-      // applications stay open through the 30th rather than shutting at
-      // midnight before it began.
-      ...(data.scheduledDate
-        ? {
-            scheduled_at: new Date(
-              composeScheduledAt(data.scheduledDate, data.scheduledTime),
-            ).toISOString(),
-          }
-        : {}),
-      ...(typeof data.amount === "number" ? { amount: data.amount } : {}),
-      ...(data.paymentFlow ? { payment_flow: data.paymentFlow } : {}),
-      ...(data.note?.trim() ? { note: data.note.trim() } : {}),
-      category_id: data.categoryId,
-    };
-    createOffer(payload, {
-      onSuccess: (offer) => onCreated(offer, data),
-    });
-  };
-
   return (
     // Square and edge to edge, at every width. It fills `AppShell`'s column,
     // which is 512px on a desktop just as on a phone — so rounding it from md
     // up drew a card floating inside a card, and `lg:p-8` doubled the gutter
     // the page was already paying. One 16px padding, once. See the page.
     <div className="bg-white p-4">
-      <h2 className="mb-6 text-2xl font-bold">Créer une offre</h2>
+      <h2 className="mb-6 text-2xl font-bold">{heading}</h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -516,26 +497,13 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
           <div className="flex flex-col gap-3">
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {isPending ? "Publication…" : "Publier l'offre"}
+              {isPending ? pendingLabel : submitLabel}
             </Button>
-            {/*
-              Goes to the missions list, NOT back one entry.
-
-              `navigate(-1)` assumes the user arrived from somewhere inside the
-              app. Opened from WhatsApp they did not: the card lands on
-              `/s/<code>`, which signs them in and replaces itself with this
-              form, so the entry behind it is the login hop — and going back to
-              it bounces straight here again. Cancel was a dead end for anyone
-              who came in through the bot, which is most people.
-
-              A fixed destination cannot trap them: whatever the history holds,
-              this is a real page they are allowed to be on.
-            */}
             <Button
               type="button"
               variant="outline"
               disabled={isPending}
-              onClick={() => navigate("/missions")}
+              onClick={() => (onCancel ? onCancel() : navigate(cancelTo))}
             >
               Annuler
             </Button>

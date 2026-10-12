@@ -8,3 +8,4 @@ export { stepIndicatorContent } from "./step-indicator";
 export { layoutContent } from "./layout";
 export { validationMessages } from "./validation";
 export { apiErrors } from "./api-errors";
+export { phoneVerificationContent } from "./phone-verification";
