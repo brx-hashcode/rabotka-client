@@ -21,13 +21,13 @@ export function suspensionWarning(
   if (preview.wouldSuspend) {
     return {
       level: "suspends",
-      text: `C'est votre ${threshold}e annulation de mission en ${days} jours : votre compte sera suspendu. Seule l'équipe Rabotka pourra le réactiver.`,
+      text: `C'est votre ${threshold}e annulation en ${days} jours : votre compte sera suspendu. Seule l'équipe Rabotka pourra le réactiver.`,
     };
   }
   if (preview.remainingBeforeSuspension === 1) {
     return {
       level: "last-chance",
-      text: `Encore une annulation de mission dans les ${days} jours et votre compte sera suspendu.`,
+      text: `Encore une annulation dans les ${days} jours et votre compte sera suspendu.`,
     };
   }
   return { level: "none" };

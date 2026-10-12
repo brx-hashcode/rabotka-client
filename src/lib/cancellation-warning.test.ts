@@ -42,7 +42,7 @@ describe("suspensionWarning", () => {
     if (w.level === "suspends") expect(w.text).toContain("3e annulation");
   });
 
-  it("says nothing about a pending application, which does not count", () => {
+  it("says nothing about a cancellation the server says does not count", () => {
     expect(
       suspensionWarning({
         ...base,
