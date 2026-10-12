@@ -9,3 +9,4 @@ export { InfoIcon } from "./info-icon";
 export { DocumentPreview } from "./document-preview";
 export { OnboardingLayout } from "../layouts/onboarding-layout";
 export { InfoCard } from "./info-card";
+export { PhoneVerificationDrawer } from "./phone-verification-drawer";
