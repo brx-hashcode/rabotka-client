@@ -15,6 +15,8 @@ export const loginContent = {
     otpLabel: "Code de vérification",
     submitButton: "Vérifier",
     resendButton: "Renvoyer le code",
+    pasteButton: "Coller le code",
+    pasteEmpty: "Copiez d'abord le code dans WhatsApp, puis réessayez.",
   },
   step3: {
     title: "Connexion réussie",
