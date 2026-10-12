@@ -18,8 +18,29 @@ const base: CancellationPreview = {
 };
 
 describe("suspensionWarning", () => {
-  it("says nothing while there is room left", () => {
-    expect(suspensionWarning(base).level).toBe("none");
+  it("says where this cancellation puts them while there is room left", () => {
+    const w = suspensionWarning(base);
+    expect(w.level).toBe("counted");
+    if (w.level === "counted") {
+      expect(w.text).toContain("1 sur 3 en 30 jours");
+    }
+  });
+
+  it("counts from what is already in the window", () => {
+    const w = suspensionWarning({
+      ...base,
+      cancellationsInWindow: 3,
+      suspensionThreshold: 8,
+      remainingBeforeSuspension: 4,
+    });
+    if (w.level === "counted") expect(w.text).toContain("4 sur 8");
+    else throw new Error(`expected counted, got ${w.level}`);
+  });
+
+  it("says nothing when the rule is off", () => {
+    expect(
+      suspensionWarning({ ...base, suspensionThreshold: 0 }).level,
+    ).toBe("none");
   });
 
   it("warns when one more would suspend", () => {

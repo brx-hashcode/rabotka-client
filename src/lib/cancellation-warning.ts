@@ -2,15 +2,19 @@ import type { CancellationPreview } from "@/lib/api/worker-mission-controller";
 
 export type SuspensionWarning =
   | { level: "none" }
+  /** It counts, with room left: say where it puts them. */
+  | { level: "counted"; text: string }
   /** One counted cancellation away from suspension, after this one. */
   | { level: "last-chance"; text: string }
   /** This cancellation suspends the account. */
   | { level: "suspends"; text: string };
 
 /**
- * What the cancel drawer warns about the repeated-cancellation rule, from the
- * server's preview. Nothing when this cancellation does not count (an
- * application still pending) or the rule is off.
+ * What the cancel drawer says about the repeated-cancellation rule, from the
+ * server's preview. Every cancellation the worker makes counts, so it is said
+ * every time — where this one puts them, then louder one short of the
+ * threshold, and plainly on the one that suspends. Nothing when the server
+ * says it does not count or the rule is off.
  */
 export function suspensionWarning(
   preview: CancellationPreview | undefined,
@@ -28,6 +32,13 @@ export function suspensionWarning(
     return {
       level: "last-chance",
       text: `Encore une annulation dans les ${days} jours et votre compte sera suspendu.`,
+    };
+  }
+  if (threshold > 0 && days > 0) {
+    const afterThis = (preview.cancellationsInWindow ?? 0) + 1;
+    return {
+      level: "counted",
+      text: `Cette annulation sera comptée : ${afterThis} sur ${threshold} en ${days} jours. À ${threshold} annulations, votre compte est suspendu.`,
     };
   }
   return { level: "none" };
