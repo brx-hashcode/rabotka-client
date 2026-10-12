@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CancellationPreview } from "@/lib/api/worker-mission-controller";
 import {
   COMPATIBILITY_NOTICE,
+  reliabilityLoss,
   suspensionWarning,
 } from "@/lib/cancellation-warning";
 
@@ -49,6 +50,7 @@ export function CancelApplicationDrawer({
 }: Props) {
   const [reason, setReason] = useState("");
   const suspension = suspensionWarning(preview);
+  const pointsLost = reliabilityLoss(preview);
 
   // Reset each time the sheet opens.
   useEffect(() => {
@@ -85,9 +87,25 @@ export function CancelApplicationDrawer({
                       {preview.penaltyFcfa.toLocaleString("fr-FR")} FCFA
                     </span>{" "}
                     sera appliquée et votre score de fiabilité baissera de{" "}
-                    {preview.scoreDeduction} points.
+                    {pointsLost} points.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Not late, but the mission was accepted: it still costs
+                reliability points when the platform is set to charge them. */}
+            {!isPreviewLoading && !preview?.wouldPenalize && pointsLost > 0 && (
+              <div className="flex gap-3 rounded-xl bg-destructive/10 p-3 text-left">
+                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <p className="text-sm text-muted-foreground">
+                  Annuler une mission acceptée fait baisser votre score de
+                  fiabilité de{" "}
+                  <span className="font-medium text-foreground">
+                    {pointsLost} points
+                  </span>
+                  .
+                </p>
               </div>
             )}
 
