@@ -1,3 +1,4 @@
+import type { SignupVerification } from "@/lib/signup-verification";
 import { create } from "zustand";
 import {
   saveKycFile,
@@ -63,12 +64,19 @@ type OnboardingStore = {
    */
   referralCode: string;
   referralSource: ReferralSource;
+  /**
+   * The WhatsApp code check of the phone number (step 1). Required by the API
+   * for the KYC uploads and the account creation; null until done, and again
+   * once the number changes or the token expires.
+   */
+  signupVerification: SignupVerification | null;
   isSubmitting: boolean;
   error: string | null;
 
   setPersonalInfo: (data: Partial<PersonalInfo>) => void;
   setKycData: (data: Partial<KycData>) => void;
   setReferral: (code: string, source: ReferralSource) => void;
+  setSignupVerification: (verification: SignupVerification | null) => void;
   setIsSubmitting: (value: boolean) => void;
   setError: (error: string | null) => void;
   resetStore: () => void;
@@ -111,6 +119,7 @@ const initialState = {
   },
   referralCode: "",
   referralSource: "MANUAL_CODE" as ReferralSource,
+  signupVerification: null as SignupVerification | null,
   isSubmitting: false,
   error: null,
 };
@@ -149,6 +158,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     get().saveToStorage();
   },
 
+  setSignupVerification: (verification) => {
+    set({ signupVerification: verification });
+    get().saveToStorage();
+  },
+
   setIsSubmitting: (value) => set({ isSubmitting: value }),
 
   setError: (error) => set({ error }),
@@ -175,6 +189,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         set({
           referralCode: data.referralCode || "",
           referralSource: data.referralSource || "MANUAL_CODE",
+          signupVerification: data.signupVerification ?? null,
           personalInfo: data.personalInfo || initialState.personalInfo,
           kycData: {
             ...initialState.kycData,
@@ -236,11 +251,20 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     if (typeof globalThis === "undefined") return;
 
     try {
-      const { personalInfo, kycData, referralCode, referralSource } = get();
+      const {
+        personalInfo,
+        kycData,
+        referralCode,
+        referralSource,
+        signupVerification,
+      } = get();
       const dataToStore = {
         personalInfo,
         referralCode,
         referralSource,
+        // sessionStorage: this tab only, gone when it closes — and the token
+        // dies within the hour anyway.
+        signupVerification,
         kycData: {
           profileType: kycData.profileType,
           categoryIds: kycData.categoryIds,

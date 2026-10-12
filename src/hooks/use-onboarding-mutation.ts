@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { apiErrors } from "@/content/onboarding";
 import { requiresBackSide } from "@/lib/kyc-document-types";
+import { isSignupVerificationError } from "@/lib/signup-verification";
 import {
   createProfile,
   type CreateProfileResponse,
@@ -11,8 +12,13 @@ export function useOnboardingMutation() {
   return useMutation({
     mutationKey: ["onboarding-mutation"],
     mutationFn: async (): Promise<CreateProfileResponse> => {
-      const { personalInfo, kycData, referralCode, referralSource } =
-        useOnboardingStore.getState();
+      const {
+        personalInfo,
+        kycData,
+        referralCode,
+        referralSource,
+        signupVerification,
+      } = useOnboardingStore.getState();
 
       const needsBack = requiresBackSide(kycData.documentType);
 
@@ -25,6 +31,7 @@ export function useOnboardingMutation() {
       }
 
       return await createProfile({
+        signupToken: signupVerification?.token ?? "",
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
         // Omitted rather than sent empty, like `directPhone` below. The column
@@ -76,9 +83,12 @@ export function useOnboardingMutation() {
       setIsSubmitting(false);
     },
     onError: (error: Error) => {
-      const { setError, setIsSubmitting } = useOnboardingStore.getState();
+      const { setError, setIsSubmitting, setSignupVerification } =
+        useOnboardingStore.getState();
       setError(error.message);
       setIsSubmitting(false);
+      // Expired or spent: drop it, and the page sends them back to step 1.
+      if (isSignupVerificationError(error)) setSignupVerification(null);
     },
   });
 }

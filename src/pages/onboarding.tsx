@@ -1,8 +1,9 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import { isSignupVerified } from "@/lib/signup-verification";
 import {
   PersonalInfoForm,
   ProfileTypeForm,
@@ -28,9 +29,28 @@ export default function Onboarding() {
     (state) => state.hydrateFromStorage,
   );
 
+  const [hydrated, setHydrated] = useState(false);
+
   useEffect(() => {
-    void hydrateFromStorage();
+    void hydrateFromStorage().finally(() => setHydrated(true));
   }, [hydrateFromStorage]);
+
+  // The document upload and the account creation need a verified phone
+  // number. Reaching them without one — a link to a later step, a token that
+  // expired or was refused — goes back to step 1, whose « Suivant » asks for
+  // the WhatsApp code. Only once the store is hydrated, or every reload would
+  // bounce back before the saved verification is read.
+  const signupVerification = useOnboardingStore(
+    (state) => state.signupVerification,
+  );
+  const phone = useOnboardingStore((state) => state.personalInfo.phone);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (step !== "kyc-documents" && step !== "confirmation") return;
+    if (!isSignupVerified(signupVerification, phone)) {
+      void setStep("personal-informations");
+    }
+  }, [hydrated, step, signupVerification, phone, setStep]);
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
