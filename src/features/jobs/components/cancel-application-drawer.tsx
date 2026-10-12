@@ -111,7 +111,20 @@ export function CancelApplicationDrawer({
 
             {/* Repeated cancellations suspend the account — said before the
                 last one, and plainly on the one that does it. */}
-            {!isPreviewLoading && suspension.level !== "none" && (
+            {/* Every cancellation counts toward a suspension: say where this
+                one puts them, quietly while there is room left. */}
+            {!isPreviewLoading && suspension.level === "counted" && (
+              <div className="flex gap-3 rounded-xl bg-amber-50 p-3 text-left">
+                <Info className="mt-0.5 size-5 shrink-0 text-amber-600" />
+                <p className="text-sm text-muted-foreground">
+                  {suspension.text}
+                </p>
+              </div>
+            )}
+
+            {!isPreviewLoading &&
+              (suspension.level === "last-chance" ||
+                suspension.level === "suspends") && (
               <div className="flex gap-3 rounded-xl bg-destructive/10 p-3 text-left">
                 <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
                 <div className="space-y-1 text-sm">
