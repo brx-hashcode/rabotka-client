@@ -106,7 +106,7 @@ export default function PublicPortfolio() {
         profile={{
           fullName,
           avatarUrl: worker.avatarUrl,
-          address: worker.address,
+          address: worker.location ?? "",
           reliabilityScore: worker.reliabilityScore,
           ratingAvg: worker.ratingAvg,
           ratingCount: worker.ratingCount,
@@ -192,7 +192,15 @@ function buildJsonLd(worker: PublicWorkerResponse, fullName: string) {
     mainEntity: {
       "@type": "Person",
       name: fullName,
-      ...(worker.address ? { address: worker.address } : {}),
+      // The locality only — never a street address, on an indexed page.
+      ...(worker.location
+        ? {
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: worker.location,
+            },
+          }
+        : {}),
       ...(worker.avatarUrl ? { image: worker.avatarUrl } : {}),
       ...(worker.description ? { description: worker.description } : {}),
     },

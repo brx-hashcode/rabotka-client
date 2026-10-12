@@ -18,13 +18,18 @@ export type PublicPortfolioItem = {
 export type PublicWorkerResponse = {
   slug: string;
   firstName: string;
+  /** The initial only (« N. ») — the page is public and indexed. */
   lastName: string;
   avatarUrl: string | null;
   reliabilityScore: number | null;
   ratingAvg: number | null;
   ratingCount: number;
   description: string;
-  address: string;
+  /**
+   * « City, Country », or null. Never the street address: the page is public,
+   * and a worker's address is often their home.
+   */
+  location: string | null;
   completedMissionsCount: number;
   portfolio: PublicPortfolioItem[];
 };
