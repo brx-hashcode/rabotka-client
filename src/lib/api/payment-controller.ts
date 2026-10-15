@@ -1,6 +1,29 @@
 import { RabotkaBaseController } from "./base-controller";
 
-export type PaymentGateway = "MONETBIL" | "MTN_MOMO";
+/** Gateway key, as the backend registry names it (e.g. `PAWAPAY`, `MTN_MOMO`). */
+export type PaymentGateway = string;
+
+/** One mobile-money network a gateway can charge. */
+export type PaymentOperator = {
+  /** The gateway's own code, sent back as-is (e.g. `MTN_MOMO_COG`). */
+  code: string;
+  label: string;
+  /** ISO 3166-1 alpha-3 country the network serves, when the gateway says. */
+  country?: string;
+};
+
+export type PaymentGatewayInfo = {
+  key: PaymentGateway;
+  label: string;
+  requiresOperator: boolean;
+  operators: PaymentOperator[];
+};
+
+export type PaymentGatewaysResponse = {
+  /** Null when payments are switched off server-side. */
+  active: PaymentGateway | null;
+  gateways: PaymentGatewayInfo[];
+};
 
 export type PaymentByTokenResponse = {
   id: string;
@@ -9,11 +32,13 @@ export type PaymentByTokenResponse = {
   profileName: string;
   amount: number | null;
   description: string | null;
+  /** The payer's country (ISO3), to offer that country's networks only. */
+  payerCountry?: string | null;
 };
 
 export type InitiatePaymentPayload = {
   phone: string;
-  operator?: "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
+  operator?: string;
 };
 
 export type InitiatePaymentResponse = {
@@ -24,6 +49,14 @@ export class PaymentController extends RabotkaBaseController {
   async getByToken(token: string): Promise<PaymentByTokenResponse> {
     try {
       return await this.get<PaymentByTokenResponse>(`/pay/${token}`);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async getGateways(): Promise<PaymentGatewaysResponse> {
+    try {
+      return await this.get<PaymentGatewaysResponse>("/payment-gateways");
     } catch (error) {
       this.handleError(error);
     }
@@ -44,4 +77,5 @@ export class PaymentController extends RabotkaBaseController {
   }
 }
 
-export const { getByToken, initiatePayment } = new PaymentController();
+export const { getByToken, getGateways, initiatePayment } =
+  new PaymentController();

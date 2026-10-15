@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import type { Value as PhoneValue } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -10,7 +10,16 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentByToken } from "@/hooks/use-payment-by-token";
 import { PaymentReceipt } from "@/features/payments";
-import type { PaymentGateway } from "@/lib/api/payment-controller";
+import type {
+  PaymentGateway,
+  PaymentGatewayInfo,
+  PaymentOperator,
+} from "@/lib/api/payment-controller";
+import { usePaymentGateways } from "@/hooks/use-payment-gateways";
+import { useProfileInvoices } from "@/hooks/use-profile-invoices";
+import { sendInvoiceToWhatsApp } from "@/lib/api/profile-controller";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { useGoBack } from "@/hooks/use-go-back";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
@@ -18,6 +27,7 @@ import { getQueryClient } from "@/app/providers";
 import {
   ArrowLeft,
   Check,
+  Send,
   AlertCircle,
   Loader2,
   XCircle,
@@ -25,7 +35,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Operator = "CG_MTNMOBILEMONEY" | "CG_AIRTELMONEY";
 type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
 
 export default function Pay() {
@@ -38,11 +47,11 @@ export default function Pay() {
   const goBack = useGoBack("/home");
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
+  const { data: gateways } = usePaymentGateways();
 
   const [phone, setPhone] = useState<PhoneValue | null>(null);
-  const [operator, setOperator] = useState<Operator | null>(
-    "CG_MTNMOBILEMONEY",
-  );
+  // The payer's pick; until they make one, the first network offered.
+  const [operator, setOperator] = useState<string | null>(null);
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
   const [paidAt, setPaidAt] = useState<Date | null>(null);
@@ -75,20 +84,71 @@ export default function Pay() {
     else setLocalStatus("rejected");
   });
 
+  // The live gateway, and the networks it can charge in the payer's country.
+  const gateway = activeGateway(gateways?.gateways, gateways?.active ?? payment?.gateway);
+  const needsOperator = gateway?.requiresOperator ?? false;
+  const payerCountry = payment?.payerCountry ?? null;
+  const operators = useMemo(
+    () => operatorsFor(gateway, payerCountry),
+    [gateway, payerCountry],
+  );
+  const selectedOperator =
+    operators.find((o) => o.code === operator) ?? operators[0] ?? null;
+
+  // The invoice for this payment, once it is approved. Issued while the
+  // payment is processed, so it is normally there by the time the approval
+  // arrives; polled briefly in case it lands a moment later. Only a logged-in
+  // payer can list (and download) their invoices: without a session the list
+  // fails and the page says where to find it instead.
+  const approved = localStatus === "approved";
+  const invoices = useProfileInvoices({ enabled: approved });
+  const invoice =
+    invoices.data?.find((i) => i.paymentRequestId === payment?.id) ?? null;
+  const [invoiceChecks, setInvoiceChecks] = useState(0);
+  const waitingForInvoice =
+    approved && !invoice && !invoices.isError && invoiceChecks < 6;
+  const { refetch: refetchInvoices, isFetching: fetchingInvoices } = invoices;
+  useEffect(() => {
+    if (!waitingForInvoice || fetchingInvoices) return;
+    const timer = setTimeout(() => {
+      setInvoiceChecks((n) => n + 1);
+      void refetchInvoices();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [waitingForInvoice, fetchingInvoices, refetchInvoices]);
+  // "Envoyer le reçu": the invoice PDF to the payer's own WhatsApp, only when
+  // they ask for it.
+  const { toast } = useToast();
+  const sendReceipt = useMutation({
+    mutationFn: (invoiceId: string) => sendInvoiceToWhatsApp(invoiceId),
+    onSuccess: () =>
+      toast({ description: "Votre reçu a été envoyé sur WhatsApp." }),
+    onError: (error) =>
+      toast({
+        variant: "destructive",
+        description: receiptErrorMessage(error),
+      }),
+  });
+
   const handlePay = () => {
     if (!phone || !isValidPhoneNumber(phone)) {
       setPhoneError("Veuillez entrer un numéro de téléphone valide.");
       return;
     }
-    const isMtnMomo = payment?.gateway === "MTN_MOMO";
-    if (!isMtnMomo && !operator) {
+    if (needsOperator && !selectedOperator) {
       setPhoneError("Veuillez sélectionner un opérateur.");
       return;
     }
     setPhoneError("");
-    const localPhone = phone.replace(/^\+242/, "");
+    // The full international number: the gateway needs the country code, and
+    // stripping +242 broke every number from another country.
     initiate(
-      { phone: localPhone, ...(isMtnMomo ? {} : { operator: operator! }) },
+      {
+        phone,
+        ...(needsOperator && selectedOperator
+          ? { operator: selectedOperator.code }
+          : {}),
+      },
       {
         onSuccess: () => setLocalStatus("processing"),
         onError: () => setLocalStatus("rejected"),
@@ -102,85 +162,125 @@ export default function Pay() {
   // outcome, not a reason to tell someone who just paid that their link is
   // invalid. Nothing below may override it.
   if (localStatus === "approved") {
+    const backLabel = returnTo ? "Retour à l'application" : "Aller à l'accueil";
     return (
-      <PageWrapper>
-        <div className="flex w-full max-w-sm flex-col items-center text-center animate-in fade-in duration-500">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
-              <Check className="h-9 w-9 text-white" strokeWidth={3} />
+      // Top-aligned like the form it replaces: centred, the confirmation
+      // floated in the middle of a tall screen with a void above it.
+      <PageWrapper align="top">
+        <div className="w-full space-y-6 pt-4 animate-in fade-in duration-500">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10 animate-in zoom-in-50 duration-500">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+                <Check className="h-8 w-8 text-white" strokeWidth={3} />
+              </div>
             </div>
+            <h1 className="mt-5 text-2xl font-bold text-foreground">
+              Paiement effectué
+            </h1>
+            {/* The amount belongs in the confirmation line, not only in the
+                receipt below: it is the one fact someone checks before they
+                stop reading. Optional chaining because this branch runs even
+                when the payment query is in an error state — the socket is
+                the authority, and the confirmation does not depend on `data`. */}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {typeof payment?.amount === "number"
+                ? `Vous avez payé ${payment.amount.toLocaleString("fr-FR")} FCFA.`
+                : "Votre paiement a bien été confirmé."}
+            </p>
           </div>
 
-          <h1 className="mt-6 text-2xl font-bold text-foreground">
-            Paiement effectué !
-          </h1>
-          {/* The amount belongs in the confirmation line, not only in the
-              receipt below: it is the one fact someone checks before they stop
-              reading. Optional chaining because this branch now runs even when
-              the payment query is in an error state — the socket is the
-              authority, and the confirmation does not depend on `data`. */}
-          <p className="mt-1 text-sm text-muted-foreground">
-            {typeof payment?.amount === "number"
-              ? `Vous avez payé ${payment.amount.toLocaleString("fr-FR")} FCFA.`
-              : "Votre paiement a bien été confirmé."}
-          </p>
-
           {payment && (
-            <div className="mt-6 w-full">
-              <PaymentReceipt
-                rows={[
-                  {
-                    label: "Référence",
-                    value: payment.id.slice(0, 8).toUpperCase(),
-                  },
-                  ...(paidAt
-                    ? [
-                        {
-                          label: "Date",
-                          value: paidAt.toLocaleString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }),
-                        },
-                      ]
-                    : []),
-                  {
-                    label: "Moyen",
-                    value: methodLabel(payment.gateway, operator),
-                  },
-                  ...(typeof payment.amount === "number"
-                    ? [
-                        {
-                          label: "Montant",
-                          value: `${payment.amount.toLocaleString("fr-FR")} FCFA`,
-                          emphasis: true,
-                        },
-                      ]
-                    : []),
-                  ...(payment.description
-                    ? [{ label: "Objet", value: payment.description }]
-                    : []),
-                  { label: "Statut", value: "Confirmé", tone: "success" as const },
-                ]}
-              />
-            </div>
+            <PaymentReceipt
+              rows={[
+                {
+                  label: "Référence",
+                  value: payment.id.slice(0, 8).toUpperCase(),
+                },
+                ...(paidAt
+                  ? [
+                      {
+                        label: "Date",
+                        value: paidAt.toLocaleString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }),
+                      },
+                    ]
+                  : []),
+                {
+                  label: "Moyen",
+                  value: methodLabel(payment.gateway, selectedOperator),
+                },
+                ...(typeof payment.amount === "number"
+                  ? [
+                      {
+                        label: "Montant",
+                        value: `${payment.amount.toLocaleString("fr-FR")} FCFA`,
+                        emphasis: true,
+                      },
+                    ]
+                  : []),
+                ...(payment.description
+                  ? [{ label: "Objet", value: payment.description }]
+                  : []),
+                { label: "Statut", value: "Confirmé", tone: "success" as const },
+              ]}
+            />
           )}
 
           {/*
             Always offer a way onward. A payment opened from a WhatsApp link
-            carries no `return`, and this screen has no header and no tab bar —
-            so the old "vous pouvez fermer cette page" left the user stranded on
-            a success page with nowhere to go.
+            carries no `return`, and this screen has no header and no tab bar.
           */}
-          <Button
-            className="mt-6 w-full bg-whatsapp text-white hover:bg-whatsapp-dark"
-            onClick={() => navigate(returnTo ?? "/home")}
-          >
-            {returnTo ? "Retour à l'application" : "Aller à l'accueil"}
-          </Button>
+          <div className="space-y-2.5">
+            {invoice ? (
+              <Button
+                className="h-12 w-full bg-whatsapp text-base font-semibold text-white hover:bg-whatsapp-dark"
+                onClick={() => sendReceipt.mutate(invoice.id)}
+                disabled={sendReceipt.isPending || sendReceipt.isSuccess}
+              >
+                {sendReceipt.isPending ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : sendReceipt.isSuccess ? (
+                  <Check className="mr-2 h-5 w-5" />
+                ) : (
+                  <Send className="mr-2 h-5 w-5" />
+                )}
+                {sendReceipt.isPending
+                  ? "Envoi en cours…"
+                  : sendReceipt.isSuccess
+                    ? "Reçu envoyé sur WhatsApp"
+                    : "Envoyer le reçu"}
+              </Button>
+            ) : waitingForInvoice ? (
+              <Button className="h-12 w-full text-base" variant="secondary" disabled>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Préparation du reçu…
+              </Button>
+            ) : null}
+
+            <Button
+              variant={invoice || waitingForInvoice ? "secondary" : "default"}
+              className={cn(
+                "h-12 w-full text-base font-semibold",
+                !invoice &&
+                  !waitingForInvoice &&
+                  "bg-whatsapp text-white hover:bg-whatsapp-dark",
+              )}
+              onClick={() => navigate(returnTo ?? "/home")}
+            >
+              {backLabel}
+            </Button>
+
+            {!invoice && !waitingForInvoice && (
+              <p className="pt-1 text-center text-xs text-muted-foreground">
+                Votre reçu est disponible dans votre profil, rubrique Factures.
+              </p>
+            )}
+          </div>
         </div>
       </PageWrapper>
     );
@@ -297,7 +397,8 @@ export default function Pay() {
 
   const amount = payment.amount;
   const description = payment.description;
-  const isMtnMomo = payment.gateway === "MTN_MOMO";
+  const isMtnMomo = !needsOperator && payment.gateway === "MTN_MOMO";
+  const phoneCountry = ALPHA2[payerCountry ?? ""] ?? "CG";
 
   return (
     <PageWrapper align="top">
@@ -356,7 +457,7 @@ export default function Pay() {
           )}
         </div>
 
-        {!isMtnMomo && (
+        {needsOperator && (
           <div className="space-y-2">
             <label
               htmlFor="operator"
@@ -364,26 +465,29 @@ export default function Pay() {
             >
               Opérateur mobile
             </label>
-            {/* A real radiogroup: these are one exclusive choice, and without
-                the role a screen reader announced two unrelated buttons. */}
-            <div
-              role="radiogroup"
-              aria-label="Opérateur mobile"
-              className="grid grid-cols-2 gap-2.5"
-            >
-              <OperatorCard
-                label="MTN Mobile Money"
-                selected={operator === "CG_MTNMOBILEMONEY"}
-                logo={mtnLogo}
-                onClick={() => setOperator("CG_MTNMOBILEMONEY")}
-              />
-              <OperatorCard
-                label="Airtel Money"
-                selected={operator === "CG_AIRTELMONEY"}
-                logo={airtelLogo}
-                onClick={() => setOperator("CG_AIRTELMONEY")}
-              />
-            </div>
+            {operators.length > 0 ? (
+              // A real radiogroup: these are one exclusive choice, and without
+              // the role a screen reader announced unrelated buttons.
+              <div
+                role="radiogroup"
+                aria-label="Opérateur mobile"
+                className="grid grid-cols-2 gap-2.5"
+              >
+                {operators.map((o) => (
+                  <OperatorCard
+                    key={o.code}
+                    label={o.label}
+                    selected={selectedOperator?.code === o.code}
+                    logo={operatorLogo(o.code)}
+                    onClick={() => setOperator(o.code)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-xl bg-card px-4 py-3 text-sm text-muted-foreground shadow-soft">
+                Le paiement mobile n'est pas encore disponible dans votre pays.
+              </p>
+            )}
           </div>
         )}
 
@@ -413,16 +517,21 @@ export default function Pay() {
             htmlFor="phone-input"
             className="text-sm font-medium text-foreground"
           >
-            {isMtnMomo ? "Numéro MTN Mobile Money" : "Numéro de téléphone"}
+            {isMtnMomo
+              ? "Numéro MTN Mobile Money"
+              : selectedOperator
+                ? `Numéro ${selectedOperator.label}`
+                : "Numéro de téléphone"}
           </label>
           <PhoneInput
-            defaultCountry="CG"
+            // Opens on the payer's own country, whose networks are listed above.
+            defaultCountry={phoneCountry}
             value={phone}
             onChange={(value) => {
               setPhone(value);
               if (phoneError) setPhoneError("");
             }}
-            placeholder="06 000 0000"
+            placeholder={PHONE_PLACEHOLDERS[phoneCountry] ?? ""}
           />
           {phoneError && (
             <p className="text-xs text-destructive">{phoneError}</p>
@@ -432,7 +541,7 @@ export default function Pay() {
         <Button
           className="w-full h-12 text-base font-semibold"
           onClick={handlePay}
-          disabled={isPending}
+          disabled={isPending || (needsOperator && operators.length === 0)}
         >
           {isPending ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
           {isPending ? "Envoi en cours..." : "Payer"}
@@ -480,7 +589,8 @@ function OperatorCard({
 }: Readonly<{
   label: string;
   selected: boolean;
-  logo: string;
+  /** Absent for a network we have no logo for: its initials stand in. */
+  logo?: string;
   onClick: () => void;
 }>) {
   return (
@@ -502,11 +612,20 @@ function OperatorCard({
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <img
-          src={logo}
-          alt=""
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-        />
+        {logo ? (
+          <img
+            src={logo}
+            alt=""
+            className="h-9 w-9 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-foreground"
+          >
+            {initials(label)}
+          </span>
+        )}
         <span
           className={cn(
             "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
@@ -525,18 +644,72 @@ function OperatorCard({
 
 
 /**
- * What the payer actually used, in their words.
- *
- * `operator` is only set when the page rendered the operator picker (Monetbil);
- * an MTN MoMo payment never shows one, so fall back to the gateway. Neither is
- * guaranteed, hence the last resort.
+ * What to tell the payer when the receipt could not be sent. The send limit
+ * comes back as the throttler's English message, which is not for them.
+ */
+function receiptErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  if (/too many requests|throttler/i.test(message)) {
+    return "Vous avez demandé ce reçu plusieurs fois. Réessayez dans quelques minutes.";
+  }
+  return message || "L'envoi du reçu a échoué. Réessayez.";
+}
+
+/** Payer country (ISO3, from the backend) → phone input country (ISO2). */
+const ALPHA2: Record<string, "CG" | "CM"> = { COG: "CG", CMR: "CM" };
+
+const PHONE_PLACEHOLDERS: Record<string, string> = {
+  CG: "06 000 0000",
+  CM: "6 00 00 00 00",
+};
+
+/** The gateway in use: the live one, as the backend names it. */
+function activeGateway(
+  gateways: PaymentGatewayInfo[] | undefined,
+  key: PaymentGateway | null | undefined,
+): PaymentGatewayInfo | null {
+  if (!gateways || !key) return null;
+  return gateways.find((g) => g.key === key) ?? null;
+}
+
+/**
+ * The networks to offer this payer: those of their country. A gateway that
+ * does not say where its networks operate, or a payer whose country is
+ * unknown, gets the full list rather than none.
+ */
+function operatorsFor(
+  gateway: PaymentGatewayInfo | null,
+  payerCountry: string | null,
+): PaymentOperator[] {
+  const all = gateway?.operators ?? [];
+  if (!payerCountry || all.every((o) => !o.country)) return all;
+  return all.filter((o) => o.country === payerCountry);
+}
+
+/** The logo we have for a network, matched on its code's network part. */
+function operatorLogo(code: string): string | undefined {
+  if (code.startsWith("MTN")) return mtnLogo;
+  if (code.startsWith("AIRTEL")) return airtelLogo;
+  return undefined;
+}
+
+function initials(label: string): string {
+  return label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/**
+ * What the payer actually used, in their words: the network they picked, or
+ * for a single-network gateway (MTN MoMo) the gateway itself.
  */
 function methodLabel(
   gateway: PaymentGateway | null,
-  operator: Operator | null,
+  operator: PaymentOperator | null,
 ): string {
+  if (operator) return operator.label;
   if (gateway === "MTN_MOMO") return "MTN Mobile Money";
-  if (operator === "CG_MTNMOBILEMONEY") return "MTN Mobile Money";
-  if (operator === "CG_AIRTELMONEY") return "Airtel Money";
   return "Mobile Money";
 }

@@ -126,7 +126,7 @@ Nous ne vendons pas vos données. Nous faisons appel à des prestataires techniq
 
 - **Messagerie WhatsApp** — WhatsApp est édité par Meta Platforms ; selon la configuration, nous passons par Meta ou par l'opérateur Twilio. Ils reçoivent votre numéro et le contenu des messages échangés.
 - **Traitement des messages de l'assistant** — vos échanges avec l'assistant Rabotka sont traités par des prestataires techniques situés hors du Congo. Votre numéro de téléphone, votre e-mail, votre adresse et vos documents d'identité ne leur sont pas transmis.
-- **Paiements** — Monetbil reçoit votre numéro, votre nom et votre e-mail ainsi que le montant ; MTN Mobile Money reçoit votre numéro et le montant.
+- **Paiements** — pawaPay reçoit votre numéro, votre nom, votre e-mail et votre identifiant de profil ainsi que le montant ; MTN Mobile Money reçoit votre numéro et le montant.
 - **Cartographie** — l'adresse que vous saisissez est envoyée au service OpenStreetMap afin d'obtenir des coordonnées approximatives.
 - **Hébergement et stockage** — nos serveurs et le stockage de vos fichiers sont assurés par des prestataires d'infrastructure.
 - **Courrier électronique** — nos e-mails partent de notre propre serveur de messagerie.
