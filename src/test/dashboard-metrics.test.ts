@@ -38,6 +38,7 @@ const invoice = (amount: string, createdAt: string): InvoiceItem => ({
   status: "DOWNLOADED",
   createdAt,
   relatedEntityType: null,
+    paymentRequestId: null,
   relatedEntityId: null,
 });
 
