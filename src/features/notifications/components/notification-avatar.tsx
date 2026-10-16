@@ -1,11 +1,16 @@
 import {
+  AlertTriangle,
   Bell,
   Briefcase,
+  CalendarClock,
   CheckCircle2,
+  ClipboardCheck,
   MessageSquare,
+  PlayCircle,
   Star,
   TrendingUp,
   Unlock,
+  Wallet,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
@@ -29,6 +34,13 @@ const ICONS: Record<string, LucideIcon> = {
   CLAIM_COMMENTED: MessageSquare,
   CLAIM_STATUS_CHANGED: MessageSquare,
   SIMILAR_PROFILE_HIRED: TrendingUp,
+  MISSION_REMINDER: CalendarClock,
+  MISSION_STARTED: PlayCircle,
+  MISSION_STATUS_CHECK: ClipboardCheck,
+  JOB_OFFER_EXPIRED: Briefcase,
+  KYC_REJECTED: AlertTriangle,
+  ACCOUNT_SUSPENDED: AlertTriangle,
+  UNLOCK_CONVERTED_TO_CREDIT: Wallet,
 };
 
 /**
@@ -46,6 +58,10 @@ const TONES: Record<string, string> = {
   MISSION_RATED: "bg-amber-100 text-amber-700",
   CLAIM_COMMENTED: "bg-amber-100 text-amber-700",
   CLAIM_STATUS_CHANGED: "bg-amber-100 text-amber-700",
+  MISSION_STATUS_CHECK: "bg-amber-100 text-amber-700",
+  KYC_REJECTED: "bg-destructive/10 text-destructive",
+  ACCOUNT_SUSPENDED: "bg-destructive/10 text-destructive",
+  UNLOCK_CONVERTED_TO_CREDIT: "bg-whatsapp/15 text-whatsapp-dark",
 };
 
 /**
