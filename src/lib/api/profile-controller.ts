@@ -160,8 +160,10 @@ export type ProfileApplicationsResponse = {
 
 export type InvoiceItem = {
   id: string;
+  /** The payment request it was issued for, when it came from one. */
+  paymentRequestId: string | null;
   amount: string;
-  reason: "CONTACT_UNLOCK" | "PENALTY" | "OTHER";
+  reason: "CONTACT_UNLOCK" | "PENALTY" | "WALLET_TOP_UP" | "OTHER";
   status: "PENDING_DOWNLOAD" | "DOWNLOADED";
   createdAt: string;
   relatedEntityType: string | null;
@@ -460,6 +462,21 @@ class ProfileController extends RabotkaBaseController {
     }
   }
 
+  /**
+   * Sends an invoice PDF to the owner's own WhatsApp. The backend picks the
+   * number (the profile's), never the client.
+   */
+  async sendInvoiceToWhatsApp(invoiceId: string): Promise<{ sent: true }> {
+    try {
+      return await this.post<{ sent: true }>(
+        `/invoices/${encodeURIComponent(invoiceId)}/send-whatsapp`,
+        {},
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   /** Absolute URL of an invoice PDF. See agreementDownloadUrl(). */
   invoiceDownloadUrl(invoiceId: string): string {
     return `${config.apiUrl}/invoices/${encodeURIComponent(invoiceId)}/download`;
@@ -488,5 +505,6 @@ export const {
   getInvoices,
   getContactedProfiles,
   invoiceDownloadUrl,
+  sendInvoiceToWhatsApp,
   markFirstLoginDone,
 } = new ProfileController();
