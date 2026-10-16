@@ -15,7 +15,14 @@ export type AppNotificationType =
   | "PAYMENT_SUCCEEDED"
   | "PAYMENT_FAILED"
   | "CLAIM_COMMENTED"
-  | "CLAIM_STATUS_CHANGED";
+  | "CLAIM_STATUS_CHANGED"
+  | "MISSION_REMINDER"
+  | "MISSION_STARTED"
+  | "MISSION_STATUS_CHECK"
+  | "JOB_OFFER_EXPIRED"
+  | "KYC_REJECTED"
+  | "ACCOUNT_SUSPENDED"
+  | "UNLOCK_CONVERTED_TO_CREDIT";
 
 /**
  * One row of the bell's feed. The actor only ever appears as a photo — a
