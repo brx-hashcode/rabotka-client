@@ -4,6 +4,7 @@ import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { isSignupVerified } from "@/lib/signup-verification";
+import { scrollToTop } from "@/lib/app-scroll";
 import {
   PersonalInfoForm,
   ProfileTypeForm,
@@ -55,7 +56,7 @@ export default function Onboarding() {
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
       globalThis.history.scrollRestoration = "manual";
-      globalThis.scrollTo(0, 0);
+      scrollToTop();
     }
   }, [step]);
 

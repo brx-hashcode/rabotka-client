@@ -1,11 +1,12 @@
 /**
  * Where the page scrolls.
  *
- * Screens with the tab bar scroll inside AppShell's `<main id="app-scroll">`,
- * not the document: the document never scrolls there, so iPhone Safari's
- * toolbar never collapses mid-scroll and the tab bar (part of the shell, not
- * `position: fixed`) has nothing to lag behind. Every other screen (landing,
- * chats, payment flows, onboarding) still scrolls the document.
+ * Every screen inside AppShell or PublicShell scrolls inside their
+ * `<main id="app-scroll">`, not the document: the document never scrolls
+ * there, so iPhone Safari's toolbar never collapses mid-scroll and nothing
+ * (headers, the tab bar, a payment's bottom button) shakes. Only the chats
+ * (AppShell `ownsViewport`) and the pages outside both shells (landing, API
+ * docs, OAuth consent) still scroll the document.
  *
  * Code that reads or sets the scroll position goes through these helpers so it
  * works on both.

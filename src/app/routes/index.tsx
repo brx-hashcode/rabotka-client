@@ -424,7 +424,7 @@ export function AppRoutes() {
             <AuthGuard>
               {/* Full-screen thread, like the claim conversation next door:
                   the tab bar would eat the composer on a short screen. */}
-              <AppShell withNav={false}>
+              <AppShell withNav={false} ownsViewport>
                 <Discussion />
               </AppShell>
             </AuthGuard>
@@ -461,7 +461,7 @@ export function AppRoutes() {
           <Suspense fallback={<PageLoader />}>
             <AuthGuard>
               {/* Full-screen conversation, like a WhatsApp chat — no tab bar. */}
-              <AppShell withNav={false}>
+              <AppShell withNav={false} ownsViewport>
                 <Claim />
               </AppShell>
             </AuthGuard>
