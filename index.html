@@ -8,6 +8,19 @@
     />
     <meta name="theme-color" content="#25D366" />
     <script>
+      // The installed app opens on the feed, never the landing page. The
+      // manifest's start_url says /home, but iPhone's "Add to Home Screen"
+      // can keep the page it was added from — usually / — so a launch from
+      // the home screen that lands there is sent on before anything paints.
+      if (
+        location.pathname === "/" &&
+        (navigator.standalone === true ||
+          matchMedia("(display-mode: standalone)").matches)
+      ) {
+        location.replace("/home" + location.search);
+      }
+    </script>
+    <script>
       // Lime status bar on the home screen from the very first paint: Safari
       // picks its bar colour when the page first paints and only looks again
       // on scroll, so setting it from React (BrandHero) alone was too late.
