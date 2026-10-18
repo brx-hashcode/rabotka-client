@@ -1,0 +1,19 @@
+# Production only — the deploy runs
+#   docker compose -f docker-compose.prod.yml -f docker-compose.www.yml up -d
+#
+# Catches www.CLIENT_DOMAIN and 301s it to the apex. Kept out of
+# docker-compose.prod.yml because develop shares that file, and its
+# www.rabotka.hashcode.digital has no DNS record (and, two levels under
+# hashcode.digital, no Cloudflare certificate either).
+services:
+  client:
+    labels:
+      # www redirect router — catches www.CLIENT_DOMAIN and 301s to apex
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.rule=Host(`www.${CLIENT_DOMAIN}`)"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.entrypoints=websecure"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.middlewares=www-redirect-${APP_ENV:-prod}"
+      - "traefik.http.routers.rabotka-client-www-${APP_ENV:-prod}.service=rabotka-client-${APP_ENV:-prod}"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.regex=^https://www\\.${CLIENT_DOMAIN}/(.*)"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.replacement=https://${CLIENT_DOMAIN}/$${1}"
+      - "traefik.http.middlewares.www-redirect-${APP_ENV:-prod}.redirectregex.permanent=true"

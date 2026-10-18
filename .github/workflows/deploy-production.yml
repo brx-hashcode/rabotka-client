@@ -118,7 +118,7 @@ jobs:
           EOF
           sed -i 's/^[[:space:]]*//' ~/rabotka-client-prod/.env
           cd ~/rabotka-client-prod && git fetch origin main && git reset --hard origin/main && \
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans"
+          docker compose -f docker-compose.prod.yml -f docker-compose.www.yml up -d --remove-orphans"
 
   smoke-test:
     name: Smoke Test (production)
