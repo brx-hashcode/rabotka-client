@@ -1,3 +1,5 @@
+import { APP_SCROLL_ID } from "@/lib/app-scroll";
+
 type PublicShellProps = {
   readonly children: React.ReactNode;
 };
@@ -29,9 +31,18 @@ type PublicShellProps = {
  */
 export function PublicShell({ children }: Readonly<PublicShellProps>) {
   return (
-    <div className="sm:bg-app-surround">
-      <div className="relative mx-auto min-h-svh w-full max-w-md bg-background sm:max-w-lg sm:shadow-soft">
-        {children}
+    // The same fixed frame as AppShell: only <main> scrolls, never the
+    // document, so iPhone Safari's toolbar cannot collapse mid-scroll and
+    // shake the page — onboarding, /pay and the public portfolio did exactly
+    // that while the tab screens were already still. See lib/app-scroll.
+    <div className="fixed inset-0 overflow-hidden sm:bg-app-surround">
+      <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background sm:max-w-lg sm:shadow-soft">
+        <main
+          id={APP_SCROLL_ID}
+          className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+        >
+          {children}
+        </main>
       </div>
     </div>
   );
