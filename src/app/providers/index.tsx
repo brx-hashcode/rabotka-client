@@ -9,7 +9,6 @@ import {
   QueryClientProvider,
   MutationCache,
 } from "@tanstack/react-query";
-import { CsrfProvider } from "./csrf-provider";
 import { SessionLinkProvider } from "./session-link-provider";
 import {
   getPolicyContent,
@@ -64,7 +63,6 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
 
   return (
     <HelmetProvider>
-    <CsrfProvider>
       <NuqsAdapter>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -76,7 +74,6 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
           </TooltipProvider>
         </QueryClientProvider>
       </NuqsAdapter>
-    </CsrfProvider>
     </HelmetProvider>
   );
 }
