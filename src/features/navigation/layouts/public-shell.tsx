@@ -37,6 +37,11 @@ export function PublicShell({ children }: Readonly<PublicShellProps>) {
     // that while the tab screens were already still. See lib/app-scroll.
     <div className="fixed inset-0 overflow-hidden sm:bg-app-surround">
       <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background sm:max-w-lg sm:shadow-soft">
+        {/* Behind iPhone's status bar in the installed app; see AppShell. */}
+        <div
+          aria-hidden
+          className="h-[env(safe-area-inset-top)] shrink-0 bg-[var(--status-bar,hsl(var(--background)))]"
+        />
         <main
           id={APP_SCROLL_ID}
           className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain"

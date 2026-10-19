@@ -26,6 +26,7 @@
       // on scroll, so setting it from React (BrandHero) alone was too late.
       if (location.pathname === "/home") {
         document.documentElement.style.backgroundColor = "#CBFFA5";
+        document.documentElement.style.setProperty("--status-bar", "#CBFFA5");
         document
           .querySelector('meta[name="theme-color"]')
           .setAttribute("content", "#CBFFA5");

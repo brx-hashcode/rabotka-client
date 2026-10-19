@@ -2,6 +2,8 @@ import { BottomNav } from "../components/bottom-nav";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
+import { useEffect } from "react";
+import { syncPush } from "@/lib/push";
 import { APP_SCROLL_ID } from "@/lib/app-scroll";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +38,13 @@ export function AppShell({
   // Both roles have a bell, and the badge should move on whatever page the
   // profile is looking at.
   useNotificationsSocket(profile?.status === "ACTIVE");
+  // Where push is already allowed, make sure this phone's subscription exists,
+  // uses the backend's current key and belongs to this profile — someone else
+  // may have signed in here before. Asking for permission is PushPrompt's job.
+  const isActive = profile?.status === "ACTIVE";
+  useEffect(() => {
+    if (isActive) void syncPush().catch(() => undefined);
+  }, [isActive]);
 
   return (
     // From sm up the app becomes a deliberate centred column on a darker
@@ -66,6 +75,13 @@ export function AppShell({
       // lib/app-scroll for the scroll helpers this implies.
       <div className="fixed inset-0 overflow-hidden sm:bg-app-surround">
         <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background sm:max-w-lg sm:shadow-soft">
+          {/* The strip behind iPhone's status bar in the installed app, where
+              the page draws under it (black-translucent): the header colour
+              of whatever screen is open, lime on home. Zero tall elsewhere. */}
+          <div
+            aria-hidden
+            className="h-[env(safe-area-inset-top)] shrink-0 bg-[var(--status-bar,hsl(var(--background)))]"
+          />
           <main
             id={APP_SCROLL_ID}
             className={cn(

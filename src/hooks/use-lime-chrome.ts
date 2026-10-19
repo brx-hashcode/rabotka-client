@@ -20,11 +20,14 @@ export function useLimeChrome() {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.style.backgroundColor = LIME_HEX;
+    // The shells' status-bar strip (installed app on iPhone) reads this.
+    root.style.setProperty("--status-bar", LIME_HEX);
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     meta?.setAttribute("content", LIME_HEX);
 
     return () => {
       root.style.backgroundColor = "";
+      root.style.removeProperty("--status-bar");
       meta?.setAttribute("content", DEFAULT_THEME_COLOR);
     };
   }, []);
