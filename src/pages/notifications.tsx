@@ -18,6 +18,7 @@ import type { AppNotification } from "@/lib/api/notification-controller";
 import { notificationsContent as copy } from "@/content/notifications";
 import { NotificationCard } from "@/features/notifications/components/notification-card";
 import { NotificationActionsSheet } from "@/features/notifications/components/notification-actions-sheet";
+import { PushPrompt } from "@/features/notifications/components/push-prompt";
 import { groupNotificationsByDay } from "@/features/notifications/read-state";
 import { onPageScroll } from "@/lib/app-scroll";
 
@@ -88,6 +89,10 @@ export default function Notifications() {
             )
           }
         />
+
+        <div className="px-4 pt-4 empty:hidden">
+          <PushPrompt />
+        </div>
 
         {isLoading && (
           <div className="space-y-3 px-4 py-4">

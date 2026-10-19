@@ -368,7 +368,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   return (
     <div className="chat-wallpaper relative flex h-dvh flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center gap-2 bg-background px-3 py-3">
+      <div className="flex shrink-0 items-center gap-2 bg-background px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button
           type="button"
           onClick={() => navigate("/claims")}

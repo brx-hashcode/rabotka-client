@@ -496,7 +496,7 @@ export default function Discussion() {
   return (
     <div className="flex h-dvh flex-col">
       {/* ── Header: who you are talking to, and whether they are there. ── */}
-      <header className="z-10 flex shrink-0 items-center gap-2 bg-card px-2 py-2 shadow-soft">
+      <header className="z-10 flex shrink-0 items-center gap-2 bg-card px-2 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-soft">
         <button
           type="button"
           aria-label="Retour"

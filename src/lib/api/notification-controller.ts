@@ -78,6 +78,29 @@ class NotificationController extends RabotkaBaseController {
     return this.delete<{ success: boolean }>(`/profile/notifications/${id}`);
   }
 
+  /** The Web Push (VAPID) public key this device subscribes with. */
+  pushKey(): Promise<{ publicKey: string }> {
+    return this.get<{ publicKey: string }>("/profile/notifications/push/key");
+  }
+
+  /** Registers this device's push subscription for the signed-in profile. */
+  subscribePush(body: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+  }): Promise<{ success: boolean }> {
+    return this.post<{ success: boolean }>(
+      "/profile/notifications/push/subscribe",
+      body,
+    );
+  }
+
+  unsubscribePush(endpoint: string): Promise<{ success: boolean }> {
+    return this.post<{ success: boolean }>(
+      "/profile/notifications/push/unsubscribe",
+      { endpoint },
+    );
+  }
+
   /** « Tout effacer ». */
   clear(): Promise<{ success: boolean }> {
     return this.post<{ success: boolean }>("/profile/notifications/clear");
@@ -93,3 +116,6 @@ export const markAllNotificationsRead =
   controller.markAllRead.bind(controller);
 export const dismissNotification = controller.dismiss.bind(controller);
 export const clearNotifications = controller.clear.bind(controller);
+export const getPushKey = controller.pushKey.bind(controller);
+export const subscribePush = controller.subscribePush.bind(controller);
+export const unsubscribePush = controller.unsubscribePush.bind(controller);
