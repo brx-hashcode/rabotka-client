@@ -24,7 +24,7 @@ export default function OnboardingSuccess() {
         {/* One column for everything, the shell's full width with the same
             gutter as login: the text, the credit card and the button share
             their edges instead of each being capped at its own width. */}
-        <div className="flex min-h-dvh w-full flex-col px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex min-h-dvh w-full flex-col px-6 pt-[max(0px,calc(2.5rem-env(safe-area-inset-top)))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <div className="flex flex-1 flex-col items-center justify-center py-8">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}

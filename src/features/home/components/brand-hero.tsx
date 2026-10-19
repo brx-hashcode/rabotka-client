@@ -51,7 +51,7 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
         <div
           aria-hidden={!compact}
           className={cn(
-            "absolute inset-x-0 top-0 flex items-center gap-2 bg-lime px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-soft",
+            "absolute inset-x-0 top-0 flex items-center gap-2 bg-lime px-4 pb-3 pt-3 shadow-soft",
             "transition duration-200 ease-out motion-reduce:transition-none",
             compact
               ? "translate-y-0 opacity-100"
@@ -65,7 +65,7 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
 
       <div
         ref={band}
-        className="rounded-b-[32px] bg-lime px-4 pb-16 pt-[max(1.75rem,calc(env(safe-area-inset-top)+0.75rem))] text-lime-foreground"
+        className="rounded-b-[32px] bg-lime px-4 pb-16 pt-[max(0.75rem,calc(1.75rem-env(safe-area-inset-top)))] text-lime-foreground"
       >
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="min-w-0">
