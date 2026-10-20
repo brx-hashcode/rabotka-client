@@ -1,5 +1,7 @@
 import { BaseController } from "mvc-front-sdk";
 import { config } from "@/config";
+import { reportNetworkFailure } from "@/lib/connectivity";
+import { isNetworkError } from "./errors";
 
 type RequestBody = Record<string, unknown> | FormData;
 
@@ -20,6 +22,18 @@ export class RabotkaBaseController extends BaseController {
   // unique query param to make every GET URL distinct and thus uncacheable.
   // (A `Cache-Control` request header would be simpler but is not CORS
   // safelisted, so it would require the cross-origin API to allow it.)
+  /**
+   * Every request passes through here: one that got no response at all marks
+   * the app offline (lib/connectivity), so the next fetches pause on the
+   * stored data instead of failing one by one.
+   */
+  private track<T>(request: Promise<T>): Promise<T> {
+    return request.catch((error: unknown) => {
+      if (isNetworkError(error)) reportNetworkFailure();
+      throw error;
+    });
+  }
+
   protected bustCache(path: string): string {
     const buster = `_=${Date.now()}${cacheBusterSeq++}`;
     const separator = path.includes("?") ? "&" : "?";
@@ -31,11 +45,11 @@ export class RabotkaBaseController extends BaseController {
     headers?: HeadersInit,
     customErrorMessage?: string,
   ): Promise<T> {
-    return this.apiService.get<T>(
+    return this.track(this.apiService.get<T>(
       this.bustCache(path),
       headers,
       customErrorMessage,
-    );
+    ));
   }
 
   protected post<T>(
@@ -44,7 +58,7 @@ export class RabotkaBaseController extends BaseController {
     headers?: HeadersInit,
     customErrorMessage?: string,
   ): Promise<T> {
-    return this.apiService.post<T>(path, body, headers, customErrorMessage);
+    return this.track(this.apiService.post<T>(path, body, headers, customErrorMessage));
   }
 
   protected put<T>(
@@ -53,7 +67,7 @@ export class RabotkaBaseController extends BaseController {
     headers?: HeadersInit,
     customErrorMessage?: string,
   ): Promise<T> {
-    return this.apiService.put<T>(path, body, headers, customErrorMessage);
+    return this.track(this.apiService.put<T>(path, body, headers, customErrorMessage));
   }
 
   protected patch<T>(
@@ -62,7 +76,7 @@ export class RabotkaBaseController extends BaseController {
     headers?: HeadersInit,
     customErrorMessage?: string,
   ): Promise<T> {
-    return this.apiService.patch<T>(path, body, headers, customErrorMessage);
+    return this.track(this.apiService.patch<T>(path, body, headers, customErrorMessage));
   }
 
   protected delete<T>(
@@ -70,6 +84,6 @@ export class RabotkaBaseController extends BaseController {
     headers?: HeadersInit,
     customErrorMessage?: string,
   ): Promise<T> {
-    return this.apiService.delete<T>(path, headers, customErrorMessage);
+    return this.track(this.apiService.delete<T>(path, headers, customErrorMessage));
   }
 }

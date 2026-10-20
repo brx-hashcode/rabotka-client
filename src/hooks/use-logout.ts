@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { logout } from "@/lib/api/auth-controller";
 import { disablePush } from "@/lib/push";
+import { clearQueryCache } from "@/lib/offline-cache";
 import { useToast } from "@/hooks/use-toast";
 
 export function useLogout() {
@@ -19,7 +20,10 @@ export function useLogout() {
       return logout();
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["profile", "me"] });
+      // Nothing of this account may stay on the phone: not in memory, not in
+      // the offline copy.
+      void clearQueryCache();
+      queryClient.clear();
       navigate("/", { replace: true });
     },
     onError: () => {
