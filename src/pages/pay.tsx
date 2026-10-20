@@ -21,6 +21,7 @@ import { useProfileInvoices } from "@/hooks/use-profile-invoices";
 import { sendInvoiceToWhatsApp } from "@/lib/api/profile-controller";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { OFFLINE_ACTION_HINT, useIsOnline } from "@/hooks/use-is-online";
 import { useInitiatePayment } from "@/hooks/use-initiate-payment";
 import { useGoBack } from "@/hooks/use-go-back";
 import { usePaymentSocket } from "@/hooks/use-payment-socket";
@@ -63,6 +64,7 @@ export default function Pay() {
   const { data: payment, isLoading, error } = usePaymentByToken(token);
   const { mutate: initiate, isPending } = useInitiatePayment(token ?? "");
   const { data: gateways } = usePaymentGateways();
+  const online = useIsOnline();
 
   const [phone, setPhone] = useState<PhoneValue | null>(null);
   // The payer's pick; until they make one, the first network offered.
@@ -635,10 +637,10 @@ export default function Pay() {
         <Button
           className="w-full h-12 text-base font-semibold"
           onClick={handlePay}
-          disabled={isPending || (needsOperator && operators.length === 0)}
+          disabled={isPending || !online || (needsOperator && operators.length === 0)}
         >
           {isPending ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
-          {isPending ? "Envoi en cours..." : "Payer"}
+          {isPending ? "Envoi en cours..." : online ? "Payer" : OFFLINE_ACTION_HINT}
         </Button>
       </div>
 

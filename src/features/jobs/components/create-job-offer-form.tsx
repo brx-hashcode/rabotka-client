@@ -50,6 +50,7 @@ import {
 import { scrollToTop } from "@/lib/app-scroll";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { Skeleton } from "@/components/ui/skeleton";
+import { OFFLINE_ACTION_HINT, useIsOnline } from "@/hooks/use-is-online";
 import {
   createJobOfferSchema,
   type jobOfferSchema,
@@ -135,6 +136,7 @@ export function JobOfferForm({
 }: Readonly<JobOfferFormProps>) {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const online = useIsOnline();
   const isLast = step === JOB_OFFER_STEPS.length - 1;
   // Read once, at mount: it decides the form's starting values.
   const [draft] = useState(() =>
@@ -640,11 +642,11 @@ export function JobOfferForm({
               <Button
                 key="publish"
                 type="button"
-                disabled={isPending}
+                disabled={isPending || !online}
                 onClick={() => void publish()}
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {isPending ? pendingLabel : submitLabel}
+                {isPending ? pendingLabel : online ? submitLabel : OFFLINE_ACTION_HINT}
               </Button>
             ) : (
               <Button key="continue" type="button" onClick={() => void next()}>

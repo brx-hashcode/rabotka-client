@@ -26,8 +26,47 @@ const MANIFEST_URL = "/offline-manifest.json";
 const MEDIA_CACHE = "rabotka-media";
 const MEDIA_MAX_ENTRIES = 150;
 const MEDIA_PATTERN = /^\/assets\/.+\.(webp|avif|png|jpe?g|gif)$/;
+/**
+ * Photos from the storage host (profile, portfolio, offers), kept once seen so
+ * they show offline. Only when the host allows a CORS read: an opaque
+ * response is counted by browsers as several megabytes of quota each, which
+ * would fill a phone's storage with a few dozen photos. Until the bucket sends
+ * Access-Control-Allow-Origin, remote photos are simply not kept.
+ */
+const PHOTO_CACHE = "rabotka-photos";
+const PHOTO_MAX_ENTRIES = 300;
 /** How long a page waits for the network before the stored app is shown. */
 const NAVIGATION_TIMEOUT_MS = 4000;
+
+/**
+ * Hosts that refused a CORS read. Asked once per worker lifetime, then left
+ * alone: retrying would download every photo twice, on data people pay for.
+ */
+const noCorsHosts = new Set();
+
+/** Other origins' images: photos, kept by `cachePhoto` when allowed. */
+async function cachePhoto(request) {
+  const cache = await caches.open(PHOTO_CACHE);
+  const cached = await cache.match(request.url);
+  if (cached) return cached;
+  const host = new URL(request.url).host;
+  if (noCorsHosts.has(host)) return fetch(request);
+  try {
+    const response = await fetch(request.url, { mode: "cors", credentials: "omit" });
+    if (response.ok && response.type === "cors") {
+      await cache.put(request.url, response.clone());
+      const keys = await cache.keys();
+      const excess = keys.length - PHOTO_MAX_ENTRIES;
+      if (excess > 0) await Promise.all(keys.slice(0, excess).map((k) => cache.delete(k)));
+    }
+    if (response.type !== "cors") noCorsHosts.add(host);
+    return response;
+  } catch {
+    // No CORS on the host (or offline): the page's own request, untouched.
+    if (self.navigator.onLine) noCorsHosts.add(host);
+    return fetch(request);
+  }
+}
 
 /** Never served from the shell cache. */
 function isBypassed(url) {
@@ -52,7 +91,7 @@ async function dropShells() {
   const names = await caches.keys();
   await Promise.all(
     names
-      .filter((n) => n.startsWith(SHELL_PREFIX) || n === MEDIA_CACHE)
+      .filter((n) => n.startsWith(SHELL_PREFIX) || n === MEDIA_CACHE || n === PHOTO_CACHE)
       .map((n) => caches.delete(n)),
   );
 }
@@ -113,6 +152,10 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+  if (request.destination === "image" && url.origin !== self.location.origin && url.protocol === "https:") {
+    event.respondWith(cachePhoto(request));
+    return;
+  }
   if (isBypassed(url)) return;
 
   // Pages: the network first, so a deploy is seen as soon as it is online;
