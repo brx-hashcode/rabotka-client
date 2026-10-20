@@ -10,6 +10,7 @@ import {
   MutationCache,
 } from "@tanstack/react-query";
 import { SessionLinkProvider } from "./session-link-provider";
+import { UpdateBanner } from "@/features/offline/update-banner";
 import {
   getPolicyContent,
   policyQueryKey,
@@ -68,6 +69,7 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <UpdateBanner />
             {/* Inside QueryClientProvider: it invalidates `profile/me` once the
                 WhatsApp link's session cookie is in place. */}
             <SessionLinkProvider>{children}</SessionLinkProvider>
