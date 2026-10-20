@@ -638,15 +638,19 @@ export default function Pay() {
           {isPending ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
           {isPending ? "Envoi en cours..." : "Payer"}
         </Button>
-
-        <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
-          <span>🔒</span>
-          <span>
-            Paiement sécurisé avec{" "}
-            <span className="font-semibold text-foreground">CashLock</span>
-          </span>
-        </p>
       </div>
+
+      {/* At the foot of the screen, not under the button: it is a reassurance
+          about the whole page, and right under « Payer » it read as part of
+          the form. `mt-auto` in the page's column; on a short screen it
+          simply follows the form. */}
+      <p className="mt-auto flex items-center justify-center gap-1 pt-10 text-center text-xs text-muted-foreground">
+        <span>🔒</span>
+        <span>
+          Paiement sécurisé avec{" "}
+          <span className="font-semibold text-foreground">CashLock</span>
+        </span>
+      </p>
     </PageWrapper>
   );
 }
@@ -664,7 +668,7 @@ function PageWrapper({
       className={cn(
         "flex min-h-dvh flex-col overflow-hidden bg-background px-6",
         align === "top"
-          ? "items-center justify-start pb-16 pt-8"
+          ? "items-center justify-start pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8"
           : "items-center justify-center py-12",
       )}
     >
