@@ -1,4 +1,4 @@
-import { Camera, MapPin, ShieldCheck, Star } from "lucide-react";
+import { BadgeCheck, Camera, MapPin, ShieldCheck, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -13,6 +13,12 @@ type Props = {
   completedMissions?: number | null;
   /** The owner's page: tapping the avatar leads to adding a photo. */
   onAvatarClick?: () => void;
+  /** Identity checked: a tick beside the name. */
+  verified?: boolean;
+  /** At the end of the row — e.g. « Modifier » on the profile tab. */
+  action?: React.ReactNode;
+  /** Under the trust line — e.g. an account status that is not « actif ». */
+  footer?: React.ReactNode;
 };
 
 /**
@@ -33,6 +39,9 @@ export function ProfileIdentity({
   reliabilityScore,
   completedMissions,
   onAvatarClick,
+  verified = false,
+  action,
+  footer,
 }: Readonly<Props>) {
   const avatar = (
     <>
@@ -69,8 +78,16 @@ export function ProfileIdentity({
         <div className="relative shrink-0">{avatar}</div>
       )}
 
-      <div className="min-w-0 space-y-1">
-        <h1 className="truncate text-lg font-bold text-foreground">{fullName}</h1>
+      <div className="min-w-0 flex-1 space-y-1">
+        <h1 className="flex items-center gap-1.5 text-lg font-bold text-foreground">
+          <span className="truncate">{fullName}</span>
+          {verified && (
+            <BadgeCheck
+              className="size-4.5 shrink-0 text-whatsapp"
+              aria-label="Identité vérifiée"
+            />
+          )}
+        </h1>
         {location && (
           <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
             <MapPin className="size-3.5 shrink-0" />
@@ -101,7 +118,9 @@ export function ProfileIdentity({
             </span>
           )}
         </p>
+        {footer}
       </div>
+      {action && <div className="shrink-0 self-start">{action}</div>}
     </section>
   );
 }
