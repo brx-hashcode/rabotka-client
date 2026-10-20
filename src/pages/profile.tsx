@@ -101,8 +101,9 @@ export default function Profile() {
       {/* The three numbers, each a way into what it counts. */}
       <div className="grid grid-cols-3 gap-2.5">
         <StatTile
+          // The amount says what it is; « Recharger » is the second line.
           value={formatAmount(profile.walletBalance)}
-          label="Solde"
+          ariaLabel={`Solde : ${formatAmount(profile.walletBalance)}. Recharger`}
           hint="Recharger"
           onClick={() => navigate("/portefeuille")}
         />
@@ -245,16 +246,18 @@ function StatTile({
   label,
   hint,
   onClick,
+  ariaLabel,
 }: Readonly<{
   value: string;
-  label: string;
+  label?: string;
+  ariaLabel?: string;
   hint?: string;
   onClick?: () => void;
 }>) {
   const body = (
     <>
       <span className="truncate text-base font-bold text-foreground">{value}</span>
-      <span className="text-xs text-muted-foreground">{label}</span>
+      {label && <span className="text-xs text-muted-foreground">{label}</span>}
       {hint && <span className="mt-0.5 text-xs font-medium text-whatsapp">{hint} ›</span>}
     </>
   );
@@ -264,6 +267,7 @@ function StatTile({
     <button
       type="button"
       onClick={onClick}
+      aria-label={ariaLabel}
       className={cn(className, "active:bg-secondary")}
     >
       {body}
