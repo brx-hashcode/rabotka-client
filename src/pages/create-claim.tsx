@@ -11,7 +11,7 @@ export default function CreateClaim() {
     // desktop exactly as on a phone — so a viewport breakpoint said nothing
     // about the space this page actually had, and `max-w-2xl` (672px) could
     // never apply at all.
-    <div className="flex w-full flex-col pt-4 pb-8">
+    <div className="-mb-6 flex min-h-[calc(100%_+_1.5rem)] w-full flex-col bg-card pb-8">
       <CreateClaimForm />
     </div>
   );

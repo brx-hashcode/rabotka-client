@@ -112,7 +112,7 @@ export const CreateClaimForm = () => {
     // which is 512px on a desktop just as on a phone — so rounding it drew a
     // card floating inside a card, and `lg:p-8` doubled the gutter the page
     // was already paying. One 16px padding, once. `max-w-2xl` was dead.
-    <div className="bg-white p-4">
+    <div className="bg-card p-4">
       <h2 className="mb-6 text-2xl font-bold">Créer une Réclamation</h2>
 
       <Form {...form}>
