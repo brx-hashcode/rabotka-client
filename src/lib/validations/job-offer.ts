@@ -8,10 +8,10 @@ export const PAYMENT_FLOW_VALUES = ["TASK", "HOURLY", "DAILY", "MONTHLY"] as con
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
 
 export const PAYMENT_FLOW_LABELS: Record<PaymentFlowValue, string> = {
-  TASK: "Par tâche (forfait)",
-  HOURLY: "Par heure",
-  DAILY: "Par jour",
-  MONTHLY: "Par mois",
+  TASK: "PAR TÂCHE",
+  HOURLY: "PAR HEURE",
+  DAILY: "PAR JOUR",
+  MONTHLY: "PAR MOIS",
 };
 
 // The date must be at least 4h in the future — mirrors the backend rule
