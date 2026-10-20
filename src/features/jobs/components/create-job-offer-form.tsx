@@ -185,6 +185,13 @@ export function JobOfferForm({
     if (await form.trigger([...JOB_OFFER_STEPS[step].fields])) goTo(step + 1);
   };
 
+  const publish = form.handleSubmit(onSubmit, (errors) => {
+    // Refused on the last screen for an earlier one — the date can go stale
+    // while the amount is typed. Show that screen.
+    const target = stepOfFirstError(errors);
+    if (target !== step) goTo(target);
+  });
+
   const startOver = () => {
     if (draftKey) clearJobOfferDraft(localStorage, draftKey);
     form.reset(initialValues);
@@ -242,19 +249,12 @@ export function JobOfferForm({
       <Form {...form}>
         <form
           onSubmit={(event) => {
-            // Enter in a field submits the form. Before the last screen that
-            // means "Continuer" — never publishing from step one on a draft.
-            if (!isLast) {
-              event.preventDefault();
-              void next();
-              return;
-            }
-            void form.handleSubmit(onSubmit, (errors) => {
-              // Refused on the last screen for an earlier one — the date can
-              // go stale while the amount is typed. Show that screen.
-              const target = stepOfFirstError(errors);
-              if (target !== step) goTo(target);
-            })(event);
+            // Only Enter in a field gets here — no button is type="submit"
+            // (see the footer). Before the last screen it means "Continuer",
+            // so a resumed draft can never publish from step one.
+            event.preventDefault();
+            if (isLast) publish();
+            else void next();
           }}
           className="space-y-6"
         >
@@ -630,13 +630,24 @@ export function JobOfferForm({
           )}
 
           <div className="flex flex-col gap-3">
+            {/* Both type="button", and keyed apart. One element that changed
+                from "Continuer" to a submit button was clicked once and did
+                both: step 2's click finished validating, the button became
+                type="submit" under it, and the browser then submitted the form
+                for that same click — straight to « offre publiée » without step
+                3 ever being seen. Publishing now takes its own click. */}
             {isLast ? (
-              <Button type="submit" disabled={isPending}>
+              <Button
+                key="publish"
+                type="button"
+                disabled={isPending}
+                onClick={() => void publish()}
+              >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {isPending ? pendingLabel : submitLabel}
               </Button>
             ) : (
-              <Button type="button" onClick={() => void next()}>
+              <Button key="continue" type="button" onClick={() => void next()}>
                 Continuer
               </Button>
             )}
