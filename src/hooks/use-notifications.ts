@@ -15,6 +15,7 @@ import {
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  type AppNotification,
   type NotificationsPage,
 } from "@/lib/api/notification-controller";
 import { notificationsContent } from "@/content/notifications";
@@ -23,6 +24,11 @@ import {
   applyRead,
 } from "@/features/notifications/read-state";
 import { useProfileMe } from "./use-profile-me";
+import {
+  playNotificationSound,
+  primeNotificationSound,
+  shouldChime,
+} from "@/lib/notification-sound";
 
 export const notificationsKeys = {
   all: ["notifications"] as const,
@@ -183,8 +189,18 @@ export function useNotificationsSocket(enabled: boolean) {
       withCredentials: true,
     });
 
-    socket.on("notification:new", () => {
+    primeNotificationSound();
+    socket.on("notification:new", (notification?: AppNotification) => {
       queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+      if (
+        shouldChime(
+          notification,
+          window.location.pathname,
+          document.visibilityState === "visible",
+        )
+      ) {
+        playNotificationSound();
+      }
     });
 
     return () => {
