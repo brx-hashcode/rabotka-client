@@ -34,6 +34,19 @@ import {
   Loader,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  initialPayCountry,
+  operatorsIn,
+  payCountries,
+  type PayCountry,
+} from "@/lib/pay-country";
 
 type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
 
@@ -52,6 +65,9 @@ export default function Pay() {
   const [phone, setPhone] = useState<PhoneValue | null>(null);
   // The payer's pick; until they make one, the first network offered.
   const [operator, setOperator] = useState<string | null>(null);
+  // The country whose networks are offered, as pawaPay's own checkout shows
+  // it. Null until the payer picks one: then it is their profile's country.
+  const [pickedCountry, setPickedCountry] = useState<string | null>(null);
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
   const [paidAt, setPaidAt] = useState<Date | null>(null);
@@ -87,11 +103,26 @@ export default function Pay() {
   // The live gateway, and the networks it can charge in the payer's country.
   const gateway = activeGateway(gateways?.gateways, gateways?.active ?? payment?.gateway);
   const needsOperator = gateway?.requiresOperator ?? false;
-  const payerCountry = payment?.payerCountry ?? null;
+  // Every country, name, flag and currency here comes from the gateway's live
+  // configuration — none is listed in code.
+  const covered = useMemo(() => payCountries(gateway), [gateway]);
+  const country =
+    pickedCountry ??
+    initialPayCountry(payment?.payerCountryCode, covered)?.code ??
+    null;
+  const current: PayCountry | null =
+    covered.find((c) => c.code === country) ?? null;
   const operators = useMemo(
-    () => operatorsFor(gateway, payerCountry),
-    [gateway, payerCountry],
+    () => operatorsIn(gateway, country),
+    [gateway, country],
   );
+  // From the selector: the number typed was for the old country.
+  const chooseCountry = (next: string) => {
+    if (next === country) return;
+    setPickedCountry(next);
+    setPhone(null);
+    setPhoneError("");
+  };
   const selectedOperator =
     operators.find((o) => o.code === operator) ?? operators[0] ?? null;
 
@@ -398,7 +429,18 @@ export default function Pay() {
   const amount = payment.amount;
   const description = payment.description;
   const isMtnMomo = !needsOperator && payment.gateway === "MTN_MOMO";
-  const phoneCountry = ALPHA2[payerCountry ?? ""] ?? "CG";
+  const phoneCountry = current?.alpha2;
+  const coveredAlpha2 = covered.flatMap((c) => (c.alpha2 ? [c.alpha2] : []));
+  // The profile's country is not one we can charge in (its mobile money is in
+  // another currency than the franc CFA): say which, and that a number from a
+  // listed country works. Its name from the browser, not a table.
+  const payerCountryCode = payment.payerCountryCode ?? null;
+  const payerCovered = covered.some(
+    (c) => c.alpha2 && c.alpha2 === payerCountryCode?.toUpperCase(),
+  );
+  const payerCountryName = payerCountryCode ? regionName(payerCountryCode) : null;
+  const payerNotCovered =
+    needsOperator && covered.length > 0 && !!payerCountryCode && !payerCovered;
 
   return (
     <PageWrapper align="top">
@@ -446,8 +488,10 @@ export default function Pay() {
                 entirely slipped through as undefined and took the whole
                 payment page down with it. */}
             {typeof amount === "number" ? amount.toLocaleString("fr-FR") : "—"}
+            {/* The selected country's franc: XAF in Congo, XOF in Bénin —
+                the same amount, the two francs being at par. */}
             <span className="ml-1.5 text-base font-medium text-muted-foreground">
-              FCFA
+              {current?.currency ?? "FCFA"}
             </span>
           </p>
           {description && (
@@ -456,6 +500,45 @@ export default function Pay() {
             </p>
           )}
         </div>
+
+        {needsOperator && covered.length > 0 && (
+          <div className="space-y-2">
+            <label
+              htmlFor="pay-country"
+              className="text-sm font-medium text-foreground"
+            >
+              Pays
+            </label>
+            <Select value={country ?? undefined} onValueChange={chooseCountry}>
+              <SelectTrigger id="pay-country" className="h-12 w-full">
+                <SelectValue placeholder="Choisir un pays" />
+              </SelectTrigger>
+              <SelectContent>
+                {covered.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    <span className="flex items-center gap-2.5">
+                      <CountryFlag country={c} />
+                      <span>{c.name}</span>
+                      {c.currency && (
+                        <span className="text-xs text-muted-foreground">
+                          {c.currency}
+                        </span>
+                      )}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {payerNotCovered && (
+              <p className="text-xs text-muted-foreground">
+                Les paiements Rabotka se font en franc CFA : le mobile money
+                {payerCountryName ? ` de « ${payerCountryName} »` : " de votre pays"}{" "}
+                n'est pas encore accepté. Payez avec un numéro d'un des pays
+                ci-dessus.
+              </p>
+            )}
+          </div>
+        )}
 
         {needsOperator && (
           <div className="space-y-2">
@@ -478,7 +561,7 @@ export default function Pay() {
                     key={o.code}
                     label={o.label}
                     selected={selectedOperator?.code === o.code}
-                    logo={operatorLogo(o.code)}
+                    logo={o.logo ?? operatorLogo(o.code)}
                     onClick={() => setOperator(o.code)}
                   />
                 ))}
@@ -524,14 +607,23 @@ export default function Pay() {
                 : "Numéro de téléphone"}
           </label>
           <PhoneInput
-            // Opens on the payer's own country, whose networks are listed above.
+            // The flag is the country chosen above, and choosing another flag
+            // here chooses that country — its networks replace the list. Keyed
+            // on it so the field re-opens on the new flag, which a changed
+            // `defaultCountry` alone does not do once a number is typed.
+            key={phoneCountry}
             defaultCountry={phoneCountry}
+            countries={coveredAlpha2.length ? coveredAlpha2 : undefined}
+            onCountryChange={(next) => {
+              const picked = covered.find((c) => c.alpha2 === next);
+              if (picked && picked.code !== country) setPickedCountry(picked.code);
+            }}
             value={phone}
             onChange={(value) => {
               setPhone(value);
               if (phoneError) setPhoneError("");
             }}
-            placeholder={PHONE_PLACEHOLDERS[phoneCountry] ?? ""}
+            placeholder={current?.dialCode ? `+${current.dialCode}` : ""}
           />
           {phoneError && (
             <p className="text-xs text-destructive">{phoneError}</p>
@@ -546,15 +638,19 @@ export default function Pay() {
           {isPending ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
           {isPending ? "Envoi en cours..." : "Payer"}
         </Button>
-
-        <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
-          <span>🔒</span>
-          <span>
-            Paiement sécurisé avec{" "}
-            <span className="font-semibold text-foreground">CashLock</span>
-          </span>
-        </p>
       </div>
+
+      {/* At the foot of the screen, not under the button: it is a reassurance
+          about the whole page, and right under « Payer » it read as part of
+          the form. `mt-auto` in the page's column; on a short screen it
+          simply follows the form. */}
+      <p className="mt-auto flex items-center justify-center gap-1 pt-10 text-center text-xs text-muted-foreground">
+        <span>🔒</span>
+        <span>
+          Paiement sécurisé avec{" "}
+          <span className="font-semibold text-foreground">CashLock</span>
+        </span>
+      </p>
     </PageWrapper>
   );
 }
@@ -572,7 +668,7 @@ function PageWrapper({
       className={cn(
         "flex min-h-dvh flex-col overflow-hidden bg-background px-6",
         align === "top"
-          ? "items-center justify-start pb-16 pt-8"
+          ? "items-center justify-start pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8"
           : "items-center justify-center py-12",
       )}
     >
@@ -655,14 +751,6 @@ function receiptErrorMessage(error: unknown): string {
   return message || "L'envoi du reçu a échoué. Réessayez.";
 }
 
-/** Payer country (ISO3, from the backend) → phone input country (ISO2). */
-const ALPHA2: Record<string, "CG" | "CM"> = { COG: "CG", CMR: "CM" };
-
-const PHONE_PLACEHOLDERS: Record<string, string> = {
-  CG: "06 000 0000",
-  CM: "6 00 00 00 00",
-};
-
 /** The gateway in use: the live one, as the backend names it. */
 function activeGateway(
   gateways: PaymentGatewayInfo[] | undefined,
@@ -672,18 +760,29 @@ function activeGateway(
   return gateways.find((g) => g.key === key) ?? null;
 }
 
-/**
- * The networks to offer this payer: those of their country. A gateway that
- * does not say where its networks operate, or a payer whose country is
- * unknown, gets the full list rather than none.
- */
-function operatorsFor(
-  gateway: PaymentGatewayInfo | null,
-  payerCountry: string | null,
-): PaymentOperator[] {
-  const all = gateway?.operators ?? [];
-  if (!payerCountry || all.every((o) => !o.country)) return all;
-  return all.filter((o) => o.country === payerCountry);
+/** The gateway's flag image for a country. */
+function CountryFlag({ country }: Readonly<{ country: PayCountry }>) {
+  return country.flag ? (
+    <img
+      src={country.flag}
+      alt=""
+      className="h-4 w-6 shrink-0 rounded-sm object-cover"
+    />
+  ) : (
+    <span className="h-4 w-6 shrink-0 rounded-sm bg-foreground/20" />
+  );
+}
+
+/** A country's name in French, from the browser (`RW` → « Rwanda »). */
+function regionName(alpha2: string): string | null {
+  try {
+    return (
+      new Intl.DisplayNames(["fr"], { type: "region" }).of(alpha2.toUpperCase()) ??
+      null
+    );
+  } catch {
+    return null;
+  }
 }
 
 /** The logo we have for a network, matched on its code's network part. */
