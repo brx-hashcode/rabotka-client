@@ -22,7 +22,7 @@ function useScrolledPast(ref: React.RefObject<HTMLElement | null>) {
 type Props = {
   /** First line, e.g. "Bonjour Awa". */
   readonly greeting: React.ReactNode;
-  /** The screen's promise, one short line. */
+  /** The band's title — on the worker home, the quote of the day on work (WorkQuote). */
   readonly title: React.ReactNode;
   /** Top-right action (the bell). */
   readonly trailing?: React.ReactNode;
@@ -70,9 +70,9 @@ export function BrandHero({ greeting, title, trailing, search }: Props) {
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-lime-muted">{greeting}</p>
-            {/* Poppins semibold, not the headings' Gilroy: Gilroy ships only
+            {/* Poppins light, not the headings' Gilroy: Gilroy ships only
                 ExtraBold, which read too heavy at this size. */}
-            <h1 className="mt-1 font-[Poppins,sans-serif] text-[22px] font-semibold leading-tight">
+            <h1 className="mt-1 font-[Poppins,sans-serif] text-[22px] font-light leading-tight">
               {title}
             </h1>
           </div>
