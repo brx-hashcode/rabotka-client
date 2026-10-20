@@ -223,7 +223,6 @@ export default function Profile() {
         <Row
           icon={UserRound}
           label="Mes informations"
-          detail="À propos, domaines, coordonnées"
           onClick={() => navigate("/profile/informations")}
         />
       </Group>

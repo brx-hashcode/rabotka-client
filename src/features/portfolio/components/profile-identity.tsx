@@ -79,11 +79,13 @@ export function ProfileIdentity({
       )}
 
       <div className="min-w-0 flex-1 space-y-1">
-        <h1 className="flex items-center gap-1.5 text-lg font-bold text-foreground">
-          <span className="truncate">{fullName}</span>
+        {/* Wraps rather than truncating: with « Modifier » beside it, a
+            full name was cut to « BAKARI YAN… ». Two lines at most. */}
+        <h1 className="flex items-start gap-1.5 text-lg font-bold leading-snug text-foreground">
+          <span className="line-clamp-2 break-words">{fullName}</span>
           {verified && (
             <BadgeCheck
-              className="size-4.5 shrink-0 text-whatsapp"
+              className="mt-1 size-4.5 shrink-0 text-whatsapp"
               aria-label="Identité vérifiée"
             />
           )}
