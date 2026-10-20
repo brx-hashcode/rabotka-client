@@ -114,7 +114,7 @@ export function BottomNav() {
                       {badge && (
                         <span
                           aria-hidden
-                          className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-whatsapp px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-background"
+                          className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground ring-2 ring-background"
                         >
                           {badge}
                         </span>
