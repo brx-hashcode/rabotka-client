@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import type { Value as PhoneValue } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import mtnLogo from "@/assets/MTN-logo.jpg?format=webp";
 import airtelLogo from "@/assets/airtel-new-logo.jpg?format=webp";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
@@ -34,6 +35,20 @@ import {
   Loader,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  alpha3Of,
+  initialPayCountry,
+  operatorsIn,
+  PAY_COUNTRIES,
+  payCountries,
+} from "@/lib/pay-country";
 
 type LocalStatus = "form" | "processing" | "approved" | "rejected" | "timeout";
 
@@ -52,6 +67,9 @@ export default function Pay() {
   const [phone, setPhone] = useState<PhoneValue | null>(null);
   // The payer's pick; until they make one, the first network offered.
   const [operator, setOperator] = useState<string | null>(null);
+  // The country whose networks are offered, as pawaPay's own checkout shows
+  // it. Null until the payer picks one: then it is their profile's country.
+  const [pickedCountry, setPickedCountry] = useState<string | null>(null);
   const [localStatus, setLocalStatus] = useState<LocalStatus>("form");
   const [phoneError, setPhoneError] = useState("");
   const [paidAt, setPaidAt] = useState<Date | null>(null);
@@ -88,10 +106,19 @@ export default function Pay() {
   const gateway = activeGateway(gateways?.gateways, gateways?.active ?? payment?.gateway);
   const needsOperator = gateway?.requiresOperator ?? false;
   const payerCountry = payment?.payerCountry ?? null;
+  const covered = useMemo(() => payCountries(gateway), [gateway]);
+  const country = pickedCountry ?? initialPayCountry(payerCountry, covered);
   const operators = useMemo(
-    () => operatorsFor(gateway, payerCountry),
-    [gateway, payerCountry],
+    () => operatorsIn(gateway, country),
+    [gateway, country],
   );
+  // From the selector: the number typed was for the old country.
+  const chooseCountry = (next: string) => {
+    if (next === country) return;
+    setPickedCountry(next);
+    setPhone(null);
+    setPhoneError("");
+  };
   const selectedOperator =
     operators.find((o) => o.code === operator) ?? operators[0] ?? null;
 
@@ -398,7 +425,12 @@ export default function Pay() {
   const amount = payment.amount;
   const description = payment.description;
   const isMtnMomo = !needsOperator && payment.gateway === "MTN_MOMO";
-  const phoneCountry = ALPHA2[payerCountry ?? ""] ?? "CG";
+  const phoneCountry = (country && PAY_COUNTRIES[country]?.alpha2) || "CG";
+  const coveredAlpha2 = covered.map((c) => PAY_COUNTRIES[c].alpha2);
+  // The profile's country is not one the gateway serves: say so, and that a
+  // number from a covered country works.
+  const payerNotCovered =
+    needsOperator && payerCountry !== null && covered.length > 0 && !covered.includes(payerCountry);
 
   return (
     <PageWrapper align="top">
@@ -456,6 +488,39 @@ export default function Pay() {
             </p>
           )}
         </div>
+
+        {needsOperator && covered.length > 0 && (
+          <div className="space-y-2">
+            <label
+              htmlFor="pay-country"
+              className="text-sm font-medium text-foreground"
+            >
+              Pays
+            </label>
+            <Select value={country ?? undefined} onValueChange={chooseCountry}>
+              <SelectTrigger id="pay-country" className="h-12 w-full">
+                <SelectValue placeholder="Choisir un pays" />
+              </SelectTrigger>
+              <SelectContent>
+                {covered.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    <CountryFlag alpha3={c} />
+                    {PAY_COUNTRIES[c].name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {payerNotCovered && (
+              <p className="text-xs text-muted-foreground">
+                Le paiement mobile n'est pas encore disponible
+                {PAY_COUNTRIES[payerCountry ?? ""]
+                  ? ` au ${PAY_COUNTRIES[payerCountry ?? ""].name}`
+                  : " dans votre pays"}
+                . Vous pouvez payer avec un numéro d'un des pays ci-dessus.
+              </p>
+            )}
+          </div>
+        )}
 
         {needsOperator && (
           <div className="space-y-2">
@@ -524,14 +589,25 @@ export default function Pay() {
                 : "Numéro de téléphone"}
           </label>
           <PhoneInput
-            // Opens on the payer's own country, whose networks are listed above.
+            // The flag is the country chosen above, and choosing another flag
+            // here chooses that country — its networks replace the list. Keyed
+            // on it so the field re-opens on the new flag, which a changed
+            // `defaultCountry` alone does not do once a number is typed.
+            key={phoneCountry}
             defaultCountry={phoneCountry}
+            countries={coveredAlpha2.length ? coveredAlpha2 : undefined}
+            onCountryChange={(next) => {
+              const a3 = alpha3Of(next);
+              if (a3 && a3 !== country && covered.includes(a3)) {
+                setPickedCountry(a3);
+              }
+            }}
             value={phone}
             onChange={(value) => {
               setPhone(value);
               if (phoneError) setPhoneError("");
             }}
-            placeholder={PHONE_PLACEHOLDERS[phoneCountry] ?? ""}
+            placeholder={(country && PAY_COUNTRIES[country]?.placeholder) ?? ""}
           />
           {phoneError && (
             <p className="text-xs text-destructive">{phoneError}</p>
@@ -655,14 +731,6 @@ function receiptErrorMessage(error: unknown): string {
   return message || "L'envoi du reçu a échoué. Réessayez.";
 }
 
-/** Payer country (ISO3, from the backend) → phone input country (ISO2). */
-const ALPHA2: Record<string, "CG" | "CM"> = { COG: "CG", CMR: "CM" };
-
-const PHONE_PLACEHOLDERS: Record<string, string> = {
-  CG: "06 000 0000",
-  CM: "6 00 00 00 00",
-};
-
 /** The gateway in use: the live one, as the backend names it. */
 function activeGateway(
   gateways: PaymentGatewayInfo[] | undefined,
@@ -672,18 +740,15 @@ function activeGateway(
   return gateways.find((g) => g.key === key) ?? null;
 }
 
-/**
- * The networks to offer this payer: those of their country. A gateway that
- * does not say where its networks operate, or a payer whose country is
- * unknown, gets the full list rather than none.
- */
-function operatorsFor(
-  gateway: PaymentGatewayInfo | null,
-  payerCountry: string | null,
-): PaymentOperator[] {
-  const all = gateway?.operators ?? [];
-  if (!payerCountry || all.every((o) => !o.country)) return all;
-  return all.filter((o) => o.country === payerCountry);
+/** The country's flag, as the phone field draws it. */
+function CountryFlag({ alpha3 }: Readonly<{ alpha3: string }>) {
+  const country = PAY_COUNTRIES[alpha3];
+  const Flag = country ? flags[country.alpha2] : undefined;
+  return (
+    <span className="mr-2 inline-flex h-4 w-6 shrink-0 overflow-hidden rounded-sm bg-foreground/20 [&_svg]:size-full">
+      {Flag && <Flag title={country.name} />}
+    </span>
+  );
 }
 
 /** The logo we have for a network, matched on its code's network part. */
