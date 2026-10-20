@@ -42,7 +42,8 @@ export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
   const isWorker = profile?.profileType === "WORKER";
-  const { data: publications = [] } = usePortfolio(isWorker);
+  const { data: publicationsData } = usePortfolio(isWorker);
+  const publications = publicationsData ?? [];
   // Bumped to open the edit sheet from the avatar or a checklist step.
   const [editSignal, setEditSignal] = useState(0);
 
@@ -69,7 +70,9 @@ export default function Profile() {
 
   const fullName = `${profile.firstName} ${profile.lastName}`.trim();
   const isEmployer = profile.profileType === "EMPLOYER";
-  const checklist = isWorker
+  // Only once the publications are in: computed before, it showed « 0/3 »
+  // and a low percentage on every reload, then jumped.
+  const checklist = isWorker && publicationsData
     ? profileChecklist(profile, publications.length)
     : null;
   const openEdit = () => setEditSignal((n) => n + 1);
@@ -170,7 +173,7 @@ export default function Profile() {
           <Row
             icon={Images}
             label="Mes publications"
-            detail={String(publications.length)}
+            detail={publicationsData ? String(publications.length) : undefined}
             onClick={() => navigate("/profile/portfolio")}
           />
         )}
