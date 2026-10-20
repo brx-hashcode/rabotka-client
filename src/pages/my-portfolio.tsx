@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 import { ScreenHeader } from "@/features/employer";
+import { ShellFooter } from "@/features/navigation";
 import { PortfolioFeed } from "@/features/portfolio/components/portfolio-feed";
 import { RealizationFormSheet } from "@/features/portfolio/components/realization-form-sheet";
 import {
@@ -250,22 +251,21 @@ export default function MyPortfolio() {
         )}
       </main>
 
-      {/* The one way to add, always in reach. */}
-      {/* `-bottom-6`, not `bottom-0`: a sticky element sticks inside its
-          scroll container's PADDING box, and AppShell pads <main> 24px at the
-          bottom for the tab bar — so at `bottom-0` the bar floated 24px up and
-          the page scrolled visibly underneath it. */}
-      <div className="sticky -bottom-6 bg-background px-4 pb-4 pt-3">
-        <Button
-          className="mx-auto flex h-12 w-full max-w-xl bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
-          onClick={() => setCreateOpen(true)}
-        >
-          <Plus className="size-5" />
-          {items.length === 0
-            ? "Ajouter ma première publication"
-            : "Nouvelle publication"}
-        </Button>
-      </div>
+      {/* The one way to add, always in reach: in the shell's footer slot,
+          so it stays put on top of the tab bar while the page scrolls. */}
+      <ShellFooter>
+        <div className="bg-background px-4 pb-3 pt-3 shadow-[0_-8px_16px_-12px_rgb(0_0_0/0.12)]">
+          <Button
+            className="mx-auto flex h-12 w-full max-w-xl bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
+            onClick={() => setCreateOpen(true)}
+          >
+            <Plus className="size-5" />
+            {items.length === 0
+              ? "Ajouter ma première publication"
+              : "Nouvelle publication"}
+          </Button>
+        </div>
+      </ShellFooter>
 
       <RealizationFormSheet open={createOpen} onOpenChange={setCreateOpen} />
     </div>
