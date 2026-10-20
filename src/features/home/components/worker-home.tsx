@@ -14,6 +14,7 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { BrandHero } from "./brand-hero";
+import { WorkQuote } from "./work-quote";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
 import { useKycGate } from "@/hooks/use-kyc-gate";
@@ -104,7 +105,7 @@ export function WorkerHome() {
           so the band keeps only search, filters and notifications. */}
       <BrandHero
         greeting={profile?.firstName ? `Bonjour ${profile.firstName}` : "Bonjour"}
-        title="Offres près de chez vous"
+        title={<WorkQuote />}
         trailing={<NotificationBell tone="onLime" />}
         search={
           <HomeHeader
