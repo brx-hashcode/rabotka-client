@@ -5,6 +5,7 @@ import { composeScheduledAt } from "@/lib/scheduled-at";
 import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PushPrompt } from "@/features/notifications/components/push-prompt";
 import { useToast } from "@/hooks/use-toast";
 import {
   type CreateJobOfferFormData,
@@ -79,6 +80,12 @@ export function JobOfferSuccess({
           référence ci-dessous avec un travailleur pour qu'il trouve directement
           votre offre.
         </p>
+      </div>
+
+      {/* Asked here because this is when it pays off: candidates start
+          arriving now, and the first to be answered is the one who stays. */}
+      <div className="mt-4">
+        <PushPrompt message="Soyez prévenu(e) dès qu'un candidat postule, même quand Rabotka est fermé." />
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-3 rounded-xl border bg-muted/40 p-4">
