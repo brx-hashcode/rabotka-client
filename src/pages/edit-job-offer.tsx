@@ -92,7 +92,7 @@ export default function EditJobOffer() {
 
   return (
     // Same frame as the create page: AppShell already sets the column.
-    <div className="-mb-6 flex min-h-full w-full flex-col bg-card pb-8">
+    <div className="-mb-6 flex min-h-[calc(100%_+_1.5rem)] w-full flex-col bg-card pb-8">
       <Seo title="Modifier l'offre — Rabotka" noIndex />
       {body}
     </div>
