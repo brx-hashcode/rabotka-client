@@ -10,6 +10,16 @@ export type PaymentOperator = {
   label: string;
   /** ISO 3166-1 alpha-3 country the network serves, when the gateway says. */
   country?: string;
+  /** That country's name, from the gateway's live configuration. */
+  countryName?: string;
+  /** Its international calling code, digits only (`242`). */
+  dialCode?: string;
+  /** The gateway's flag image for the country. */
+  countryFlag?: string;
+  /** The gateway's logo for the network. */
+  logo?: string;
+  /** The currency the network is charged in (`XAF`, `XOF`). */
+  currency?: string;
 };
 
 export type PaymentGatewayInfo = {
@@ -34,6 +44,8 @@ export type PaymentByTokenResponse = {
   description: string | null;
   /** The payer's country (ISO3), to offer that country's networks only. */
   payerCountry?: string | null;
+  /** The payer's profile country, ISO alpha-2 (`CG`). */
+  payerCountryCode?: string | null;
 };
 
 export type InitiatePaymentPayload = {
