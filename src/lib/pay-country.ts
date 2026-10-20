@@ -1,66 +1,70 @@
-import type { Country } from "react-phone-number-input";
+import {
+  getCountries,
+  getCountryCallingCode,
+  type Country,
+} from "react-phone-number-input";
 import type {
   PaymentGatewayInfo,
   PaymentOperator,
 } from "@/lib/api/payment-controller";
 
 /**
- * The countries a mobile-money gateway may cover, keyed by the alpha-3 code
- * the backend and pawaPay speak; alpha-2 drives the phone field's flag.
- * Mirrors ALPHA3 in the backend's payment-countries.ts.
+ * A country the checkout can charge in, as the gateway describes it. Nothing
+ * here is a list kept in code: names, flags, calling codes and currencies all
+ * come from the gateway's live configuration (pawaPay's active-conf), so a
+ * country enabled on the account shows up without a release.
  */
-export const PAY_COUNTRIES: Record<
-  string,
-  { alpha2: Country; name: string; placeholder?: string }
-> = {
-  COG: { alpha2: "CG", name: "Congo", placeholder: "06 000 0000" },
-  CMR: { alpha2: "CM", name: "Cameroun", placeholder: "6 00 00 00 00" },
-  COD: { alpha2: "CD", name: "RD Congo" },
-  GAB: { alpha2: "GA", name: "Gabon" },
-  CIV: { alpha2: "CI", name: "Côte d'Ivoire" },
-  SEN: { alpha2: "SN", name: "Sénégal" },
-  BEN: { alpha2: "BJ", name: "Bénin" },
-  BFA: { alpha2: "BF", name: "Burkina Faso" },
-  GHA: { alpha2: "GH", name: "Ghana" },
-  KEN: { alpha2: "KE", name: "Kenya" },
-  MWI: { alpha2: "MW", name: "Malawi" },
-  MOZ: { alpha2: "MZ", name: "Mozambique" },
-  NGA: { alpha2: "NG", name: "Nigeria" },
-  RWA: { alpha2: "RW", name: "Rwanda" },
-  SLE: { alpha2: "SL", name: "Sierra Leone" },
-  TZA: { alpha2: "TZ", name: "Tanzanie" },
-  UGA: { alpha2: "UG", name: "Ouganda" },
-  ZMB: { alpha2: "ZM", name: "Zambie" },
+export type PayCountry = {
+  /** Gateway code, ISO alpha-3 (`COG`). */
+  code: string;
+  name: string;
+  flag?: string;
+  dialCode?: string;
+  currency?: string;
+  /** For the phone field: the ISO alpha-2 country with that calling code. */
+  alpha2?: Country;
 };
 
-export function alpha3Of(alpha2: string | undefined): string | null {
-  if (!alpha2) return null;
-  return (
-    Object.entries(PAY_COUNTRIES).find(([, c]) => c.alpha2 === alpha2)?.[0] ??
-    null
-  );
+/** The phone library's country for a calling code (`242` → `CG`). */
+export function alpha2ForDialCode(dial: string | undefined): Country | undefined {
+  if (!dial) return undefined;
+  return getCountries().find((c) => getCountryCallingCode(c) === dial);
 }
 
-/** The countries the gateway has networks in, in the order it lists them. */
-export function payCountries(gateway: PaymentGatewayInfo | null): string[] {
-  const seen: string[] = [];
+/** The calling code of an ISO alpha-2 country, or undefined if unknown. */
+export function dialCodeOf(alpha2: string | null | undefined): string | undefined {
+  if (!alpha2) return undefined;
+  const upper = alpha2.toUpperCase() as Country;
+  return getCountries().includes(upper) ? getCountryCallingCode(upper) : undefined;
+}
+
+/** Each country the gateway has networks in, once, in the gateway's order. */
+export function payCountries(gateway: PaymentGatewayInfo | null): PayCountry[] {
+  const out: PayCountry[] = [];
   for (const o of gateway?.operators ?? []) {
-    if (o.country && PAY_COUNTRIES[o.country] && !seen.includes(o.country))
-      seen.push(o.country);
+    if (!o.country || out.some((c) => c.code === o.country)) continue;
+    out.push({
+      code: o.country,
+      name: o.countryName ?? o.country,
+      flag: o.countryFlag,
+      dialCode: o.dialCode,
+      currency: o.currency,
+      alpha2: alpha2ForDialCode(o.dialCode),
+    });
   }
-  return seen;
+  return out;
 }
 
 /**
- * Where the checkout opens: the payer's own country when the gateway covers
- * it, else the first one it does — never an empty operator list.
+ * Where the checkout opens: the country whose calling code is the payer's
+ * own country's, else the first one the gateway covers — never an empty list.
  */
 export function initialPayCountry(
-  payerCountry: string | null,
-  covered: readonly string[],
-): string | null {
-  if (payerCountry && covered.includes(payerCountry)) return payerCountry;
-  return covered[0] ?? null;
+  payerCountryCode: string | null | undefined,
+  covered: readonly PayCountry[],
+): PayCountry | null {
+  const dial = dialCodeOf(payerCountryCode);
+  return covered.find((c) => dial && c.dialCode === dial) ?? covered[0] ?? null;
 }
 
 /**
