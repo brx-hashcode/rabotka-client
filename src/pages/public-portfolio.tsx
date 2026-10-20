@@ -6,14 +6,13 @@ import { usePublicWorker } from "@/hooks/use-public-worker";
 import type { PublicWorkerResponse } from "@/lib/api/public-worker-controller";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 
 import { ScreenHeader } from "@/features/employer";
-import { PortfolioHeader } from "@/features/portfolio/components/portfolio-header";
+import { ProfileIdentity } from "@/features/portfolio/components/profile-identity";
 import { PortfolioFeed } from "@/features/portfolio/components/portfolio-feed";
 
-const CONTAINER = "mx-auto w-full max-w-xl px-4 pb-8 sm:pb-12";
-const SKELETON_TILE_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
+const CONTAINER = "mx-auto w-full max-w-xl space-y-5 px-4 pb-8 pt-4 sm:pb-12";
+const SKELETON_TILE_KEYS = ["a", "b", "c", "d"];
 
 export default function PublicPortfolio() {
   const { slug } = useParams<{ slug: string }>();
@@ -102,83 +101,77 @@ export default function PublicPortfolio() {
           jsonLd={buildJsonLd(worker, fullName)}
         />
 
-      <PortfolioHeader
-        profile={{
-          fullName,
-          avatarUrl: worker.avatarUrl,
-          address: worker.location ?? "",
-          reliabilityScore: worker.reliabilityScore,
-          ratingAvg: worker.ratingAvg,
-          ratingCount: worker.ratingCount,
-          completedMissionsCount: worker.completedMissionsCount,
-        }}
-        realizationsCount={worker.portfolio.length}
+      {/* Same compact identity as « Mes publications »: the worker sees
+          their page exactly as an employer does. */}
+      <ProfileIdentity
+        fullName={fullName}
+        avatarUrl={worker.avatarUrl}
+        location={worker.location}
+        ratingAvg={worker.ratingAvg}
+        ratingCount={worker.ratingCount}
+        reliabilityScore={worker.reliabilityScore}
+        completedMissions={worker.completedMissionsCount}
       />
 
-      {/* The description was FETCHED and thrown away — used to build the SEO
-          meta tags and never shown to a human. So an employer opening a
-          candidate's profile saw a face, three numbers and some photos, and
-          nothing saying what the person actually does.
-
-          Same card as the worker detail screen, so the two profile surfaces
-          describe somebody the same way. */}
+      {/* What the person does, in their words — it used to be fetched for the
+          SEO tags and never shown to a human. Flat, like the other surfaces
+          of this page. */}
       {worker.description && (
-        <div className="mt-6 rounded-xl bg-card p-4 shadow-soft">
-          <p className="mb-2 text-xs font-medium text-muted-foreground">
+        <section className="rounded-xl bg-card p-4">
+          <p className="mb-1.5 text-xs font-medium text-muted-foreground">
             À propos
           </p>
           <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
             {worker.description}
           </p>
-        </div>
+        </section>
       )}
 
-      <Separator className="my-6" />
-
-      {worker.portfolio.length === 0 ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">
-          Aucune publication pour le moment.
-        </p>
-      ) : (
-        <PortfolioFeed
-          items={worker.portfolio}
-          onOpen={(item) =>
-            navigate(`/p/${worker.slug}/r/${item.id}${backSuffix}`, {
-              // Lets the detail's back pop instead of pushing the portfolio
-              // on top of it — see useBackToPortfolio.
-              state: { fromGrid: true },
-            })
-          }
-        />
-      )}
-
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold text-foreground">
+          Publications
+          <span className="ml-1.5 font-normal text-muted-foreground">
+            {worker.portfolio.length}
+          </span>
+        </h2>
+        {worker.portfolio.length === 0 ? (
+          <p className="rounded-xl bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+            Aucune publication pour le moment.
+          </p>
+        ) : (
+          <PortfolioFeed
+            items={worker.portfolio}
+            onOpen={(item) =>
+              navigate(`/p/${worker.slug}/r/${item.id}${backSuffix}`, {
+                // Lets the detail's back pop instead of pushing the portfolio
+                // on top of it — see useBackToPortfolio.
+                state: { fromGrid: true },
+              })
+            }
+          />
+        )}
+      </section>
       </main>
     </>
   );
 }
 
+/** Mirrors the compact identity and the two-column grid. */
 function PortfolioSkeleton() {
   return (
-    // pt-8 mirrors PortfolioHeader's own top padding (the page container no
-    // longer supplies it, so the gradient can start flush under the header).
-    <div className="pt-8">
-      <div className="flex flex-col items-center gap-4">
-        <Skeleton className="size-24 rounded-full" />
-        <Skeleton className="h-5 w-40" />
-        <div className="flex items-center gap-10">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
-              <Skeleton className="h-5 w-8" />
-              <Skeleton className="h-3 w-14" />
-            </div>
-          ))}
+    <div className="space-y-5">
+      <div className="flex items-center gap-4">
+        <Skeleton className="size-16 shrink-0 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-3.5 w-28" />
+          <Skeleton className="h-3.5 w-36" />
         </div>
-        <Skeleton className="h-4 w-full max-w-sm" />
       </div>
-      <Separator className="my-6" />
-      <div className="grid grid-cols-3 gap-0.5 sm:gap-1">
+      <Skeleton className="h-24 w-full rounded-xl" />
+      <div className="grid grid-cols-2 gap-3">
         {SKELETON_TILE_KEYS.map((key) => (
-          <Skeleton key={key} className="aspect-square w-full rounded-none" />
+          <Skeleton key={key} className="aspect-[4/5] w-full rounded-xl" />
         ))}
       </div>
     </div>

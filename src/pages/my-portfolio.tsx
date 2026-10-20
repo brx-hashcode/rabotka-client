@@ -1,28 +1,25 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import {
-  Camera,
   Check,
   ChevronRight,
   Eye,
   ImagePlus,
-  MapPin,
   PenLine,
   Plus,
   Share2,
-  ShieldCheck,
   Star,
 } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { usePortfolio } from "@/hooks/use-portfolio";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 import { ScreenHeader } from "@/features/employer";
+import { ProfileIdentity } from "@/features/portfolio/components/profile-identity";
 import { ShellFooter } from "@/features/navigation";
 import { PortfolioFeed } from "@/features/portfolio/components/portfolio-feed";
 import { RealizationFormSheet } from "@/features/portfolio/components/realization-form-sheet";
@@ -93,67 +90,15 @@ export default function MyPortfolio() {
           <HeaderSkeleton />
         ) : (
           <>
-            {/* Identity, compact and left-aligned: the screen is about the
-                work below, not a centred profile card above it. */}
-            <section className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => navigate("/profile")}
-                aria-label={
-                  profile.avatarUrl ? "Ma photo" : "Ajouter une photo de profil"
-                }
-                className="relative shrink-0"
-              >
-                <Avatar className="size-16">
-                  {profile.avatarUrl && (
-                    <AvatarImage
-                      src={profile.avatarUrl}
-                      alt={fullName}
-                      className="object-cover"
-                    />
-                  )}
-                  <AvatarFallback className="bg-lime text-lg font-semibold text-lime-foreground">
-                    {initialsOf(fullName)}
-                  </AvatarFallback>
-                </Avatar>
-                {!profile.avatarUrl && (
-                  // The first thing an employer looks at: ask for it here.
-                  <span className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full bg-whatsapp text-white ring-2 ring-background">
-                    <Camera className="size-3.5" />
-                  </span>
-                )}
-              </button>
-              <div className="min-w-0 space-y-1">
-                <h1 className="truncate text-lg font-bold text-foreground">
-                  {fullName}
-                </h1>
-                {(profile.city || profile.address) && (
-                  <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                    <MapPin className="size-3.5 shrink-0" />
-                    {profile.city || profile.address}
-                  </p>
-                )}
-                <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {(profile.ratingCount ?? 0) > 0 && profile.ratingAvg != null ? (
-                    <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                      {profile.ratingAvg.toFixed(1)}
-                      <span className="font-normal text-muted-foreground">
-                        ({profile.ratingCount} avis)
-                      </span>
-                    </span>
-                  ) : (
-                    <span>Pas encore d'avis</span>
-                  )}
-                  {profile.reliabilityScore != null && (
-                    <span className="inline-flex items-center gap-1">
-                      <ShieldCheck className="size-3.5 text-whatsapp" />
-                      {profile.reliabilityScore} % fiable
-                    </span>
-                  )}
-                </p>
-              </div>
-            </section>
+            <ProfileIdentity
+              fullName={fullName}
+              avatarUrl={profile.avatarUrl}
+              location={profile.city || profile.address || null}
+              ratingAvg={profile.ratingAvg ?? null}
+              ratingCount={profile.ratingCount ?? 0}
+              reliabilityScore={profile.reliabilityScore}
+              onAvatarClick={() => navigate("/profile")}
+            />
 
             {checklist.percent < 100 && (
               <section className="rounded-xl bg-card p-4">
@@ -324,17 +269,6 @@ function EmptyPortfolio() {
         </ul>
       </div>
     </div>
-  );
-}
-
-function initialsOf(fullName: string): string {
-  return (
-    fullName
-      .split(/\s+/)
-      .map((part) => part.charAt(0))
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "?"
   );
 }
 
