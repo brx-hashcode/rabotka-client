@@ -10,6 +10,7 @@ import {
   MutationCache,
 } from "@tanstack/react-query";
 import { SessionLinkProvider } from "./session-link-provider";
+import { isNetworkError } from "@/lib/api/errors";
 import { UpdateBanner } from "@/features/offline/update-banner";
 import {
   getPolicyContent,
@@ -38,8 +39,14 @@ export const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
-      refetchOnReconnect: false,
-      retry: false,
+      // Back online: refresh what the screens show, which after a spell
+      // offline is the stored copy (lib/offline-cache).
+      refetchOnReconnect: true,
+      // Only a request that got no response is retried — and once the app is
+      // marked offline (lib/connectivity) the retry waits for the network
+      // instead of failing, so screens keep their stored data. Anything the
+      // server answered is final, as before.
+      retry: (failureCount, error) => isNetworkError(error) && failureCount < 2,
     },
   },
 });
