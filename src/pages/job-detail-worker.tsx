@@ -34,6 +34,7 @@ import {
   useCanApply,
 } from "@/hooks/use-jobs";
 import { ApplyConfirmDrawer } from "@/features/jobs/components/apply-confirm-drawer";
+import { PushPrompt } from "@/features/notifications/components/push-prompt";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { KycNotice, kycShortLabel } from "@/features/kyc";
 import { useAccountGate } from "@/hooks/use-account-gate";
@@ -265,6 +266,14 @@ export default function JobDetailWorker() {
             <AccountNotice reason={accountReason} className="mb-3" />
           ) : (
             blocked && reason && <KycNotice reason={reason} className="mb-3" />
+          )}
+
+          {/* Right after applying: the employer's answer is what the worker
+              waits for, and a reply missed for an hour can lose the job. */}
+          {job.applicationState === "LIVE" && (
+            <div className="mb-3">
+              <PushPrompt message="Soyez prévenu(e) dès que l'employeur répond, même quand Rabotka est fermé." />
+            </div>
           )}
 
           <Button

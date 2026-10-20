@@ -73,6 +73,9 @@ export function useApplyToJob() {
       qc.invalidateQueries({ queryKey: ["saved-jobs"] });
       // Without this, applying from a search result leaves its button on "Postuler".
       qc.invalidateQueries({ queryKey: [JOB_SEARCH_KEY] });
+      // And the offer screen it was sent from, which otherwise kept its
+      // "Postuler" button until the next visit.
+      qc.invalidateQueries({ queryKey: ["job-detail"] });
       toast.success("Candidature envoyée !");
     },
     onError: (err: Error) =>
