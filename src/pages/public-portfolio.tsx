@@ -113,19 +113,9 @@ export default function PublicPortfolio() {
         completedMissions={worker.completedMissionsCount}
       />
 
-      {/* What the person does, in their words — it used to be fetched for the
-          SEO tags and never shown to a human. Flat, like the other surfaces
-          of this page. */}
-      {worker.description && (
-        <section className="rounded-xl bg-card p-4">
-          <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-            À propos
-          </p>
-          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-            {worker.description}
-          </p>
-        </section>
-      )}
+      {/* No « À propos » here: the bio is on the worker's profile screen,
+          which is where an employer arrives from. It still feeds the SEO
+          description and the JSON-LD above. */}
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-foreground">
@@ -168,7 +158,6 @@ function PortfolioSkeleton() {
           <Skeleton className="h-3.5 w-36" />
         </div>
       </div>
-      <Skeleton className="h-24 w-full rounded-xl" />
       <div className="grid grid-cols-2 gap-3">
         {SKELETON_TILE_KEYS.map((key) => (
           <Skeleton key={key} className="aspect-[4/5] w-full rounded-xl" />
