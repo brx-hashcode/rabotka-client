@@ -43,13 +43,15 @@ export function payCountries(gateway: PaymentGatewayInfo | null): PayCountry[] {
   const out: PayCountry[] = [];
   for (const o of gateway?.operators ?? []) {
     if (!o.country || out.some((c) => c.code === o.country)) continue;
+    const alpha2 = alpha2ForDialCode(o.dialCode);
     out.push({
       code: o.country,
-      name: o.countryName ?? o.country,
+      // A name from the gateway, else the browser's, never the bare « CMR ».
+      name: o.countryName ?? (alpha2 && regionName(alpha2)) ?? o.country,
       flag: o.countryFlag,
       dialCode: o.dialCode,
       currency: o.currency,
-      alpha2: alpha2ForDialCode(o.dialCode),
+      alpha2,
     });
   }
   return out;
@@ -78,4 +80,16 @@ export function operatorsIn(
   const all = gateway?.operators ?? [];
   if (!country || all.every((o) => !o.country)) return all;
   return all.filter((o) => o.country === country);
+}
+
+/** A country's name in French, from the browser (`RW` → « Rwanda »). */
+export function regionName(alpha2: string): string | null {
+  try {
+    return (
+      new Intl.DisplayNames(["fr"], { type: "region" }).of(alpha2.toUpperCase()) ??
+      null
+    );
+  } catch {
+    return null;
+  }
 }

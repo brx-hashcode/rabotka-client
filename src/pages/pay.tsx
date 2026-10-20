@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import type { Value as PhoneValue } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import mtnLogo from "@/assets/MTN-logo.jpg?format=webp";
 import airtelLogo from "@/assets/airtel-new-logo.jpg?format=webp";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
@@ -45,6 +46,7 @@ import {
   initialPayCountry,
   operatorsIn,
   payCountries,
+  regionName,
   type PayCountry,
 } from "@/lib/pay-country";
 
@@ -762,27 +764,22 @@ function activeGateway(
 
 /** The gateway's flag image for a country. */
 function CountryFlag({ country }: Readonly<{ country: PayCountry }>) {
-  return country.flag ? (
-    <img
-      src={country.flag}
-      alt=""
-      className="h-4 w-6 shrink-0 rounded-sm object-cover"
-    />
-  ) : (
-    <span className="h-4 w-6 shrink-0 rounded-sm bg-foreground/20" />
-  );
-}
-
-/** A country's name in French, from the browser (`RW` → « Rwanda »). */
-function regionName(alpha2: string): string | null {
-  try {
+  if (country.flag) {
     return (
-      new Intl.DisplayNames(["fr"], { type: "region" }).of(alpha2.toUpperCase()) ??
-      null
+      <img
+        src={country.flag}
+        alt=""
+        className="h-4 w-6 shrink-0 rounded-sm object-cover"
+      />
     );
-  } catch {
-    return null;
   }
+  // No image from the gateway (its fallback list): the phone field's own.
+  const Flag = country.alpha2 ? flags[country.alpha2] : undefined;
+  return (
+    <span className="inline-flex h-4 w-6 shrink-0 overflow-hidden rounded-sm bg-foreground/20 [&_svg]:size-full">
+      {Flag && <Flag title={country.name} />}
+    </span>
+  );
 }
 
 /** The logo we have for a network, matched on its code's network part. */
