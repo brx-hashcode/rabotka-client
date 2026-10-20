@@ -57,6 +57,16 @@ describe("pay country", () => {
     expect(operatorsIn(momo, "COG")).toHaveLength(1);
   });
 
+  it("names a country without a gateway name from the browser, never by its code", () => {
+    const fallback = {
+      ...pawaPay,
+      operators: [{ code: "MTN_MOMO_CMR", label: "MTN", country: "CMR", dialCode: "237" }],
+    } as unknown as PaymentGatewayInfo;
+    const [cmr] = payCountries(fallback);
+    expect(cmr.name).not.toBe("CMR");
+    expect(cmr.alpha2).toBe("CM");
+  });
+
   it("maps between calling codes and the phone field's countries", () => {
     expect(alpha2ForDialCode("229")).toBe("BJ");
     expect(dialCodeOf("RW")).toBe("250");
