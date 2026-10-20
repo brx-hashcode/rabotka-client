@@ -10,6 +10,7 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { ArrowLeft, ChevronDown, Loader2, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsOnline } from "@/hooks/use-is-online";
 import { discussionsContent } from "@/content/discussions";
 import { MessageBubble } from "@/features/discussions/components/message-bubble";
 import { DeleteMessageSheet } from "@/features/discussions/components/delete-message-sheet";
@@ -136,6 +137,7 @@ export default function Discussion() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useAutoGrowTextarea(draft, COMPOSER_MAX_PX);
+  const online = useIsOnline();
 
   /**
    * Scroll the THREAD to its end — never the page.
@@ -401,7 +403,7 @@ export default function Discussion() {
 
   const submit = () => {
     const body = draft.trim();
-    if (!body || send.isPending) return;
+    if (!body || send.isPending || !online) return;
     tapFeedback();
 
     // Cleared here rather than in `onSuccess`: the pending bubble already shows
@@ -774,7 +776,8 @@ export default function Discussion() {
                   // timestamp, which would arrive as `smooth`.
                   requestAnimationFrame(() => scrollThreadToBottom());
                 }}
-                placeholder={content.placeholder}
+                // Typing works offline; sending waits for the network.
+                placeholder={online ? content.placeholder : "Hors ligne · envoi possible une fois connecté"}
                 rows={1}
                 // Grows with the text up to `COMPOSER_MAX_PX`, then scrolls.
                 // The measuring is in `useAutoGrowTextarea`, not in CSS: Safari
@@ -803,7 +806,7 @@ export default function Discussion() {
               type="button"
               aria-label={content.send}
               onClick={submit}
-              disabled={!draft.trim() || send.isPending}
+              disabled={!draft.trim() || send.isPending || !online}
               className={cn(
                 "flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-whatsapp text-white shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
                 // Slides away when there is nothing to send rather than sitting

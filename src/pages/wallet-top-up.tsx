@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/wallet-controller";
 import { networkNames, topUpError } from "@/lib/top-up";
 import { useToast } from "@/hooks/use-toast";
+import { OFFLINE_ACTION_HINT, useIsOnline } from "@/hooks/use-is-online";
 import { cn, formatAmount } from "@/lib/utils";
 
 const PRESETS = [1000, 2500, 5000, 10000] as const;
@@ -23,6 +24,7 @@ export default function WalletTopUp() {
   const { data: balance, isLoading: balanceLoading } = useWalletBalance();
   const { data: gateways } = usePaymentGateways();
   const topUp = useTopUpWallet();
+  const online = useIsOnline();
   const [amount, setAmount] = useState<number | null>(null);
 
   const error = topUpError(amount, WALLET_MIN_TOP_UP, WALLET_MAX_TOP_UP);
@@ -68,17 +70,18 @@ export default function WalletTopUp() {
                 <Skeleton className="mt-1 h-6 w-24" />
               ) : (
                 <p className="text-xl font-bold text-foreground">
-                  {formatAmount(balance ?? 0)}
+                  {/* Unknown (offline, never loaded) is not zero. */}
+                  {balance == null ? "—" : formatAmount(balance)}
                 </p>
               )}
             </div>
           </div>
-          {valid && amount != null && !balanceLoading && (
+          {valid && amount != null && !balanceLoading && balance != null && (
             <div className="mt-3 flex items-center justify-between rounded-lg bg-lime/50 px-3 py-2 text-sm text-lime-foreground">
               <span>Après la recharge</span>
               <span className="flex items-center gap-1.5 font-semibold">
                 <ArrowRight className="h-3.5 w-3.5" />
-                {formatAmount((balance ?? 0) + amount)}
+                {formatAmount(balance + amount)}
               </span>
             </div>
           )}
@@ -166,13 +169,15 @@ export default function WalletTopUp() {
       <div className="sticky -bottom-6 space-y-2.5 bg-background px-4 pb-4 pt-3">
         <Button
           className="h-12 w-full bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
-          disabled={!valid || topUp.isPending}
+          disabled={!valid || topUp.isPending || !online}
           onClick={handleRecharge}
         >
           {topUp.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {valid && amount != null
-            ? `Recharger ${formatAmount(amount)}`
-            : "Choisissez un montant"}
+          {!online
+            ? OFFLINE_ACTION_HINT
+            : valid && amount != null
+              ? `Recharger ${formatAmount(amount)}`
+              : "Choisissez un montant"}
         </Button>
         <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
           <Lock className="h-3 w-3 shrink-0" />

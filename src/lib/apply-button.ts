@@ -21,6 +21,8 @@ export function applyButton(input: {
   kycBlockedLabel: string | null;
   dailyExhausted: boolean;
   resetsAt: string | null;
+  /** No network: applying needs the server, so it waits. */
+  offline?: boolean;
   now?: Date;
 }): ApplyButton {
   if (input.applied) {
@@ -50,6 +52,9 @@ export function applyButton(input: {
         : null,
     };
   }
+  // Last: the offer and the worker are fine, only the connection is missing.
+  if (input.offline)
+    return { kind: "blocked", label: "Postuler", hint: "Disponible une fois connecté" };
   return { kind: "apply", label: "Postuler" };
 }
 

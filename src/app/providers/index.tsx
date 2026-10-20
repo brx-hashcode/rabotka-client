@@ -12,6 +12,7 @@ import {
 import { SessionLinkProvider } from "./session-link-provider";
 import { isNetworkError } from "@/lib/api/errors";
 import { UpdateBanner } from "@/features/offline/update-banner";
+import { OfflineBanner } from "@/features/offline/offline-banner";
 import {
   getPolicyContent,
   policyQueryKey,
@@ -77,6 +78,7 @@ export function Providers({ children }: Readonly<ProvidersProps>) {
             <Toaster />
             <Sonner />
             <UpdateBanner />
+            <OfflineBanner />
             {/* Inside QueryClientProvider: it invalidates `profile/me` once the
                 WhatsApp link's session cookie is in place. */}
             <SessionLinkProvider>{children}</SessionLinkProvider>
