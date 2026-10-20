@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useKeyboardFrame } from "@/hooks/use-keyboard-frame";
+import { useIsOnline } from "@/hooks/use-is-online";
 import {
   AlertCircle,
   Send,
@@ -322,10 +324,11 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   // send in a thread, and the server accepts one.
   const canSend = message.trim().length > 0 || files.length > 0;
 
+  const online = useIsOnline();
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const content = message.trim();
-    if (!canSend || isSending) return;
+    if (!canSend || isSending || !online) return;
 
     let attachment_urls: string[] | undefined;
     if (files.length > 0) {
@@ -357,6 +360,13 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
     );
   };
 
+  const keyboard = useKeyboardFrame();
+  const keyboardHeight = keyboard?.height ?? null;
+  // A shorter visible area must not hide the last message.
+  useEffect(() => {
+    if (keyboardHeight !== null) scrollToBottom();
+  }, [keyboardHeight]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -366,7 +376,23 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   };
 
   return (
-    <div className="chat-wallpaper relative flex h-dvh flex-col overflow-hidden">
+    // Pinned to the visible area while an iPhone keyboard is open, like the
+    // discussion screen (see useKeyboardFrame): iOS scrolls the page under
+    // the keyboard instead of shrinking it, which slid the header away.
+    <div
+      className="chat-wallpaper relative flex h-dvh flex-col overflow-hidden"
+      style={
+        keyboard
+          ? {
+              position: "fixed",
+              insetInline: 0,
+              top: keyboard.top,
+              height: keyboard.height,
+              zIndex: 40,
+            }
+          : undefined
+      }
+    >
       {/* Header */}
       <div className="flex shrink-0 items-center gap-2 bg-background px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button
@@ -515,7 +541,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             placeholder={
               isClaimClosed
                 ? "Cette réclamation est fermée"
-                : "Tapez votre message"
+                : online
+                  ? "Tapez votre message"
+                  : "Hors ligne · envoi possible une fois connecté"
             }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -526,7 +554,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
           />
           <button
             type="submit"
-            disabled={isClaimClosed || isSending || !canSend}
+            disabled={isClaimClosed || isSending || !canSend || !online}
             className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white transition-colors hover:bg-whatsapp-dark disabled:opacity-40"
             aria-label="Envoyer"
           >

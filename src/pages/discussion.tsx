@@ -10,6 +10,8 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { ArrowLeft, ChevronDown, Loader2, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useKeyboardFrame } from "@/hooks/use-keyboard-frame";
+import { useIsOnline } from "@/hooks/use-is-online";
 import { discussionsContent } from "@/content/discussions";
 import { MessageBubble } from "@/features/discussions/components/message-bubble";
 import { DeleteMessageSheet } from "@/features/discussions/components/delete-message-sheet";
@@ -136,6 +138,9 @@ export default function Discussion() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useAutoGrowTextarea(draft, COMPOSER_MAX_PX);
+  // The visible area above an iPhone keyboard; null otherwise. See the return.
+  const keyboard = useKeyboardFrame();
+  const online = useIsOnline();
 
   /**
    * Scroll the THREAD to its end — never the page.
@@ -151,6 +156,13 @@ export default function Discussion() {
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
   };
+
+  // The keyboard opening (or the iPhone moving the visible area while
+  // typing) shortens the thread: keep the last message above the composer.
+  const keyboardHeight = keyboard?.height ?? null;
+  useEffect(() => {
+    if (keyboardHeight !== null) scrollThreadToBottom();
+  }, [keyboardHeight]);
 
   /**
    * Messages sent but not yet answered for, shown greyed with a clock so the
@@ -401,7 +413,7 @@ export default function Discussion() {
 
   const submit = () => {
     const body = draft.trim();
-    if (!body || send.isPending) return;
+    if (!body || send.isPending || !online) return;
     tapFeedback();
 
     // Cleared here rather than in `onSuccess`: the pending bubble already shows
@@ -482,19 +494,34 @@ export default function Discussion() {
   );
 
   /**
-   * `h-dvh` and nothing else.
+   * `h-dvh`, and on an iPhone with the keyboard open, the visible area.
    *
-   * This was briefly pinned to `visualViewport.height`, so the composer would
-   * sit above the keyboard. Inside the WhatsApp in-app browser — where most of
-   * this audience opens the app — that shrank the column to the space above the
-   * keyboard while the webview scrolled the document underneath it, leaving the
-   * thread squeezed into the top of the screen and a page of white below.
+   * iOS does not shrink the page for the keyboard; it scrolls it. The column
+   * slid up with it: the header left the screen and the composer floated.
+   * While a keyboard is open the column is `position: fixed` on the visual
+   * viewport — its offset as well as its height. An earlier attempt set the
+   * height alone, which squeezed the thread into the top of the screen inside
+   * the WhatsApp browser while the document scrolled underneath; following the
+   * offset is what keeps the box on the part of the page actually shown.
    *
-   * Doing it properly needs `position: fixed` plus `visualViewport.offsetTop`,
-   * and that is not something to guess at from a laptop.
+   * Android needs none of it: the page itself resizes there
+   * (`interactive-widget=resizes-content`), and the frame stays null.
    */
   return (
-    <div className="flex h-dvh flex-col">
+    <div
+      className="flex h-dvh flex-col"
+      style={
+        keyboard
+          ? {
+              position: "fixed",
+              insetInline: 0,
+              top: keyboard.top,
+              height: keyboard.height,
+              zIndex: 40,
+            }
+          : undefined
+      }
+    >
       {/* ── Header: who you are talking to, and whether they are there. ── */}
       <header className="z-10 flex shrink-0 items-center gap-2 bg-card px-2 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-soft">
         <button
@@ -774,7 +801,8 @@ export default function Discussion() {
                   // timestamp, which would arrive as `smooth`.
                   requestAnimationFrame(() => scrollThreadToBottom());
                 }}
-                placeholder={content.placeholder}
+                // Typing works offline; sending waits for the network.
+                placeholder={online ? content.placeholder : "Hors ligne · envoi possible une fois connecté"}
                 rows={1}
                 // Grows with the text up to `COMPOSER_MAX_PX`, then scrolls.
                 // The measuring is in `useAutoGrowTextarea`, not in CSS: Safari
@@ -803,7 +831,7 @@ export default function Discussion() {
               type="button"
               aria-label={content.send}
               onClick={submit}
-              disabled={!draft.trim() || send.isPending}
+              disabled={!draft.trim() || send.isPending || !online}
               className={cn(
                 "flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-whatsapp text-white shadow-[0_1px_0.5px_rgb(0_0_0/0.13)] transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
                 // Slides away when there is nothing to send rather than sitting

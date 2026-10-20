@@ -28,6 +28,9 @@ COPY package.json pnpm-lock.yaml ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+# vite.config.ts imports it (the offline manifest step); `vite preview` loads
+# the config at startup, so the server would not start without it.
+COPY build ./build
 COPY src ./src
 
 ENV VITE_PORT=3000
