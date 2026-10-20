@@ -47,8 +47,8 @@ const content = editProfileContent;
 interface EditProfileSheetButtonProps {
   readonly profile: ProfileMeResponse;
   /**
-   * A small « Modifier » text button where it is placed, instead of the
-   * floating pencil the mobile layout used — which sat over the content.
+   * A small round pencil where it is placed, instead of the floating one the
+   * mobile layout used — which sat over the content.
    */
   readonly inline?: boolean;
   /** Bump to open the sheet from elsewhere (e.g. a checklist step). */
@@ -169,12 +169,15 @@ export function EditProfileSheetButton({
   return (
     <>
       {inline ? (
+        // A small round pencil: the word « Modifier » took the room the
+        // name needed in the identity card.
         <button
           type="button"
           onClick={handleOpen}
-          className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-whatsapp active:bg-whatsapp/10"
+          aria-label={content.buttons.edit}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-lime/70 text-lime-foreground active:bg-lime"
         >
-          {content.buttons.edit}
+          <Pencil className="size-4" />
         </button>
       ) : (
       <Button
