@@ -160,7 +160,10 @@ export default function WalletTopUp() {
 
       {/* Pinned, like the offer screen's: the action stays in reach, and the
           reassurance sits with it at the foot rather than mid-form. */}
-      <div className="sticky bottom-0 space-y-2.5 bg-background px-4 pb-4 pt-3">
+      {/* `-bottom-6`: AppShell pads <main> 24px at the bottom and a sticky
+          element stops at that padding, which left the page showing under
+          the bar. */}
+      <div className="sticky -bottom-6 space-y-2.5 bg-background px-4 pb-4 pt-3">
         <Button
           className="h-12 w-full bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
           disabled={!valid || topUp.isPending}
