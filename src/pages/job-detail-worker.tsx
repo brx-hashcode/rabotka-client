@@ -40,6 +40,7 @@ import { KycNotice, kycShortLabel } from "@/features/kyc";
 import { useAccountGate } from "@/hooks/use-account-gate";
 import { AccountNotice, accountShortLabel } from "@/features/account";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
+import { applyButton } from "@/lib/apply-button";
 
 export default function JobDetailWorker() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function JobDetailWorker() {
   // Null for a remote job, and for offers created before the location pickers
   // existed — the row is dropped rather than rendered empty.
   const region = job ? jobLocationRegion(job) : null;
-  const { canApply, quota } = useCanApply();
+  const { quota } = useCanApply();
   const { blocked, reason } = useKycGate();
   // A suspended (or banned, or not-yet-activated) account keeps every read on
   // this screen — it only loses the apply button.
@@ -63,22 +64,20 @@ export default function JobDetailWorker() {
   const toggleSave = useToggleSaveJob();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const dailyExhausted = quota != null && quota.remaining <= 0;
-
-  // About the offer, not the worker — so it is checked first. Applying to a
-  // filled offer spends one of the worker's daily applications and can never
-  // succeed.
-  const offerClosed = job ? isClosedToApplications(job) : false;
-
-  let applyLabel = "Postuler";
-  if (job?.applied) applyLabel = "Déjà postulé";
-  // Même libellé que la carte du fil : il parle du poste, pas de la personne.
-  else if (offerClosed) applyLabel = "Plus de place disponible";
-  else if (accountBlocked && accountReason)
-    applyLabel = accountShortLabel(accountReason);
-  else if (blocked && reason) applyLabel = kycShortLabel(reason);
-  else if (dailyExhausted) applyLabel = "Limite quotidienne atteinte";
-  else if (!canApply) applyLabel = "Trop de candidatures en cours";
+  // Applying to a filled offer spends one of the worker's daily applications
+  // and can never succeed — hence a gate of its own, ahead of the worker's.
+  const button = job
+    ? applyButton({
+        applied: job.applied,
+        applicationId: job.applicationId,
+        offerClosed: isClosedToApplications(job),
+        accountBlockedLabel:
+          accountBlocked && accountReason ? accountShortLabel(accountReason) : null,
+        kycBlockedLabel: blocked && reason ? kycShortLabel(reason) : null,
+        dailyExhausted: quota != null && quota.remaining <= 0,
+        resetsAt: quota?.resetsAt ?? null,
+      })
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -122,8 +121,8 @@ export default function JobDetailWorker() {
         />
       )}
 
-      {!isLoading && job && (
-        <div className="space-y-4 px-4 py-4">
+      {!isLoading && job && button && (
+        <div className="space-y-4 px-4 pt-4">
           <div className="rounded-xl bg-card p-4 shadow-soft">
             <h2 className="text-lg font-bold leading-snug text-foreground">
               {job.title}
@@ -276,21 +275,38 @@ export default function JobDetailWorker() {
             </div>
           )}
 
-          <Button
-            className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
-            disabled={
-              job.applied ||
-              offerClosed ||
-              !canApply ||
-              blocked ||
-              accountBlocked ||
-              apply.isPending
-            }
-            onClick={() => setConfirmOpen(true)}
-          >
-            {apply.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {applyLabel}
-          </Button>
+          {/* Pinned to the bottom of the scroll area: on a long offer the
+              button used to sit below the description and the recruiter, so
+              the one thing to do here was off screen. Only the button and its
+              one-line hint stick — the notices above are too tall to cover
+              the offer with. */}
+          <div className="sticky bottom-0 -mx-4 bg-background px-4 pb-4 pt-3">
+            {button.kind === "view-application" ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate(button.to)}
+              >
+                {button.label}
+              </Button>
+            ) : (
+              <Button
+                className="w-full bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
+                disabled={button.kind === "blocked" || apply.isPending}
+                onClick={() => setConfirmOpen(true)}
+              >
+                {apply.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {button.label}
+              </Button>
+            )}
+            {button.kind === "blocked" && button.hint && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">
+                {button.hint}
+              </p>
+            )}
+          </div>
 
           <ApplyConfirmDrawer
             open={confirmOpen}

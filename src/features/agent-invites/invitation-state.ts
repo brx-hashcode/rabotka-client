@@ -28,7 +28,6 @@ export type AcceptGates = {
   accountBlockedLabel: string | null;
   kycBlockedLabel: string | null;
   dailyExhausted: boolean;
-  tooManyActive: boolean;
 };
 
 /**
@@ -48,7 +47,5 @@ export function acceptButton(gates: AcceptGates): {
     return { label: gates.kycBlockedLabel, disabled: true };
   if (gates.dailyExhausted)
     return { label: "Limite quotidienne atteinte", disabled: true };
-  if (gates.tooManyActive)
-    return { label: "Trop de candidatures en cours", disabled: true };
   return { label: "Accepter et postuler", disabled: false };
 }
