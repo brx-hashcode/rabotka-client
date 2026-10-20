@@ -46,7 +46,7 @@ export function ProfileIdentity({
       </Avatar>
       {onAvatarClick && !avatarUrl && (
         // The first thing an employer looks at: ask for it on the owner's side.
-        <span className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full bg-whatsapp text-white ring-2 ring-background">
+        <span className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full bg-whatsapp text-white ring-2 ring-card">
           <Camera className="size-3.5" />
         </span>
       )}
@@ -54,7 +54,8 @@ export function ProfileIdentity({
   );
 
   return (
-    <section className="flex items-center gap-4">
+    // In a soft card, so the identity reads as one block above the work.
+    <section className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-soft">
       {onAvatarClick ? (
         <button
           type="button"
