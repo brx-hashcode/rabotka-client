@@ -1,4 +1,5 @@
 import { BottomNav } from "../components/bottom-nav";
+import { SHELL_FOOTER_ID } from "../components/shell-footer";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
@@ -94,6 +95,9 @@ export function AppShell({
           >
             {children}
           </main>
+          {/* Where a screen's pinned action lands (see ShellFooter): out of
+              the scroll, on top of the tab bar. Empty, it takes no space. */}
+          <div id={SHELL_FOOTER_ID} className="shrink-0 empty:hidden" />
           {withNav && <BottomNav />}
         </div>
       </div>

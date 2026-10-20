@@ -81,6 +81,11 @@ export type ProfileMeResponse = {
   walletBalance: number;
   categoryIds: string[];
   categoryNames: string[];
+  /** Average of the ratings received; null before the first one. */
+  ratingAvg?: number | null;
+  ratingCount?: number;
+  /** The public portfolio's slug (`/p/:slug`); null until one is minted. */
+  portfolioSlug?: string | null;
 };
 
 export type UpdateProfilePayload = {

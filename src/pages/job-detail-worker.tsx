@@ -280,7 +280,10 @@ export default function JobDetailWorker() {
               the one thing to do here was off screen. Only the button and its
               one-line hint stick — the notices above are too tall to cover
               the offer with. */}
-          <div className="sticky bottom-0 -mx-4 bg-background px-4 pb-4 pt-3">
+          {/* `-bottom-6`: AppShell pads <main> 24px at the bottom, and a
+              sticky element stops at its container's padding edge — at
+              `bottom-0` the offer showed through under the button. */}
+          <div className="sticky -bottom-6 -mx-4 bg-background px-4 pb-4 pt-3">
             {button.kind === "view-application" ? (
               <Button
                 variant="outline"
