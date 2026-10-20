@@ -42,7 +42,17 @@ export function primeNotificationSound() {
   window.addEventListener("keydown", unlock);
 }
 
+/**
+ * The first message of a thread arrives twice — as `message:new` and as its
+ * bell entry — so a second chime this close to the first is the same event.
+ */
+const SAME_EVENT_MS = 2_000;
+let lastPlayedAt = 0;
+
 export function playNotificationSound() {
+  const now = Date.now();
+  if (now - lastPlayedAt < SAME_EVENT_MS) return;
+  lastPlayedAt = now;
   const audio = element();
   try {
     audio.currentTime = 0;

@@ -18,7 +18,9 @@ import {
   markDiscussionRead,
   reportRedaction,
   sendDiscussionMessage,
+  type DiscussionMessage,
 } from "@/lib/api/discussions-controller";
+import { playNotificationSound, shouldChime } from "@/lib/notification-sound";
 import { useProfileMe } from "./use-profile-me";
 
 export const discussionsKeys = {
@@ -315,6 +317,46 @@ export function useDiscussionsSocket(enabled: boolean) {
       socket.off("message:new", refresh);
       socket.off("message:read", refresh);
       socket.off("message:deleted", refresh);
+      releaseDiscussionSocket();
+    };
+  }, [enabled, queryClient]);
+}
+
+/**
+ * App-wide: a chime for every incoming message, and a live Discussion badge.
+ *
+ * The bell's `notification:new` is not enough for chat — a conversation gets
+ * one bell entry per half hour (NOTIFICATION_DEDUPE_SECONDS, backend), so in a
+ * back-and-forth every message after the first arrived in silence. This holds
+ * the shared /messagerie socket for as long as the app is open; with it,
+ * "en ligne" means in the app rather than on a Discussion screen.
+ *
+ * `message:new` only ever reaches the recipient, so nobody hears their own.
+ */
+export function useIncomingMessages(enabled: boolean) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const socket = acquireDiscussionSocket();
+    const onMessage = (message?: DiscussionMessage) => {
+      void queryClient.invalidateQueries({ queryKey: discussionsKeys.list() });
+      if (
+        message?.conversationId &&
+        shouldChime(
+          { link: `/discussions/${message.conversationId}` },
+          window.location.pathname,
+          document.visibilityState === "visible",
+        )
+      ) {
+        playNotificationSound();
+      }
+    };
+
+    socket.on("message:new", onMessage);
+    return () => {
+      socket.off("message:new", onMessage);
       releaseDiscussionSocket();
     };
   }, [enabled, queryClient]);
