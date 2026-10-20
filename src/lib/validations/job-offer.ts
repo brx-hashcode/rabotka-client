@@ -2,10 +2,13 @@ import { z } from "zod";
 import { EMPLOYMENT_TYPE_VALUES, isDatedMission } from "@/lib/employment-type";
 import { composeScheduledAt } from "@/lib/scheduled-at";
 
-export const PAYMENT_FLOW_VALUES = ["HOURLY", "DAILY", "MONTHLY"] as const;
+// TASK first: a fixed price for the whole job is how most missions are paid,
+// and the time-based three left that employer nothing true to pick.
+export const PAYMENT_FLOW_VALUES = ["TASK", "HOURLY", "DAILY", "MONTHLY"] as const;
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
 
 export const PAYMENT_FLOW_LABELS: Record<PaymentFlowValue, string> = {
+  TASK: "Par tâche (forfait)",
   HOURLY: "Par heure",
   DAILY: "Par jour",
   MONTHLY: "Par mois",
