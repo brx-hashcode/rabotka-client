@@ -1,59 +1,64 @@
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { useProfileMe } from "@/hooks/use-profile-me";
-import { useKycGate } from "@/hooks/use-kyc-gate";
-import { KycNotice } from "@/features/kyc";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
-  User,
-  BadgeCheck,
-  Phone,
-  Mail,
-  MapPin,
   AlertCircle,
-  FileWarning,
-  Shield,
-  Globe,
-  Building2,
   ChevronRight,
+  Clock,
   Images,
   LayoutDashboard,
+  UserRound,
   UsersRound,
   Wallet,
-  Clock,
 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProfileMe } from "@/hooks/use-profile-me";
+import { usePortfolio } from "@/hooks/use-portfolio";
 import { PenaltiesSheetButton } from "@/features/profile/components/penalties-sheet-button";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
 import { InvoicesSheetButton } from "@/features/profile/components/invoices-sheet-button";
 import { ReferralSheetButton } from "@/features/profile/components/referral-sheet-button";
-import { DomainBadges } from "@/features/profile/components/domain-badges";
+import { ProfileIdentity } from "@/features/portfolio/components/profile-identity";
+import {
+  profileChecklist,
+  type ChecklistStep,
+} from "@/features/portfolio/profile-checklist";
 import { SupportContactButton } from "@/features/support";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
-import { cn } from "@/lib/utils";
+import { cn, formatAmount } from "@/lib/utils";
 
-const WHATSAPP_PLACEHOLDER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 212 212'%3E%3Cpath fill='%23DFE5E7' d='M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z'/%3E%3Cpath fill='%23FFF' d='M173.561 171.615a62.767 62.767 0 0 0-2.065-2.955 67.7 67.7 0 0 0-2.608-3.299 70.112 70.112 0 0 0-3.184-3.527 71.097 71.097 0 0 0-5.924-5.47 72.458 72.458 0 0 0-10.204-7.026 75.2 75.2 0 0 0-5.98-3.055c-.062-.028-.118-.059-.18-.087-9.792-4.44-22.106-7.529-37.416-7.529s-27.624 3.089-37.416 7.529c-.338.153-.653.318-.985.474a75.37 75.37 0 0 0-6.229 3.298 72.589 72.589 0 0 0-9.15 6.395 71.243 71.243 0 0 0-5.924 5.47 70.064 70.064 0 0 0-3.184 3.527 67.142 67.142 0 0 0-2.609 3.299 63.292 63.292 0 0 0-2.065 2.955 56.33 56.33 0 0 0-1.447 2.324c-.033.056-.073.119-.104.174a47.92 47.92 0 0 0-1.07 1.926c-.559 1.068-.818 1.678-.818 1.678v.398c18.285 17.927 43.322 28.985 70.945 28.985 27.678 0 52.761-11.103 71.055-29.095v-.289s-.619-1.45-1.992-3.778a58.346 58.346 0 0 0-1.446-2.322zM106.002 125.5c2.645 0 5.212-.253 7.68-.737a38.272 38.272 0 0 0 3.624-.896 37.124 37.124 0 0 0 5.12-1.958 36.307 36.307 0 0 0 6.15-3.67 35.923 35.923 0 0 0 9.489-10.48 36.558 36.558 0 0 0 2.422-4.84 37.051 37.051 0 0 0 1.716-5.25c.299-1.208.542-2.443.725-3.701.275-1.887.417-3.827.417-5.811s-.142-3.925-.417-5.811a38.734 38.734 0 0 0-1.215-5.494 36.68 36.68 0 0 0-3.648-8.298 35.923 35.923 0 0 0-9.489-10.48 36.347 36.347 0 0 0-6.15-3.67 37.124 37.124 0 0 0-5.12-1.958 37.67 37.67 0 0 0-3.624-.896 39.875 39.875 0 0 0-7.68-.737c-21.162 0-37.345 16.183-37.345 37.345 0 21.159 16.183 37.342 37.345 37.342z'/%3E%3C/svg%3E";
-
+/**
+ * The profile tab, as a hub: who you are in one compact card, the three
+ * numbers that matter (each one a way in), what is missing from the profile,
+ * then everything reachable from here, grouped.
+ *
+ * It used to open on a centred header taking a third of the screen, then the
+ * bio, the domains and every contact field — so the links people came for
+ * (publications, wallet, claims) sat at the bottom, under a floating pencil
+ * that covered the content. The facts now live on « Mes informations ».
+ */
 export default function Profile() {
   const navigate = useNavigate();
   const { data: profile, isLoading, error } = useProfileMe();
-  const { blocked: kycBlocked, reason: kycReason } = useKycGate();
+  const isWorker = profile?.profileType === "WORKER";
+  const { data: publications = [] } = usePortfolio(isWorker);
+  // Bumped to open the edit sheet from the avatar or a checklist step.
+  const [editSignal, setEditSignal] = useState(0);
 
   if (isLoading) {
     return (
-      <div className="pt-8 lg:pt-10 pb-8 px-4">
+      <div className="px-4 pb-8 pt-6">
         <ProfileSkeleton />
       </div>
     );
   }
 
-  if (error) {
+  if (error || !profile) {
     return (
-      <div className="pt-8 lg:pt-10 pb-8 px-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-foreground">Erreur</h1>
+      <div className="flex items-center justify-center px-4 pb-8 pt-10">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold text-foreground">Erreur</h1>
           <p className="text-muted-foreground">
             Impossible de charger votre profil. Veuillez vous reconnecter.
           </p>
@@ -62,413 +67,296 @@ export default function Profile() {
     );
   }
 
-  if (!profile) {
-    return null;
-  }
-
-  const fullName = `${profile.firstName} ${profile.lastName}`;
-  const initials =
-    `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`.toUpperCase();
-  const isVerified = profile.verificationStatus === "VERIFIED";
+  const fullName = `${profile.firstName} ${profile.lastName}`.trim();
   const isEmployer = profile.profileType === "EMPLOYER";
-  const categoryNames = profile.categoryNames ?? [];
+  const checklist = isWorker
+    ? profileChecklist(profile, publications.length)
+    : null;
+  const openEdit = () => setEditSignal((n) => n + 1);
+  const openStep = (step: ChecklistStep) =>
+    step.key === "publications" ? navigate("/profile/portfolio") : openEdit();
 
-  // Flat px-4 like the rest of the app: md:px-8 keys off the viewport, not
-  // AppShell's max-w-lg column, so on a desktop-width window every card sat at
-  // 32px gutters. max-w-2xl inside that column is dead weight.
   return (
-    <div className="pt-8 lg:pt-10 pb-8 px-4">
-      <div className="space-y-6">
-        <div className="relative bg-linear-to-b from-whatsapp/10 to-transparent rounded-2xl pt-8 pb-6 px-6">
-          <div className="absolute top-4 right-4">
-            <EditProfileSheetButton profile={profile} />
-          </div>
-
-          <div className="flex flex-col items-center space-y-3">
-            <div className="relative">
-              <Avatar className="h-28 w-28 border-4 border-white shadow-md">
-                <AvatarImage
-                  src={profile.avatarUrl ?? WHATSAPP_PLACEHOLDER}
-                  alt={fullName}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-muted text-muted-foreground text-3xl">
-                  {initials || <User className="h-12 w-12" />}
-                </AvatarFallback>
-              </Avatar>
-              {isVerified && (
-                <div className="absolute bottom-0 right-0 bg-whatsapp rounded-full p-1.5 border-2 border-white shadow-sm">
-                  <BadgeCheck className="h-4 w-4 text-white" />
-                </div>
-              )}
-            </div>
-
-            <div className="text-center space-y-1">
-              <h2 className="text-xl font-bold text-foreground">{fullName}</h2>
-              <p className="text-sm text-muted-foreground">
-                {translateProfileType(profile.profileType)}
-              </p>
-            </div>
-
+    <div className="space-y-6 px-4 pb-8 pt-6">
+      <ProfileIdentity
+        fullName={fullName}
+        avatarUrl={profile.avatarUrl}
+        location={profile.city || profile.address || null}
+        ratingAvg={profile.ratingAvg ?? null}
+        ratingCount={profile.ratingCount ?? 0}
+        reliabilityScore={profile.reliabilityScore}
+        verified={profile.verificationStatus === "VERIFIED"}
+        onAvatarClick={openEdit}
+        action={
+          <EditProfileSheetButton profile={profile} inline openSignal={editSignal} />
+        }
+        footer={
+          // Only when it needs saying: « Actif » is the normal case.
+          profile.status === "ACTIVE" ? null : (
             <AccountStatusBadge status={profile.status} />
-          </div>
-        </div>
+          )
+        }
+      />
 
-        <div className="bg-card shadow-soft rounded-xl flex divide-x divide-border">
-          <StatItem
-            value={profile.walletBalance.toLocaleString("fr-FR")}
-            label="Solde (FCFA)"
+      {/* The three numbers, each a way into what it counts. */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <StatTile
+          // The amount says what it is; « Recharger » is the second line.
+          value={formatAmount(profile.walletBalance)}
+          ariaLabel={`Solde : ${formatAmount(profile.walletBalance)}. Recharger`}
+          hint="Recharger"
+          onClick={() => navigate("/portefeuille")}
+        />
+        {isEmployer ? (
+          <StatTile
+            value={String(profile.jobOffersCount)}
+            label="Offres publiées"
+            onClick={() => navigate("/jobs")}
           />
-
-          {isEmployer ? (
-            <StatItem value={profile.jobOffersCount} label="Offres publiees" />
-          ) : (
-            <StatItem
-              value={profile.applicationsCount}
-              label="Candidatures"
-            />
-          )}
-
-          <StatItem
-            value={
-              profile.reliabilityScore === null
-                ? "N/A"
-                : `${profile.reliabilityScore}%`
-            }
-            label="Fiabilite"
+        ) : (
+          <StatTile
+            value={String(profile.applicationsCount)}
+            label="Candidatures"
+            onClick={() => navigate("/mes-candidatures")}
           />
-        </div>
-
-        {profile.description && (
-          <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-muted/30">
-              <p className="text-xs font-medium text-muted-foreground">
-                A propos
-              </p>
-            </div>
-            <div className="px-4 py-3">
-              <p className="text-sm text-foreground leading-relaxed">
-                {profile.description}
-              </p>
-            </div>
-          </div>
         )}
-
-        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">
-              Domaines
-            </p>
-          </div>
-          <div className="px-4 py-3">
-            {categoryNames.length > 0 ? (
-              <DomainBadges names={categoryNames} />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Aucun domaine sélectionné
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">
-              Informations
-            </p>
-          </div>
-          <div className="divide-y divide-border">
-            {/* The phone IS the WhatsApp number — every login link and
-                notification goes there — so it is labelled as such and the
-                separate "WhatsApp: connecte" row that repeated it is gone. */}
-            <InfoRow
-              icon={<Phone className="h-4 w-4 text-whatsapp" />}
-              label="Numero WhatsApp"
-              value={profile.phone}
-            />
-            {/* Only when there is one. Most people have a single number, and a
-                row reading "Non renseigne" would imply something is missing. */}
-            {profile.directPhone && (
-              <InfoRow
-                icon={<Phone className="h-4 w-4 text-whatsapp" />}
-                label="Numero direct"
-                value={profile.directPhone}
-              />
-            )}
-            {/* Same rule as the direct number above: shown only when there is
-                one. Email is optional at signup and most profiles have none, so
-                a row reading "Non renseigne" would flag the normal case as an
-                omission to go and fix. */}
-            {profile.email && (
-              <InfoRow
-                icon={<Mail className="h-4 w-4 text-whatsapp" />}
-                label="Email"
-                value={profile.email}
-              />
-            )}
-            {profile.countryName && (
-              <InfoRow
-                icon={<Globe className="h-4 w-4 text-whatsapp" />}
-                label="Pays"
-                value={profile.countryName}
-              />
-            )}
-            {profile.city && (
-              <InfoRow
-                icon={<Building2 className="h-4 w-4 text-whatsapp" />}
-                label="Ville"
-                value={profile.city}
-              />
-            )}
-            <InfoRow
-              icon={<MapPin className="h-4 w-4 text-whatsapp" />}
-              label="Adresse"
-              value={profile.address}
-            />
-            <InfoRow
-              icon={<Shield className="h-4 w-4 text-whatsapp" />}
-              label="Verification KYC"
-              value={translateVerificationStatus(profile.verificationStatus)}
-            />
-            {/*
-              One findable explanation that does not depend on which screen the
-              user is on — the action screens each show their own notice, but
-              this is where someone looks when wondering why.
-            */}
-            {kycBlocked && kycReason && (
-              <div className="p-4">
-                <KycNotice reason={kycReason} />
-              </div>
-            )}
-            {/* The agreement and CV downloads are gone from here on purpose:
-                both are on-demand now, so this list stays the profile's facts
-                rather than a mix of facts and actions. */}
-            {!isEmployer && (
-              <InfoRow
-                icon={<FileWarning className="h-4 w-4 text-amber-500" />}
-                label="Penalites"
-                value={`${profile.penaltiesCount} penalite${profile.penaltiesCount !== 1 ? "s" : ""}${profile.unpaidPenaltiesCount > 0 ? ` (${profile.unpaidPenaltiesCount} impayee${profile.unpaidPenaltiesCount !== 1 ? "s" : ""})` : ""}`}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Action list */}
-        <div className="space-y-3">
-          <div className="bg-card rounded-xl shadow-soft overflow-hidden divide-y divide-border">
-            {!isEmployer && (
-              <>
-                <ActionRow
-                  icon={<Images className="h-4 w-4 text-muted-foreground" />}
-                  label="Mes publications"
-                  onClick={() => navigate("/profile/portfolio")}
-                />
-                <PenaltiesSheetButton asRow />
-              </>
-            )}
-            {isEmployer && (
-              <>
-                <ActionRow
-                  icon={
-                    <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
-                  }
-                  label="Tableau de bord"
-                  onClick={() => navigate("/dashboard")}
-                />
-                {/* Hidden, not removed. The page, its route and
-                    `GET /profile/contacts` all still work — this only takes the
-                    entry point out of the menu, so restoring it is deleting one
-                    wrapper rather than rebuilding the feature. */}
-                <div className="hidden">
-                  <ActionRow
-                    icon={
-                      <UsersRound className="h-4 w-4 text-muted-foreground" />
-                    }
-                    label="Profils contactés"
-                    onClick={() => navigate("/profils-contactes")}
-                  />
-                </div>
-                {/* Both rows exist because an employer's five tab slots are
-                    full. Claims never had one; Missions gave its slot up to
-                    Discussion, and this is where it went — added BEFORE the
-                    tab was removed, so the route was never unreachable. */}
-                <ActionRow
-                  icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-                  label="Missions"
-                  onClick={() => navigate("/missions")}
-                />
-                <ActionRow
-                  icon={
-                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  }
-                  label="Réclamations"
-                  onClick={() => navigate("/claims")}
-                />
-              </>
-            )}
-            <ReferralSheetButton asRow />
-            <ActionRow
-              icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
-              label="Recharger mon portefeuille"
-              onClick={() => navigate("/portefeuille")}
-            />
-            <InvoicesSheetButton asRow />
-            <SupportContactButton asRow />
-          </div>
-
-          {/* Last thing on the screen, deliberately quiet. It exists so a
-              support conversation can start with "which version?" and get an
-              answer, not as information anyone browses for. */}
-          <p className="pb-2 text-center text-xs text-muted-foreground">
-            Rabotka v{__APP_VERSION__}
-          </p>
-        </div>
+        <StatTile
+          value={
+            profile.reliabilityScore == null ? "—" : `${profile.reliabilityScore} %`
+          }
+          label="Fiabilité"
+        />
       </div>
+
+      {checklist && checklist.percent < 100 && (
+        <section className="rounded-xl bg-card p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-sm font-semibold text-foreground">
+              Complétez votre profil
+            </p>
+            <span className="shrink-0 text-sm font-semibold tabular-nums text-whatsapp">
+              {checklist.percent} %
+            </span>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-whatsapp transition-all duration-500 motion-reduce:transition-none"
+              style={{ width: `${checklist.percent}%` }}
+            />
+          </div>
+          {/* Only what is left: the done steps are the bar's job here. */}
+          <ul className="mt-2">
+            {checklist.steps
+              .filter((s) => !s.done)
+              .map((step) => (
+                <li key={step.key}>
+                  <button
+                    type="button"
+                    onClick={() => openStep(step)}
+                    className="flex w-full items-center gap-3 rounded-lg px-1 py-2 text-left text-sm text-foreground active:bg-secondary"
+                  >
+                    <span className="size-5 shrink-0 rounded-full ring-1 ring-inset ring-border" />
+                    <span className="flex-1">{step.label}</span>
+                    <ChevronRight className="size-4 text-muted-foreground" />
+                  </button>
+                </li>
+              ))}
+          </ul>
+        </section>
+      )}
+
+      <Group title="Mon activité">
+        {isWorker && (
+          <Row
+            icon={Images}
+            label="Mes publications"
+            detail={String(publications.length)}
+            onClick={() => navigate("/profile/portfolio")}
+          />
+        )}
+        {isEmployer && (
+          <>
+            <Row
+              icon={LayoutDashboard}
+              label="Tableau de bord"
+              onClick={() => navigate("/dashboard")}
+            />
+            {/* Missions gave its tab slot to Discussion; it lives here. */}
+            <Row
+              icon={Clock}
+              label="Missions"
+              onClick={() => navigate("/missions")}
+            />
+            {/* Hidden, not removed: the page, its route and the API still
+                work — restoring it is deleting this wrapper. */}
+            <div className="hidden">
+              <Row
+                icon={UsersRound}
+                label="Profils contactés"
+                onClick={() => navigate("/profils-contactes")}
+              />
+            </div>
+          </>
+        )}
+        {/* Both roles: the worker's tab bar gave Réclamations up to
+            Discussion on the promise that it lived here — and it did not. */}
+        <Row
+          icon={AlertCircle}
+          label="Réclamations"
+          onClick={() => navigate("/claims")}
+        />
+        {isWorker && <PenaltiesSheetButton asRow />}
+      </Group>
+
+      <Group title="Argent">
+        <Row
+          icon={Wallet}
+          label="Portefeuille"
+          detail={formatAmount(profile.walletBalance)}
+          onClick={() => navigate("/portefeuille")}
+        />
+        <InvoicesSheetButton asRow />
+        <ReferralSheetButton asRow />
+      </Group>
+
+      <Group title="Mon profil">
+        <Row
+          icon={UserRound}
+          label="Mes informations"
+          onClick={() => navigate("/profile/informations")}
+        />
+      </Group>
+
+      <Group title="Aide">
+        <SupportContactButton asRow />
+      </Group>
+
+      {/* Deliberately quiet: so a support conversation can start with
+          "which version?" and get an answer. */}
+      <p className="text-center text-xs text-muted-foreground">
+        Rabotka v{__APP_VERSION__}
+      </p>
     </div>
   );
 }
 
-const StatItem = ({
+function StatTile({
   value,
   label,
-}: Readonly<{
-  value: number | string;
-  label: string;
-}>) => (
-  <div className="flex-1 flex flex-col items-center justify-center gap-1 py-4 px-2 text-center">
-    <span className="text-lg font-bold text-foreground">{value}</span>
-    <span className="text-xs text-muted-foreground">{label}</span>
-  </div>
-);
-
-const ActionRow = ({
-  icon,
-  label,
+  hint,
   onClick,
-  destructive = false,
-  disabled = false,
+  ariaLabel,
 }: Readonly<{
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  destructive?: boolean;
-  disabled?: boolean;
-}>) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    className={cn(
-      "flex w-full items-center gap-3 px-4 py-3.5 text-left",
-      "active:bg-muted disabled:opacity-50",
-      destructive ? "text-destructive" : "text-foreground",
-    )}
-  >
-    <div className="shrink-0">{icon}</div>
-    <span className="flex-1 text-sm font-medium">{label}</span>
-    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-  </button>
-);
-
-const InfoRow = ({
-  icon,
-  label,
-  value,
-}: Readonly<{
-  icon: React.ReactNode;
-  label: string;
   value: string;
-}>) => (
-  <div className="flex items-center gap-3 px-4 py-3">
-    <div className="shrink-0">{icon}</div>
-    <div className="min-w-0 flex-1">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium text-foreground truncate">{value}</p>
-    </div>
-  </div>
-);
+  label?: string;
+  ariaLabel?: string;
+  hint?: string;
+  onClick?: () => void;
+}>) {
+  const body = (
+    <>
+      <span className="truncate text-base font-bold text-foreground">{value}</span>
+      {label && <span className="text-xs text-muted-foreground">{label}</span>}
+      {hint && <span className="mt-0.5 text-xs font-medium text-whatsapp">{hint} ›</span>}
+    </>
+  );
+  const className =
+    "flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-card px-2 py-3.5 text-center";
+  return onClick ? (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={cn(className, "active:bg-secondary")}
+    >
+      {body}
+    </button>
+  ) : (
+    <div className={className}>{body}</div>
+  );
+}
+
+function Group({
+  title,
+  children,
+}: Readonly<{ title: string; children: React.ReactNode }>) {
+  return (
+    <section className="space-y-2">
+      <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h2>
+      <div className="divide-y divide-border/60 overflow-hidden rounded-xl bg-card">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function Row({
+  icon: Icon,
+  label,
+  detail,
+  onClick,
+}: Readonly<{
+  icon: React.ElementType;
+  label: string;
+  detail?: string;
+  onClick: () => void;
+}>) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 px-4 py-3.5 text-left text-foreground active:bg-muted"
+    >
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="flex-1 text-sm font-medium">{label}</span>
+      {detail && (
+        <span className="max-w-[45%] truncate text-xs text-muted-foreground">
+          {detail}
+        </span>
+      )}
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+    </button>
+  );
+}
 
 const AccountStatusBadge = ({
   status,
 }: Readonly<{ status: ProfileMeResponse["status"] }>) => {
   const config = {
-    ACTIVE: {
-      label: "Actif",
-      className: "bg-green-100 text-green-700 border-0",
-    },
+    ACTIVE: { label: "Actif", className: "bg-green-100 text-green-700" },
     PENDING_ACTIVATION: {
       label: "Activation en attente",
-      className: "bg-yellow-100 text-yellow-700 border-0",
+      className: "bg-yellow-100 text-yellow-700",
     },
-    SUSPENDED: {
-      label: "Suspendu",
-      className: "bg-orange-100 text-orange-700 border-0",
-    },
-    BANNED: { label: "Banni", className: "bg-red-100 text-red-700 border-0" },
+    SUSPENDED: { label: "Suspendu", className: "bg-orange-100 text-orange-700" },
+    BANNED: { label: "Banni", className: "bg-red-100 text-red-700" },
   };
   const { label, className } = config[status];
-  return <Badge className={cn("text-xs", className)}>{label}</Badge>;
-};
-
-const ProfileSkeleton = () => {
   return (
-    <div className="w-full space-y-6">
-      <div className="bg-muted/20 rounded-2xl pt-8 pb-6 px-6">
-        <div className="flex flex-col items-center space-y-3">
-          <Skeleton className="h-28 w-28 rounded-full" />
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-4 w-24" />
-          <div className="flex gap-2">
-            <Skeleton className="h-5 w-16 rounded-full" />
-            <Skeleton className="h-5 w-20 rounded-full" />
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-24 rounded-xl" />
-      </div>
-      <Skeleton className="h-20 rounded-xl" />
-      <div className="rounded-xl shadow-soft overflow-hidden">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 px-4 py-3">
-            <Skeleton className="h-4 w-4 rounded" />
-            <div className="flex-1 space-y-1">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Badge className={cn("mt-1 border-0 text-xs", className)}>
+      {label}
+    </Badge>
   );
 };
 
-const translateProfileType = (
-  profileType: ProfileMeResponse["profileType"],
-): string => {
-  switch (profileType) {
-    case "EMPLOYER":
-      return "Recruteur";
-    case "WORKER":
-      return "Travailleur";
-    default:
-      return "Inconnu";
-  }
-};
-
-const translateVerificationStatus = (
-  status: ProfileMeResponse["verificationStatus"],
-): string => {
-  switch (status) {
-    case "VERIFIED":
-      return "Verifie";
-    case "PENDING":
-      return "En attente";
-    case "REJECTED":
-      return "Rejete";
-    default:
-      return "Inconnu";
-  }
-};
+const ProfileSkeleton = () => (
+  <div className="w-full space-y-6">
+    <div className="flex items-center gap-4 rounded-xl bg-card p-4">
+      <Skeleton className="size-16 shrink-0 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-3.5 w-28" />
+        <Skeleton className="h-3.5 w-36" />
+      </div>
+    </div>
+    <div className="grid grid-cols-3 gap-2.5">
+      <Skeleton className="h-20 rounded-xl" />
+      <Skeleton className="h-20 rounded-xl" />
+      <Skeleton className="h-20 rounded-xl" />
+    </div>
+    <Skeleton className="h-28 rounded-xl" />
+    <Skeleton className="h-40 rounded-xl" />
+  </div>
+);

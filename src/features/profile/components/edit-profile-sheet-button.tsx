@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -46,10 +46,19 @@ const content = editProfileContent;
 
 interface EditProfileSheetButtonProps {
   readonly profile: ProfileMeResponse;
+  /**
+   * A small round pencil where it is placed, instead of the floating one the
+   * mobile layout used — which sat over the content.
+   */
+  readonly inline?: boolean;
+  /** Bump to open the sheet from elsewhere (e.g. a checklist step). */
+  readonly openSignal?: number;
 }
 
 export function EditProfileSheetButton({
   profile,
+  inline = false,
+  openSignal = 0,
 }: EditProfileSheetButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
@@ -110,6 +119,15 @@ export function EditProfileSheetButton({
     setIsOpen(true);
   };
 
+  // Opened from outside: each new signal opens it once.
+  const lastSignal = useRef(openSignal);
+  useEffect(() => {
+    if (openSignal === lastSignal.current) return;
+    lastSignal.current = openSignal;
+    handleOpen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the signal opens it
+  }, [openSignal]);
+
   const onSubmit = (data: EditProfileFormData) => {
     updateProfile(
       {
@@ -150,6 +168,18 @@ export function EditProfileSheetButton({
 
   return (
     <>
+      {inline ? (
+        // A small round pencil: the word « Modifier » took the room the
+        // name needed in the identity card.
+        <button
+          type="button"
+          onClick={handleOpen}
+          aria-label={content.buttons.edit}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-lime/70 text-lime-foreground active:bg-lime"
+        >
+          <Pencil className="size-4" />
+        </button>
+      ) : (
       <Button
         variant={isMobile ? "default" : "outline"}
         size={isMobile ? "icon" : "sm"}
@@ -164,6 +194,7 @@ export function EditProfileSheetButton({
         <Pencil className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
         {!isMobile && content.buttons.edit}
       </Button>
+      )}
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
