@@ -9,9 +9,9 @@ import {
   MessageCircle,
 } from "lucide-react";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import type { TabMatch } from "./active-tab";
 
-export type NavTab = {
-  readonly to: string;
+export type NavTab = TabMatch & {
   readonly label: string;
   readonly icon: LucideIcon;
 };
@@ -35,30 +35,62 @@ export type NavTab = {
  * than as five clear targets. Single silhouettes survive the size; detail does
  * not. The stroke weight is set once in `BottomNav`, not here.
  */
+// `match`: the detail screens each tab owns when someone lands on them cold
+// (a notification, a shared link). See active-tab.ts.
 export const WORKER_TABS: readonly NavTab[] = [
-  { to: "/home", label: "Accueil", icon: Home },
+  {
+    to: "/home",
+    label: "Accueil",
+    icon: Home,
+    match: ["/offres", "/recherche-offres", "/favoris"],
+  },
   // The applications this worker SENT — one document, not a clipboard.
   { to: "/mes-candidatures", label: "Candidatures", icon: FileText },
   // Confirmed engagements, so a calendar with a tick rather than a clock: the
   // clock said "time", which is not what a mission is.
-  { to: "/applications", label: "Missions", icon: CalendarCheck },
+  {
+    to: "/applications",
+    label: "Missions",
+    icon: CalendarCheck,
+    match: ["/missions"],
+  },
   // Réclamations gave up this slot; it lives in the Profile menu, where it
   // already had a row.
   { to: "/discussions", label: "Discussion", icon: MessageCircle },
-  { to: "/profile", label: "Profil", icon: User },
+  {
+    to: "/profile",
+    label: "Profil",
+    icon: User,
+    match: ["/claims", "/portefeuille"],
+  },
 ];
 
 export const EMPLOYER_TABS: readonly NavTab[] = [
-  { to: "/home", label: "Accueil", icon: Home },
-  { to: "/jobs", label: "Mes offres", icon: Briefcase },
+  {
+    to: "/home",
+    label: "Accueil",
+    icon: Home,
+    match: ["/recherche", "/recommandations"],
+  },
+  { to: "/jobs", label: "Mes offres", icon: Briefcase, match: ["/job-offers"] },
   // What arrives here is PEOPLE, not mail. The tray metaphor was borrowed from
   // email and said nothing about candidates.
-  { to: "/candidatures", label: "Candidatures", icon: Users },
+  {
+    to: "/candidatures",
+    label: "Candidatures",
+    icon: Users,
+    match: ["/missions"],
+  },
   // Missions gave up this slot. Candidatures stays, and the two views are
   // close, so the loss of reach is small — but /missions was NOT in the
   // Profile menu before this change, so a row was added there first.
   { to: "/discussions", label: "Discussion", icon: MessageCircle },
-  { to: "/profile", label: "Profil", icon: User },
+  {
+    to: "/profile",
+    label: "Profil",
+    icon: User,
+    match: ["/claims", "/portefeuille", "/profils-contactes"],
+  },
 ];
 
 export function getTabsForProfileType(

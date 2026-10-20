@@ -53,7 +53,6 @@ describe("acceptButton", () => {
     accountBlockedLabel: null,
     kycBlockedLabel: null,
     dailyExhausted: false,
-    tooManyActive: false,
   };
 
   it("lets the worker accept when nothing stands in the way", () => {

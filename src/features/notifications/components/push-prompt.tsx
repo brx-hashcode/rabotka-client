@@ -6,16 +6,19 @@ import { usePush } from "@/hooks/use-push";
  * on. Asking needs a tap — browsers refuse a permission prompt that no gesture
  * triggered — so this is a button, never an automatic prompt.
  */
-export function PushPrompt() {
+export function PushPrompt({
+  message = "Soyez prévenu(e) sur votre téléphone, même quand Rabotka est fermé.",
+}: Readonly<{
+  /** Why turn it on, said for the moment the prompt appears in. */
+  message?: string;
+}> = {}) {
   const push = usePush();
 
   if (push.state === "off") {
     return (
       <div className="flex items-center gap-3 rounded-2xl bg-lime/60 p-3 text-lime-foreground">
         <BellRing className="size-5 shrink-0" />
-        <p className="min-w-0 flex-1 text-xs leading-snug">
-          Soyez prévenu(e) sur votre téléphone, même quand Rabotka est fermé.
-        </p>
+        <p className="min-w-0 flex-1 text-xs leading-snug">{message}</p>
         <button
           type="button"
           onClick={() => void push.enable()}

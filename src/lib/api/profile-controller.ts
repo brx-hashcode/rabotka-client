@@ -193,6 +193,16 @@ export type ContactedProfile = {
   jobTitle: string | null;
 };
 
+
+export type SignupWho = {
+  firstName?: string;
+  lastName?: string;
+  profileType?: "WORKER" | "EMPLOYER";
+};
+
+/** The sign-up screens the app reports reaching, past the number check. */
+export type SignupProgressStage = "DOCUMENTS" | "CONFIRMATION";
+
 class ProfileController extends RabotkaBaseController {
   /**
    * Pre-uploads a single KYC file (document or selfie) and returns its public
@@ -226,14 +236,44 @@ class ProfileController extends RabotkaBaseController {
     }
   }
 
-  /** Signup step 1: a WhatsApp code to the number being registered. */
-  async sendSignupOtp(phone: string): Promise<{ success: boolean }> {
+  /**
+   * Signup step 1: a WhatsApp code to the number being registered. The name
+   * and type ride along so the team can reach someone who stops before the
+   * end — the server keeps them on the sign-up attempt only.
+   */
+  async sendSignupOtp(
+    phone: string,
+    who: SignupWho = {},
+  ): Promise<{ success: boolean }> {
     try {
       return await this.post<{ success: boolean }>("/auth/signup/send-otp", {
         phone,
+        ...(who.firstName ? { firstName: who.firstName } : {}),
+        ...(who.lastName ? { lastName: who.lastName } : {}),
+        ...(who.profileType ? { profileType: who.profileType } : {}),
       });
     } catch (error) {
       this.handleError(error);
+    }
+  }
+
+  /**
+   * A later sign-up screen was reached, for the drop-off view in the admin.
+   * Best-effort: it never throws, and a sign-up never waits on it.
+   */
+  async reportSignupProgress(
+    stage: SignupProgressStage,
+    signupToken: string,
+    profileType?: "WORKER" | "EMPLOYER",
+  ): Promise<void> {
+    try {
+      await this.post(
+        "/auth/signup/progress",
+        { stage, ...(profileType ? { profileType } : {}) },
+        { "x-signup-token": signupToken },
+      );
+    } catch {
+      /* drop-off tracking only */
     }
   }
 
@@ -498,6 +538,7 @@ export const {
   uploadKycFile,
   sendSignupOtp,
   verifySignupOtp,
+  reportSignupProgress,
   getApplications,
   agreementDownloadUrl,
   resumeDownloadUrl,

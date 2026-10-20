@@ -5,6 +5,7 @@ import { composeScheduledAt } from "@/lib/scheduled-at";
 import { Check, Copy, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PushPrompt } from "@/features/notifications/components/push-prompt";
 import { useToast } from "@/hooks/use-toast";
 import {
   type CreateJobOfferFormData,
@@ -68,7 +69,7 @@ export function JobOfferSuccess({
     // is that branch's sibling, and it was the one left without any, so its
     // label/value rows landed flush against both edges. Same shape as the
     // form's root so the two branches stay visibly paired.
-    <div className="flex w-full flex-col bg-white p-4">
+    <div className="flex w-full flex-col bg-card p-4">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-green-100">
           <Check className="size-8 text-green-600" strokeWidth={3} />
@@ -79,6 +80,12 @@ export function JobOfferSuccess({
           référence ci-dessous avec un travailleur pour qu'il trouve directement
           votre offre.
         </p>
+      </div>
+
+      {/* Asked here because this is when it pays off: candidates start
+          arriving now, and the first to be answered is the one who stays. */}
+      <div className="mt-4">
+        <PushPrompt message="Soyez prévenu(e) dès qu'un candidat postule, même quand Rabotka est fermé." />
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-3 rounded-xl border bg-muted/40 p-4">

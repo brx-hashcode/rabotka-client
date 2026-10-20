@@ -73,7 +73,14 @@ export default function CreateJobOffer() {
     // the fields paid for all of it.
     //
     // `max-w-2xl` (672px) was dead for the same reason — the column is 512.
-    <div className="flex w-full flex-col pt-4 pb-8">
+    //
+    // White to the edges, top to bottom. A white block on the grey page left
+    // a grey band above it and a grey field under a short form or the success
+    // screen. AppShell pads <main> 24px at the bottom for the tab bar, and a
+    // percentage height ignores padding — `min-h-full` stopped 24px short and
+    // the padding showed grey. So: 100% + those 24px, and `-mb-6` to lay the
+    // extra over the padding rather than add a scroll.
+    <div className="-mb-6 flex min-h-[calc(100%_+_1.5rem)] w-full flex-col bg-card pb-8">
       <Seo title="Créer une offre — Rabotka" noIndex />
       {body}
     </div>

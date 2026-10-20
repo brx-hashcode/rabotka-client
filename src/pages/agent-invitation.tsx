@@ -153,7 +153,6 @@ export default function AgentInvitation() {
             accountBlocked && accountReason ? accountShortLabel(accountReason) : null,
           kycBlockedLabel: kycBlocked && kycReason ? kycShortLabel(kycReason) : null,
           dailyExhausted: quota != null && quota.remaining <= 0,
-          tooManyActive: false,
         });
         const busy = accept.isPending || decline.isPending;
 

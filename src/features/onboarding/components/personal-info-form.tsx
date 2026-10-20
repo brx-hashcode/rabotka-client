@@ -283,6 +283,9 @@ export function PersonalInfoForm({
           if (!open) setVerifyPhone(null);
         }}
         phone={verifyPhone ?? ""}
+        firstName={personalInfo.firstName}
+        lastName={personalInfo.lastName}
+        profileType={profileType}
         onVerified={(verification) => {
           setSignupVerification(verification);
           setVerifyPhone(null);

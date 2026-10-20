@@ -73,7 +73,7 @@ export type JobFeedItem = {
 };
 
 export type JobSearchSort = "recent" | "soon" | "amount_desc";
-export type JobPaymentFlow = "HOURLY" | "DAILY" | "MONTHLY";
+export type JobPaymentFlow = "TASK" | "HOURLY" | "DAILY" | "MONTHLY";
 
 export type JobSearchParams = {
   q?: string;

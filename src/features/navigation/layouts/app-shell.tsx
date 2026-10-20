@@ -2,6 +2,7 @@ import { BottomNav } from "../components/bottom-nav";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
+import { useIncomingMessages } from "@/hooks/use-discussions";
 import { useEffect } from "react";
 import { syncPush } from "@/lib/push";
 import { APP_SCROLL_ID } from "@/lib/app-scroll";
@@ -38,6 +39,8 @@ export function AppShell({
   // Both roles have a bell, and the badge should move on whatever page the
   // profile is looking at.
   useNotificationsSocket(profile?.status === "ACTIVE");
+  // Every message chimes, and the Discussion badge moves, wherever they are.
+  useIncomingMessages(profile?.status === "ACTIVE");
   // Where push is already allowed, make sure this phone's subscription exists,
   // uses the backend's current key and belongs to this profile — someone else
   // may have signed in here before. Asking for permission is PushPrompt's job.

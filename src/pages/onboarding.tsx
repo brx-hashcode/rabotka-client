@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Seo } from "@/hooks/use-seo";
 import { useQueryState } from "nuqs";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { isSignupVerified } from "@/lib/signup-verification";
 import { scrollToTop } from "@/lib/app-scroll";
+import { reportSignupProgress } from "@/lib/api/profile-controller";
 import {
   PersonalInfoForm,
   ProfileTypeForm,
@@ -52,6 +53,25 @@ export default function Onboarding() {
       void setStep("personal-informations");
     }
   }, [hydrated, step, signupVerification, phone, setStep]);
+
+  // Tells the admin's drop-off view how far this sign-up got: the documents
+  // and the final review are screens the server cannot see being reached.
+  // Once per screen per visit, and only with a live verification — the
+  // effect above sends anyone without one back to step 1.
+  const profileType = useOnboardingStore((state) => state.kycData.profileType);
+  const reported = useRef(new Set<OnboardingStep>());
+  useEffect(() => {
+    if (!hydrated) return;
+    if (step !== "kyc-documents" && step !== "confirmation") return;
+    if (!signupVerification || !isSignupVerified(signupVerification, phone)) return;
+    if (reported.current.has(step)) return;
+    reported.current.add(step);
+    void reportSignupProgress(
+      step === "kyc-documents" ? "DOCUMENTS" : "CONFIRMATION",
+      signupVerification.token,
+      profileType || undefined,
+    );
+  }, [hydrated, step, signupVerification, phone, profileType]);
 
   useEffect(() => {
     if (typeof globalThis !== "undefined") {
