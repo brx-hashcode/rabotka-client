@@ -24,6 +24,10 @@ type Props = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly phone: string;
+  /** Who is signing up — strings, not an object, so a re-render never re-sends. */
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly profileType?: "WORKER" | "EMPLOYER";
   readonly onVerified: (verification: SignupVerification) => void;
 };
 
@@ -41,6 +45,9 @@ export function PhoneVerificationDrawer({
   open,
   onOpenChange,
   phone,
+  firstName,
+  lastName,
+  profileType,
   onVerified,
 }: Props) {
   const [sending, setSending] = useState(false);
@@ -52,13 +59,13 @@ export function PhoneVerificationDrawer({
     setSending(true);
     setSendError(null);
     try {
-      await sendSignupOtp(phone);
+      await sendSignupOtp(phone, { firstName, lastName, profileType });
     } catch (error) {
       setSendError(errorText(error));
     } finally {
       setSending(false);
     }
-  }, [phone]);
+  }, [phone, firstName, lastName, profileType]);
 
   // One code per opening; the form's own button handles resends.
   useEffect(() => {
