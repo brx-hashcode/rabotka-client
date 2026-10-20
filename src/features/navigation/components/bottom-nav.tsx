@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { tapFeedback } from "@/lib/haptics";
 import { getTabsForProfileType } from "../config/tabs";
 import { activeTab } from "../config/active-tab";
+import { useUnreadDiscussionsCount } from "@/hooks/use-discussions";
+import { badgeText } from "@/features/notifications/read-state";
 
 /**
  * The tab screen the person was last on. Module state rather than React
@@ -20,6 +22,9 @@ export function BottomNav() {
   const { pathname } = useLocation();
   if (tabs.some((t) => t.to === pathname)) lastTab = pathname;
   const current = activeTab(pathname, tabs, lastTab)?.to ?? null;
+  // Messages are where an engagement gets settled; the bell alone did not say
+  // one was waiting. Same "9+" cap as the bell.
+  const unreadMessages = useUnreadDiscussionsCount();
 
   const initials =
     `${profile?.firstName?.[0] ?? ""}${profile?.lastName?.[0] ?? ""}`.toUpperCase();
@@ -39,6 +44,7 @@ export function BottomNav() {
         {tabs.map(({ to, label, icon: Icon }) => {
           const isProfile = to === "/profile";
           const isActive = current === to;
+          const badge = to === "/discussions" ? badgeText(unreadMessages) : null;
           return (
             <li key={to} className="flex-1">
               <Link
@@ -103,9 +109,24 @@ export function BottomNav() {
                         the first version look unfinished. Set here rather
                         than per icon in `tabs.tsx`, so the bar cannot drift
                         out of step with itself. */}
-                    <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                    <span className="relative">
+                      <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                      {badge && (
+                        <span
+                          aria-hidden
+                          className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground ring-2 ring-background"
+                        >
+                          {badge}
+                        </span>
+                      )}
+                    </span>
                     <span className="text-[11px] font-medium leading-none">
                       {label}
+                      {badge && (
+                        <span className="sr-only">
+                          {` (${unreadMessages} non lu${unreadMessages > 1 ? "s" : ""})`}
+                        </span>
+                      )}
                     </span>
                   </>
                 )}
