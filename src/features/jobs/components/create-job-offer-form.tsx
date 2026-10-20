@@ -209,7 +209,7 @@ export function JobOfferForm({
     // which is 512px on a desktop just as on a phone — so rounding it from md
     // up drew a card floating inside a card, and `lg:p-8` doubled the gutter
     // the page was already paying. One 16px padding, once. See the page.
-    <div className="bg-white p-4">
+    <div className="bg-card p-4">
       <h2 className="text-2xl font-bold">{heading}</h2>
 
       <div className="mb-6 mt-3">
