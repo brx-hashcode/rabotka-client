@@ -41,6 +41,7 @@ import { useAccountGate } from "@/hooks/use-account-gate";
 import { AccountNotice, accountShortLabel } from "@/features/account";
 import { cn, formatDateTime, formatOfferAmount } from "@/lib/utils";
 import { applyButton } from "@/lib/apply-button";
+import { useIsOnline } from "@/hooks/use-is-online";
 
 export default function JobDetailWorker() {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ export default function JobDetailWorker() {
   // existed — the row is dropped rather than rendered empty.
   const region = job ? jobLocationRegion(job) : null;
   const { quota } = useCanApply();
+  const online = useIsOnline();
   const { blocked, reason } = useKycGate();
   // A suspended (or banned, or not-yet-activated) account keeps every read on
   // this screen — it only loses the apply button.
@@ -76,6 +78,7 @@ export default function JobDetailWorker() {
         kycBlockedLabel: blocked && reason ? kycShortLabel(reason) : null,
         dailyExhausted: quota != null && quota.remaining <= 0,
         resetsAt: quota?.resetsAt ?? null,
+        offline: !online,
       })
     : null;
 

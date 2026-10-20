@@ -1,8 +1,10 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Navigate, useLocation } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { QueryErrorState } from "@/components/common/query-error-state";
 import { isUnauthorized } from "@/lib/api/errors";
+import { clearQueryCache } from "@/lib/offline-cache";
 import { LoadingScreen } from "./loading-screen";
 
 type AuthGuardProps = {
@@ -10,7 +12,7 @@ type AuthGuardProps = {
 };
 
 export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
-  const { data, isPending, isError, isFetching, error, refetch } =
+  const { data, isPending, isError, isFetching, error, refetch, fetchStatus } =
     useProfileMe();
   const location = useLocation();
 
@@ -20,8 +22,45 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
   // and the guard would redirect while the answer was still in flight. Only
   // widen it to cover the error case; a bare `isFetching` would blank the screen
   // during ordinary background refetches of a perfectly good session.
+  // Signed out by the server (expired or revoked session): the offline copy
+  // belongs to that session and goes with it.
+  const signedOut = isError && isUnauthorized(error);
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!signedOut) return;
+    void clearQueryCache();
+    // And from memory: nothing of the ended session may linger for the next
+    // person to sign in on this phone. `profile/me` stays — it carries the 401
+    // the redirect below reads.
+    queryClient.removeQueries({
+      predicate: (q) => !(q.queryKey[0] === "profile" && q.queryKey[1] === "me"),
+    });
+  }, [signedOut, queryClient]);
+
+  // Offline with nothing stored yet (first visit, or the copy was wiped): the
+  // check is paused, waiting for a network — say so instead of a loader that
+  // never ends.
+  if (isPending && fetchStatus === "paused") {
+    return (
+      <QueryErrorState
+        message="Pas de connexion internet. Rabotka s'ouvrira dès que vous serez connecté."
+        onRetry={refetch}
+        isRetrying={false}
+        className="min-h-screen"
+      />
+    );
+  }
+
   if (isPending || (isError && isFetching)) {
     return <LoadingScreen />;
+  }
+
+  // A network failure with a profile already in hand — restored from the
+  // offline copy, or loaded earlier in the session: open the app on it. The
+  // connection, not the session, is what failed; the server alone can sign
+  // someone out (the 401 below).
+  if (isError && !isUnauthorized(error) && data) {
+    return <>{children}</>;
   }
 
   if (isError && !isUnauthorized(error)) {

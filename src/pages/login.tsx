@@ -10,6 +10,7 @@ import { useVerifyOtpMutation } from "@/hooks/use-verify-otp-mutation";
 import { useResendOtpMutation } from "@/hooks/use-resend-otp-mutation";
 import { getMe } from "@/lib/api/profile-controller";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { isUnauthorized } from "@/lib/api/errors";
 import { LoadingScreen } from "@/components/auth";
 import {
   Step1PhoneForm,
@@ -42,7 +43,19 @@ export default function Login() {
   // Already signed in — typically a WhatsApp link whose `?s=` code was just
   // exchanged for a session. Showing the phone form there would ask a logged-in
   // user to log in again, so go straight to the destination.
-  const { data: profile, isPending: isCheckingSession } = useProfileMe();
+  const {
+    data: storedProfile,
+    error: sessionError,
+    isPending: isPendingSession,
+    fetchStatus: sessionFetchStatus,
+  } = useProfileMe();
+  // A profile the server has just refused (401) is not a session — it is the
+  // offline copy of one that ended. Counting it as signed in bounced the user
+  // between here and the guard without end.
+  const profile = isUnauthorized(sessionError) ? undefined : storedProfile;
+  // Offline with nothing stored, the check is paused, not running: show the
+  // form rather than a loader that would wait for a network.
+  const isCheckingSession = isPendingSession && sessionFetchStatus !== "paused";
   useEffect(() => {
     if (step === "1" && profile) {
       navigate(redirectTo === "/onboarding/avatar" ? "/home" : redirectTo, {

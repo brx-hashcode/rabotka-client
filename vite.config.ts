@@ -6,6 +6,7 @@ import { imagetools } from "vite-imagetools";
 import sitemap from "vite-plugin-sitemap";
 import path from "node:path";
 import { readFileSync } from "node:fs";
+import { offlineManifest } from "./build/offline-manifest";
 
 /*
  * The version shown in the profile screen's footer.
@@ -79,6 +80,8 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       imagetools(),
       imageOptimizer,
+      // The file list the service worker stores, so the app opens offline.
+      offlineManifest({ disabled: env.VITE_OFFLINE_DISABLED === "true" }),
       sitemap({
         hostname: env.VITE_SITE_URL || "https://rabotka.work",
         dynamicRoutes: ["/onboarding", "/terms"],

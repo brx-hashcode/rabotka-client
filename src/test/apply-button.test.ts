@@ -60,6 +60,20 @@ describe("applyButton", () => {
   });
 });
 
+describe("applyButton offline", () => {
+  it("waits for the network, but still leads to an existing application", () => {
+    expect(applyButton({ ...open, offline: true })).toEqual({
+      kind: "blocked",
+      label: "Postuler",
+      hint: "Disponible une fois connecté",
+    });
+    expect(
+      applyButton({ ...open, offline: true, applied: true, applicationId: "a1" })
+        .kind,
+    ).toBe("view-application");
+  });
+});
+
 describe("quotaResetLabel", () => {
   const friday = new Date(2026, 9, 23, 18, 0); // Fri 23 Oct 2026
 

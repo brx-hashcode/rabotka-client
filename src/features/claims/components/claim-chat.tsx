@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useKeyboardFrame } from "@/hooks/use-keyboard-frame";
+import { useIsOnline } from "@/hooks/use-is-online";
 import {
   AlertCircle,
   Send,
@@ -323,10 +324,11 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
   // send in a thread, and the server accepts one.
   const canSend = message.trim().length > 0 || files.length > 0;
 
+  const online = useIsOnline();
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const content = message.trim();
-    if (!canSend || isSending) return;
+    if (!canSend || isSending || !online) return;
 
     let attachment_urls: string[] | undefined;
     if (files.length > 0) {
@@ -539,7 +541,9 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
             placeholder={
               isClaimClosed
                 ? "Cette réclamation est fermée"
-                : "Tapez votre message"
+                : online
+                  ? "Tapez votre message"
+                  : "Hors ligne · envoi possible une fois connecté"
             }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -550,7 +554,7 @@ export const ClaimChat = ({ claim }: ClaimChatProps) => {
           />
           <button
             type="submit"
-            disabled={isClaimClosed || isSending || !canSend}
+            disabled={isClaimClosed || isSending || !canSend || !online}
             className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white transition-colors hover:bg-whatsapp-dark disabled:opacity-40"
             aria-label="Envoyer"
           >
