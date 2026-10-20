@@ -156,7 +156,7 @@ export default function MyPortfolio() {
             </section>
 
             {checklist.percent < 100 && (
-              <section className="rounded-xl bg-card p-4 shadow-soft">
+              <section className="rounded-xl bg-card p-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-sm font-semibold text-foreground">
                     Complétez votre profil
@@ -254,7 +254,7 @@ export default function MyPortfolio() {
       {/* The one way to add, always in reach: in the shell's footer slot,
           so it stays put on top of the tab bar while the page scrolls. */}
       <ShellFooter>
-        <div className="bg-background px-4 pb-3 pt-3 shadow-[0_-8px_16px_-12px_rgb(0_0_0/0.12)]">
+        <div className="bg-background px-4 pb-3 pt-3">
           <Button
             className="mx-auto flex h-12 w-full max-w-xl bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
             onClick={() => setCreateOpen(true)}
@@ -286,7 +286,7 @@ function EmptyPortfolio() {
     <div className="space-y-4">
       <div
         aria-hidden
-        className="relative overflow-hidden rounded-xl bg-card opacity-70 shadow-soft"
+        className="relative overflow-hidden rounded-xl bg-card opacity-70"
       >
         <span className="absolute left-3 top-3 z-10 rounded-full bg-foreground/80 px-2 py-0.5 text-[11px] font-medium text-background">
           Exemple

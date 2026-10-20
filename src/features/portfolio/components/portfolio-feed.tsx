@@ -44,7 +44,9 @@ function PostCard({
       type="button"
       onClick={() => onOpen(item)}
       aria-label={postLabel(item.description, item.images.length)}
-      className="flex flex-col overflow-hidden rounded-xl bg-card text-left shadow-soft transition-transform active:scale-[0.98] motion-reduce:active:scale-100"
+      // Flat: the white surface on the grey page is separation enough — a
+      // shadow on every card of a grid made it look raised off the screen.
+      className="flex flex-col overflow-hidden rounded-xl bg-card text-left transition-transform active:scale-[0.98] motion-reduce:active:scale-100"
     >
       {cover ? (
         <div className="relative">
