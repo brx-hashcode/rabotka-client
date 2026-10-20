@@ -2,13 +2,16 @@ import { z } from "zod";
 import { EMPLOYMENT_TYPE_VALUES, isDatedMission } from "@/lib/employment-type";
 import { composeScheduledAt } from "@/lib/scheduled-at";
 
-export const PAYMENT_FLOW_VALUES = ["HOURLY", "DAILY", "MONTHLY"] as const;
+// TASK first: a fixed price for the whole job is how most missions are paid,
+// and the time-based three left that employer nothing true to pick.
+export const PAYMENT_FLOW_VALUES = ["TASK", "HOURLY", "DAILY", "MONTHLY"] as const;
 export type PaymentFlowValue = (typeof PAYMENT_FLOW_VALUES)[number];
 
 export const PAYMENT_FLOW_LABELS: Record<PaymentFlowValue, string> = {
-  HOURLY: "Par heure",
-  DAILY: "Par jour",
-  MONTHLY: "Par mois",
+  TASK: "PAR TÂCHE",
+  HOURLY: "PAR HEURE",
+  DAILY: "PAR JOUR",
+  MONTHLY: "PAR MOIS",
 };
 
 // The date must be at least 4h in the future — mirrors the backend rule

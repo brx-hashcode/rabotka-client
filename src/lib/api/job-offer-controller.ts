@@ -225,7 +225,7 @@ export type CreateJobOfferPayload = {
   city?: string;
   quantity: number;
   amount?: number;
-  payment_flow?: "HOURLY" | "DAILY" | "MONTHLY";
+  payment_flow?: "TASK" | "HOURLY" | "DAILY" | "MONTHLY";
   note?: string;
   category_id?: string;
 };

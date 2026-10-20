@@ -41,6 +41,7 @@ export const EMPTY_JOB_FILTERS: JobSearchFilters = {
 
 const FLOW_OPTIONS: { label: string; value: JobPaymentFlow | null }[] = [
   { label: "Toutes", value: null },
+  { label: "Tâche", value: "TASK" },
   { label: "Heure", value: "HOURLY" },
   { label: "Jour", value: "DAILY" },
   { label: "Mois", value: "MONTHLY" },
@@ -52,6 +53,8 @@ const FLOW_OPTIONS: { label: string; value: JobPaymentFlow | null }[] = [
  * meaningless. Bounded by the offer DTO's 1 000–1 000 000 FCFA range.
  */
 const AMOUNT_PRESETS: Record<JobPaymentFlow, number[]> = {
+  // A whole job: between a day's pay and a few days'.
+  TASK: [10000, 25000, 50000],
   HOURLY: [1000, 2500, 5000],
   DAILY: [5000, 10000, 25000],
   MONTHLY: [50000, 100000, 250000],

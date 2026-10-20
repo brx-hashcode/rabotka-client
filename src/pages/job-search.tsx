@@ -30,7 +30,7 @@ import { useJobSearch, useCanApply } from "@/hooks/use-jobs";
 
 const SKELETON_KEYS = ["s1", "s2", "s3", "s4"];
 
-const FLOWS = ["HOURLY", "DAILY", "MONTHLY"] as const;
+const FLOWS = ["TASK", "HOURLY", "DAILY", "MONTHLY"] as const;
 const DATES = ["today", "7d", "30d"] as const;
 const SORTS = ["recent", "soon", "amount_desc"] as const;
 

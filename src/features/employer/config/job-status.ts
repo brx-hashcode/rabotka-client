@@ -134,7 +134,9 @@ export function closedToCandidatesReason(
   return null;
 }
 
+// Read after an amount: « 15 000 FCFA par heure », « 15 000 FCFA la tâche ».
 export const PAYMENT_FLOW_LABELS: Record<string, string> = {
+  TASK: "la tâche",
   HOURLY: "par heure",
   DAILY: "par jour",
   MONTHLY: "par mois",
