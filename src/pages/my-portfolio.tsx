@@ -156,14 +156,17 @@ export default function MyPortfolio() {
 
             {checklist.percent < 100 && (
               <section className="rounded-xl bg-card p-4 shadow-soft">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-baseline justify-between gap-3">
                   <p className="text-sm font-semibold text-foreground">
-                    Profil complété à {checklist.percent} %
+                    Complétez votre profil
                   </p>
-                  <span className="text-xs text-muted-foreground">
-                    Plus de chances d'être choisi
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-whatsapp">
+                    {checklist.percent} %
                   </span>
                 </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Un profil complet a plus de chances d'être choisi.
+                </p>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-whatsapp transition-all duration-500 motion-reduce:transition-none"
@@ -248,7 +251,11 @@ export default function MyPortfolio() {
       </main>
 
       {/* The one way to add, always in reach. */}
-      <div className="sticky bottom-0 bg-background px-4 pb-4 pt-3">
+      {/* `-bottom-6`, not `bottom-0`: a sticky element sticks inside its
+          scroll container's PADDING box, and AppShell pads <main> 24px at the
+          bottom for the tab bar — so at `bottom-0` the bar floated 24px up and
+          the page scrolled visibly underneath it. */}
+      <div className="sticky -bottom-6 bg-background px-4 pb-4 pt-3">
         <Button
           className="mx-auto flex h-12 w-full max-w-xl bg-whatsapp text-base text-white hover:bg-whatsapp-dark"
           onClick={() => setCreateOpen(true)}
