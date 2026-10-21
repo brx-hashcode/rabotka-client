@@ -4,36 +4,49 @@
  * this one is downloaded on mobile data).
  *
  * Browsers refuse audio a gesture did not start, and a socket event is not a
- * gesture. So the element is played muted once on the first tap or key press,
- * which unlocks it for the rest of the session — the admin's approach
- * (rabotka-admin use-chat-socket.ts).
+ * gesture, so playback has to be unlocked on the first tap or key press. It
+ * used to be unlocked by playing the chime itself with `muted` set — the
+ * admin's approach — but iOS Safari and in-app webviews do not always honour
+ * `muted` on an Audio element, so the chime rang the moment the app was
+ * opened and touched. Web Audio unlocks with `resume()`, which plays nothing.
  */
-let sound: HTMLAudioElement | null = null;
+const SRC = "/notification.m4a";
+const VOLUME = 0.5;
 
-function element(): HTMLAudioElement {
-  if (!sound) {
-    sound = new Audio("/notification.m4a");
-    sound.volume = 0.5;
-    sound.preload = "auto";
-  }
-  return sound;
+let context: AudioContext | null = null;
+let buffer: Promise<AudioBuffer | null> | null = null;
+
+function audioContext(): AudioContext | null {
+  if (context) return context;
+  const Ctor =
+    globalThis.AudioContext ??
+    (globalThis as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
+  if (!Ctor) return null;
+  context = new Ctor();
+  return context;
+}
+
+/** Fetched and decoded once, on the unlocking gesture. */
+function chime(ctx: AudioContext): Promise<AudioBuffer | null> {
+  buffer ??= fetch(SRC)
+    .then((res) => res.arrayBuffer())
+    .then((bytes) => ctx.decodeAudioData(bytes))
+    .catch(() => {
+      buffer = null; // offline at the time: try again next chime
+      return null;
+    });
+  return buffer;
 }
 
 function unlock() {
   window.removeEventListener("pointerdown", unlock);
   window.removeEventListener("keydown", unlock);
-  const audio = element();
-  audio.muted = true;
-  audio
-    .play()
-    .then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-    })
-    .catch(() => undefined)
-    .finally(() => {
-      audio.muted = false;
-    });
+  const ctx = audioContext();
+  if (!ctx) return;
+  // Silent: resuming a context starts its clock, it plays no sound.
+  void ctx.resume().catch(() => undefined);
+  void chime(ctx);
 }
 
 /** Call once the app is running; harmless to call again. */
@@ -53,13 +66,22 @@ export function playNotificationSound() {
   const now = Date.now();
   if (now - lastPlayedAt < SAME_EVENT_MS) return;
   lastPlayedAt = now;
-  const audio = element();
-  try {
-    audio.currentTime = 0;
-  } catch {
-    /* not loaded yet */
+  // Not unlocked yet, or suspended again (iOS does so when the app goes to
+  // the background): stay quiet, and resume on the next tap.
+  const ctx = context;
+  if (!ctx || ctx.state !== "running") {
+    primeNotificationSound();
+    return;
   }
-  void audio.play().catch(() => undefined);
+  void chime(ctx).then((decoded) => {
+    if (!decoded) return;
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = VOLUME;
+    source.buffer = decoded;
+    source.connect(gain).connect(ctx.destination);
+    source.start();
+  });
 }
 
 /**
