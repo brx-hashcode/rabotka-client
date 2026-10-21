@@ -79,7 +79,7 @@ export function Footer() {
                 <span className="font-display font-bold text-xl">
                   {headerContent.logo.brandName}
                 </span>
-                <span className="text-[10px] text-background/70 leading-none">
+                <span className="text-[11px] text-background/70 leading-none">
                   {headerContent.logo.slogan}
                 </span>
               </div>

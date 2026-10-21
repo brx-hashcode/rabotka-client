@@ -37,7 +37,7 @@ export default function NotFound() {
           <img src={rabotkaLogo} alt="" className="size-9" />
           <span className="flex flex-col leading-none">
             <span className="font-display text-lg font-extrabold">Rabotka</span>
-            <span className="text-[10px] text-lime-muted">Job Matching</span>
+            <span className="text-[11px] text-lime-muted">Job Matching</span>
           </span>
         </Link>
 

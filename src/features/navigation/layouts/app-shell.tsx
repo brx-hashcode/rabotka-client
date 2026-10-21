@@ -1,5 +1,6 @@
 import { BottomNav } from "../components/bottom-nav";
 import { SHELL_FOOTER_ID } from "../components/shell-footer";
+import { PullToRefresh } from "../components/pull-to-refresh";
 import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
@@ -86,6 +87,9 @@ export function AppShell({
             aria-hidden
             className="h-[env(safe-area-inset-top)] shrink-0 bg-[var(--status-bar,hsl(var(--background)))]"
           />
+          {/* Tab screens only: a focused flow (payment, a form) has nothing
+              to reload and a stray pull mid-form would be a surprise. */}
+          {withNav && <PullToRefresh scrollerId={APP_SCROLL_ID} />}
           <main
             id={APP_SCROLL_ID}
             className={cn(
