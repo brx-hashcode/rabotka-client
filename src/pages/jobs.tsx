@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useEmployerJobOffersInfinite } from "@/hooks/use-employer-job-offers-infinite";
 import { ScreenHeader, JobOfferList } from "@/features/employer";
 import { useAccountGate } from "@/hooks/use-account-gate";
@@ -79,7 +80,18 @@ export default function Jobs() {
         emptyMessage={
           cannotCreate
             ? "Vous n'avez pas encore publié d'offre. La création est indisponible tant que votre compte n'est pas en règle."
-            : "Vous n'avez pas encore publié d'offre. Appuyez sur + pour en créer une."
+            : "Vous n'avez pas encore publié d'offre. Décrivez le travail, les candidats arrivent."
+        }
+        emptyAction={
+          !cannotCreate && (
+            <Button
+              className="bg-whatsapp text-white hover:bg-whatsapp-dark"
+              onClick={() => navigate("/job-offers/new")}
+            >
+              <Plus className="h-4 w-4" />
+              Publier une offre
+            </Button>
+          )
         }
       />
     </div>

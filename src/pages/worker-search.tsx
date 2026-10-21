@@ -123,6 +123,19 @@ export default function WorkerSearch() {
           <p className="max-w-xs text-sm text-muted-foreground">
             Aucun travailleur trouvé. Essayez d'autres mots-clés ou filtres.
           </p>
+          {(activeFilterCount > 0 || input) && (
+            <Button
+              variant="outline"
+              className="mt-5"
+              onClick={() => {
+                setInput("");
+                setQ("");
+                applyFilters({ categoryId: null, minReliability: null, minRating: null, city: "" });
+              }}
+            >
+              Effacer la recherche
+            </Button>
+          )}
         </div>
       )}
 
