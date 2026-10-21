@@ -88,10 +88,9 @@ export function CreateJobOfferForm({ onCreated }: Readonly<Props>) {
       schema={createJobOfferSchema}
       submitLabel="Publier l'offre"
       pendingLabel="Publication…"
-      // The missions list, NOT back one entry. `navigate(-1)` assumes the user
-      // arrived from inside the app; opened from WhatsApp the entry behind this
-      // form is the login hop, and going back to it bounces straight here.
-      cancelTo="/missions"
+      // Only when there is nothing in the app to go back to (opened from
+      // WhatsApp): the offers list, where a new offer would have landed.
+      cancelTo="/jobs"
       isPending={isPending}
       onSubmit={(data) =>
         createOffer(toCreatePayload(data), {
@@ -111,7 +110,10 @@ type JobOfferFormProps = {
   schema: ReturnType<typeof jobOfferSchema>;
   submitLabel: string;
   pendingLabel: string;
-  /** Where « Annuler » goes — a fixed page, never back one entry. */
+  /**
+   * Where « Annuler » goes when the form is the first screen of the app (opened
+   * from WhatsApp); otherwise it goes back to the screen the user came from.
+   */
   cancelTo: string;
   /** Replaces `cancelTo` when the caller knows the way back better. */
   onCancel?: () => void;
@@ -659,7 +661,14 @@ export function JobOfferForm({
               disabled={isPending}
               onClick={() => {
                 if (step > 0) return goTo(step - 1);
-                return onCancel ? onCancel() : navigate(cancelTo);
+                if (onCancel) return onCancel();
+                // Back to wherever « Créer une offre » was tapped (home, Mes
+                // offres…) — it always sent people to Missions en cours. `idx`
+                // is react-router's own position: 0 means the form opened the
+                // session (the WhatsApp login hop REPLACES its entry), and -1
+                // would leave the app.
+                if ((globalThis.history.state?.idx ?? 0) > 0) return navigate(-1);
+                return navigate(cancelTo, { replace: true });
               }}
             >
               {step > 0 ? "Retour" : "Annuler"}
