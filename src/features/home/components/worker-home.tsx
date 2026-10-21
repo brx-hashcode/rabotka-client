@@ -7,6 +7,8 @@ import {
   Briefcase,
   Send,
   ClipboardList,
+  Search,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +29,7 @@ import { SponsoredCard } from "@/features/sponsored/sponsored-card";
 import { interleaveAds } from "@/features/sponsored/interleave";
 import { useFeedSlots } from "@/features/sponsored/use-feed-slots";
 import { cn } from "@/lib/utils";
+import { quotaResetLabel } from "@/lib/apply-button";
 
 const INITIAL_LIMIT = 10;
 const PAGE_STEP = 5;
@@ -136,8 +139,17 @@ export function WorkerHome() {
             // White like the cards beside it: the band is the brand surface,
             // the rail is plain cards. The bar carries the green.
             <div className="flex h-30 w-40 shrink-0 flex-col justify-between rounded-2xl bg-card p-4 shadow-soft">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime text-lime-foreground">
-                <Send className="h-5 w-5" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime text-lime-foreground">
+                  <Send className="h-5 w-5" />
+                </div>
+                {/* When the count comes back: "0 restante" alone read as a
+                    dead end, with no hint it was only for today. */}
+                <p className="min-w-0 text-right text-[11px] leading-tight text-muted-foreground">
+                  Renouvelées
+                  <br />
+                  {quotaResetLabel(quota.resetsAt)}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-semibold leading-tight text-foreground">
@@ -210,9 +222,31 @@ export function WorkerHome() {
             <Briefcase className="h-8 w-8 text-lime-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Aucune offre pour le moment. Revenez plus tard ou essayez une autre
-            catégorie.
+            {categoryId
+              ? "Aucune offre dans cette catégorie pour le moment."
+              : "Aucune offre pour vous pour le moment. De nouvelles offres arrivent chaque jour."}
           </p>
+          {/* Somewhere to go instead of a dead end. */}
+          <div className="mt-5 flex w-full max-w-xs flex-col gap-2">
+            {categoryId && (
+              <Button onClick={() => selectChip(null)}>Voir toutes mes offres</Button>
+            )}
+            <Button
+              variant={categoryId ? "outline" : "default"}
+              onClick={() => navigate("/recherche-offres")}
+            >
+              <Search className="h-4 w-4" />
+              Rechercher des offres
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => navigate("/profile/portfolio")}
+            >
+              <UserRound className="h-4 w-4" />
+              Compléter mon profil
+            </Button>
+          </div>
         </div>
       )}
 

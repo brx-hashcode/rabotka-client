@@ -56,7 +56,7 @@ export function AttachmentPreview({
       ) : (
         <FileText className="size-5 text-muted-foreground" />
       )}
-      <span className="w-full truncate text-[10px] leading-tight text-muted-foreground">
+      <span className="w-full truncate text-[11px] leading-tight text-muted-foreground">
         {isImage ? "Indisponible" : label}
       </span>
     </div>

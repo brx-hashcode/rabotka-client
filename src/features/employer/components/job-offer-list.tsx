@@ -10,6 +10,8 @@ type JobOfferListProps = {
   readonly offers: readonly EmployerJobOfferItem[];
   readonly isLoading: boolean;
   readonly emptyMessage: string;
+  /** Where to go from an empty list, under the message. */
+  readonly emptyAction?: React.ReactNode;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;
   readonly onLoadMore?: () => void;
@@ -20,6 +22,7 @@ export function JobOfferList({
   offers,
   isLoading,
   emptyMessage,
+  emptyAction,
   hasMore = false,
   isLoadingMore = false,
   onLoadMore,
@@ -42,6 +45,9 @@ export function JobOfferList({
           <Briefcase className="h-10 w-10 text-lime-foreground" />
         </div>
         <p className="max-w-xs text-sm text-muted-foreground">{emptyMessage}</p>
+        {emptyAction && (
+          <div className="mt-5 flex w-full max-w-xs flex-col gap-2">{emptyAction}</div>
+        )}
       </div>
     );
   }
