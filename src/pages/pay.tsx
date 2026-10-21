@@ -76,7 +76,13 @@ export default function Pay() {
   const [phoneError, setPhoneError] = useState("");
   const [paidAt, setPaidAt] = useState<Date | null>(null);
 
-  usePaymentSocket(token ?? "", localStatus === "processing", (status) => {
+  usePaymentSocket(
+    token ?? "",
+    // Still listening after TIMEOUT: the operator's answer often lands later.
+    // `processing` alone made the hook's cleanup close the socket the moment
+    // TIMEOUT arrived, so the screen stayed on « en cours » for good.
+    localStatus === "processing" || localStatus === "timeout",
+    (status) => {
     if (status === "APPROVED") {
       // Approval arrives over the socket, not as a mutation result, so the
       // global MutationCache invalidation in app/providers never fires for it —
@@ -397,9 +403,13 @@ export default function Pay() {
           <Loader className="h-14 w-14 text-yellow-500 mx-auto animate-spin" />
           <h1 className="text-xl font-bold">Paiement en cours de traitement</h1>
           <p className="text-sm text-muted-foreground max-w-xs">
-            La confirmation prend plus de temps que prévu. Ne fermez pas cette
-            page — votre paiement sera confirmé dès réception de la confirmation
-            de l'opérateur.
+            La confirmation de l'opérateur prend plus de temps que prévu. Si
+            ce n'est pas encore fait, validez la demande sur votre téléphone.
+          </p>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Vous pouvez quitter cette page : vous recevrez une notification dès
+            que le paiement sera confirmé ou refusé. Si vous restez ici, elle se
+            mettra à jour toute seule.
           </p>
           {/* Waiting is the advice, not a requirement: the webhook settles the
               payment server-side whether or not this page stays open. */}

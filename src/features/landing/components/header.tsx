@@ -64,7 +64,7 @@ export function Header() {
               <span className="font-display text-xl font-bold text-foreground">
                 {headerContent.logo.brandName}
               </span>
-              <span className="text-[10px] text-muted-foreground leading-none">
+              <span className="text-[11px] text-muted-foreground leading-none">
                 {headerContent.logo.slogan}
               </span>
             </div>

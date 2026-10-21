@@ -262,7 +262,7 @@ export function SpendChart({ points }: Readonly<{ points: SpendPoint[] }>) {
                       x={cx}
                       y={y - 5}
                       textAnchor="middle"
-                      className="fill-foreground text-[9px] font-semibold"
+                      className="fill-foreground text-[10px] font-semibold"
                     >
                       {p.total.toLocaleString("fr-FR")}
                     </text>
@@ -271,7 +271,7 @@ export function SpendChart({ points }: Readonly<{ points: SpendPoint[] }>) {
                     x={cx}
                     y={H - 4}
                     textAnchor="middle"
-                    className="fill-muted-foreground text-[9px]"
+                    className="fill-muted-foreground text-[10px]"
                   >
                     {p.label}
                   </text>

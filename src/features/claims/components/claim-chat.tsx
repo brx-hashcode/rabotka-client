@@ -169,7 +169,7 @@ function CommentBubble({
         )}
         <p
           className={cn(
-            "text-right text-[10px] leading-none text-muted-foreground",
+            "text-right text-[11px] leading-none text-muted-foreground",
             hasText ? "mt-0.5" : "px-1 pb-0.5 pt-1",
           )}
         >

@@ -822,7 +822,7 @@ export default function Discussion() {
                   truncation, and without a warning it is a silent one — text
                   simply stops appearing under the thumb. */}
               {draft.length > MAX_LENGTH - 100 && (
-                <span className="pointer-events-none absolute -top-5 right-3 rounded-full bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground shadow-soft tabular-nums">
+                <span className="pointer-events-none absolute -top-5 right-3 rounded-full bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground shadow-soft tabular-nums">
                   {draft.length} / {MAX_LENGTH}
                 </span>
               )}
