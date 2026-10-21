@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
 import { useEmployerJobOffersInfinite } from "@/hooks/use-employer-job-offers-infinite";
 import {
   ScreenHeader,
@@ -34,6 +35,11 @@ export default function Missions() {
         onLoadMore={() => fetchNextPage()}
         onOfferClick={(offer) => navigate(`/missions/${offer.id}`)}
         emptyMessage="Aucune mission en cours pour le moment. Vos offres pourvues apparaîtront ici."
+        emptyAction={
+          <Button variant="outline" onClick={() => navigate("/jobs")}>
+            Voir mes offres
+          </Button>
+        }
       />
     </div>
   );

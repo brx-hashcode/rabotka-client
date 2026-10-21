@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { Inbox, Calendar, Loader2, Lock } from "lucide-react";
+import { Inbox, Calendar, Loader2, Lock, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,8 +46,22 @@ export default function ReceivedApplications() {
             <Inbox className="h-10 w-10 text-lime-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Aucune candidature reçue pour le moment.
+            Aucune candidature reçue pour le moment. Elles arrivent ici dès
+            qu'un travailleur postule à l'une de vos offres.
           </p>
+          {/* Not only waiting: the employer can go and find people. */}
+          <div className="mt-5 flex w-full max-w-xs flex-col gap-2">
+            <Button
+              className="bg-whatsapp text-white hover:bg-whatsapp-dark"
+              onClick={() => navigate("/recherche")}
+            >
+              <Search className="h-4 w-4" />
+              Rechercher des travailleurs
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/jobs")}>
+              Voir mes offres
+            </Button>
+          </div>
         </div>
       )}
 
