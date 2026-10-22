@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./app";
 import "@/styles/index.css";
-import { captureInstallPrompt, registerAppShell } from "@/lib/app-shell";
+import { registerAppShell } from "@/lib/app-shell";
 import { persistQueryCache, restoreQueryCache } from "@/lib/offline-cache";
 import { initConnectivity } from "@/lib/connectivity";
 import { queryClient } from "./providers";
@@ -10,8 +10,6 @@ import { queryClient } from "./providers";
 // lib/connectivity.
 initConnectivity();
 
-// Before render: Chrome's install prompt fires once, early.
-captureInstallPrompt();
 // The offline copy of the app. Production only; see lib/app-shell.
 void registerAppShell();
 

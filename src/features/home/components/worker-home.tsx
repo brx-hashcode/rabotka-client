@@ -16,7 +16,6 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { useJobFeed, useCanApply } from "@/hooks/use-jobs";
 import type { JobFeedItem } from "@/lib/api/job-feed-controller";
 import { BrandHero } from "./brand-hero";
-import { InstallAppCard } from "@/features/offline/install-app-card";
 import { WorkQuote } from "./work-quote";
 import { HomeHeader } from "./home-header";
 import { JobCard } from "./job-card";
@@ -180,10 +179,6 @@ export function WorkerHome() {
           subtitle="candidatures"
           onClick={() => navigate("/mes-candidatures")}
         />
-      </div>
-
-      <div className="pt-2">
-        <InstallAppCard />
       </div>
 
       <div className="flex gap-2 overflow-x-auto px-4 pb-3 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
