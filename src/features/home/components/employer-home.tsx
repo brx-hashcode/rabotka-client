@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkerFeed } from "@/hooks/use-recommendations";
 import type { RecommendedWorker } from "@/lib/api/recommendation-controller";
 import { BrandHero } from "./brand-hero";
-import { InstallAppCard } from "@/features/offline/install-app-card";
 import { HomeHeader } from "./home-header";
 import { RecommendedWorkerCard } from "./recommended-worker-card";
 import { SponsoredCard } from "@/features/sponsored/sponsored-card";
@@ -68,10 +67,6 @@ export function EmployerHome() {
       />
 
       <QuickActions />
-
-      <div className="pt-3">
-        <InstallAppCard />
-      </div>
 
       {isLoading && (
         <div className="space-y-3 px-4 py-4">
