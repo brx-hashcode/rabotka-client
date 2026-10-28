@@ -20,6 +20,17 @@ export type ApplicationState =
   | "SELF_CANCELLED"
   | "CAN_REAPPLY";
 
+/** A question the employer asks when applying (offer detail only). */
+export type ApplyQuestion = {
+  id: string;
+  kind: "YES_NO" | "CHOICE" | "SHORT_TEXT";
+  label: string;
+  options: string[];
+  required: boolean;
+};
+
+export type ApplyAnswer = { questionId: string; value: string };
+
 export type JobFeedItem = {
   id: string;
   reference: string;
@@ -45,6 +56,8 @@ export type JobFeedItem = {
   quantity: number;
   acceptedCount: number;
   createdAt: string;
+  /** Asked when applying; only the offer detail carries them. */
+  questions?: ApplyQuestion[];
   matchScore: number;
   saved: boolean;
   applied: boolean;
@@ -106,6 +119,7 @@ export type DailyQuota = {
 
 type BackendJobFeedItem = {
   id: string;
+  questions?: ApplyQuestion[];
   reference: string;
   title: string;
   description: string;
@@ -172,6 +186,7 @@ function mapItem(o: BackendJobFeedItem): JobFeedItem {
     quantity: o.quantity,
     acceptedCount: o.acceptedCount ?? 0,
     createdAt: o.created_at,
+    questions: o.questions,
     matchScore: o.matchScore ?? 0,
     saved: o.saved,
     applied: o.applied,
@@ -232,10 +247,15 @@ class JobFeedController extends RabotkaBaseController {
   }
 
   // POST /profile/jobs/:id/apply → apply; returns the updated daily quota.
-  async applyToJob(jobOfferId: string): Promise<{ dailyQuota: DailyQuota }> {
+  // `answers`: the offer's questions, when it asks some.
+  async applyToJob(
+    jobOfferId: string,
+    answers?: ApplyAnswer[],
+  ): Promise<{ dailyQuota: DailyQuota }> {
     try {
       return await this.post<{ success: boolean; dailyQuota: DailyQuota }>(
         `/profile/jobs/${jobOfferId}/apply`,
+        answers ? { answers } : undefined,
       );
     } catch (error) {
       this.handleError(error);
