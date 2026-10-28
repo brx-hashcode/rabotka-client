@@ -31,7 +31,6 @@ const imageOptimizer = ViteImageOptimizer({
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
-  const siteUrl = (env.VITE_SITE_URL || "https://rabotka.work").replace(/\/+$/, "");
 
   return {
     server: {
@@ -39,21 +38,6 @@ export default defineConfig(({ mode }) => {
       port: Number.parseInt(env.VITE_PORT),
       hmr: { overlay: false },
       proxy: {
-        // The public job pages and their sitemap: plain HTML rendered by the
-        // API (job-pages.controller.ts), readable by search engines and link
-        // previews. The header names this site so their links point here.
-        "^/emplois(/|$|\\?)": {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true,
-          rewrite: (p) => `/api/v1/public${p}`,
-          headers: { "X-Rabotka-Site": siteUrl },
-        },
-        "/sitemap-emplois.xml": {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true,
-          rewrite: () => "/api/v1/public/emplois/sitemap.xml",
-          headers: { "X-Rabotka-Site": siteUrl },
-        },
         "/api": {
           target: env.VITE_BACKEND_URL,
           changeOrigin: true,
@@ -75,21 +59,6 @@ export default defineConfig(({ mode }) => {
       port: Number.parseInt(env.VITE_PORT) || 3000,
       allowedHosts: true,
       proxy: {
-        // The public job pages and their sitemap: plain HTML rendered by the
-        // API (job-pages.controller.ts), readable by search engines and link
-        // previews. The header names this site so their links point here.
-        "^/emplois(/|$|\\?)": {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true,
-          rewrite: (p) => `/api/v1/public${p}`,
-          headers: { "X-Rabotka-Site": siteUrl },
-        },
-        "/sitemap-emplois.xml": {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true,
-          rewrite: () => "/api/v1/public/emplois/sitemap.xml",
-          headers: { "X-Rabotka-Site": siteUrl },
-        },
         "/api": {
           target: env.VITE_BACKEND_URL,
           changeOrigin: true,
@@ -114,7 +83,7 @@ export default defineConfig(({ mode }) => {
       // The file list the service worker stores, so the app opens offline.
       offlineManifest({ disabled: env.VITE_OFFLINE_DISABLED === "true" }),
       sitemap({
-        hostname: siteUrl,
+        hostname: env.VITE_SITE_URL || "https://rabotka.work",
         dynamicRoutes: ["/onboarding", "/terms"],
         exclude: [
           "/login",

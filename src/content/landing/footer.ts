@@ -4,7 +4,6 @@ export const footerLinks: FooterLinkGroup = {
   Produit: [
     { label: "Comment ça marche", href: "#how-it-works" },
     { label: "Trouver une mission", href: "/onboarding?profileType=WORKER" },
-    { label: "Offres d'emploi", href: "/emplois" },
     {
       label: "Trouver un travailleur",
       href: "/onboarding?profileType=EMPLOYER",

@@ -6,8 +6,6 @@ Allow: /terms$
 Allow: /og-image.jpg
 Allow: /rabotka-logo.png
 Allow: /sitemap.xml
-Allow: /emplois
-Allow: /sitemap-emplois.xml
 
 # Auth-protected pages — always redirect unauthenticated users, never index
 Disallow: /profile
@@ -21,4 +19,3 @@ Disallow: /r/
 Disallow: /login
 
 Sitemap: https://rabotka.work/sitemap.xml
-Sitemap: https://rabotka.work/sitemap-emplois.xml
