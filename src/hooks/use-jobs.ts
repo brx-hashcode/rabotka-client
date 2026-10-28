@@ -16,6 +16,7 @@ import {
   unsaveJob,
   getSavedJobs,
   searchJobs,
+  type ApplyAnswer,
   type JobFeedItem,
   type DailyQuota,
   type JobSearchParams,
@@ -66,7 +67,10 @@ export function useCanApply() {
 export function useApplyToJob() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (jobOfferId: string) => applyToJob(jobOfferId),
+    mutationFn: (args: string | { jobOfferId: string; answers?: ApplyAnswer[] }) =>
+      typeof args === "string"
+        ? applyToJob(args)
+        : applyToJob(args.jobOfferId, args.answers),
     onSuccess: ({ dailyQuota }) => {
       qc.setQueryData(["daily-quota"], dailyQuota);
       qc.invalidateQueries({ queryKey: ["job-feed"] });
