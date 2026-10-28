@@ -55,6 +55,8 @@ export function Footer() {
           navigate("/");
           setTimeout(() => scrollToElement(id), 150);
         }
+      } else if (href.startsWith("/emplois")) {
+        // Served by the API, not a route of the app: a real page load.
       } else if (href.startsWith("/")) {
         e.preventDefault();
         navigate(href);
