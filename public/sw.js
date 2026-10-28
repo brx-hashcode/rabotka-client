@@ -75,6 +75,10 @@ function isBypassed(url) {
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/socket.io") ||
     url.pathname.startsWith("/payment-status") ||
+    // The public job pages are served by the API, not the app: never the app shell.
+    url.pathname === "/emplois" ||
+    url.pathname.startsWith("/emplois/") ||
+    url.pathname === "/sitemap-emplois.xml" ||
     url.pathname === MANIFEST_URL ||
     url.pathname === "/sw.js"
   );
