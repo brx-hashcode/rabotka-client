@@ -23,7 +23,7 @@ export type ApplicationState =
 /** A question the employer asks when applying (offer detail only). */
 export type ApplyQuestion = {
   id: string;
-  kind: "YES_NO" | "CHOICE" | "SHORT_TEXT";
+  kind: "YES_NO" | "CHOICE" | "SHORT_TEXT" | "LONG_TEXT" | "NUMBER" | "DATE";
   label: string;
   options: string[];
   required: boolean;

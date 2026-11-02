@@ -207,14 +207,23 @@ function Questions({
                 </span>
               )}
             </legend>
-            {q.kind === "SHORT_TEXT" ? (
+            {q.kind === "SHORT_TEXT" || q.kind === "LONG_TEXT" ? (
               <textarea
                 value={value}
                 onChange={(e) => onChange(q.id, e.target.value)}
-                maxLength={300}
-                rows={2}
+                maxLength={q.kind === "LONG_TEXT" ? 3000 : 300}
+                rows={q.kind === "LONG_TEXT" ? 6 : 2}
                 placeholder="Votre réponse"
                 className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+              />
+            ) : q.kind === "NUMBER" || q.kind === "DATE" ? (
+              <input
+                type={q.kind === "NUMBER" ? "number" : "date"}
+                inputMode={q.kind === "NUMBER" ? "decimal" : undefined}
+                min={q.kind === "NUMBER" ? 0 : undefined}
+                value={value}
+                onChange={(e) => onChange(q.id, e.target.value)}
+                className="h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 sm:w-56"
               />
             ) : (
               <div className="flex flex-wrap gap-2">
