@@ -315,6 +315,7 @@ export default function JobDetailWorker() {
           </div>
 
           <ApplyConfirmDrawer
+        jobOfferId={job.id}
             open={confirmOpen}
             onOpenChange={setConfirmOpen}
             title={job.title}
@@ -322,8 +323,11 @@ export default function JobDetailWorker() {
             address={jobLocationLabel(job)}
             amount={job.amount}
             isPending={apply.isPending}
-            onConfirm={() =>
-              apply.mutate(job.id, { onSuccess: () => setConfirmOpen(false) })
+            onConfirm={(answers) =>
+              apply.mutate(
+                { jobOfferId: job.id, answers },
+                { onSuccess: () => setConfirmOpen(false) },
+              )
             }
           />
         </div>

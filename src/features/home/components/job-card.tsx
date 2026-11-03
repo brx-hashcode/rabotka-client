@@ -221,6 +221,7 @@ export function JobCard({ job, canApply }: Props) {
       )}
 
       <ApplyConfirmDrawer
+        jobOfferId={job.id}
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={job.title}
@@ -228,8 +229,11 @@ export function JobCard({ job, canApply }: Props) {
         address={jobLocationLabel(job)}
         amount={job.amount}
         isPending={apply.isPending}
-        onConfirm={() =>
-          apply.mutate(job.id, { onSuccess: () => setConfirmOpen(false) })
+        onConfirm={(answers) =>
+          apply.mutate(
+            { jobOfferId: job.id, answers },
+            { onSuccess: () => setConfirmOpen(false) },
+          )
         }
       />
     </div>
