@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { FileText, Trash2 } from "lucide-react";
 
@@ -13,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DownloadLink } from "@/components/common/download-link";
 import { ScreenHeader } from "@/features/employer";
 import { CvUploadButton } from "@/features/profile-cv/components/cv-upload-button";
+import { ConfirmDialog } from "@/features/portfolio/components/confirm-dialog";
 import {
   profileCvFileUrl,
   rabotkaCvUrl,
@@ -37,6 +39,7 @@ export default function MyCv() {
   const { data: cv, isLoading } = useProfileCv(isWorker);
   const remove = useRemoveProfileCv();
   const preference = useSetCvPreference();
+  const [confirmRemove, setConfirmRemove] = useState(false);
 
   if (!profileLoading && profile && !isWorker) {
     return <Navigate to="/profile" replace />;
@@ -81,7 +84,7 @@ export default function MyCv() {
                 type="button"
                 variant="outline"
                 disabled={remove.isPending}
-                onClick={() => remove.mutate()}
+                onClick={() => setConfirmRemove(true)}
                 aria-label="Retirer mon CV"
               >
                 <Trash2 className="size-4" />
@@ -147,6 +150,20 @@ export default function MyCv() {
             <DownloadLink href={rabotkaCvUrl()}>Voir mon CV Rabotka</DownloadLink>
           </div>
         </section>
+
+        <ConfirmDialog
+          open={confirmRemove}
+          onOpenChange={setConfirmRemove}
+          title="Retirer votre CV ?"
+          description="Vos prochaines candidatures partiront avec votre CV Rabotka. Celles déjà envoyées gardent le CV joint."
+          actionLabel="Retirer mon CV"
+          isPending={remove.isPending}
+          onConfirm={() =>
+            remove.mutate(undefined, {
+              onSuccess: () => setConfirmRemove(false),
+            })
+          }
+        />
 
         <p className="px-1 text-xs text-muted-foreground">
           Votre téléphone et votre e-mail figurent souvent sur votre CV : le
