@@ -204,6 +204,19 @@ export function JobOfferForm({
   };
 
   const isRemote = form.watch("isRemote");
+  const countryCode = form.watch("countryCode");
+  // An offer is posted in the employer's own country: only the city is asked.
+  // Without a country on the profile, the picker stays.
+  const { data: profile } = useProfileMe();
+  const homeCode = profile?.countryCode ?? "";
+  const homeName = profile?.countryName ?? "";
+  // Set whenever it is missing on site: a new offer, an old draft, an offer
+  // that was online, or the « Mission en ligne » box unticked again.
+  useEffect(() => {
+    if (isRemote || countryCode || !homeCode) return;
+    form.setValue("countryCode", homeCode);
+    form.setValue("countryName", homeName);
+  }, [form, isRemote, countryCode, homeCode, homeName]);
   const employmentType = form.watch("employmentType");
   // The time field is disabled and bounded by whichever day is chosen.
   const scheduledDate = form.watch("scheduledDate");
@@ -497,7 +510,7 @@ export function JobOfferForm({
                   no answer. */}
               {!isRemote && (
                 <>
-                  <CountryCityFields form={form} />
+                  <CountryCityFields form={form} hideCountry={!!homeCode} />
 
                   <FormField
                     control={form.control}

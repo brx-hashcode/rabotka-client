@@ -41,6 +41,12 @@ type Props<T extends FieldValues> = {
    * A single wording here would be wrong in one of those places.
    */
   readonly countryHint?: string;
+  /**
+   * The country is already set by the caller (a job offer is posted in the
+   * employer's own country): show the city alone, its list read from the
+   * country the form holds.
+   */
+  readonly hideCountry?: boolean;
 };
 
 /**
@@ -60,6 +66,7 @@ export function CountryCityFields<T extends FieldValues>({
   form,
   container,
   countryHint,
+  hideCountry = false,
 }: Props<T>) {
   const countryField = "countryCode" as Path<T>;
   const cityField = "city" as Path<T>;
@@ -83,44 +90,46 @@ export function CountryCityFields<T extends FieldValues>({
   // d'abord un p...".
   return (
     <div className="grid grid-cols-1 gap-4">
-      <FormField
-        control={form.control}
-        name={countryField}
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-1">
-            <FormLabel>{countryCityLabels.country.label}</FormLabel>
-            <FormControl>
-              <CategoryCombobox
-                options={toCountryOptions(countries.data)}
-                value={field.value || null}
-                onChange={(code) => {
-                  const next = locationAfterCountryChange(
-                    code,
-                    countries.data,
-                  );
-                  field.onChange(next.countryCode);
-                  form.setValue(
-                    "countryName" as Path<T>,
-                    next.countryName as never,
-                    { shouldValidate: true },
-                  );
-                  form.setValue(cityField, next.city as never, {
-                    shouldValidate: true,
-                  });
-                  setCitySearch("");
-                }}
-                placeholder={countryCityLabels.country.placeholder}
-                disabled={countries.isPending}
-                container={container}
-              />
-            </FormControl>
-            {countryHint && (
-              <p className="text-xs text-muted-foreground">{countryHint}</p>
-            )}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {!hideCountry && (
+        <FormField
+          control={form.control}
+          name={countryField}
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-1">
+              <FormLabel>{countryCityLabels.country.label}</FormLabel>
+              <FormControl>
+                <CategoryCombobox
+                  options={toCountryOptions(countries.data)}
+                  value={field.value || null}
+                  onChange={(code) => {
+                    const next = locationAfterCountryChange(
+                      code,
+                      countries.data,
+                    );
+                    field.onChange(next.countryCode);
+                    form.setValue(
+                      "countryName" as Path<T>,
+                      next.countryName as never,
+                      { shouldValidate: true },
+                    );
+                    form.setValue(cityField, next.city as never, {
+                      shouldValidate: true,
+                    });
+                    setCitySearch("");
+                  }}
+                  placeholder={countryCityLabels.country.placeholder}
+                  disabled={countries.isPending}
+                  container={container}
+                />
+              </FormControl>
+              {countryHint && (
+                <p className="text-xs text-muted-foreground">{countryHint}</p>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
 
       <FormField
         control={form.control}
