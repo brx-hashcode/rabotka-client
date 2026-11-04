@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, FileText, Loader2 } from "lucide-react";
 
 import {
   Drawer,
@@ -16,6 +16,10 @@ import { useJobDetail } from "@/hooks/use-jobs";
 import type { ApplyAnswer, ApplyQuestion } from "@/lib/api/job-feed-controller";
 import { cn } from "@/lib/utils";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { useProfileCv } from "@/hooks/use-profile-cv";
+import type { CvChoice } from "@/lib/api/profile-cv-controller";
+import { initialCvChoice } from "@/lib/profile-cv";
+import { CvUploadButton } from "@/features/profile-cv/components/cv-upload-button";
 import { formatDateTime, formatOfferAmount } from "@/lib/utils";
 
 type Props = {
@@ -29,8 +33,8 @@ type Props = {
   readonly address: string;
   readonly amount?: number | null;
   readonly isPending?: boolean;
-  /** `answers` is set only when the offer asks questions. */
-  readonly onConfirm: (answers?: ApplyAnswer[]) => void;
+  /** `answers` is set only when the offer asks questions; `cv` is the CV sent. */
+  readonly onConfirm: (answers: ApplyAnswer[] | undefined, cv: CvChoice) => void;
 };
 
 /**
@@ -62,6 +66,12 @@ export function ApplyConfirmDrawer({
   const missing = questions.some(
     (q) => q.required && !(values[q.id] ?? "").trim(),
   );
+  // « Mon CV » or the Rabotka CV: the worker's default until they pick.
+  const profileCv = useProfileCv(open);
+  const [picked, setPicked] = useState<CvChoice | null>(null);
+  const cv: CvChoice = profileCv.data?.uploaded
+    ? (picked ?? initialCvChoice(profileCv.data))
+    : "RABOTKA";
   const answers = questions.length
     ? questions
         .filter((q) => (values[q.id] ?? "").trim())
@@ -80,6 +90,12 @@ export function ApplyConfirmDrawer({
           </DrawerHeader>
 
           <div className="flex-1 space-y-4 overflow-y-auto px-6 pb-2">
+            <CvPicker
+              uploadedName={profileCv.data?.uploaded?.fileName ?? null}
+              loading={profileCv.isLoading}
+              value={cv}
+              onChange={setPicked}
+            />
             {questions.length > 0 && (
               <Questions
                 questions={questions}
@@ -155,7 +171,7 @@ export function ApplyConfirmDrawer({
             <Button
               className="bg-whatsapp text-white hover:bg-whatsapp active:bg-whatsapp-dark"
               disabled={isPending || detail.isLoading || missing}
-              onClick={() => onConfirm(answers)}
+              onClick={() => onConfirm(answers, cv)}
             >
               {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
               Oui, je postule
@@ -169,6 +185,69 @@ export function ApplyConfirmDrawer({
         </div>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+/**
+ * Which CV goes with the application. Without one of their own, the worker is
+ * told the Rabotka CV is sent, and may add theirs right here.
+ */
+function CvPicker({
+  uploadedName,
+  loading,
+  value,
+  onChange,
+}: Readonly<{
+  uploadedName: string | null;
+  loading: boolean;
+  value: CvChoice;
+  onChange: (cv: CvChoice) => void;
+}>) {
+  if (loading) return null;
+  if (!uploadedName) {
+    return (
+      <div className="space-y-2 rounded-xl bg-card p-3 text-left shadow-soft">
+        <p className="text-xs font-medium text-muted-foreground">CV envoyé</p>
+        <p className="flex items-start gap-2 text-sm text-foreground">
+          <FileText className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          Votre CV Rabotka sera envoyé. Ajoutez le vôtre pour montrer votre
+          expérience hors Rabotka.
+        </p>
+        <CvUploadButton
+          variant="outline"
+          className="w-full"
+          onUploaded={() => onChange("UPLOADED")}
+        />
+      </div>
+    );
+  }
+  const options: { value: CvChoice; label: string }[] = [
+    { value: "UPLOADED", label: `Mon CV · ${uploadedName}` },
+    { value: "RABOTKA", label: "CV Rabotka" },
+  ];
+  return (
+    <fieldset className="space-y-2 rounded-xl bg-card p-3 text-left shadow-soft">
+      <legend className="sr-only">CV envoyé</legend>
+      <p className="text-xs font-medium text-muted-foreground">CV envoyé</p>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            aria-pressed={value === o.value}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "max-w-full truncate rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+              value === o.value
+                ? "border-whatsapp bg-whatsapp/10 text-whatsapp-dark"
+                : "bg-background text-foreground hover:bg-muted",
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
