@@ -223,7 +223,7 @@ function Questions({
                 min={q.kind === "NUMBER" ? 0 : undefined}
                 value={value}
                 onChange={(e) => onChange(q.id, e.target.value)}
-                className="h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40 sm:w-56"
+                className="h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
               />
             ) : (
               <div className="flex flex-wrap gap-2">
