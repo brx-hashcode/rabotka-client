@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 import {
   Drawer,
@@ -234,13 +234,12 @@ function Questions({
                     aria-pressed={value === v}
                     onClick={() => onChange(q.id, value === v ? "" : v)}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+                      "inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                       value === v
                         ? "border-whatsapp bg-whatsapp/10 text-whatsapp-dark"
                         : "bg-background text-foreground hover:bg-muted",
                     )}
                   >
-                    {value === v && <Check className="size-3.5" />}
                     {label}
                   </button>
                 ))}
