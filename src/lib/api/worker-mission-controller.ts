@@ -99,6 +99,11 @@ export type WorkerMission = {
     status: JobOfferStatus;
   };
   employer: WorkerMissionEmployer;
+  /**
+   * Your own answers to the offer's questions, as the recruiter reads them.
+   * Sent on the detail only.
+   */
+  answers?: { label: string; kind: string; value: string }[];
 };
 
 export type WorkerMissionsResponse = {

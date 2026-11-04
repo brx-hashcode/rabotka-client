@@ -264,6 +264,22 @@ export default function WorkerMissionDetail() {
             </Section>
           )}
 
+          {/* What you answered to the recruiter's questions, as they read it. */}
+          {mission.answers && mission.answers.length > 0 && (
+            <Section title="Vos réponses">
+              <dl className="space-y-3 text-sm">
+                {mission.answers.map((answer) => (
+                  <div key={answer.label}>
+                    <dt className="text-muted-foreground">{answer.label}</dt>
+                    <dd className="mt-0.5 whitespace-pre-line break-words font-medium text-foreground">
+                      {answer.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </Section>
+          )}
+
           {/* Employer. Laid out like the offer screen's card — this one showed
               a bare name, because `avatar_url` was never selected server-side
               and there was nothing to render. */}
