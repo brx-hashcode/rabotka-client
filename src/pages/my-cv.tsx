@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from "react-router";
-import { FileText, Sparkles, Trash2 } from "lucide-react";
+import { FileText, Trash2 } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
 import { useProfileMe } from "@/hooks/use-profile-me";
@@ -138,8 +138,7 @@ export default function MyCv() {
           </section>
         )}
 
-        <section className="flex items-start gap-3 rounded-xl bg-card p-4 shadow-soft">
-          <Sparkles className="mt-0.5 size-5 shrink-0 text-whatsapp-dark" />
+        <section className="rounded-xl bg-card p-4 shadow-soft">
           <div className="min-w-0 space-y-1 text-sm">
             <p className="font-medium text-foreground">Votre CV Rabotka</p>
             <p className="text-muted-foreground">
