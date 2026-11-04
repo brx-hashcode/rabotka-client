@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FormattedText } from "@/components/common/formatted-text";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employment-type";
 import {
   jobLocationLabel,
@@ -199,9 +200,7 @@ export default function JobDetailWorker() {
 
           {job.description && (
             <Section title="Description">
-              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-                {job.description}
-              </p>
+              <FormattedText text={job.description} className="text-foreground" />
             </Section>
           )}
 

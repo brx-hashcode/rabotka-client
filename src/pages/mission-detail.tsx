@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FormattedText } from "@/components/common/formatted-text";
 import { jobLocationDetail } from "@/lib/job-location";
 import { EMPLOYMENT_TYPE_LABELS, closesOnFill } from "@/lib/employment-type";
 import { useNavigate, useParams } from "react-router";
@@ -274,9 +275,7 @@ export default function MissionDetail() {
           {/* Description */}
           {offer.description && (
             <Section title="Description">
-              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-                {offer.description}
-              </p>
+              <FormattedText text={offer.description} className="text-foreground" />
             </Section>
           )}
 
