@@ -322,9 +322,9 @@ export default function JobDetailWorker() {
             address={jobLocationLabel(job)}
             amount={job.amount}
             isPending={apply.isPending}
-            onConfirm={(answers) =>
+            onConfirm={(answers, cv) =>
               apply.mutate(
-                { jobOfferId: job.id, answers },
+                { jobOfferId: job.id, answers, cv },
                 { onSuccess: () => setConfirmOpen(false) },
               )
             }

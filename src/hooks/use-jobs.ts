@@ -1,3 +1,4 @@
+import type { CvChoice } from "@/lib/api/profile-cv-controller";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -67,10 +68,14 @@ export function useCanApply() {
 export function useApplyToJob() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: string | { jobOfferId: string; answers?: ApplyAnswer[] }) =>
+    mutationFn: (
+      args:
+        | string
+        | { jobOfferId: string; answers?: ApplyAnswer[]; cv?: CvChoice },
+    ) =>
       typeof args === "string"
         ? applyToJob(args)
-        : applyToJob(args.jobOfferId, args.answers),
+        : applyToJob(args.jobOfferId, args.answers, args.cv),
     onSuccess: ({ dailyQuota }) => {
       qc.setQueryData(["daily-quota"], dailyQuota);
       qc.invalidateQueries({ queryKey: ["job-feed"] });

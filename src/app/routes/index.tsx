@@ -22,6 +22,7 @@ const Onboarding = lazy(() => import("@/pages/onboarding"));
 const Profile = lazy(() => import("@/pages/profile"));
 const ProfileDetails = lazy(() => import("@/pages/profile-details"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
+const MyCv = lazy(() => import("@/pages/my-cv"));
 const Login = lazy(() => import("@/pages/login"));
 const Terms = lazy(() => import("@/pages/terms"));
 const DevelopersApiDocumentation = lazy(
@@ -389,6 +390,18 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <ProfileDetails />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/profile/cv"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <MyCv />
               </AppShell>
             </AuthGuard>
           </Suspense>

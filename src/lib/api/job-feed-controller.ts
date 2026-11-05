@@ -1,3 +1,4 @@
+import type { CvChoice } from "./profile-cv-controller";
 import { RabotkaBaseController } from "./base-controller";
 import type { EmploymentTypeValue } from "@/lib/employment-type";
 import type { JobOfferStatus } from "./job-offer-controller";
@@ -247,15 +248,21 @@ class JobFeedController extends RabotkaBaseController {
   }
 
   // POST /profile/jobs/:id/apply → apply; returns the updated daily quota.
-  // `answers`: the offer's questions, when it asks some.
+  // `answers`: the offer's questions, when it asks some. `cv`: which CV goes
+  // with it; left out, the worker's default.
   async applyToJob(
     jobOfferId: string,
     answers?: ApplyAnswer[],
+    cv?: CvChoice,
   ): Promise<{ dailyQuota: DailyQuota }> {
     try {
+      const body = {
+        ...(answers ? { answers } : {}),
+        ...(cv ? { cv } : {}),
+      };
       return await this.post<{ success: boolean; dailyQuota: DailyQuota }>(
         `/profile/jobs/${jobOfferId}/apply`,
-        answers ? { answers } : undefined,
+        Object.keys(body).length ? body : undefined,
       );
     } catch (error) {
       this.handleError(error);

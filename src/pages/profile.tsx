@@ -4,6 +4,7 @@ import {
   AlertCircle,
   ChevronRight,
   Clock,
+  FileText,
   Images,
   LayoutDashboard,
   UserRound,
@@ -27,6 +28,7 @@ import {
 import { SupportContactButton } from "@/features/support";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
 import { cn, formatAmount } from "@/lib/utils";
+import { useProfileCv } from "@/hooks/use-profile-cv";
 
 /**
  * The profile tab, as a hub: who you are in one compact card, the three
@@ -43,6 +45,7 @@ export default function Profile() {
   const { data: profile, isLoading, error } = useProfileMe();
   const isWorker = profile?.profileType === "WORKER";
   const { data: publicationsData } = usePortfolio(isWorker);
+  const { data: cv } = useProfileCv(isWorker);
   const publications = publicationsData ?? [];
   // Bumped to open the edit sheet from the avatar or a checklist step.
   const [editSignal, setEditSignal] = useState(0);
@@ -228,6 +231,14 @@ export default function Profile() {
           label="Mes informations"
           onClick={() => navigate("/profile/informations")}
         />
+        {isWorker && (
+          <Row
+            icon={FileText}
+            label="Mon CV"
+            detail={cv ? (cv.uploaded ? "Ajouté" : "À ajouter") : undefined}
+            onClick={() => navigate("/profile/cv")}
+          />
+        )}
       </Group>
 
       <Group title="Aide">
