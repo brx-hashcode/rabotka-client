@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { refreshFor, type PushedNotification } from "@/lib/notification-refresh";
 import {
   useInfiniteQuery,
   useMutation,
@@ -192,6 +193,8 @@ export function useNotificationsSocket(enabled: boolean) {
     primeNotificationSound();
     socket.on("notification:new", (notification?: AppNotification) => {
       queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+      // And whatever it is about: the mission, the applicants, the wallet…
+      refreshFor(queryClient, (notification ?? {}) as PushedNotification);
       if (
         shouldChime(
           notification,
