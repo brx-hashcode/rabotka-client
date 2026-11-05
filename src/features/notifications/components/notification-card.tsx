@@ -177,7 +177,9 @@ export function NotificationCard({
           >
             {notification.title}
           </span>
-          <span className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+          {/* Whole: an interview's date or a refusal's reason sits at the end,
+              and two lines cut it off. Bodies are a sentence or two. */}
+          <span className="mt-0.5 block whitespace-pre-line break-words text-xs leading-relaxed text-muted-foreground">
             {notification.body}
           </span>
           <span className="mt-1 block text-[11px] text-muted-foreground/80">
