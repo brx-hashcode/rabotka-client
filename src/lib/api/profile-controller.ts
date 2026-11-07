@@ -167,7 +167,11 @@ export type InvoiceItem = {
   id: string;
   /** The payment request it was issued for, when it came from one. */
   paymentRequestId: string | null;
+  /** The price in XAF (the books). */
   amount: string;
+  /** What the network was charged when not that price (USD in the DRC), else null. */
+  chargedCurrency: string | null;
+  chargedAmount: string | null;
   reason: "CONTACT_UNLOCK" | "PENALTY" | "WALLET_TOP_UP" | "OTHER";
   status: "PENDING_DOWNLOAD" | "DOWNLOADED";
   createdAt: string;

@@ -36,6 +36,7 @@ import {
   Loader,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
 import {
   Select,
   SelectContent,
@@ -135,6 +136,17 @@ export default function Pay() {
   };
   const selectedOperator =
     operators.find((o) => o.code === operator) ?? operators[0] ?? null;
+  // What the chosen network is charged: the XAF price itself in the CFA
+  // zone, converted into its own currency elsewhere (dollars in the DRC).
+  const chargeCurrency =
+    selectedOperator?.currency ?? current?.currency ?? "XAF";
+  const charge =
+    payment?.prices?.find((p) => p.currency === chargeCurrency) ?? null;
+  const amountLabel = charge
+    ? formatMoney(charge.amount, charge.currency)
+    : typeof payment?.amount === "number"
+      ? formatMoney(payment.amount, "XAF")
+      : null;
 
   // The invoice for this payment, once it is approved. Issued while the
   // payment is processed, so it is normally there by the time the approval
@@ -224,8 +236,8 @@ export default function Pay() {
                 when the payment query is in an error state — the socket is
                 the authority, and the confirmation does not depend on `data`. */}
             <p className="mt-1 text-sm text-muted-foreground">
-              {typeof payment?.amount === "number"
-                ? `Vous avez payé ${payment.amount.toLocaleString("fr-FR")} FCFA.`
+              {amountLabel
+                ? `Vous avez payé ${amountLabel}.`
                 : "Votre paiement a bien été confirmé."}
             </p>
           </div>
@@ -255,11 +267,11 @@ export default function Pay() {
                   label: "Moyen",
                   value: methodLabel(payment.gateway, selectedOperator),
                 },
-                ...(typeof payment.amount === "number"
+                ...(amountLabel
                   ? [
                       {
                         label: "Montant",
-                        value: `${payment.amount.toLocaleString("fr-FR")} FCFA`,
+                        value: amountLabel,
                         emphasis: true,
                       },
                     ]
@@ -501,12 +513,10 @@ export default function Pay() {
             {/* `!== null` was not enough: a response missing `amount`
                 entirely slipped through as undefined and took the whole
                 payment page down with it. */}
-            {typeof amount === "number" ? amount.toLocaleString("fr-FR") : "—"}
-            {/* The selected country's franc: XAF in Congo, XOF in Bénin —
-                the same amount, the two francs being at par. */}
-            <span className="ml-1.5 text-base font-medium text-muted-foreground">
-              {current?.currency ?? "FCFA"}
-            </span>
+            {/* In the chosen network's currency: the franc CFA price as
+                set in Congo or Bénin (the two francs at par), converted
+                in dollars in the DRC, in shillings in Kenya… */}
+            {typeof amount === "number" ? (amountLabel ?? "—") : "—"}
           </p>
           {description && (
             <p className="mt-2.5 text-xs leading-snug text-muted-foreground">
