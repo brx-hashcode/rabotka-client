@@ -310,7 +310,7 @@ export function JobOfferForm({
                       <Textarea
                         placeholder="Décrivez précisément la mission à réaliser."
                         rows={5}
-                        maxLength={1000}
+                        maxLength={2500}
                         disabled={isPending}
                         {...field}
                       />
