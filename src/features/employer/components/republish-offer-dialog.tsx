@@ -16,10 +16,10 @@ import { Label } from "@/components/ui/label";
 
 /**
  * Earliest selectable value for the picker, in local time (YYYY-MM-DDTHH:mm).
- * Mirrors the backend's 4-hour minimum so the native picker blocks invalid
- * dates before a round-trip. Same rule as the create-offer form.
+ * Now: the backend only asks for a date still to come (an urgent mission may
+ * start within the hour). Same rule as the create-offer form.
  */
-const MIN_HOURS_AHEAD = 4;
+const MIN_HOURS_AHEAD = 0;
 
 function minScheduledAt(): string {
   const d = new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
@@ -90,7 +90,7 @@ export function RepublishOfferDialog({
               className="w-full min-w-0 max-w-full"
             />
             <p className="text-xs text-muted-foreground">
-              La date doit être au moins {MIN_HOURS_AHEAD} heures dans le futur.
+              Une date et une heure à venir : la mission peut commencer aujourd&apos;hui.
             </p>
           </div>
 

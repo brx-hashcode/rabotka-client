@@ -102,7 +102,7 @@ export function isMissionNotStarted(
 export function scheduledAtLabel(
   type: EmploymentTypeValue | string | null | undefined,
 ): string {
-  return isDatedMission(type) ? "Date de la mission" : "Ouverte jusqu'au";
+  return isDatedMission(type) ? "Candidatures jusqu'au" : "Ouverte jusqu'au";
 }
 
 export function scheduledAtHelpText(
@@ -112,6 +112,6 @@ export function scheduledAtHelpText(
   // an employer who does not know the time yet should read that here rather
   // than discover it by tapping.
   return isDatedMission(type)
-    ? "Le jour où la mission a lieu. L'heure est facultative. Les candidatures se ferment à cette date."
+    ? "Vous acceptez des candidatures jusqu'à ce moment, en général le début de la mission : elle peut commencer aujourd'hui, même dans l'heure. L'heure est facultative."
     : "Dernier jour pour recevoir des candidatures. L'heure est facultative. L'offre expire ensuite si personne n'a été recruté.";
 }

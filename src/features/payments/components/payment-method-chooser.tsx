@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAmount } from "@/lib/utils";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
+import { formatMoney, isCfa } from "@/lib/money";
 
 type Method = "wallet" | "mobile";
 
@@ -71,6 +73,11 @@ export function PaymentMethodChooser({
 }: Props) {
   const insufficient = walletBalance < amount;
   const busy = Boolean(walletPending || mobilePending);
+  // Mobile money is charged in the profile's own currency (dollars in the
+  // DRC); the wallet holds francs CFA and is debited the price as set.
+  const { currency, price } = useDisplayCurrency();
+  const local = !isCfa(currency.currency);
+  const fcfa = formatMoney(amount, "XAF");
 
   // Preselect the cheapest path for the user so the common case is one tap.
   const [method, setMethod] = useState<Method>(
@@ -113,8 +120,11 @@ export function PaymentMethodChooser({
           <p className="mt-2 text-sm font-medium text-muted-foreground">
             {amountLabel} :{" "}
             <span className="text-base font-bold text-foreground">
-              {amount.toLocaleString("fr-FR")} FCFA
+              {price(amount)}
             </span>
+            {local && (
+              <span className="text-xs font-normal"> ({fcfa})</span>
+            )}
           </p>
         </div>
       </div>
@@ -185,7 +195,7 @@ export function PaymentMethodChooser({
               Paiement en cours…
             </>
           ) : (
-            `Payer ${amount.toLocaleString("fr-FR")} FCFA`
+            `Payer ${method === "wallet" ? fcfa : price(amount)}`
           )}
         </Button>
 

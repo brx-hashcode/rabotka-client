@@ -34,6 +34,8 @@ const offer = (
 const invoice = (amount: string, createdAt: string): InvoiceItem => ({
   id: Math.random().toString(36),
   amount,
+  chargedCurrency: null,
+  chargedAmount: null,
   reason: "CONTACT_UNLOCK",
   status: "DOWNLOADED",
   createdAt,

@@ -24,6 +24,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
 
 /** Matches the offers limit: the pending count is an aggregate, not a page. */
 const DASHBOARD_APPLICATIONS_LIMIT = 100;
@@ -184,7 +185,9 @@ export default function EmployerDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-foreground">
-                    {Number(inv.amount).toLocaleString("fr-FR")} FCFA
+                    {inv.chargedCurrency && inv.chargedAmount !== null
+                      ? formatMoney(Number(inv.chargedAmount), inv.chargedCurrency)
+                      : formatMoney(Number(inv.amount), "XAF")}
                   </span>
                   {/* Every invoice is a receipt of a completed payment, so the
                       indicator is uniform ("Payée"). Invoice.status only tracks
