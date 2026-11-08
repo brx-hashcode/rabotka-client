@@ -28,8 +28,8 @@ const jobOfferFields = z.object({
   description: z
     .string()
     .trim()
-    .min(20, "La description doit contenir entre 20 et 1000 caractères")
-    .max(1000, "La description doit contenir entre 20 et 1000 caractères"),
+    .min(20, "La description doit contenir entre 20 et 2500 caractères")
+    .max(2500, "La description doit contenir entre 20 et 2500 caractères"),
   employmentType: z.enum(EMPLOYMENT_TYPE_VALUES).default("MISSION"),
   /**
    * The day, `YYYY-MM-DD`. Required — checked in the superRefine below, which
