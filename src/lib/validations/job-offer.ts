@@ -14,9 +14,10 @@ export const PAYMENT_FLOW_LABELS: Record<PaymentFlowValue, string> = {
   MONTHLY: "PAR MOIS",
 };
 
-// The date must be at least 4h in the future — mirrors the backend rule
-// (MIN_SCHEDULED_HOURS_FROM_NOW in job-offer.service.ts).
-const MIN_HOURS_AHEAD = 4;
+// The date only has to be still to come — mirrors the backend rule
+// (MIN_HOURS_FROM_NOW in job-offer.constants.ts): an urgent mission may start,
+// and stop taking applications, within the hour.
+const MIN_HOURS_AHEAD = 0;
 
 const jobOfferFields = z.object({
   title: z
@@ -113,7 +114,7 @@ export function jobOfferSchema(options?: { keepSchedule?: string }) {
         code: z.ZodIssueCode.custom,
         path: ["scheduledDate"],
         message: isDatedMission(data.employmentType)
-          ? "La date de la mission est requise"
+          ? "La date limite des candidatures est requise"
           : "La date de clôture des candidatures est requise",
       });
     } else {
@@ -137,7 +138,7 @@ export function jobOfferSchema(options?: { keepSchedule?: string }) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [data.scheduledTime ? "scheduledTime" : "scheduledDate"],
-          message: "La date doit être au moins 4 heures dans le futur",
+          message: "Choisissez une date et une heure à venir",
         });
       }
     }
