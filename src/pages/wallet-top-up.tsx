@@ -15,6 +15,8 @@ import { networkNames, topUpError } from "@/lib/top-up";
 import { useToast } from "@/hooks/use-toast";
 import { OFFLINE_ACTION_HINT, useIsOnline } from "@/hooks/use-is-online";
 import { cn, formatAmount } from "@/lib/utils";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
+import { isCfa } from "@/lib/money";
 
 const PRESETS = [1000, 2500, 5000, 10000] as const;
 
@@ -29,6 +31,10 @@ export default function WalletTopUp() {
 
   const error = topUpError(amount, WALLET_MIN_TOP_UP, WALLET_MAX_TOP_UP);
   const valid = amount != null && error === null;
+  // The wallet is credited in XAF; mobile money is charged in the profile's
+  // own currency (dollars in the DRC): say what will leave the phone.
+  const { currency, price } = useDisplayCurrency();
+  const local = !isCfa(currency.currency);
   // The networks really on offer, from the live gateway — the page used to
   // promise « MTN / Airtel » whatever was enabled.
   const live = gateways?.gateways.find((g) => g.key === gateways.active);
@@ -155,7 +161,9 @@ export default function WalletTopUp() {
               )}
             >
               {error ??
-                `Entre ${formatAmount(WALLET_MIN_TOP_UP)} et ${formatAmount(WALLET_MAX_TOP_UP)}.`}
+                (valid && amount != null && local
+                  ? `Le portefeuille est en francs CFA : vous paierez ${price(amount)} par mobile money.`
+                  : `Entre ${formatAmount(WALLET_MIN_TOP_UP)} et ${formatAmount(WALLET_MAX_TOP_UP)}.`)}
             </p>
           </div>
         </div>

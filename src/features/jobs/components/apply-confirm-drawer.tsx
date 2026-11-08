@@ -21,6 +21,7 @@ import type { CvChoice } from "@/lib/api/profile-cv-controller";
 import { initialCvChoice } from "@/lib/profile-cv";
 import { CvUploadButton } from "@/features/profile-cv/components/cv-upload-button";
 import { formatDateTime, formatOfferAmount } from "@/lib/utils";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 
 type Props = {
   /** The offer: its questions, if any, are asked here before applying. */
@@ -58,6 +59,7 @@ export function ApplyConfirmDrawer({
   onConfirm,
 }: Props) {
   const { data: terms } = useApplicationTerms();
+  const { price } = useDisplayCurrency();
   const { data: me } = useProfileMe();
   // The feed's cards carry no questions: the offer detail does.
   const detail = useJobDetail(open ? jobOfferId : undefined);
@@ -126,16 +128,13 @@ export function ApplyConfirmDrawer({
                         Une annulation moins de {terms.cancellationThresholdHours}{" "}
                         heures avant le début entraîne une pénalité de{" "}
                         <span className="font-medium text-foreground">
-                          {terms.lateCancellationPenaltyFcfa.toLocaleString(
-                            "fr-FR",
-                          )}{" "}
-                          FCFA
+                          {price(terms.lateCancellationPenaltyFcfa)}
                         </span>
                         .
                       </>
                     ) : (
                       <>
-                        Une annulation tardive entraîne une pénalité en FCFA.
+                        Une annulation tardive entraîne une pénalité.
                       </>
                     )}
                   </li>

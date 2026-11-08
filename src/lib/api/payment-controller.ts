@@ -18,7 +18,7 @@ export type PaymentOperator = {
   countryFlag?: string;
   /** The gateway's logo for the network. */
   logo?: string;
-  /** The currency the network is charged in (`XAF`, `XOF`). */
+  /** The currency the network is charged in (`XAF`, `XOF`, `USD` in the DRC…). */
   currency?: string;
 };
 
@@ -46,6 +46,22 @@ export type PaymentByTokenResponse = {
   payerCountry?: string | null;
   /** The payer's profile country, ISO alpha-2 (`CG`). */
   payerCountryCode?: string | null;
+  /**
+   * What `amount` (XAF) costs in each currency on offer: the chosen
+   * network's is what is charged (dollars in the DRC).
+   */
+  prices?: { currency: string; amount: number }[];
+};
+
+/** `GET payment-currency/:country`: the currency a country pays in, and how to convert. */
+export type PaymentCurrencyResponse = {
+  country: string;
+  currency: string;
+  perXaf: number;
+  decimals: number;
+  significantDigits: number;
+  marginPercent: number;
+  asOf: string | null;
 };
 
 export type InitiatePaymentPayload = {
@@ -61,6 +77,16 @@ export class PaymentController extends RabotkaBaseController {
   async getByToken(token: string): Promise<PaymentByTokenResponse> {
     try {
       return await this.get<PaymentByTokenResponse>(`/pay/${token}`);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async getCurrency(country: string): Promise<PaymentCurrencyResponse> {
+    try {
+      return await this.get<PaymentCurrencyResponse>(
+        `/payment-currency/${encodeURIComponent(country)}`,
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -89,5 +115,5 @@ export class PaymentController extends RabotkaBaseController {
   }
 }
 
-export const { getByToken, getGateways, initiatePayment } =
+export const { getByToken, getGateways, getCurrency, initiatePayment } =
   new PaymentController();

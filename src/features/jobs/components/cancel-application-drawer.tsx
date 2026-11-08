@@ -20,6 +20,7 @@ import {
   reliabilityLoss,
   suspensionWarning,
 } from "@/lib/cancellation-warning";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 
 type Props = {
   readonly open: boolean;
@@ -48,6 +49,8 @@ export function CancelApplicationDrawer({
   isPending,
   onConfirm,
 }: Props) {
+  // Paid like any payment: in the profile's own currency (dollars in the DRC).
+  const { price } = useDisplayCurrency();
   const [reason, setReason] = useState("");
   const suspension = suspensionWarning(preview);
   const pointsLost = reliabilityLoss(preview);
@@ -84,7 +87,7 @@ export function CancelApplicationDrawer({
                     La mission commence dans moins de {preview.thresholdHours}{" "}
                     heures. Une pénalité de{" "}
                     <span className="font-medium text-foreground">
-                      {preview.penaltyFcfa.toLocaleString("fr-FR")} FCFA
+                      {price(preview.penaltyFcfa)}
                     </span>{" "}
                     sera appliquée et votre score de fiabilité baissera de{" "}
                     {pointsLost} points.
