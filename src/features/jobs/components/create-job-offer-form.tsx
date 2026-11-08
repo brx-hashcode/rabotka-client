@@ -59,10 +59,10 @@ import {
   PAYMENT_FLOW_LABELS,
 } from "@/lib/validations/job-offer";
 
-// The earliest instant the picker may offer. Mirrors the "at least 4h ahead"
+// The earliest instant the picker may offer: now. Mirrors the "still to come"
 // rule in the schema and in the service, so a day or an hour that the server
 // would refuse is never presented in the first place.
-const MIN_HOURS_AHEAD = 4;
+const MIN_HOURS_AHEAD = 0;
 function minScheduledAt(): Date {
   return new Date(Date.now() + MIN_HOURS_AHEAD * 60 * 60 * 1000);
 }
@@ -157,6 +157,10 @@ export function JobOfferForm({
     defaultValues: draft ?? initialValues,
     mode: "onChange",
   });
+  // The date's or the hour's error, shown once under the pair.
+  const scheduleError =
+    form.formState.errors.scheduledDate?.message ??
+    form.formState.errors.scheduledTime?.message;
 
   // Saved as it is typed, a beat after the last keystroke.
   useEffect(() => {
@@ -396,7 +400,7 @@ export function JobOfferForm({
                   explanation is three lines long, and in half the width it would
                   have left the two columns wildly uneven. */}
               <div className="space-y-2">
-                {/* `items-end`, not `items-start`. "Date de la mission" and
+                {/* `items-end`, not `items-start`. "Candidatures jusqu'au" and
                     "Ouverte jusqu'au" both wrap to two lines in half a column
                     while "Heure" stays on one, so aligning the tops left the two
                     inputs at different heights. Aligning the bottoms puts the
@@ -427,7 +431,6 @@ export function JobOfferForm({
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -457,12 +460,19 @@ export function JobOfferForm({
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
 
+                {/* One line under the pair for either error: inside its column,
+                    the hour's message pushed that field up, out of line with
+                    the date. */}
+                {scheduleError && (
+                  <p role="alert" className="text-sm font-medium text-destructive">
+                    {scheduleError}
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">
                   {scheduledAtHelpText(employmentType)}
                 </p>

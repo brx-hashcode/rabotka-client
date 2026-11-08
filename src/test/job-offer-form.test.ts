@@ -131,20 +131,21 @@ describe("toCreatePayload", () => {
 });
 
 describe("jobOfferSchema keepSchedule", () => {
-  const soon = inHours(1);
+  // An hour ago: past is the only thing refused now.
+  const soon = inHours(-1);
   const values = {
     ...offerToFormValues(offer({ scheduledAt: soon.toISOString() })),
   };
   const kept = composeScheduledAt(values.scheduledDate, values.scheduledTime);
 
-  it("accepts keeping a date that is now less than 4h away", () => {
+  it("accepts keeping a date that has passed since", () => {
     expect(jobOfferSchema({ keepSchedule: kept }).safeParse(values).success).toBe(
       true,
     );
   });
 
-  it("still refuses a NEW date less than 4h away", () => {
-    const later = inHours(2);
+  it("still refuses a NEW date that has passed", () => {
+    const later = inHours(-2);
     const moved = {
       ...values,
       scheduledDate: toDateInput(later),
@@ -157,5 +158,15 @@ describe("jobOfferSchema keepSchedule", () => {
 
   it("refuses it on creation", () => {
     expect(jobOfferSchema().safeParse(values).success).toBe(false);
+  });
+
+  it("accepts an urgent mission within the hour on creation", () => {
+    const urgent = inHours(0.5);
+    const now = {
+      ...values,
+      scheduledDate: toDateInput(urgent),
+      scheduledTime: `${String(urgent.getHours()).padStart(2, "0")}:${String(urgent.getMinutes()).padStart(2, "0")}`,
+    };
+    expect(jobOfferSchema().safeParse(now).success).toBe(true);
   });
 });

@@ -51,10 +51,10 @@ describe("isCompletable (does the worker confirm this?)", () => {
 });
 
 describe("scheduledAtLabel", () => {
-  it("names the mission date on a MISSION and the deadline otherwise", () => {
+  it("names the applications deadline on a MISSION and the closing day otherwise", () => {
     // One column, two meanings. Asking an employer for "la date de la mission"
     // on a CDI is how you get one invented.
-    expect(scheduledAtLabel("MISSION")).toMatch(/mission/i);
+    expect(scheduledAtLabel("MISSION")).toMatch(/candidatures jusqu'au/i);
     for (const type of ONGOING) {
       expect(scheduledAtLabel(type)).toMatch(/ouverte jusqu'au/i);
     }
