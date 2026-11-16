@@ -34,6 +34,7 @@ const VerifyWhatsApp = lazy(() => import("@/pages/verify-whatsapp"));
 const Pay = lazy(() => import("@/pages/pay"));
 const AdRedirect = lazy(() => import("@/pages/ad-redirect"));
 const LoginLink = lazy(() => import("@/pages/login-link"));
+const Reunion = lazy(() => import("@/pages/reunion"));
 const OAuthConsent = lazy(() => import("@/pages/oauth-consent"));
 const IdentityCheck = lazy(() => import("@/pages/identity-check"));
 const PublicPortfolio = lazy(() => import("@/pages/public-portfolio"));
@@ -696,6 +697,15 @@ export function AppRoutes() {
             <PublicShell>
               <Pay />
             </PublicShell>
+          </Suspense>
+        }
+      />
+      {/* A Rabotka event's visio, by the personal link (no account). */}
+      <Route
+        path="/reunion/:room"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <Reunion />
           </Suspense>
         }
       />
