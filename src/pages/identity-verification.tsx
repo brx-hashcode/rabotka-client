@@ -8,13 +8,7 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { ScreenHeader } from "@/features/employer";
 import { FileUploadZone } from "@/features/onboarding/components/file-upload-zone";
 import { kycDocumentsContent, kycDocumentGuidance } from "@/content/onboarding";
@@ -250,29 +244,22 @@ function DocumentsForm({
         <p className="text-sm font-medium">
           {kycDocumentsContent.documentType.label}
         </p>
-        <Select
+        <NativeSelect
+          options={KYC_DOCUMENT_TYPE_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.label.toLocaleUpperCase("fr-FR"),
+          }))}
           value={documentType}
+          placeholder={kycDocumentsContent.documentType.placeholder}
           onValueChange={(value) => {
+            if (!value) return;
             setDocumentType(value as DocumentType);
             // A passport has no back: drop one already chosen.
             if (!requiresBackSide(value as DocumentType)) {
               remove("kycDocumentBack");
             }
           }}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={kycDocumentsContent.documentType.placeholder}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {KYC_DOCUMENT_TYPE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label.toLocaleUpperCase("fr-FR")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       </div>
 
       {zone("kycDocument", guidance?.front ?? zones.kycDocument, "document")}
