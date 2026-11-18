@@ -21,5 +21,12 @@ export function useProfileMe() {
     retry: (failureCount, error) =>
       !isUnauthorized(error) && failureCount < 2,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
+    // Fresher than the app's 5-minute default, and re-read when the person
+    // comes back to the app: the verification status changes on someone
+    // else's action (an admin approves or refuses), and the gates, the
+    // notices and the profile all read it from here. A refusal read on
+    // WhatsApp must not meet « En attente » back in the app.
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
   });
 }
