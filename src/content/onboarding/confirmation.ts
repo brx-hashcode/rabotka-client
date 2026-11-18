@@ -29,8 +29,10 @@ export const confirmationContent = {
     // there and the signup will go through; only the thumbnail is missing.
     uploadedNoPreview: "Document téléversé — aperçu indisponible",
     // « Plus tard » on the documents step.
+    laterTitle: "Documents à envoyer après l'inscription",
     later:
-      "À envoyer après l'inscription, depuis votre profil (Vérification d'identité). Il faudra les envoyer pour postuler ou publier une mission.",
+      "Vous les enverrez depuis votre profil, rubrique Vérification d'identité. D'ici là, vous ne pourrez pas postuler ni publier de mission.",
+    laterAction: "Les envoyer maintenant",
   },
   profileTypes: {
     worker: "Travailleur",

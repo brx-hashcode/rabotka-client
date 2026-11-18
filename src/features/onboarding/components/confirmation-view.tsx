@@ -17,6 +17,7 @@ import {
   CreditCard,
   Globe,
   Building2,
+  IdCard,
 } from "lucide-react";
 import { InfoCard } from "./info-card";
 import { ReferralCodeField } from "./referral-code-field";
@@ -190,9 +191,28 @@ export function ConfirmationView({
           </h3>
           {/* « Plus tard »: nothing to show but when and where they are sent. */}
           {documentsLater ? (
-            <p className="rounded-lg bg-card p-4 text-sm text-muted-foreground shadow-soft">
-              {content.kycDocuments.later}
-            </p>
+            <div className="flex items-start gap-3 rounded-lg bg-amber-50 p-4 shadow-soft">
+              <div className="rounded-lg bg-white p-2">
+                <IdCard className="size-5 text-amber-600" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-sm font-semibold text-amber-900">
+                  {content.kycDocuments.laterTitle}
+                </p>
+                <p className="text-sm text-amber-800">
+                  {content.kycDocuments.later}
+                </p>
+                {/* Back to the documents step: changing one's mind costs a tap. */}
+                <button
+                  type="button"
+                  onClick={onBack}
+                  disabled={isSubmitting}
+                  className="pt-1 text-sm font-medium text-amber-900 underline underline-offset-4 disabled:opacity-50"
+                >
+                  {content.kycDocuments.laterAction}
+                </button>
+              </div>
+            </div>
           ) : (
           <div className="grid grid-cols-1 gap-4">
             <div className="bg-card shadow-soft rounded-lg p-4">
