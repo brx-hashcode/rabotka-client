@@ -242,6 +242,14 @@ export function KycDocumentsForm({
     ],
   );
 
+  const anyUploading =
+    uploading.kycDocument || uploading.kycDocumentBack || uploading.kycSelfie;
+
+  const handleLater = useCallback(() => {
+    for (const field of KYC_FILE_FIELDS) handleRemoveFile(field);
+    onNext();
+  }, [handleRemoveFile, onNext]);
+
   const documentType = form.watch("documentType");
   const needsBackSide = requiresBackSide(documentType);
 
@@ -412,7 +420,11 @@ export function KycDocumentsForm({
             )}
           />
 
-          <div className="flex flex-col-reverse gap-3 pt-4">
+          <p className="text-sm text-muted-foreground pt-2">
+            {content.laterHint}
+          </p>
+
+          <div className="flex flex-col-reverse gap-3">
             <Button
               type="button"
               variant="outline"
@@ -420,6 +432,18 @@ export function KycDocumentsForm({
               className="w-full"
             >
               {content.buttons.back}
+            </Button>
+            {/* « Plus tard »: the account is created without documents, which
+                are sent from Profil › Vérification d'identité. Anything half
+                uploaded is cleared — the set goes all together or not at all. */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleLater}
+              disabled={anyUploading}
+              className="w-full"
+            >
+              {content.buttons.later}
             </Button>
             <Button
               type="submit"

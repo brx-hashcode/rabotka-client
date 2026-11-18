@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { useOnboardingStore } from "@/stores/onboardingStore";
+import { useOnboardingStore, type KycData } from "@/stores/onboardingStore";
+import { kycUploadState } from "@/lib/kyc-upload-state";
 import { apiErrors } from "@/content/onboarding";
 import { requiresBackSide } from "@/lib/kyc-document-types";
 import { isSignupVerificationError } from "@/lib/signup-verification";
@@ -7,6 +8,27 @@ import {
   createProfile,
   type CreateProfileResponse,
 } from "@/lib/api/profile-controller";
+
+/** The document fields of a complete set, as `POST /profile` takes them. */
+function documentFields(kycData: KycData, needsBack: boolean) {
+  return {
+    documentType: kycData.documentType || undefined,
+    kycDocumentUrl: kycData.kycDocumentUrl ?? undefined,
+    kycDocumentKey: kycData.kycDocumentKey ?? undefined,
+    // Send the back only when the type has one, so a stale upload left over
+    // from a type the user switched away from never reaches the backend.
+    // The key follows the same rule — sending one without its url would
+    // persist a pointer to a document the profile does not claim to have.
+    kycDocumentBackUrl: needsBack
+      ? (kycData.kycDocumentBackUrl ?? undefined)
+      : undefined,
+    kycDocumentBackKey: needsBack
+      ? (kycData.kycDocumentBackKey ?? undefined)
+      : undefined,
+    kycSelfieUrl: kycData.kycSelfieUrl ?? undefined,
+    kycSelfieKey: kycData.kycSelfieKey ?? undefined,
+  };
+}
 
 export function useOnboardingMutation() {
   return useMutation({
@@ -21,14 +43,14 @@ export function useOnboardingMutation() {
       } = useOnboardingStore.getState();
 
       const needsBack = requiresBackSide(kycData.documentType);
-
-      if (
-        !kycData.kycDocumentUrl ||
-        !kycData.kycSelfieUrl ||
-        (needsBack && !kycData.kycDocumentBackUrl)
-      ) {
+      // All or nothing. « Plus tard » sends no document at all (the account is
+      // created with nothing to review, and they are sent from the profile);
+      // half a set is a mistake, never sent.
+      const documents = kycUploadState(kycData);
+      if (documents === "partial") {
         throw new Error(apiErrors.kycDocumentsRequired);
       }
+      const withDocuments = documents === "complete";
 
       return await createProfile({
         signupToken: signupVerification?.token ?? "",
@@ -49,21 +71,7 @@ export function useOnboardingMutation() {
         description: personalInfo.description,
         profileType: kycData.profileType,
         categoryIds: kycData.categoryIds.length > 0 ? kycData.categoryIds : undefined,
-        documentType: kycData.documentType,
-        kycDocumentUrl: kycData.kycDocumentUrl,
-        kycDocumentKey: kycData.kycDocumentKey ?? undefined,
-        // Send the back only when the type has one, so a stale upload left over
-        // from a type the user switched away from never reaches the backend.
-        // The key follows the same rule — sending one without its url would
-        // persist a pointer to a document the profile does not claim to have.
-        kycDocumentBackUrl: needsBack
-          ? (kycData.kycDocumentBackUrl ?? undefined)
-          : undefined,
-        kycDocumentBackKey: needsBack
-          ? (kycData.kycDocumentBackKey ?? undefined)
-          : undefined,
-        kycSelfieUrl: kycData.kycSelfieUrl,
-        kycSelfieKey: kycData.kycSelfieKey ?? undefined,
+        ...(withDocuments ? documentFields(kycData, needsBack) : {}),
         readAndApprovedPolicies: true,
         // Same rule as the document back above: send it only when there is one.
         // An empty string would pass a code the user never gave, and record a

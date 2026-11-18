@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { KYC_VERIFICATION_PATH } from "@/lib/kyc-upload-state";
 import {
   Building2,
   FileWarning,
@@ -93,11 +94,15 @@ export default function ProfileDetails() {
             </Section>
 
             <Section title="Compte">
-              <InfoRow
-                icon={Shield}
-                label="Vérification d'identité"
-                value={verificationLabel(profile.verificationStatus)}
-              />
+              {/* Opens the page that shows where it stands, and where missing
+                  or refused documents are sent. */}
+              <Link to={KYC_VERIFICATION_PATH} className="block">
+                <InfoRow
+                  icon={Shield}
+                  label="Vérification d'identité"
+                  value={verificationLabel(profile.verificationStatus)}
+                />
+              </Link>
               {profile.profileType === "WORKER" && (
                 <InfoRow
                   icon={FileWarning}
@@ -156,6 +161,8 @@ function verificationLabel(status: ProfileMeResponse["verificationStatus"]) {
       return "En attente";
     case "REJECTED":
       return "Refusée";
+    case "NOT_SUBMITTED":
+      return "Documents à envoyer";
     default:
       return "Inconnue";
   }

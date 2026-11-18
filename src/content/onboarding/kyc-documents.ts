@@ -55,7 +55,12 @@ export const kycDocumentsContent = {
   buttons: {
     back: "Retour",
     next: "Continuer",
+    // Skips the documents: the account is created, and they are sent later
+    // from Profil › Vérification d'identité.
+    later: "Plus tard",
   },
+  laterHint:
+    "Pas vos documents sous la main ? Créez votre compte maintenant et envoyez-les plus tard depuis votre profil. Il faudra les envoyer pour postuler ou publier une mission.",
 } as const;
 
 /**

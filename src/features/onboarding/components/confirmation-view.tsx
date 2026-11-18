@@ -25,6 +25,7 @@ import {
   documentTypeLabel as documentTypeLabelFor,
   requiresBackSide,
 } from "@/lib/kyc-document-types";
+import { kycUploadState } from "@/lib/kyc-upload-state";
 import { cn } from "@/lib/utils";
 
 type OnboardingStep =
@@ -36,7 +37,12 @@ type OnboardingStep =
 type ConfirmationViewProps = {
   currentStep: OnboardingStep;
   onBack: () => void;
-  onSuccess: (email: string, creditedBalance: number) => void;
+  /** `documentsLater`: signed up with « Plus tard », no document sent. */
+  onSuccess: (
+    email: string,
+    creditedBalance: number,
+    documentsLater: boolean,
+  ) => void;
   onError: () => void;
 };
 
@@ -51,15 +57,18 @@ export function ConfirmationView({
   const mutation = useOnboardingMutation();
   const [policyAccepted, setPolicyAccepted] = useState(false);
 
+  // Read before the mutation: it resets the store on success.
+  const documentsLater = kycUploadState(kycData) === "none";
+
   const handleSubmit = useCallback(async () => {
     try {
       const result = await mutation.mutateAsync();
-      onSuccess(personalInfo.email, result.creditedBalance);
+      onSuccess(personalInfo.email, result.creditedBalance, documentsLater);
     } catch (error) {
       console.error(error);
       onError();
     }
-  }, [mutation, onSuccess, onError, personalInfo.email]);
+  }, [mutation, onSuccess, onError, personalInfo.email, documentsLater]);
 
   const content = confirmationContent;
 
@@ -158,6 +167,7 @@ export function ConfirmationView({
                   : content.profileTypes.employer}
               </Badge>
             </InfoCard>
+            {!documentsLater && (
             <InfoCard
               label={content.personalInfo.fields.documentType}
               icon={CreditCard}
@@ -170,6 +180,7 @@ export function ConfirmationView({
                 {documentTypeLabel}
               </Badge>
             </InfoCard>
+            )}
           </div>
         </section>
 
@@ -177,6 +188,12 @@ export function ConfirmationView({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {content.kycDocuments.title}
           </h3>
+          {/* « Plus tard »: nothing to show but when and where they are sent. */}
+          {documentsLater ? (
+            <p className="rounded-lg bg-card p-4 text-sm text-muted-foreground shadow-soft">
+              {content.kycDocuments.later}
+            </p>
+          ) : (
           <div className="grid grid-cols-1 gap-4">
             <div className="bg-card shadow-soft rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">
@@ -252,6 +269,7 @@ export function ConfirmationView({
               )}
             </div>
           </div>
+          )}
         </section>
       </div>
 

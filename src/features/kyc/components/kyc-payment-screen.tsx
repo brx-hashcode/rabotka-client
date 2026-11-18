@@ -4,6 +4,7 @@ import { PaymentScreen, PaymentNotice } from "@/features/payments";
 import { kycContent } from "@/content/kyc";
 import { whatsappLink } from "@/config";
 import type { KycBlockReason } from "@/hooks/use-kyc-gate";
+import { KYC_VERIFICATION_PATH } from "@/lib/kyc-upload-state";
 
 type KycPaymentScreenProps = Readonly<{
   reason: KycBlockReason;
@@ -25,29 +26,44 @@ export function KycPaymentScreen({
   backLabel = kycContent.screen.backLabel,
 }: KycPaymentScreenProps) {
   const navigate = useNavigate();
-  const copy = reason === "REJECTED" ? kycContent.rejected : kycContent.pending;
+
+  // Missing or refused documents have something to do: the action opens the
+  // page that sends them. Under review, there is nothing to do but go back.
+  if (reason === "MISSING" || reason === "REJECTED") {
+    const copy = reason === "MISSING" ? kycContent.missing : kycContent.rejected;
+    return (
+      <PaymentScreen>
+        <PaymentNotice
+          title={copy.title}
+          description={
+            reason === "REJECTED" ? (
+              <>
+                {kycContent.rejected.body}{" "}
+                <a
+                  href={whatsappLink(kycContent.rejected.supportMessage)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-foreground underline underline-offset-2"
+                >
+                  {kycContent.rejected.supportLabel}
+                </a>
+              </>
+            ) : (
+              kycContent.missing.body
+            )
+          }
+          actionLabel={copy.actionLabel}
+          onAction={() => navigate(KYC_VERIFICATION_PATH)}
+        />
+      </PaymentScreen>
+    );
+  }
 
   return (
     <PaymentScreen>
       <PaymentNotice
-        title={copy.title}
-        description={
-          reason === "REJECTED" ? (
-            <>
-              {kycContent.rejected.body}{" "}
-              <a
-                href={whatsappLink(kycContent.rejected.supportMessage)}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-foreground underline underline-offset-2"
-              >
-                {kycContent.rejected.supportLabel}
-              </a>
-            </>
-          ) : (
-            kycContent.pending.body
-          )
-        }
+        title={kycContent.pending.title}
+        description={kycContent.pending.body}
         actionLabel={backLabel}
         onAction={() => navigate(backTo)}
       />

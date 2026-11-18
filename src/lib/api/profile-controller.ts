@@ -3,6 +3,24 @@ import type { DocumentType } from "@/lib/kyc-document-types";
 import { RabotkaBaseController } from "./base-controller";
 import { config } from "@/config";
 
+/** Where a person's identity verification stands. */
+export type VerificationStatus =
+  | "NOT_SUBMITTED"
+  | "PENDING"
+  | "VERIFIED"
+  | "REJECTED";
+
+/** A full set of identity documents, each pre-uploaded with `uploadMyKycFile`. */
+export type SubmitKycPayload = {
+  documentType: DocumentType;
+  kycDocumentUrl: string;
+  kycDocumentKey?: string;
+  kycDocumentBackUrl?: string;
+  kycDocumentBackKey?: string;
+  kycSelfieUrl: string;
+  kycSelfieKey?: string;
+};
+
 export type CreateProfilePayload = {
   /** From the phone verification (verifySignupOtp), for this `phone`. */
   signupToken: string;
@@ -27,12 +45,15 @@ export type CreateProfilePayload = {
   description: string;
   profileType: "WORKER" | "EMPLOYER" | "";
   categoryIds?: string[];
-  documentType: DocumentType | "";
-  kycDocumentUrl: string;
+  // The identity documents: all of them, or none (« Plus tard »: the account
+  // is created with nothing to review, and they are sent later through
+  // `submitMyKyc`). The backend refuses half a set.
+  documentType?: DocumentType;
+  kycDocumentUrl?: string;
   // Omitted for a PASSPORT, which has no back to photograph. The backend
   // discards it if sent alongside one.
   kycDocumentBackUrl?: string;
-  kycSelfieUrl: string;
+  kycSelfieUrl?: string;
   // Storage keys returned alongside the urls above. Optional because the
   // backend still accepts profiles without them — a client that predates this
   // change keeps working, and its rows get picked up by the backfill.
@@ -68,7 +89,14 @@ export type ProfileMeResponse = {
   description: string;
   profileType: "WORKER" | "EMPLOYER";
   status: "PENDING_ACTIVATION" | "ACTIVE" | "SUSPENDED" | "BANNED";
-  verificationStatus: "PENDING" | "VERIFIED" | "REJECTED";
+  /**
+   * NOT_SUBMITTED: signed up without identity documents (« Plus tard »);
+   * nothing is under review until they are sent. PENDING: sent, waiting for a
+   * reviewer.
+   */
+  verificationStatus: VerificationStatus;
+  /** The reviewer's words on a refusal; null otherwise. */
+  rejectionReason?: string | null;
   reliabilityScore: number | null;
   whatsappConnected: boolean;
   avatarUrl: string | null;
@@ -441,6 +469,37 @@ class ProfileController extends RabotkaBaseController {
     }
   }
 
+  /** One identity document file, sent by a signed-in person (Vérification d'identité). */
+  async uploadMyKycFile(file: File): Promise<{ url: string; key: string }> {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      return await this.post<{ url: string; key: string }>(
+        "/profile/me/kyc-upload",
+        formData as unknown as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  /**
+   * Sends the uploaded set for verification: after signing up without it, or
+   * after a rejection. The profile becomes PENDING.
+   */
+  async submitMyKyc(
+    payload: SubmitKycPayload,
+  ): Promise<{ verificationStatus: VerificationStatus }> {
+    try {
+      return await this.post<{ verificationStatus: VerificationStatus }>(
+        "/profile/me/kyc",
+        payload as unknown as Record<string, unknown>,
+      );
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async updateAvatar(file: File): Promise<UpdateAvatarResponse> {
     try {
       const formData = new FormData();
@@ -545,6 +604,8 @@ export const {
   confirmPhoneChange,
   createProfile,
   uploadKycFile,
+  uploadMyKycFile,
+  submitMyKyc,
   sendSignupOtp,
   verifySignupOtp,
   reportSignupProgress,

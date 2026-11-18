@@ -12,6 +12,9 @@ export const statusPagesContent = {
       "Vous recevrez un message sur WhatsApp dès que votre compte sera activé.",
     creditLabel: "Crédit de bienvenue accordé",
     button: "Commencer",
+    // Signed up with « Plus tard »: nothing is under review yet.
+    documentsLater:
+      "Dernière étape : envoyez votre pièce d'identité et un selfie depuis votre profil (Vérification d'identité). Vous pourrez alors postuler ou publier une mission.",
   },
 
   error: {

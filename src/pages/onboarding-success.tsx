@@ -12,6 +12,9 @@ export default function OnboardingSuccess() {
   const [params] = useSearchParams();
   const email = params.get("email") ?? "";
   const creditAmount = Number(params.get("credit") ?? 0);
+  // « Plus tard »: nothing is under review, so « dès que votre compte sera
+  // activé » alone would promise something that is not on its way.
+  const documentsLater = params.get("documents") === "later";
 
   const handleStart = () => {
     navigate("/onboarding/avatar");
@@ -79,7 +82,13 @@ export default function OnboardingSuccess() {
                   {content.emailSent.replace("{profile_email}", email)}
                 </p>
               )}
-              <p>{content.whatsappMessage}</p>
+              {documentsLater ? (
+                <p className="font-medium text-foreground">
+                  {content.documentsLater}
+                </p>
+              ) : (
+                <p>{content.whatsappMessage}</p>
+              )}
             </motion.div>
           </div>
 

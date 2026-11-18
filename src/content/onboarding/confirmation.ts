@@ -28,6 +28,9 @@ export const confirmationContent = {
     // copy to preview — after a reload that emptied IndexedDB. The document is
     // there and the signup will go through; only the thumbnail is missing.
     uploadedNoPreview: "Document téléversé — aperçu indisponible",
+    // « Plus tard » on the documents step.
+    later:
+      "À envoyer après l'inscription, depuis votre profil (Vérification d'identité). Il faudra les envoyer pour postuler ou publier une mission.",
   },
   profileTypes: {
     worker: "Travailleur",
