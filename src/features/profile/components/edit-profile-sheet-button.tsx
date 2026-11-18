@@ -33,6 +33,8 @@ import {
   type EditProfileFormData,
 } from "@/lib/validations/profile";
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
+import type { Country as PhoneCountry } from "react-phone-number-input";
+import { OFFERED_PHONE_COUNTRIES, offeredCountry } from "@/lib/geo-fields";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import {
   getCategories,
@@ -265,11 +267,15 @@ export function EditProfileSheetButton({
                     <FormLabel>{content.fields.directPhone.label}</FormLabel>
                     <FormControl>
                       <PhoneInput
-                        defaultCountry="CG"
-                        // Locked to Congo, matching the rule the schema
-                        // enforces. Offering every flag on a field that only
-                        // accepts +242 is an invitation to be told no.
-                        countries={["CG"]}
+                        // Opens on the profile's own country when it is one of
+                        // the 13.
+                        defaultCountry={
+                          (offeredCountry(profile.countryCode)?.code ??
+                            "CG") as PhoneCountry
+                        }
+                        // The 13 countries the schema accepts, and no others: offering
+                        // a flag the field would refuse is an invitation to be told no.
+                        countries={OFFERED_PHONE_COUNTRIES as PhoneCountry[]}
                         placeholder={content.fields.directPhone.placeholder}
                         value={field.value ?? ""}
                         onChange={field.onChange}

@@ -25,6 +25,8 @@ export const validationMessages = {
     // No `required` — the field is optional. Only the format is checked, and
     // only when something was actually typed.
     invalid: "Numéro de téléphone invalide",
+    notOffered:
+      "Le numéro direct doit être d'un des pays proposés (Congo, RDC, Cameroun, Gabon, Bénin…)",
   },
   email: {
     // Optional too, for the same reason: most people sign up without one.

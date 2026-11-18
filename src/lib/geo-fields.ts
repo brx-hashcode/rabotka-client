@@ -236,3 +236,22 @@ export function offeredCountry(
   const match = CANDIDATE_LOCATIONS.find((c) => c.code === code);
   return match ? { code: match.code, name: match.name } : null;
 }
+
+/**
+ * The flags the « Numéro direct » field offers: the same 13 countries. The
+ * WhatsApp number stays open to every country (the diaspora signs up too);
+ * the direct line is the one someone on the ground dials.
+ */
+export const OFFERED_PHONE_COUNTRIES = CANDIDATE_LOCATIONS.map(
+  (c) => c.code,
+) as readonly string[];
+
+/** Whether a number belongs to one of the 13. Empty is not this check's business. */
+export function isOfferedPhoneNumber(value: string): boolean {
+  try {
+    const country = parsePhoneNumber(value)?.country;
+    return !!country && OFFERED_PHONE_COUNTRIES.includes(country);
+  } catch {
+    return false;
+  }
+}

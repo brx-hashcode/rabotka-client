@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { countryFromPhone, offeredCountry } from "@/lib/geo-fields";
+import type { Country as PhoneCountry } from "react-phone-number-input";
+import {
+  countryFromPhone,
+  offeredCountry,
+  OFFERED_PHONE_COUNTRIES,
+} from "@/lib/geo-fields";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { CountryCityFields } from "@/components/common/country-city-fields";
@@ -23,7 +28,7 @@ import { isSignupVerified } from "@/lib/signup-verification";
 import { PhoneVerificationDrawer } from "./phone-verification-drawer";
 
 /** The flag the WhatsApp field opens on. */
-const PHONE_DEFAULT_COUNTRY = "CG";
+const PHONE_DEFAULT_COUNTRY: PhoneCountry = "CG";
 
 type PersonalInfoFormProps = {
   onNext: () => void;
@@ -221,11 +226,15 @@ export function PersonalInfoForm({
                   <FormLabel>{content.fields.directPhone.label}</FormLabel>
                   <FormControl>
                     <PhoneInput
-                      defaultCountry="CG"
-                      // Locked to Congo, matching the rule the schema
-                      // enforces. Offering every flag on a field that only
-                      // accepts +242 is an invitation to be told no.
-                      countries={["CG"]}
+                      // Opens on the WhatsApp number's flag when it is one of
+                      // the 13: the direct line is usually in the same country.
+                      defaultCountry={
+                        (offeredCountry(phoneCountry)?.code ??
+                          PHONE_DEFAULT_COUNTRY) as PhoneCountry
+                      }
+                      // The 13 countries the schema accepts, and no others: offering
+                      // a flag the field would refuse is an invitation to be told no.
+                      countries={OFFERED_PHONE_COUNTRIES as PhoneCountry[]}
                       placeholder={content.fields.directPhone.placeholder}
                       value={field.value ?? ""}
                       onChange={field.onChange}
