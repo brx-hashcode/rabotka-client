@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import { useCities } from "@/hooks/use-geo";
 import { useProfileMe } from "@/hooks/use-profile-me";
-import { filterCities } from "@/lib/geo-fields";
+import { filterCityList, toCityOptions } from "@/lib/geo-fields";
 
 /** Where to look when the viewer's profile has no country yet. */
 const FALLBACK_COUNTRY = "CG";
@@ -11,9 +10,6 @@ type Props = {
   readonly value: string;
   readonly onChange: (city: string) => void;
   readonly allLabel?: string;
-  readonly container?: HTMLElement | null;
-  /** Rows shown before the list scrolls. Lower it inside a sheet. */
-  readonly maxVisibleItems?: number;
 };
 
 /**
@@ -33,34 +29,20 @@ export function CityFilterCombobox({
   value,
   onChange,
   allLabel = "Toutes les villes",
-  container,
-  maxVisibleItems,
 }: Props) {
   const { data: profile } = useProfileMe();
   const countryCode = profile?.countryCode || FALLBACK_COUNTRY;
 
   const cities = useCities(countryCode);
-  const [search, setSearch] = useState("");
-
-  // Capped and filtered here: some countries have ~15 000 cities and handing
-  // them all to the combobox renders 15 000 DOM nodes.
-  const { options, truncated } = filterCities(cities.data, search);
 
   return (
     <CategoryCombobox
-      options={options}
+      options={toCityOptions(filterCityList(cities.data, countryCode))}
       value={value || null}
       onChange={(city) => onChange(city ?? "")}
       allLabel={allLabel}
       placeholder={allLabel}
       disabled={cities.isPending}
-      container={container}
-      maxVisibleItems={maxVisibleItems}
-      search={search}
-      onSearchChange={setSearch}
-      footnote={
-        truncated > 0 ? `${truncated} autres — précisez votre recherche` : undefined
-      }
     />
   );
 }

@@ -2,6 +2,7 @@ import { BottomNav } from "../components/bottom-nav";
 import { SHELL_FOOTER_ID } from "../components/shell-footer";
 import { PullToRefresh } from "../components/pull-to-refresh";
 import { useProfileMe } from "@/hooks/use-profile-me";
+import { useRefreshOnReturn } from "@/hooks/use-refresh-on-return";
 import { useJobEvents } from "@/hooks/use-job-events";
 import { useNotificationsSocket } from "@/hooks/use-notifications";
 import { useIncomingMessages } from "@/hooks/use-discussions";
@@ -39,10 +40,15 @@ export function AppShell({
   const { data: profile } = useProfileMe();
   useJobEvents(profile?.status === "ACTIVE");
   // Both roles have a bell, and the badge should move on whatever page the
-  // profile is looking at.
-  useNotificationsSocket(profile?.status === "ACTIVE");
+  // profile is looking at. Any signed-in account, not only an active one: a
+  // refusal or a suspension is news for an account that is not active, and
+  // its notification also refreshes the profile (notification-refresh).
+  useNotificationsSocket(profile != null);
   // Every message chimes, and the Discussion badge moves, wherever they are.
   useIncomingMessages(profile?.status === "ACTIVE");
+  // Back from WhatsApp after a while: the missions, applications, wallet,
+  // messages and status shown are re-read, not left as they were.
+  useRefreshOnReturn(profile != null);
   // Where push is already allowed, make sure this phone's subscription exists,
   // uses the backend's current key and belongs to this profile — someone else
   // may have signed in here before. Asking for permission is PushPrompt's job.

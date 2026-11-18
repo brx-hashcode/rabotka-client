@@ -123,7 +123,6 @@ export function JobSearchFiltersSheet({
   const [draft, setDraft] = useState<JobSearchFilters>(value);
   // Portal target so the combobox dropdown renders inside the sheet (and stays
   // scrollable within the sheet's scroll-lock).
-  const [container, setContainer] = useState<HTMLElement | null>(null);
 
   // Sync the draft with the applied filters each time the sheet opens.
   useEffect(() => {
@@ -157,7 +156,6 @@ export function JobSearchFiltersSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        ref={setContainer}
         side="bottom"
         className="max-h-[88vh] overflow-y-auto rounded-t-2xl"
       >
@@ -177,8 +175,6 @@ export function JobSearchFiltersSheet({
               onChange={(id) => set("categoryId", id)}
               allLabel="Tous les domaines"
               placeholder="Tous les domaines"
-              container={container}
-              maxVisibleItems={3}
             />
           </div>
 
@@ -190,8 +186,6 @@ export function JobSearchFiltersSheet({
             <CityFilterCombobox
               value={draft.city}
               onChange={(city) => set("city", city)}
-              container={container}
-              maxVisibleItems={3}
             />
           </div>
 

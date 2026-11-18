@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useCities, useCountries } from "@/hooks/use-geo";
+import { useCities } from "@/hooks/use-geo";
 import { CategoryCombobox } from "@/components/common/category-combobox";
+import { Input } from "@/components/ui/input";
 import {
   FormControl,
   FormField,
@@ -11,10 +11,14 @@ import {
 import {
   cityPlaceholder,
   countryCityLabels,
-  filterCities,
+  curatedCities,
+  NATIVE_LIST_MAX,
   isCityDisabled,
   locationAfterCountryChange,
+  pickerCountries,
+  toCityOptions,
   toCountryOptions,
+  withCurrentCity,
 } from "@/lib/geo-fields";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
@@ -31,8 +35,6 @@ export type CountryCityFields = {
 
 type Props<T extends FieldValues> = {
   readonly form: UseFormReturn<T>;
-  /** Portal target, when rendered inside a Sheet/Dialog. */
-  readonly container?: HTMLElement | null;
   /**
    * A line under the country picker saying what this country is *for*.
    *
@@ -64,7 +66,6 @@ type Props<T extends FieldValues> = {
  */
 export function CountryCityFields<T extends FieldValues>({
   form,
-  container,
   countryHint,
   hideCountry = false,
 }: Props<T>) {
@@ -72,15 +73,25 @@ export function CountryCityFields<T extends FieldValues>({
   const cityField = "city" as Path<T>;
 
   const countryCode = form.watch(countryField) as string | undefined;
-  const countries = useCountries();
-  const cities = useCities(countryCode);
+  const countryName = form.watch("countryName" as Path<T>) as string | undefined;
+  const cityValue = form.watch(cityField) as string | undefined;
+  // The 13 countries and their few cities ship with the app: no request, no
+  // loading state. A country outside them (an older profile, an employer
+  // elsewhere) still gets its full city list from the API.
+  const countries = pickerCountries(
+    countryCode ? { code: countryCode, name: countryName ?? "" } : null,
+  );
+  const curated = curatedCities(countryCode);
+  const cities = useCities(curated ? null : countryCode);
+  const citiesPending = !curated && cities.isPending;
 
-  // The city list is filtered here rather than by the combobox: a country can
-  // have 15 000 cities, and rendering them all would lock up the phone.
-  const [citySearch, setCitySearch] = useState("");
-  const { options: cityOptions, truncated } = filterCities(
-    cities.data,
-    citySearch,
+  // A native list for the 13 countries' few cities, and for a country outside
+  // them whose list is short enough to scroll. Past that (thousands of places
+  // in the dataset) the city is typed: no system picker reads that many.
+  const apiCities = cities.data ?? [];
+  const typedCity = !curated && apiCities.length > NATIVE_LIST_MAX;
+  const cityOptions = toCityOptions(
+    withCurrentCity(curated ?? apiCities, cityValue),
   );
 
   // One column, always. Every caller renders inside a container capped well
@@ -99,13 +110,10 @@ export function CountryCityFields<T extends FieldValues>({
               <FormLabel>{countryCityLabels.country.label}</FormLabel>
               <FormControl>
                 <CategoryCombobox
-                  options={toCountryOptions(countries.data)}
+                  options={toCountryOptions(countries)}
                   value={field.value || null}
                   onChange={(code) => {
-                    const next = locationAfterCountryChange(
-                      code,
-                      countries.data,
-                    );
+                    const next = locationAfterCountryChange(code, countries);
                     field.onChange(next.countryCode);
                     form.setValue(
                       "countryName" as Path<T>,
@@ -115,11 +123,8 @@ export function CountryCityFields<T extends FieldValues>({
                     form.setValue(cityField, next.city as never, {
                       shouldValidate: true,
                     });
-                    setCitySearch("");
                   }}
                   placeholder={countryCityLabels.country.placeholder}
-                  disabled={countries.isPending}
-                  container={container}
                 />
               </FormControl>
               {countryHint && (
@@ -138,22 +143,24 @@ export function CountryCityFields<T extends FieldValues>({
           <FormItem className="flex flex-col gap-1">
             <FormLabel>{countryCityLabels.city.label}</FormLabel>
             <FormControl>
-              <CategoryCombobox
-                options={cityOptions}
-                value={field.value || null}
-                onChange={(city) => field.onChange(city ?? "")}
-                onBlur={field.onBlur}
-                placeholder={cityPlaceholder(countryCode, cities.isPending)}
-                disabled={isCityDisabled(countryCode, cities.isPending)}
-                container={container}
-                search={citySearch}
-                onSearchChange={setCitySearch}
-                footnote={
-                  truncated > 0
-                    ? `${truncated} autres — précisez votre recherche`
-                    : undefined
-                }
-              />
+              {typedCity ? (
+                <Input
+                  value={(field.value as string | undefined) ?? ""}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={countryCityLabels.city.typedPlaceholder}
+                  autoComplete="address-level2"
+                />
+              ) : (
+                <CategoryCombobox
+                  options={cityOptions}
+                  value={field.value || null}
+                  onChange={(city) => field.onChange(city ?? "")}
+                  onBlur={field.onBlur}
+                  placeholder={cityPlaceholder(countryCode, citiesPending)}
+                  disabled={isCityDisabled(countryCode, citiesPending)}
+                />
+              )}
             </FormControl>
             {/* Only once the field has been engaged with, or once a submit has
                 been attempted. Picking a country clears the city by design, and

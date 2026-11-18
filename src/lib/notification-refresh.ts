@@ -108,3 +108,34 @@ export function refreshKeysFor(n: PushedNotification): QueryKey[] {
 export function refreshFor(queryClient: QueryClient, n: PushedNotification): void {
   for (const queryKey of refreshKeysFor(n)) void queryClient.invalidateQueries({ queryKey });
 }
+
+/**
+ * What to re-read when the person comes back to the app after a while away.
+ *
+ * Most of them live in WhatsApp and switch to the app and back all day: a
+ * refusal, an acceptance or a new message read in WhatsApp must not meet the
+ * screen as it was. Everything a notification can be about, minus the job
+ * feed and job pages, which would reorder or shift under the thumb while
+ * someone is browsing; a pull-to-refresh is there for those.
+ */
+export const RETURN_REFRESH_KEYS: QueryKey[] = [
+  ["notifications"],
+  ["discussions"],
+  ["worker", "missions"],
+  ["worker", "mission"],
+  ["worker-mission"],
+  ["profile", "applications"],
+  ...EMPLOYER_APPLICATION,
+  ...MONEY,
+];
+
+/** Away at least this long: shorter is a glance at a notification, not news. */
+export const RETURN_REFRESH_AFTER_MS = 30 * 1000;
+
+/** Whether coming back after `hiddenAt` should re-read the screens. */
+export function shouldRefreshOnReturn(
+  hiddenAt: number | null,
+  now: number,
+): boolean {
+  return hiddenAt != null && now - hiddenAt >= RETURN_REFRESH_AFTER_MS;
+}

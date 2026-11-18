@@ -7,6 +7,7 @@ import {
   type Step3FormData,
 } from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,13 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { FileUploadZone } from "./file-upload-zone";
 import { kycDocumentsContent, kycDocumentGuidance } from "@/content/onboarding";
 import { compressImage } from "@/lib/image-compress";
@@ -242,6 +237,14 @@ export function KycDocumentsForm({
     ],
   );
 
+  const anyUploading =
+    uploading.kycDocument || uploading.kycDocumentBack || uploading.kycSelfie;
+
+  const handleLater = useCallback(() => {
+    for (const field of KYC_FILE_FIELDS) handleRemoveFile(field);
+    onNext();
+  }, [handleRemoveFile, onNext]);
+
   const documentType = form.watch("documentType");
   const needsBackSide = requiresBackSide(documentType);
 
@@ -281,6 +284,32 @@ export function KycDocumentsForm({
         </div>
       </div>
 
+      {/* « Plus tard » where the decision is made, before the form: someone
+          without their papers should not have to scroll past three upload
+          zones to find out they can go on without them. */}
+      <div className="flex items-start gap-3 rounded-2xl bg-muted/60 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card">
+          <Clock className="size-5 text-muted-foreground" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              {content.later.title}
+            </p>
+            <p className="text-sm text-muted-foreground">{content.later.body}</p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleLater}
+            disabled={anyUploading}
+          >
+            {content.buttons.later}
+          </Button>
+        </div>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -289,31 +318,24 @@ export function KycDocumentsForm({
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.documentType.label}</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    // Persist on pick, not on submit: a reload mid-step used to
-                    // drop the choice back to the default, and the restore
-                    // effect above has nothing to restore from otherwise.
-                    setKycData({ documentType: value as DocumentType });
-                  }}
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={content.documentType.placeholder}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {KYC_DOCUMENT_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label.toLocaleUpperCase("fr-FR")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <NativeSelect
+                    options={KYC_DOCUMENT_TYPE_OPTIONS.map((option) => ({
+                      value: option.value,
+                      label: option.label.toLocaleUpperCase("fr-FR"),
+                    }))}
+                    value={field.value}
+                    placeholder={content.documentType.placeholder}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      field.onChange(value);
+                      // Persist on pick, not on submit: a reload mid-step used
+                      // to drop the choice back to the default, and the restore
+                      // effect above has nothing to restore from otherwise.
+                      setKycData({ documentType: value as DocumentType });
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -413,6 +435,17 @@ export function KycDocumentsForm({
           />
 
           <div className="flex flex-col-reverse gap-3 pt-4">
+            {/* Shown last: the same « Plus tard » as the card at the top, for
+                whoever scrolled down first. Anything half uploaded is cleared
+                — the set goes all together or not at all. */}
+            <button
+              type="button"
+              onClick={handleLater}
+              disabled={anyUploading}
+              className="py-1 text-center text-sm font-medium text-muted-foreground underline underline-offset-4 disabled:opacity-50"
+            >
+              {content.buttons.laterLink}
+            </button>
             <Button
               type="button"
               variant="outline"

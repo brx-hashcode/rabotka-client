@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
@@ -15,11 +15,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import type { Country as PhoneCountry } from "react-phone-number-input";
+import {
+  countryFromPhone,
+  offeredCountry,
+  OFFERED_PHONE_COUNTRIES,
+} from "@/lib/geo-fields";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import { isSignupVerified } from "@/lib/signup-verification";
 import { PhoneVerificationDrawer } from "./phone-verification-drawer";
+
+/** The flag the WhatsApp field opens on. */
+const PHONE_DEFAULT_COUNTRY: PhoneCountry = "CG";
 
 type PersonalInfoFormProps = {
   onNext: () => void;
@@ -61,6 +70,30 @@ export function PersonalInfoForm({
       form.reset(personalInfo);
     }
   }, [personalInfo, form]);
+
+  // The country follows the phone field: its flag from the start (Congo by
+  // default), then the number once typed (+243 → Congo-Kinshasa). Until the
+  // person picks a country themselves — or one was restored — which it never
+  // overwrites: `autoCountry` remembers what this effect set, and anything
+  // else in the field is someone's choice.
+  const [phoneCountry, setPhoneCountry] = useState<string | undefined>(
+    PHONE_DEFAULT_COUNTRY,
+  );
+  const autoCountry = useRef<string | null>(null);
+  const phone = form.watch("phone");
+  // Watched too: restoring a saved form can empty the field after it was
+  // filled, and it must fill again.
+  const countryCode = form.watch("countryCode");
+  useEffect(() => {
+    const current = countryCode;
+    if (current && current !== autoCountry.current) return;
+    const country = countryFromPhone(phone) ?? offeredCountry(phoneCountry);
+    if (!country || country.code === current) return;
+    autoCountry.current = country.code;
+    form.setValue("countryCode", country.code, { shouldValidate: true });
+    form.setValue("countryName", country.name, { shouldValidate: true });
+    form.setValue("city", "", { shouldValidate: false });
+  }, [phone, phoneCountry, countryCode, form]);
 
   const description = form.watch("description");
   const charCount = description?.length || 0;
@@ -168,7 +201,8 @@ export function PersonalInfoForm({
                   <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
                     <PhoneInput
-                      defaultCountry="CG"
+                      defaultCountry={PHONE_DEFAULT_COUNTRY}
+                      onCountryChange={(country) => setPhoneCountry(country)}
                       placeholder={content.fields.phone.placeholder}
                       value={field.value}
                       onChange={field.onChange}
@@ -192,11 +226,15 @@ export function PersonalInfoForm({
                   <FormLabel>{content.fields.directPhone.label}</FormLabel>
                   <FormControl>
                     <PhoneInput
-                      defaultCountry="CG"
-                      // Locked to Congo, matching the rule the schema
-                      // enforces. Offering every flag on a field that only
-                      // accepts +242 is an invitation to be told no.
-                      countries={["CG"]}
+                      // Opens on the WhatsApp number's flag when it is one of
+                      // the 13: the direct line is usually in the same country.
+                      defaultCountry={
+                        (offeredCountry(phoneCountry)?.code ??
+                          PHONE_DEFAULT_COUNTRY) as PhoneCountry
+                      }
+                      // The 13 countries the schema accepts, and no others: offering
+                      // a flag the field would refuse is an invitation to be told no.
+                      countries={OFFERED_PHONE_COUNTRIES as PhoneCountry[]}
                       placeholder={content.fields.directPhone.placeholder}
                       value={field.value ?? ""}
                       onChange={field.onChange}
