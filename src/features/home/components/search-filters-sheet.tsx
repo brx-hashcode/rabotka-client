@@ -44,7 +44,6 @@ export function SearchFiltersSheet({
   const [draft, setDraft] = useState<SearchFilters>(value);
   // Portal target so the combobox dropdown renders inside the sheet (and stays
   // scrollable within the sheet's scroll-lock).
-  const [container, setContainer] = useState<HTMLElement | null>(null);
 
   // Sync the draft with the applied filters each time the sheet opens.
   useEffect(() => {
@@ -64,7 +63,7 @@ export function SearchFiltersSheet({
     // which this screen needs, because the comboboxes portal their dropdown
     // into the sheet so it scrolls with it.
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent ref={setContainer} className="max-h-[88vh]">
+      <DrawerContent className="max-h-[88vh]">
         <DrawerHeader className="px-6 pb-0 text-left">
           <DrawerTitle>Filtres</DrawerTitle>
         </DrawerHeader>
@@ -82,8 +81,6 @@ export function SearchFiltersSheet({
               value={draft.city}
               onChange={(city) => set("city", city)}
               allLabel="Toutes les villes"
-              container={container}
-              maxVisibleItems={3}
             />
           </div>
 
@@ -96,8 +93,6 @@ export function SearchFiltersSheet({
               onChange={(id) => set("categoryId", id)}
               allLabel="Toutes les catégories"
               placeholder="Toutes les catégories"
-              container={container}
-              maxVisibleItems={3}
             />
           </div>
 

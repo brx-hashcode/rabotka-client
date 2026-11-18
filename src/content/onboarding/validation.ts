@@ -24,7 +24,8 @@ export const validationMessages = {
      * diaspora. The direct line is the one somebody on the ground is expected
      * to CALL, so for now it has to be reachable locally.
      */
-    notCongolese: "Le numéro direct doit être un numéro congolais (+242)",
+    notOffered:
+      "Le numéro direct doit être d'un des pays proposés (Congo, RDC, Cameroun, Gabon, Bénin…)",
   },
   country: {
     required: "Sélectionnez un pays",

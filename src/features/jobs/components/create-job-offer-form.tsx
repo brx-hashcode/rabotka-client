@@ -17,17 +17,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DeselectableSelectItem } from "@/components/ui/deselectable-select-item";
 import { getCategories } from "@/lib/api/job-category-controller";
 import {
   EMPLOYMENT_TYPE_LABELS,
@@ -357,24 +350,17 @@ export function JobOfferForm({
                 render={({ field }) => (
                   <FormItem className="hidden">
                     <FormLabel>Type de contrat *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={isPending}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choisir..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {EMPLOYMENT_TYPE_VALUES.map((value) => (
-                          <SelectItem key={value} value={value}>
-                            {EMPLOYMENT_TYPE_LABELS[value]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <NativeSelect
+                        options={EMPLOYMENT_TYPE_VALUES.map((value) => ({
+                          value,
+                          label: EMPLOYMENT_TYPE_LABELS[value],
+                        }))}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
                     <FormDescription>
                       Une mission ponctuelle se termine à une date donnée. Un CDI,
                       un CDD ou un stage est un engagement continu.
@@ -603,31 +589,19 @@ export function JobOfferForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type de rémunération (optionnel)</FormLabel>
-                    <Select
-                      value={field.value ? field.value : undefined}
-                      onValueChange={field.onChange}
-                      disabled={isPending}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choisir…" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {/* Optional field: tapping the chosen option clears it,
-                            which Radix cannot do on its own. */}
-                        {PAYMENT_FLOW_VALUES.map((value) => (
-                          <DeselectableSelectItem
-                            key={value}
-                            value={value}
-                            selected={field.value || undefined}
-                            onDeselect={() => field.onChange("")}
-                          >
-                            {PAYMENT_FLOW_LABELS[value]}
-                          </DeselectableSelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      {/* Optional: the first option, « Aucun », clears it. */}
+                      <NativeSelect
+                        options={PAYMENT_FLOW_VALUES.map((value) => ({
+                          value,
+                          label: PAYMENT_FLOW_LABELS[value],
+                        }))}
+                        value={field.value || ""}
+                        allLabel="Aucun"
+                        onValueChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

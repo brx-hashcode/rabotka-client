@@ -56,6 +56,18 @@ describe("the direct number", () => {
     );
   });
 
+  it("accepts a number from any of the 13 countries, not only Congo", () => {
+    for (const number of [
+      "+243812345678", // Congo-Kinshasa
+      "+221771234567", // Sénégal
+      "+237677123456", // Cameroun
+    ]) {
+      expect(errorPaths({ ...base, directPhone: number })).not.toContain(
+        "directPhone",
+      );
+    }
+  });
+
   /**
    * The rule this file exists for. It is the line an employer on the ground is
    * expected to DIAL — an international number there is a call nobody local

@@ -1,3 +1,4 @@
+import { parsePhoneNumber } from "react-phone-number-input";
 import type { ComboboxOption } from "@/components/common/category-combobox";
 import type { Country } from "@/lib/api/geo-controller";
 import { fold } from "@/lib/search";
@@ -10,6 +11,8 @@ export const countryCityLabels = {
     // The disabled state has to explain itself, or an empty greyed-out control
     // just reads as broken.
     placeholderNoCountry: "Choisissez d'abord un pays",
+    // A country outside the 13 with thousands of places: the city is typed.
+    typedPlaceholder: "Votre ville",
     loading: "Chargement…",
   },
 } as const;
@@ -206,4 +209,72 @@ export function withCurrentCity(
   current: string | null | undefined,
 ): string[] {
   return current && !cities.includes(current) ? [...cities, current] : [...cities];
+}
+
+/**
+ * The country a WhatsApp number belongs to, when it is one of the 13 the
+ * pickers offer; null otherwise (an unknown or partial number, a country
+ * outside the list). Pre-fills the country at sign-up: almost everyone lives
+ * where their number is from, and a picked country is one less screen tap.
+ */
+export function countryFromPhone(
+  phone: string | null | undefined,
+): Country | null {
+  if (!phone?.trim()) return null;
+  let iso: string | undefined;
+  try {
+    iso = parsePhoneNumber(phone)?.country;
+  } catch {
+    return null;
+  }
+  const match = CANDIDATE_LOCATIONS.find((c) => c.code === iso);
+  return match ? { code: match.code, name: match.name } : null;
+}
+
+/** One of the 13 offered countries by ISO code, or null. */
+export function offeredCountry(
+  code: string | null | undefined,
+): Country | null {
+  const match = CANDIDATE_LOCATIONS.find((c) => c.code === code);
+  return match ? { code: match.code, name: match.name } : null;
+}
+
+/**
+ * The flags the « Numéro direct » field offers: the same 13 countries. The
+ * WhatsApp number stays open to every country (the diaspora signs up too);
+ * the direct line is the one someone on the ground dials.
+ */
+export const OFFERED_PHONE_COUNTRIES = CANDIDATE_LOCATIONS.map(
+  (c) => c.code,
+) as readonly string[];
+
+/** Whether a number belongs to one of the 13. Empty is not this check's business. */
+export function isOfferedPhoneNumber(value: string): boolean {
+  try {
+    const country = parsePhoneNumber(value)?.country;
+    return !!country && OFFERED_PHONE_COUNTRIES.includes(country);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * How many options a native `<select>` may hold and stay usable. Past this the
+ * system picker becomes a long scroll with no search.
+ */
+export const NATIVE_LIST_MAX = 200;
+
+/**
+ * The cities the job-search filter offers: every city of the country when
+ * there are few enough to scroll (Congo-Brazzaville has 58, so a job in
+ * Dolisie stays findable), otherwise the capital and the two largest (Côte
+ * d'Ivoire has nearly 5 000 places in the dataset).
+ */
+export function filterCityList(
+  cities: readonly string[] | undefined,
+  countryCode: string | null | undefined,
+): readonly string[] {
+  const all = cities ?? [];
+  if (all.length <= NATIVE_LIST_MAX) return all;
+  return curatedCities(countryCode) ?? all.slice(0, NATIVE_LIST_MAX);
 }

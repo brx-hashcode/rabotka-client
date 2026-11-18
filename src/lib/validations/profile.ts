@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { isOfferedPhoneNumber } from "@/lib/geo-fields";
 import { validationMessages } from "@/content/profile";
 
 export const editProfileSchema = z.object({
@@ -40,6 +41,11 @@ export const editProfileSchema = z.object({
     .refine(
       (value) => !value || isValidPhoneNumber(value),
       validationMessages.directPhone.invalid,
+    )
+    // The same 13 countries as at signup.
+    .refine(
+      (value) => !value || isOfferedPhoneNumber(value),
+      validationMessages.directPhone.notOffered,
     ),
   /**
    * Optional at signup, so this is where someone adds one later or drops one

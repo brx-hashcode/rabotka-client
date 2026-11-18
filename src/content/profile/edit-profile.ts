@@ -46,6 +46,8 @@ export const editProfileContent = {
   categories: {
     label: "Domaines d'activité",
     hint: "Choisissez jusqu'à 5 domaines",
+    placeholder: "Choisir un domaine",
+    addLabel: "+ Ajouter un domaine",
   },
   buttons: {
     edit: "Modifier",
