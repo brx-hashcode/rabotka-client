@@ -18,7 +18,7 @@ export const confirmationContent = {
     defaultDescription: "Aucune description",
   },
   kycDocuments: {
-    title: "Documents KYC",
+    title: "Vérification d'identité",
     documentIdentity: "Document d'identité — recto",
     documentIdentityBack: "Document d'identité — verso",
     selfie: "Selfie",

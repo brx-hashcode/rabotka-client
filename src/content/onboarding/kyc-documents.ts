@@ -1,6 +1,6 @@
 export const kycDocumentsContent = {
-  title: "Documents KYC",
-  subtitle: "Téléchargez vos documents d'identité pour la vérification",
+  title: "Vérification d'identité",
+  subtitle: "Une pièce d'identité et un selfie : c'est ce qui rassure ceux avec qui vous travaillerez.",
   profileType: {
     label: "Type de profil",
     placeholder: "Sélectionnez un type",
@@ -56,11 +56,15 @@ export const kycDocumentsContent = {
     back: "Retour",
     next: "Continuer",
     // Skips the documents: the account is created, and they are sent later
-    // from Profil › Vérification d'identité.
-    later: "Plus tard",
+    // from Profil › Vérification d'identité. The card at the top…
+    later: "Envoyer plus tard",
+    // …and the quiet link under the buttons, for whoever scrolled first.
+    laterLink: "Je les enverrai plus tard",
   },
-  laterHint:
-    "Pas vos documents sous la main ? Créez votre compte maintenant et envoyez-les plus tard depuis votre profil. Il faudra les envoyer pour postuler ou publier une mission.",
+  later: {
+    title: "Pas vos documents sous la main ?",
+    body: "Créez votre compte maintenant et envoyez-les depuis votre profil. Ils seront nécessaires pour postuler ou publier une mission.",
+  },
 } as const;
 
 /**
