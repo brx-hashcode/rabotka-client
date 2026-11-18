@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { motion } from "framer-motion";
-import { CheckCircle, Gift } from "lucide-react";
+import { CheckCircle, Gift, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/hooks/use-seo";
 import { statusPagesContent } from "@/content/onboarding/modals";
@@ -71,6 +71,29 @@ export default function OnboardingSuccess() {
               </motion.div>
             )}
 
+            {/* « Plus tard »: the one thing left to do, in the same amber card
+                as the recap — not a bold paragraph lost under the email line. */}
+            {documentsLater && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="mb-6 flex w-full items-start gap-3 rounded-xl bg-amber-50 px-4 py-3 text-left shadow-soft"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
+                  <IdCard className="h-5 w-5 text-amber-600" aria-hidden />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-sm font-semibold text-amber-900">
+                    {content.documentsLaterTitle}
+                  </p>
+                  <p className="text-sm text-amber-800">
+                    {content.documentsLater}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -82,13 +105,9 @@ export default function OnboardingSuccess() {
                   {content.emailSent.replace("{profile_email}", email)}
                 </p>
               )}
-              {documentsLater ? (
-                <p className="font-medium text-foreground">
-                  {content.documentsLater}
-                </p>
-              ) : (
-                <p>{content.whatsappMessage}</p>
-              )}
+              {/* « Dès que votre compte sera activé » waits on a review; with
+                  no documents sent, nothing is under review yet. */}
+              {!documentsLater && <p>{content.whatsappMessage}</p>}
             </motion.div>
           </div>
 
