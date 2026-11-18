@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCities, useCountries } from "@/hooks/use-geo";
+import { useCities } from "@/hooks/use-geo";
 import { CategoryCombobox } from "@/components/common/category-combobox";
 import {
   FormControl,
@@ -11,10 +11,14 @@ import {
 import {
   cityPlaceholder,
   countryCityLabels,
+  curatedCities,
   filterCities,
   isCityDisabled,
   locationAfterCountryChange,
+  pickerCountries,
+  toCityOptions,
   toCountryOptions,
+  withCurrentCity,
 } from "@/lib/geo-fields";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
@@ -72,16 +76,24 @@ export function CountryCityFields<T extends FieldValues>({
   const cityField = "city" as Path<T>;
 
   const countryCode = form.watch(countryField) as string | undefined;
-  const countries = useCountries();
-  const cities = useCities(countryCode);
+  const countryName = form.watch("countryName" as Path<T>) as string | undefined;
+  const cityValue = form.watch(cityField) as string | undefined;
+  // The 13 countries and their few cities ship with the app: no request, no
+  // loading state. A country outside them (an older profile, an employer
+  // elsewhere) still gets its full city list from the API.
+  const countries = pickerCountries(
+    countryCode ? { code: countryCode, name: countryName ?? "" } : null,
+  );
+  const curated = curatedCities(countryCode);
+  const cities = useCities(curated ? null : countryCode);
+  const citiesPending = !curated && cities.isPending;
 
   // The city list is filtered here rather than by the combobox: a country can
   // have 15 000 cities, and rendering them all would lock up the phone.
   const [citySearch, setCitySearch] = useState("");
-  const { options: cityOptions, truncated } = filterCities(
-    cities.data,
-    citySearch,
-  );
+  const { options: cityOptions, truncated } = curated
+    ? { options: toCityOptions(withCurrentCity(curated, cityValue)), truncated: 0 }
+    : filterCities(cities.data, citySearch);
 
   // One column, always. Every caller renders inside a container capped well
   // below the md breakpoint -- the onboarding column, the job-offer form, the
@@ -99,13 +111,10 @@ export function CountryCityFields<T extends FieldValues>({
               <FormLabel>{countryCityLabels.country.label}</FormLabel>
               <FormControl>
                 <CategoryCombobox
-                  options={toCountryOptions(countries.data)}
+                  options={toCountryOptions(countries)}
                   value={field.value || null}
                   onChange={(code) => {
-                    const next = locationAfterCountryChange(
-                      code,
-                      countries.data,
-                    );
+                    const next = locationAfterCountryChange(code, countries);
                     field.onChange(next.countryCode);
                     form.setValue(
                       "countryName" as Path<T>,
@@ -118,7 +127,6 @@ export function CountryCityFields<T extends FieldValues>({
                     setCitySearch("");
                   }}
                   placeholder={countryCityLabels.country.placeholder}
-                  disabled={countries.isPending}
                   container={container}
                 />
               </FormControl>
@@ -143,11 +151,12 @@ export function CountryCityFields<T extends FieldValues>({
                 value={field.value || null}
                 onChange={(city) => field.onChange(city ?? "")}
                 onBlur={field.onBlur}
-                placeholder={cityPlaceholder(countryCode, cities.isPending)}
-                disabled={isCityDisabled(countryCode, cities.isPending)}
+                placeholder={cityPlaceholder(countryCode, citiesPending)}
+                disabled={isCityDisabled(countryCode, citiesPending)}
                 container={container}
-                search={citySearch}
-                onSearchChange={setCitySearch}
+                {...(curated
+                  ? {}
+                  : { search: citySearch, onSearchChange: setCitySearch })}
                 footnote={
                   truncated > 0
                     ? `${truncated} autres — précisez votre recherche`
