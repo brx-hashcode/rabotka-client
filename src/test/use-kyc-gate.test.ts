@@ -8,11 +8,11 @@ vi.mock("@/hooks/use-profile-me", () => ({
   useProfileMe: () => useProfileMe() as unknown,
 }));
 
-const { useKycGate } = await import("@/hooks/use-kyc-gate");
+const { useKycGate, kycBlockReason } = await import("@/hooks/use-kyc-gate");
 
 /** The hook derives everything from the query, so it needs no React runtime. */
 function gateFor(
-  verificationStatus?: "PENDING" | "VERIFIED" | "REJECTED",
+  verificationStatus?: "PENDING" | "VERIFIED" | "REJECTED" | "NOT_SUBMITTED" | "SOMETHING_NEW",
   isLoading = false,
 ) {
   useProfileMe.mockReturnValue({
@@ -59,5 +59,31 @@ describe("useKycGate", () => {
     // Logged out / query failed — AuthGuard owns that case, not this hook.
     const gate = gateFor(undefined, false);
     expect(gate.blocked).toBe(false);
+  });
+});
+
+describe("documents not sent (« Plus tard »)", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("blocks with the MISSING reason, never the pending one", () => {
+    const gate = gateFor("NOT_SUBMITTED");
+    expect(gate.blocked).toBe(true);
+    expect(gate.reason).toBe("MISSING");
+    expect(gate.isMissing).toBe(true);
+    expect(gate.isPending).toBe(false);
+  });
+
+  it("reads an unknown status as pending rather than letting it through", () => {
+    const gate = gateFor("SOMETHING_NEW");
+    expect(gate.blocked).toBe(true);
+    expect(gate.reason).toBe("PENDING");
+  });
+
+  it("maps each status to its copy", () => {
+    expect(kycBlockReason("NOT_SUBMITTED")).toBe("MISSING");
+    expect(kycBlockReason("REJECTED")).toBe("REJECTED");
+    expect(kycBlockReason("PENDING")).toBe("PENDING");
+    expect(kycBlockReason(null)).toBe("PENDING");
+    expect(kycBlockReason(undefined)).toBe("PENDING");
   });
 });

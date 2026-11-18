@@ -1,17 +1,37 @@
 export const statusPagesContent = {
   success: {
-    title: "Bienvenue sur Rabotka !",
-    subtitle: "Votre compte a été créé avec succès.",
-    emailSent:
-      "Un e-mail de confirmation a été envoyé à {profile_email}.",
-    // No invitation to "join Rabotka on WhatsApp": onboarding happens through
-    // WhatsApp, so the user is already there. Activation is the only thing they
-    // are actually waiting for, so it is the only thing this line says. The
-    // welcome email closes on the same sentence.
-    whatsappMessage:
-      "Vous recevrez un message sur WhatsApp dès que votre compte sera activé.",
-    creditLabel: "Crédit de bienvenue accordé",
-    button: "Commencer",
+    title: "Bienvenue sur Rabotka !",
+    subtitle: "Votre compte est créé.",
+    creditLabel: "Crédit de bienvenue",
+    creditHint: "Déjà dans votre portefeuille.",
+    // What is done and what comes next, in order. The identity step reads
+    // differently when the documents were sent (under review) or skipped
+    // (« Plus tard »: to send). The welcome email says the same.
+    nextTitle: "La suite",
+    steps: {
+      account: {
+        title: "Compte créé",
+        body: "Vos informations sont enregistrées.",
+      },
+      photo: {
+        title: "Ajoutez une photo",
+        body: "Un visage inspire confiance. C'est l'étape suivante.",
+      },
+      identityToSend: {
+        title: "Vérifiez votre identité",
+        body: "Envoyez votre pièce d'identité et un selfie depuis votre profil, rubrique Vérification d'identité.",
+      },
+      identityPending: {
+        title: "Vérification de votre identité",
+        body: "Un agent Rabotka examine vos documents. Vous recevrez un message sur WhatsApp dès qu'elle sera terminée.",
+      },
+      work: {
+        title: "Postulez ou publiez une mission",
+        body: "Dès que votre identité est vérifiée.",
+      },
+    },
+    emailSent: "Un e-mail de confirmation a été envoyé à {profile_email}.",
+    button: "Continuer",
   },
 
   error: {
