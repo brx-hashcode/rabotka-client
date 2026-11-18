@@ -41,9 +41,16 @@ export const notificationsKeys = {
 const POLL_INTERVAL = 3 * 60 * 1000;
 const PAGE_SIZE = 20;
 
+/**
+ * Any signed-in account, not only an ACTIVE one. The accounts that are not
+ * active yet are precisely those the feed has news for — « Vérification
+ * refusée » goes to a PENDING_ACTIVATION profile, « Compte suspendu » to a
+ * SUSPENDED one — and gating on ACTIVE hid both. The API serves the feed to any
+ * signed-in profile.
+ */
 function useFeedEnabled() {
   const { data: profile } = useProfileMe();
-  return profile?.status === "ACTIVE";
+  return profile != null;
 }
 
 /** Drives the bell's badge. */

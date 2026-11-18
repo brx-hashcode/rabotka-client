@@ -82,8 +82,9 @@ export default function Onboarding() {
   }, [step]);
 
   const handleSuccess = useCallback(
-    (email: string, creditedBalance: number) => {
+    (email: string, creditedBalance: number, documentsLater: boolean) => {
       const params = new URLSearchParams({ email, credit: String(creditedBalance) });
+      if (documentsLater) params.set("documents", "later");
       navigate(`/onboarding/success?${params.toString()}`);
     },
     [navigate],

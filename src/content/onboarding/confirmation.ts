@@ -18,7 +18,7 @@ export const confirmationContent = {
     defaultDescription: "Aucune description",
   },
   kycDocuments: {
-    title: "Documents KYC",
+    title: "Vérification d'identité",
     documentIdentity: "Document d'identité — recto",
     documentIdentityBack: "Document d'identité — verso",
     selfie: "Selfie",
@@ -28,6 +28,11 @@ export const confirmationContent = {
     // copy to preview — after a reload that emptied IndexedDB. The document is
     // there and the signup will go through; only the thumbnail is missing.
     uploadedNoPreview: "Document téléversé — aperçu indisponible",
+    // « Plus tard » on the documents step.
+    laterTitle: "Documents à envoyer après l'inscription",
+    later:
+      "Vous les enverrez depuis votre profil, rubrique Vérification d'identité. D'ici là, vous ne pourrez pas postuler ni publier de mission.",
+    laterAction: "Les envoyer maintenant",
   },
   profileTypes: {
     worker: "Travailleur",

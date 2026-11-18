@@ -7,6 +7,7 @@ import {
   type Step3FormData,
 } from "@/lib/validations/onboarding";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -236,6 +237,14 @@ export function KycDocumentsForm({
     ],
   );
 
+  const anyUploading =
+    uploading.kycDocument || uploading.kycDocumentBack || uploading.kycSelfie;
+
+  const handleLater = useCallback(() => {
+    for (const field of KYC_FILE_FIELDS) handleRemoveFile(field);
+    onNext();
+  }, [handleRemoveFile, onNext]);
+
   const documentType = form.watch("documentType");
   const needsBackSide = requiresBackSide(documentType);
 
@@ -272,6 +281,32 @@ export function KycDocumentsForm({
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
           <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
+        </div>
+      </div>
+
+      {/* « Plus tard » where the decision is made, before the form: someone
+          without their papers should not have to scroll past three upload
+          zones to find out they can go on without them. */}
+      <div className="flex items-start gap-3 rounded-2xl bg-muted/60 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card">
+          <Clock className="size-5 text-muted-foreground" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              {content.later.title}
+            </p>
+            <p className="text-sm text-muted-foreground">{content.later.body}</p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleLater}
+            disabled={anyUploading}
+          >
+            {content.buttons.later}
+          </Button>
         </div>
       </div>
 
@@ -400,6 +435,17 @@ export function KycDocumentsForm({
           />
 
           <div className="flex flex-col-reverse gap-3 pt-4">
+            {/* Shown last: the same « Plus tard » as the card at the top, for
+                whoever scrolled down first. Anything half uploaded is cleared
+                — the set goes all together or not at all. */}
+            <button
+              type="button"
+              onClick={handleLater}
+              disabled={anyUploading}
+              className="py-1 text-center text-sm font-medium text-muted-foreground underline underline-offset-4 disabled:opacity-50"
+            >
+              {content.buttons.laterLink}
+            </button>
             <Button
               type="button"
               variant="outline"

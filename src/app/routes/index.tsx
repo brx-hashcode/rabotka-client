@@ -21,6 +21,7 @@ const Onboarding = lazy(() => import("@/pages/onboarding"));
 
 const Profile = lazy(() => import("@/pages/profile"));
 const ProfileDetails = lazy(() => import("@/pages/profile-details"));
+const IdentityVerification = lazy(() => import("@/pages/identity-verification"));
 const MyPortfolio = lazy(() => import("@/pages/my-portfolio"));
 const MyCv = lazy(() => import("@/pages/my-cv"));
 const Login = lazy(() => import("@/pages/login"));
@@ -391,6 +392,21 @@ export function AppRoutes() {
             <AuthGuard>
               <AppShell>
                 <ProfileDetails />
+              </AppShell>
+            </AuthGuard>
+          </Suspense>
+        }
+      />
+      {/* Sending identity documents once signed in: after « Plus tard »,
+          or after a rejection. The bot's card and the rejection message
+          open it (backend KYC_DOCUMENTS_CTA_PATH). */}
+      <Route
+        path="/profile/verification"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthGuard>
+              <AppShell>
+                <IdentityVerification />
               </AppShell>
             </AuthGuard>
           </Suspense>

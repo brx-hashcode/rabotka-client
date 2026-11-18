@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { KYC_VERIFICATION_PATH } from "@/lib/kyc-upload-state";
 import {
   Building2,
   FileWarning,
@@ -7,6 +8,7 @@ import {
   MapPin,
   Phone,
   Shield,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
@@ -14,6 +16,7 @@ import { useProfileMe } from "@/hooks/use-profile-me";
 import { useKycGate } from "@/hooks/use-kyc-gate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KycNotice } from "@/features/kyc";
+import { kycVerificationContent } from "@/content/kyc";
 import { ScreenHeader } from "@/features/employer";
 import { DomainBadges } from "@/features/profile/components/domain-badges";
 import { EditProfileSheetButton } from "@/features/profile/components/edit-profile-sheet-button";
@@ -93,11 +96,15 @@ export default function ProfileDetails() {
             </Section>
 
             <Section title="Compte">
-              <InfoRow
-                icon={Shield}
-                label="Vérification d'identité"
-                value={verificationLabel(profile.verificationStatus)}
-              />
+              {/* Opens the page that shows where it stands, and where missing
+                  or refused documents are sent. */}
+              <Link to={KYC_VERIFICATION_PATH} className="block">
+                <InfoRow
+                  icon={Shield}
+                  label="Vérification d'identité"
+                  value={verificationLabel(profile.verificationStatus)}
+                />
+              </Link>
               {profile.profileType === "WORKER" && (
                 <InfoRow
                   icon={FileWarning}
@@ -108,6 +115,26 @@ export default function ProfileDetails() {
               {kycBlocked && kycReason && (
                 <div className="p-4">
                   <KycNotice reason={kycReason} />
+                </div>
+              )}
+              {/* Verified: the warning gives way to the good news, so the
+                  section does not just go quiet once the check passes. */}
+              {profile.verificationStatus === "VERIFIED" && (
+                <div className="p-4">
+                  <div className="flex items-start gap-2.5 rounded-xl bg-green-50 px-3 py-2.5">
+                    <ShieldCheck
+                      className="mt-0.5 h-4 w-4 shrink-0 text-green-600"
+                      aria-hidden
+                    />
+                    <div className="space-y-0.5 text-sm">
+                      <p className="font-medium text-green-800">
+                        {kycVerificationContent.verified.title}
+                      </p>
+                      <p className="text-green-700">
+                        {kycVerificationContent.verified.body}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </Section>
@@ -156,6 +183,8 @@ function verificationLabel(status: ProfileMeResponse["verificationStatus"]) {
       return "En attente";
     case "REJECTED":
       return "Refusée";
+    case "NOT_SUBMITTED":
+      return "Documents à envoyer";
     default:
       return "Inconnue";
   }
