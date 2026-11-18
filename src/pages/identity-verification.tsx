@@ -1,7 +1,13 @@
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Clock } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Clock,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Seo } from "@/hooks/use-seo";
 import { useProfileMe } from "@/hooks/use-profile-me";
@@ -22,6 +28,7 @@ import {
 } from "@/lib/kyc-document-types";
 import { kycUploadState } from "@/lib/kyc-upload-state";
 import { serverMessage } from "@/lib/api/errors";
+import { cn } from "@/lib/utils";
 import { submitMyKyc, uploadMyKycFile } from "@/lib/api/profile-controller";
 
 type Field = "kycDocument" | "kycDocumentBack" | "kycSelfie";
@@ -58,6 +65,7 @@ export default function IdentityVerification() {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfileMe();
   const status = profile?.verificationStatus;
+  const role: Role = profile?.profileType === "EMPLOYER" ? "employer" : "worker";
 
   return (
     <div className="flex min-h-full flex-col">
@@ -72,11 +80,7 @@ export default function IdentityVerification() {
             <Skeleton className="h-40 rounded-xl" />
           </div>
         ) : status === "VERIFIED" ? (
-          <StateCard
-            icon={<CheckCircle2 className="h-6 w-6 text-green-600" />}
-            title={content.verified.title}
-            body={content.verified.body}
-          />
+          <VerifiedState role={role} />
         ) : status === "NOT_SUBMITTED" || status === "REJECTED" ? (
           <DocumentsForm
             rejected={status === "REJECTED"}
@@ -85,29 +89,166 @@ export default function IdentityVerification() {
         ) : (
           // PENDING, and any status this client does not know yet: nothing
           // to send from here.
-          <StateCard
-            icon={<Clock className="h-6 w-6 text-amber-600" />}
-            title={content.pending.title}
-            body={content.pending.body}
-          />
+          <PendingState role={role} />
         )}
       </main>
     </div>
   );
 }
 
-function StateCard({
-  icon,
+type Role = "worker" | "employer";
+
+/** The state at a glance: a round icon, a title and one sentence. */
+function StatusHeader({
+  tone,
+  icon: Icon,
   title,
   body,
-}: Readonly<{ icon: React.ReactNode; title: string; body: string }>) {
+}: Readonly<{
+  tone: "amber" | "green";
+  icon: LucideIcon;
+  title: string;
+  body: string;
+}>) {
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-card p-4">
-      <div className="shrink-0">{icon}</div>
-      <div className="space-y-1">
-        <p className="font-semibold text-foreground">{title}</p>
+    <section className="flex flex-col items-center rounded-2xl bg-card px-5 py-6 text-center">
+      <div
+        className={cn(
+          "mb-3 flex size-14 items-center justify-center rounded-full",
+          tone === "amber" ? "bg-amber-100" : "bg-green-100",
+        )}
+      >
+        <Icon
+          aria-hidden
+          className={cn(
+            "size-7",
+            tone === "amber" ? "text-amber-600" : "text-green-600",
+          )}
+        />
+      </div>
+      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+    </section>
+  );
+}
+
+/**
+ * Sent, waiting for a reviewer: where the file stands, and what is worth
+ * doing meanwhile — a page that only said « reçus » left nothing to do but
+ * leave.
+ */
+function PendingState({ role }: Readonly<{ role: Role }>) {
+  const steps = content.pending.steps;
+  return (
+    <div className="space-y-5">
+      <StatusHeader
+        tone="amber"
+        icon={Clock}
+        title={content.pending.title}
+        body={content.pending.body}
+      />
+
+      <section className="rounded-2xl bg-card p-4">
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {content.pending.timelineTitle}
+        </h3>
+        <ol>
+          <TimelineStep tone="done" icon={Check} {...steps.sent} />
+          <TimelineStep tone="current" icon={Clock} {...steps.review} />
+          <TimelineStep tone="next" icon={ShieldCheck} {...steps.active[role]} last />
+        </ol>
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {content.pending.meanwhileTitle}
+        </h3>
+        <div className="overflow-hidden rounded-2xl bg-card">
+          {content.pending.meanwhile[role].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="flex items-center gap-3 px-4 py-3 active:bg-muted/60"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.hint}</p>
+              </div>
+              <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TimelineStep({
+  tone,
+  icon: Icon,
+  title,
+  body,
+  last = false,
+}: Readonly<{
+  tone: "done" | "current" | "next";
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  last?: boolean;
+}>) {
+  return (
+    <li className="relative flex gap-3 pb-4 last:pb-0">
+      {!last && (
+        <span
+          aria-hidden
+          className="absolute top-9 bottom-0 left-[1.125rem] w-px bg-border"
+        />
+      )}
+      <div
+        className={cn(
+          "relative flex size-9 shrink-0 items-center justify-center rounded-full",
+          tone === "done" && "bg-green-100 text-green-600",
+          tone === "current" && "bg-amber-100 text-amber-600",
+          tone === "next" && "bg-muted text-muted-foreground",
+        )}
+      >
+        <Icon aria-hidden className="size-4" />
+      </div>
+      <div className="min-w-0 pt-1">
+        <p
+          className={cn(
+            "text-sm font-semibold",
+            tone === "next" ? "text-muted-foreground" : "text-foreground",
+          )}
+        >
+          {title}
+        </p>
         <p className="text-sm text-muted-foreground">{body}</p>
       </div>
+    </li>
+  );
+}
+
+/** Verified: the good news, and the one thing it unlocks. */
+function VerifiedState({ role }: Readonly<{ role: Role }>) {
+  const navigate = useNavigate();
+  const action = content.verified.action[role];
+  return (
+    <div className="space-y-5">
+      <StatusHeader
+        tone="green"
+        icon={ShieldCheck}
+        title={content.verified.title}
+        body={content.verified.body}
+      />
+      <Button
+        className="w-full"
+        variant="whatsapp"
+        size="lg"
+        onClick={() => navigate(action.to)}
+      >
+        {action.label}
+      </Button>
     </div>
   );
 }
