@@ -35,6 +35,7 @@ import {
 import type { ProfileMeResponse } from "@/lib/api/profile-controller";
 import type { Country as PhoneCountry } from "react-phone-number-input";
 import { OFFERED_PHONE_COUNTRIES, offeredCountry } from "@/lib/geo-fields";
+import { CategoryMultiSelect } from "@/components/common/category-multi-select";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import {
   getCategories,
@@ -42,7 +43,6 @@ import {
 } from "@/lib/api/job-category-controller";
 
 const MAX_CATEGORIES = 5;
-const INITIAL_VISIBLE = 10;
 
 const content = editProfileContent;
 
@@ -70,8 +70,6 @@ export function EditProfileSheetButton({
    * it the dropdown mounts on document.body, outside the sheet's scroll lock,
    * and the list cannot be scrolled on a phone.
    */
-  const [sheetContent, setSheetContent] = useState<HTMLDivElement | null>(null);
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -200,7 +198,6 @@ export function EditProfileSheetButton({
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
-          ref={setSheetContent}
           side="right"
           className="w-full sm:max-w-md overflow-y-auto"
         >
@@ -253,7 +250,7 @@ export function EditProfileSheetButton({
                 )}
               />
 
-              <CountryCityFields form={form} container={sheetContent} />
+              <CountryCityFields form={form} />
 
               {/* The WhatsApp number is deliberately absent: it is the login
                   identity, and an unverified overwrite would send every future
@@ -365,15 +362,6 @@ export function EditProfileSheetButton({
                 name="categoryIds"
                 render={({ field, fieldState }) => {
                   const selected: string[] = field.value ?? [];
-                  const atMax = selected.length >= MAX_CATEGORIES;
-
-                  const toggle = (id: string) => {
-                    if (selected.includes(id)) {
-                      field.onChange(selected.filter((s) => s !== id));
-                    } else if (!atMax) {
-                      field.onChange([...selected, id]);
-                    }
-                  };
 
                   return (
                     <div className="flex flex-col gap-2">
@@ -386,56 +374,14 @@ export function EditProfileSheetButton({
                           {content.categories.hint}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {allCategories.slice(0, visibleCount).map((cat) => {
-                          const isSelected = selected.includes(cat.id);
-                          const isDisabled = !isSelected && atMax;
-                          return (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              disabled={isDisabled}
-                              onClick={() => toggle(cat.id)}
-                              className={[
-                                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                                isSelected
-                                  ? "border-green-500 bg-green-50 text-green-700"
-                                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
-                                isDisabled
-                                  ? "cursor-not-allowed opacity-40"
-                                  : "cursor-pointer",
-                              ].join(" ")}
-                            >
-                              {cat.icon && (
-                                <span aria-hidden="true">{cat.icon}</span>
-                              )}
-                              {cat.name}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {visibleCount < allCategories.length && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setVisibleCount((v) =>
-                              Math.min(v + INITIAL_VISIBLE, allCategories.length),
-                            )
-                          }
-                          className="mt-1 text-xs text-green-600 font-medium hover:underline self-start"
-                        >
-                          Voir plus ({allCategories.length - visibleCount} restants)
-                        </button>
-                      )}
-                      {visibleCount > INITIAL_VISIBLE && (
-                        <button
-                          type="button"
-                          onClick={() => setVisibleCount(INITIAL_VISIBLE)}
-                          className="mt-1 text-xs text-gray-400 font-medium hover:underline self-start"
-                        >
-                          Voir moins
-                        </button>
-                      )}
+                      <CategoryMultiSelect
+                        options={allCategories}
+                        value={selected}
+                        onChange={(next) => field.onChange(next)}
+                        max={MAX_CATEGORIES}
+                        placeholder={content.categories.placeholder}
+                        addLabel={content.categories.addLabel}
+                      />
                       {fieldState.error && (
                         <p className="text-sm font-medium text-destructive">
                           {fieldState.error.message}

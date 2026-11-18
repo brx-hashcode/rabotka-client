@@ -12,22 +12,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
+import { CategoryMultiSelect } from "@/components/common/category-multi-select";
 import { profileTypeContent } from "@/content/onboarding";
-import { matchesSearch } from "@/lib/search";
 import {
   getCategories,
   type JobCategory,
 } from "@/lib/api/job-category-controller";
 
 const MAX_CATEGORIES = 5;
-const INITIAL_VISIBLE = 10;
 
 /**
  * Preselected, rather than making everyone answer a question most of them
@@ -51,8 +44,6 @@ export function ProfileTypeForm({
   const kycData = useOnboardingStore((state) => state.kycData);
   const setKycData = useOnboardingStore((state) => state.setKycData);
   const [categories, setCategories] = useState<JobCategory[]>([]);
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
-  const [categorySearch, setCategorySearch] = useState("");
 
   const [profileTypeParam, setProfileTypeParam] = useQueryState<
     "WORKER" | "EMPLOYER" | ""
@@ -120,21 +111,6 @@ export function ProfileTypeForm({
     }
   }, [storedCategoryIds, form]);
 
-  // Reveal any restored pick that sits past the initial slice, once the
-  // categories have actually loaded -- otherwise it stays selected but
-  // invisible, and the counter reads a number the user cannot account for.
-  useEffect(() => {
-    if (categories.length === 0 || storedCategoryIds.length === 0) return;
-    const lastSelectedIndex = Math.max(
-      ...storedCategoryIds.map((id) => categories.findIndex((c) => c.id === id)),
-    );
-    if (lastSelectedIndex >= INITIAL_VISIBLE) {
-      setVisibleCount((current) =>
-        Math.max(current, Math.min(lastSelectedIndex + 1, categories.length)),
-      );
-    }
-  }, [categories, storedCategoryIds]);
-
   const onSubmit = useCallback(
     (data: Step2FormData) => {
       const selectedCategories = categories.filter((c) =>
@@ -171,30 +147,28 @@ export function ProfileTypeForm({
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1">
                 <FormLabel>{content.profileType.label}</FormLabel>
-                <Select
-                  onValueChange={(value: "WORKER" | "EMPLOYER") => {
-                    field.onChange(value);
-                    void setProfileTypeParam(value);
+                <NativeSelect
+                  options={[
+                    {
+                      value: "WORKER",
+                      label: content.profileType.options.worker.toUpperCase(),
+                    },
+                    {
+                      value: "EMPLOYER",
+                      label: content.profileType.options.employer.toUpperCase(),
+                    },
+                  ]}
+                  value={field.value}
+                  placeholder={content.profileType.placeholder}
+                  onValueChange={(raw) => {
+                    if (raw !== "WORKER" && raw !== "EMPLOYER") return;
+                    field.onChange(raw);
+                    void setProfileTypeParam(raw);
                     // Persist on pick rather than on submit: leaving the step
                     // without pressing Continue used to discard the choice.
-                    setKycData({ profileType: value });
+                    setKycData({ profileType: raw });
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={content.profileType.placeholder}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="WORKER">
-                      {content.profileType.options.worker.toUpperCase()}
-                    </SelectItem>
-                    <SelectItem value="EMPLOYER">
-                      {content.profileType.options.employer.toUpperCase()}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                />
                 {/* Both roles, side by side and always visible. Someone who
                     already knows which one they are skims past it; someone who
                     doesn't gets the answer without having to open the list.
@@ -224,26 +198,13 @@ export function ProfileTypeForm({
             name="categoryIds"
             render={({ field, fieldState }) => {
               const selected: string[] = field.value ?? [];
-              const atMax = selected.length >= MAX_CATEGORIES;
               // Folded, so "maraichage" finds "Agriculture & Maraîchage" —
               // lower-casing alone left every accented domain unreachable by
               // the spelling people type. Same helper the comboboxes use.
-              const filteredCategories = categories.filter((c) =>
-                matchesSearch(categorySearch, c.name),
-              );
-
-              const toggle = (id: string) => {
-                let next: string[];
-                if (selected.includes(id)) {
-                  next = selected.filter((s) => s !== id);
-                } else if (!atMax) {
-                  next = [...selected, id];
-                } else {
-                  return;
-                }
+              const update = (next: string[]) => {
                 field.onChange(next);
                 // Names travel with the ids so the confirmation view never
-                // shows a stale label for a domain that was just deselected.
+                // shows a stale label for a domain that was just removed.
                 setKycData({
                   categoryIds: next,
                   categoryNames: categories
@@ -268,72 +229,14 @@ export function ProfileTypeForm({
                       ? content.categories.context.employer
                       : content.categories.context.worker}
                   </p>
-                  <input
-                    type="search"
-                    value={categorySearch}
-                    onChange={(e) => setCategorySearch(e.target.value)}
-                    placeholder="Rechercher un domaine..."
-                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  <CategoryMultiSelect
+                    options={categories}
+                    value={selected}
+                    onChange={update}
+                    max={MAX_CATEGORIES}
+                    placeholder={content.categories.placeholder}
+                    addLabel={content.categories.addLabel}
                   />
-                  <div className="flex flex-wrap gap-2">
-                    {filteredCategories.length === 0 && (
-                      <p className="text-xs text-gray-400">
-                        Aucune domaine trouvée.
-                      </p>
-                    )}
-                    {filteredCategories.slice(0, visibleCount).map((cat) => {
-                      const isSelected = selected.includes(cat.id);
-                      const isDisabled = !isSelected && atMax;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => toggle(cat.id)}
-                          className={[
-                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                            isSelected
-                              ? "border-green-500 bg-green-50 text-green-700"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300",
-                            isDisabled
-                              ? "cursor-not-allowed opacity-40"
-                              : "cursor-pointer",
-                          ].join(" ")}
-                        >
-                          {cat.icon && (
-                            <span aria-hidden="true">{cat.icon}</span>
-                          )}
-                          {cat.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {visibleCount < filteredCategories.length && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setVisibleCount((v) =>
-                          Math.min(
-                            v + INITIAL_VISIBLE,
-                            filteredCategories.length,
-                          ),
-                        )
-                      }
-                      className="mt-1 text-xs text-green-600 font-medium hover:underline self-start"
-                    >
-                      Voir plus ({filteredCategories.length - visibleCount}{" "}
-                      restants)
-                    </button>
-                  )}
-                  {visibleCount > INITIAL_VISIBLE && (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleCount(INITIAL_VISIBLE)}
-                      className="mt-1 text-xs text-gray-400 font-medium hover:underline self-start"
-                    >
-                      Voir moins
-                    </button>
-                  )}
                   {fieldState.error && (
                     <p className="text-sm font-medium text-destructive">
                       {fieldState.error.message}

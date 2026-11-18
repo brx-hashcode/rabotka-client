@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import type { Value as PhoneValue } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import flags from "react-phone-number-input/flags";
 import mtnLogo from "@/assets/MTN-logo.jpg?format=webp";
 import airtelLogo from "@/assets/airtel-new-logo.jpg?format=webp";
 import rabotkaLogo from "@/assets/rabotka-logo.png?format=webp";
@@ -37,13 +36,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/money";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import {
   initialPayCountry,
   operatorsIn,
@@ -533,26 +526,16 @@ export default function Pay() {
             >
               Pays
             </label>
-            <Select value={country ?? undefined} onValueChange={chooseCountry}>
-              <SelectTrigger id="pay-country" className="h-12 w-full">
-                <SelectValue placeholder="Choisir un pays" />
-              </SelectTrigger>
-              <SelectContent>
-                {covered.map((c) => (
-                  <SelectItem key={c.code} value={c.code}>
-                    <span className="flex items-center gap-2.5">
-                      <CountryFlag country={c} />
-                      <span>{c.name}</span>
-                      {c.currency && (
-                        <span className="text-xs text-muted-foreground">
-                          {c.currency}
-                        </span>
-                      )}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              id="pay-country"
+              options={covered.map((c) => ({
+                value: c.code,
+                label: c.currency ? `${c.name} — ${c.currency}` : c.name,
+              }))}
+              value={country}
+              placeholder="Choisir un pays"
+              onValueChange={chooseCountry}
+            />
             {payerNotCovered && (
               <p className="text-xs text-muted-foreground">
                 Les paiements Rabotka se font en franc CFA : le mobile money
@@ -782,26 +765,6 @@ function activeGateway(
 ): PaymentGatewayInfo | null {
   if (!gateways || !key) return null;
   return gateways.find((g) => g.key === key) ?? null;
-}
-
-/** The gateway's flag image for a country. */
-function CountryFlag({ country }: Readonly<{ country: PayCountry }>) {
-  if (country.flag) {
-    return (
-      <img
-        src={country.flag}
-        alt=""
-        className="h-4 w-6 shrink-0 rounded-sm object-cover"
-      />
-    );
-  }
-  // No image from the gateway (its fallback list): the phone field's own.
-  const Flag = country.alpha2 ? flags[country.alpha2] : undefined;
-  return (
-    <span className="inline-flex h-4 w-6 shrink-0 overflow-hidden rounded-sm bg-foreground/20 [&_svg]:size-full">
-      {Flag && <Flag title={country.name} />}
-    </span>
-  );
 }
 
 /** The logo we have for a network, matched on its code's network part. */

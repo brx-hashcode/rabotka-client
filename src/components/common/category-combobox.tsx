@@ -1,16 +1,4 @@
-import { useRef, useState, type CSSProperties } from "react";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { cn } from "@/lib/utils";
-import { foldedCommandFilter } from "@/lib/search";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type ComboboxOption = { id: string; name: string };
 
@@ -19,69 +7,27 @@ type CategoryComboboxProps = {
   readonly value: string | null;
   readonly onChange: (id: string | null) => void;
   readonly placeholder?: string;
-  /** When set, shows a first "clear" option that sets the value to null. */
+  /** When set, a first « all » option that sets the value to null. */
   readonly allLabel?: string;
   readonly disabled?: boolean;
   readonly triggerClassName?: string;
   /**
-   * Hands search back to the parent. When set, cmdk's own filtering is turned
-   * OFF and `options` is taken as already filtered — which is the only way to
-   * serve a list too long to put in the DOM (some countries have 15 000
-   * cities; rendering them all locks up the phone).
-   */
-  readonly search?: string;
-  readonly onSearchChange?: (value: string) => void;
-  /** Shown under the list when results were capped. */
-  readonly footnote?: string;
-  /**
-   * Portal target for the dropdown. Pass the enclosing Sheet/Dialog content so
-   * the list renders inside its scroll-lock and stays scrollable; defaults to
-   * document.body (fine on a normal page).
-   */
-  readonly container?: HTMLElement | null;
-  /**
-   * Called once the picker closes, i.e. the user is done with this field.
-   *
-   * Wired to react-hook-form's `field.onBlur` by callers that want the
-   * touched state. Fired on close rather than on the trigger's own blur
-   * because opening the popover moves focus into it — which would mark the
-   * field touched at the very moment the user started engaging with it.
+   * Called when the person leaves the field. Wired to react-hook-form's
+   * `field.onBlur` by callers that want the touched state.
    */
   readonly onBlur?: () => void;
-  /**
-   * How many rows the list shows before it scrolls.
-   *
-   * Lower it inside a bottom sheet. The popover portals into the sheet but is
-   * positioned against the viewport, so a tall list has nowhere to go: Radix
-   * flips it upward and it covers the card the user was reading, which is what
-   * a seven-row list did on the search filters.
-   */
-  readonly maxVisibleItems?: number;
 };
 
 /**
- * Row height in rem: `text-sm` is a 1.25rem line box, `py-1.5` adds 0.375rem
- * either side. Kept next to the list so the two move together — the height is
- * computed from this rather than guessed at as a `max-h-*` class, which is how
- * the old `max-h-56` ended up meaning "about seven, probably".
- */
-const ITEM_HEIGHT_REM = 2;
-/**
- * Group padding, plus enough of the next row to show the list scrolls.
+ * Picks one option by id: countries, cities, trades.
  *
- * Cutting exactly at a row boundary reads as the end of the list, and people
- * stop scrolling.
+ * A native `<select>` (see NativeSelect) since the custom popover combobox
+ * shook on phones: its search box opened the keyboard, the screen shrank, the
+ * list repositioned, and the page scrolled behind it. The lists it serves are
+ * short now — 13 countries, two or three cities each, the trades — so the
+ * system picker reads them better than a search did. The name stays so its
+ * callers did not have to change.
  */
-const LIST_PADDING_REM = 1;
-
-/**
- * Up to this many options, the list is read, not searched: no search box. On a
- * phone the box took focus on open, the keyboard came up, the visible screen
- * shrank, and the dropdown jumped about while repositioning — for a list of 13
- * countries that fits on one screen anyway.
- */
-const SEARCH_FROM = 16;
-
 export function CategoryCombobox({
   options,
   value,
@@ -90,142 +36,18 @@ export function CategoryCombobox({
   allLabel,
   disabled,
   triggerClassName,
-  container,
-  search,
-  onSearchChange,
-  footnote,
   onBlur,
-  maxVisibleItems = 6,
 }: CategoryComboboxProps) {
-  const controlledSearch = onSearchChange !== undefined;
-  const searchable =
-    controlledSearch || options.length + (allLabel ? 1 : 0) >= SEARCH_FROM;
-  const [open, setOpen] = useState(false);
-  const listRef = useRef<HTMLDivElement>(null);
-  const selected = options.find((o) => o.id === value);
-
   return (
-    <PopoverPrimitive.Root
-      // Modal: the page behind the open list stays put. A swipe that ran past
-      // the end of the list used to scroll the form instead, taking the field
-      // — and the list anchored to it — away from under the finger.
-      modal
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) onBlur?.();
-      }}
-    >
-      <PopoverPrimitive.Trigger asChild>
-        <button
-          type="button"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled}
-          className={cn(
-            "flex h-12 w-full items-center justify-between rounded-2xl border-0 bg-card px-4 text-base ring-1 ring-inset ring-border disabled:opacity-50 md:text-sm",
-            !selected && "text-muted-foreground",
-            triggerClassName,
-          )}
-        >
-          <span className="truncate">
-            {selected ? selected.name : placeholder}
-          </span>
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-        </button>
-      </PopoverPrimitive.Trigger>
-      <PopoverPrimitive.Portal container={container ?? undefined}>
-        <PopoverPrimitive.Content
-          align="start"
-          sideOffset={4}
-          collisionPadding={8}
-          // Without a search box, focus goes to the list (arrow keys still
-          // work), never to a text field: no keyboard, nothing to reflow.
-          onOpenAutoFocus={(event) => {
-            if (searchable) return;
-            event.preventDefault();
-            listRef.current?.focus({ preventScroll: true });
-          }}
-          // `w-(--var)` is Tailwind v4 syntax. This was `w-[--var]`, the v3
-          // form, which v4 does not compile — so the popover had no width at
-          // all and sat narrower than the field that opened it.
-          className="z-50 w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] rounded-2xl bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
-        >
-          {/* `filter` rather than cmdk's default: its built-in scorer compares
-              raw code points, so typing "maraichage" scored 0 against
-              "Agriculture & Maraîchage" and the option disappeared. Ignored
-              when the parent owns the search (cities), which folds already. */}
-          <Command
-            ref={listRef}
-            tabIndex={-1}
-            className="outline-none"
-            shouldFilter={searchable && !controlledSearch}
-            filter={foldedCommandFilter}
-          >
-            {searchable && (
-              <CommandInput
-                placeholder="Rechercher…"
-                value={controlledSearch ? search : undefined}
-                onValueChange={onSearchChange}
-              />
-            )}
-            <CommandList
-              className="max-h-(--list-max-h)"
-              style={
-                {
-                  "--list-max-h": `${maxVisibleItems * ITEM_HEIGHT_REM + LIST_PADDING_REM}rem`,
-                } as CSSProperties
-              }
-            >
-              <CommandEmpty>Aucun résultat.</CommandEmpty>
-              <CommandGroup>
-                {allLabel && (
-                  <CommandItem
-                    value={allLabel}
-                    className="data-[selected=true]:bg-whatsapp data-[selected=true]:text-white"
-                    onSelect={() => {
-                      onChange(null);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 size-4",
-                        !value ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    {allLabel}
-                  </CommandItem>
-                )}
-                {options.map((o) => (
-                  <CommandItem
-                    key={o.id}
-                    value={o.name}
-                    className="data-[selected=true]:bg-whatsapp data-[selected=true]:text-white"
-                    onSelect={() => {
-                      onChange(o.id === value ? null : o.id);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 size-4",
-                        value === o.id ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    {o.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-              {footnote && (
-                <p className="text-muted-foreground px-3 py-2 text-center text-xs">
-                  {footnote}
-                </p>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverPrimitive.Content>
-      </PopoverPrimitive.Portal>
-    </PopoverPrimitive.Root>
+    <NativeSelect
+      options={options.map((o) => ({ value: o.id, label: o.name }))}
+      value={value}
+      onValueChange={(id) => onChange(id === "" ? null : id)}
+      placeholder={placeholder}
+      allLabel={allLabel}
+      disabled={disabled}
+      onBlur={onBlur}
+      className={triggerClassName}
+    />
   );
 }

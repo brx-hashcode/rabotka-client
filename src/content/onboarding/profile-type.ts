@@ -21,6 +21,8 @@ export const profileTypeContent = {
   categories: {
     label: "Domaines d'activité",
     hint: "Choisissez jusqu'à 5 domaines",
+    placeholder: "Choisir un domaine",
+    addLabel: "+ Ajouter un domaine",
     /**
      * Says what the domains are FOR, which is the part that decides how
      * carefully someone picks them. Split by role because the consequence is

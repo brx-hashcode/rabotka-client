@@ -11,6 +11,8 @@ export const countryCityLabels = {
     // The disabled state has to explain itself, or an empty greyed-out control
     // just reads as broken.
     placeholderNoCountry: "Choisissez d'abord un pays",
+    // A country outside the 13 with thousands of places: the city is typed.
+    typedPlaceholder: "Votre ville",
     loading: "Chargement…",
   },
 } as const;
@@ -254,4 +256,25 @@ export function isOfferedPhoneNumber(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * How many options a native `<select>` may hold and stay usable. Past this the
+ * system picker becomes a long scroll with no search.
+ */
+export const NATIVE_LIST_MAX = 200;
+
+/**
+ * The cities the job-search filter offers: every city of the country when
+ * there are few enough to scroll (Congo-Brazzaville has 58, so a job in
+ * Dolisie stays findable), otherwise the capital and the two largest (Côte
+ * d'Ivoire has nearly 5 000 places in the dataset).
+ */
+export function filterCityList(
+  cities: readonly string[] | undefined,
+  countryCode: string | null | undefined,
+): readonly string[] {
+  const all = cities ?? [];
+  if (all.length <= NATIVE_LIST_MAX) return all;
+  return curatedCities(countryCode) ?? all.slice(0, NATIVE_LIST_MAX);
 }
