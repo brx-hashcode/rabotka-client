@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { countryFromPhone } from "@/lib/geo-fields";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { CountryCityFields } from "@/components/common/country-city-fields";
@@ -61,6 +62,19 @@ export function PersonalInfoForm({
       form.reset(personalInfo);
     }
   }, [personalInfo, form]);
+
+  // The country follows the WhatsApp number while none is chosen: +242 picks
+  // Congo-Brazzaville. Never over a choice already made — someone abroad on
+  // a home number picks their country by hand, once.
+  const phone = form.watch("phone");
+  useEffect(() => {
+    if (form.getValues("countryCode")) return;
+    const country = countryFromPhone(phone);
+    if (!country) return;
+    form.setValue("countryCode", country.code, { shouldValidate: true });
+    form.setValue("countryName", country.name, { shouldValidate: true });
+    form.setValue("city", "", { shouldValidate: false });
+  }, [phone, form]);
 
   const description = form.watch("description");
   const charCount = description?.length || 0;

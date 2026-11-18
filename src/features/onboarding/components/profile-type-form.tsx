@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { profileTypeContent } from "@/content/onboarding";
 import { matchesSearch } from "@/lib/search";
-import { StepIndicator } from "./step-indicator";
 import {
   getCategories,
   type JobCategory,
@@ -40,20 +39,12 @@ const INITIAL_VISIBLE = 10;
  */
 const DEFAULT_PROFILE_TYPE = "WORKER" as const;
 
-type OnboardingStep =
-  | "personal-informations"
-  | "profile-type"
-  | "kyc-documents"
-  | "confirmation";
-
 type ProfileTypeFormProps = {
-  currentStep: OnboardingStep;
   onBack: () => void;
   onNext: () => void;
 };
 
 export function ProfileTypeForm({
-  currentStep,
   onBack,
   onNext,
 }: Readonly<ProfileTypeFormProps>) {
@@ -170,7 +161,6 @@ export function ProfileTypeForm({
           <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
           <p className="text-sm text-gray-600 mt-1">{content.subtitle}</p>
         </div>
-        <StepIndicator currentStep={currentStep} variant="compact" />
       </div>
 
       <Form {...form}>

@@ -1,3 +1,4 @@
+import { parsePhoneNumber } from "react-phone-number-input";
 import type { ComboboxOption } from "@/components/common/category-combobox";
 import type { Country } from "@/lib/api/geo-controller";
 import { fold } from "@/lib/search";
@@ -206,4 +207,24 @@ export function withCurrentCity(
   current: string | null | undefined,
 ): string[] {
   return current && !cities.includes(current) ? [...cities, current] : [...cities];
+}
+
+/**
+ * The country a WhatsApp number belongs to, when it is one of the 13 the
+ * pickers offer; null otherwise (an unknown or partial number, a country
+ * outside the list). Pre-fills the country at sign-up: almost everyone lives
+ * where their number is from, and a picked country is one less screen tap.
+ */
+export function countryFromPhone(
+  phone: string | null | undefined,
+): Country | null {
+  if (!phone?.trim()) return null;
+  let iso: string | undefined;
+  try {
+    iso = parsePhoneNumber(phone)?.country;
+  } catch {
+    return null;
+  }
+  const match = CANDIDATE_LOCATIONS.find((c) => c.code === iso);
+  return match ? { code: match.code, name: match.name } : null;
 }

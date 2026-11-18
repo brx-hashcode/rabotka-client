@@ -11,6 +11,7 @@ import {
   ProfileTypeForm,
   KycDocumentsForm,
   ConfirmationView,
+  StepIndicator,
 } from "@/features/onboarding/components";
 
 type OnboardingStep =
@@ -105,7 +106,6 @@ export default function Onboarding() {
       case "profile-type":
         return (
           <ProfileTypeForm
-            currentStep="profile-type"
             onBack={() => setStep("personal-informations")}
             onNext={() => setStep("kyc-documents")}
           />
@@ -147,7 +147,14 @@ export default function Onboarding() {
             paid 32px a side on a phone — on the screen where every pixel of
             field width matters most. */}
         <div className="w-full">
-          <div className="bg-white p-4">{renderStep()}</div>
+          <div className="bg-white p-4">
+            {/* Every step says where it stands: knowing it is two more short
+                screens is what keeps someone going. It was on step 2 only. */}
+            <div className="mb-6">
+              <StepIndicator currentStep={step} />
+            </div>
+            {renderStep()}
+          </div>
         </div>
       </div>
     </>
