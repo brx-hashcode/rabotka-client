@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { countryFromPhone } from "@/lib/geo-fields";
+import { countryFromPhone, offeredCountry } from "@/lib/geo-fields";
 
 describe("countryFromPhone()", () => {
   it("names the country of a number from one of the 13", () => {
@@ -18,5 +18,13 @@ describe("countryFromPhone()", () => {
     expect(countryFromPhone("")).toBeNull();
     expect(countryFromPhone(undefined)).toBeNull();
     expect(countryFromPhone("not a number")).toBeNull();
+  });
+});
+
+describe("offeredCountry()", () => {
+  it("names the phone flag's country when it is offered", () => {
+    expect(offeredCountry("CG")).toEqual({ code: "CG", name: "Congo-Brazzaville" });
+    expect(offeredCountry("FR")).toBeNull();
+    expect(offeredCountry(undefined)).toBeNull();
   });
 });

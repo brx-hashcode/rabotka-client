@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
@@ -15,12 +15,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { countryFromPhone } from "@/lib/geo-fields";
+import { countryFromPhone, offeredCountry } from "@/lib/geo-fields";
 import { Textarea } from "@/components/ui/textarea";
 import { personalInfoContent } from "@/content/onboarding";
 import { CountryCityFields } from "@/components/common/country-city-fields";
 import { isSignupVerified } from "@/lib/signup-verification";
 import { PhoneVerificationDrawer } from "./phone-verification-drawer";
+
+/** The flag the WhatsApp field opens on. */
+const PHONE_DEFAULT_COUNTRY = "CG";
 
 type PersonalInfoFormProps = {
   onNext: () => void;
@@ -63,18 +66,29 @@ export function PersonalInfoForm({
     }
   }, [personalInfo, form]);
 
-  // The country follows the WhatsApp number while none is chosen: +242 picks
-  // Congo-Brazzaville. Never over a choice already made — someone abroad on
-  // a home number picks their country by hand, once.
+  // The country follows the phone field: its flag from the start (Congo by
+  // default), then the number once typed (+243 → Congo-Kinshasa). Until the
+  // person picks a country themselves — or one was restored — which it never
+  // overwrites: `autoCountry` remembers what this effect set, and anything
+  // else in the field is someone's choice.
+  const [phoneCountry, setPhoneCountry] = useState<string | undefined>(
+    PHONE_DEFAULT_COUNTRY,
+  );
+  const autoCountry = useRef<string | null>(null);
   const phone = form.watch("phone");
+  // Watched too: restoring a saved form can empty the field after it was
+  // filled, and it must fill again.
+  const countryCode = form.watch("countryCode");
   useEffect(() => {
-    if (form.getValues("countryCode")) return;
-    const country = countryFromPhone(phone);
-    if (!country) return;
+    const current = countryCode;
+    if (current && current !== autoCountry.current) return;
+    const country = countryFromPhone(phone) ?? offeredCountry(phoneCountry);
+    if (!country || country.code === current) return;
+    autoCountry.current = country.code;
     form.setValue("countryCode", country.code, { shouldValidate: true });
     form.setValue("countryName", country.name, { shouldValidate: true });
     form.setValue("city", "", { shouldValidate: false });
-  }, [phone, form]);
+  }, [phone, phoneCountry, countryCode, form]);
 
   const description = form.watch("description");
   const charCount = description?.length || 0;
@@ -182,7 +196,8 @@ export function PersonalInfoForm({
                   <FormLabel>{content.fields.phone.label}</FormLabel>
                   <FormControl>
                     <PhoneInput
-                      defaultCountry="CG"
+                      defaultCountry={PHONE_DEFAULT_COUNTRY}
+                      onCountryChange={(country) => setPhoneCountry(country)}
                       placeholder={content.fields.phone.placeholder}
                       value={field.value}
                       onChange={field.onChange}

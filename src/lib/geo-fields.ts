@@ -228,3 +228,11 @@ export function countryFromPhone(
   const match = CANDIDATE_LOCATIONS.find((c) => c.code === iso);
   return match ? { code: match.code, name: match.name } : null;
 }
+
+/** One of the 13 offered countries by ISO code, or null. */
+export function offeredCountry(
+  code: string | null | undefined,
+): Country | null {
+  const match = CANDIDATE_LOCATIONS.find((c) => c.code === code);
+  return match ? { code: match.code, name: match.name } : null;
+}
