@@ -106,6 +106,10 @@ export function CategoryCombobox({
 
   return (
     <PopoverPrimitive.Root
+      // Modal: the page behind the open list stays put. A swipe that ran past
+      // the end of the list used to scroll the form instead, taking the field
+      // — and the list anchored to it — away from under the finger.
+      modal
       open={open}
       onOpenChange={(next) => {
         setOpen(next);

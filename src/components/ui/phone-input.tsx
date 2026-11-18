@@ -120,6 +120,9 @@ const CountrySelect = ({
 
   return (
     <Popover
+      // Modal: while the list is open the page behind it does not scroll, so
+      // a swipe through the flags never drags the form along with it.
+      modal
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
