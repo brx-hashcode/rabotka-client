@@ -141,3 +141,69 @@ export function cityPlaceholder(
   if (citiesPending) return countryCityLabels.city.loading;
   return countryCityLabels.city.placeholder;
 }
+
+/**
+ * The countries a candidate picks from: the 13 Rabotka Business is open in
+ * (rabotka-backend `BUSINESS_COUNTRIES`), with each one's capital and its two
+ * largest other cities — Congo-Brazzaville has just its two. Names and
+ * spellings are the dataset's, so a pick matches the API's own lists.
+ *
+ * A short list on purpose: the full dataset made the pickers long and
+ * searchable, and on a phone the search box opened the keyboard, which shook
+ * the dropdown around. The API still serves every country and city, and a
+ * stored value outside this list stays shown (see `pickerCountries`).
+ */
+export const CANDIDATE_LOCATIONS: readonly {
+  readonly code: string;
+  readonly name: string;
+  readonly cities: readonly string[];
+}[] = [
+  { code: "BJ", name: "Bénin", cities: ["Porto-Novo", "Cotonou", "Abomey-Calavi"] },
+  { code: "CM", name: "Cameroun", cities: ["Yaoundé", "Douala", "Garoua"] },
+  { code: "CG", name: "Congo-Brazzaville", cities: ["Brazzaville", "Pointe-Noire"] },
+  { code: "CD", name: "Congo-Kinshasa", cities: ["Kinshasa", "Lubumbashi", "Mbuji-Mayi"] },
+  { code: "CI", name: "Côte d’Ivoire", cities: ["Yamoussoukro", "Abidjan", "Bouaké"] },
+  { code: "GA", name: "Gabon", cities: ["Libreville", "Port-Gentil", "Franceville"] },
+  { code: "KE", name: "Kenya", cities: ["Nairobi", "Mombasa", "Nakuru"] },
+  { code: "MZ", name: "Mozambique", cities: ["Maputo", "Matola", "Nampula"] },
+  { code: "UG", name: "Ouganda", cities: ["Kampala", "Mbarara", "Gulu"] },
+  { code: "RW", name: "Rwanda", cities: ["Kigali", "Gisenyi", "Butare"] },
+  { code: "SN", name: "Sénégal", cities: ["Dakar", "Touba", "Thiès"] },
+  { code: "SL", name: "Sierra Leone", cities: ["Freetown", "Bo", "Kenema"] },
+  { code: "ZM", name: "Zambie", cities: ["Lusaka", "Kitwe", "Ndola"] },
+];
+
+/** The curated cities of a country, or null when it is not one of the 13. */
+export function curatedCities(
+  countryCode: string | null | undefined,
+): readonly string[] | null {
+  return (
+    CANDIDATE_LOCATIONS.find((c) => c.code === countryCode)?.cities ?? null
+  );
+}
+
+/**
+ * The countries to offer: the 13, plus the one already stored when it is
+ * another (a profile from before the list was narrowed), so the picker still
+ * shows it instead of an empty placeholder.
+ */
+export function pickerCountries(
+  current: { code: string; name: string } | null | undefined,
+): Country[] {
+  const list: Country[] = CANDIDATE_LOCATIONS.map(({ code, name }) => ({
+    code,
+    name,
+  }));
+  if (current?.code && !list.some((c) => c.code === current.code)) {
+    list.push({ code: current.code, name: current.name || current.code });
+  }
+  return list;
+}
+
+/** A city list with the stored city kept in it, so the picker still shows it. */
+export function withCurrentCity(
+  cities: readonly string[],
+  current: string | null | undefined,
+): string[] {
+  return current && !cities.includes(current) ? [...cities, current] : [...cities];
+}

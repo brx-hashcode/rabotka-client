@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
@@ -74,6 +74,14 @@ const ITEM_HEIGHT_REM = 2;
  */
 const LIST_PADDING_REM = 1;
 
+/**
+ * Up to this many options, the list is read, not searched: no search box. On a
+ * phone the box took focus on open, the keyboard came up, the visible screen
+ * shrank, and the dropdown jumped about while repositioning — for a list of 13
+ * countries that fits on one screen anyway.
+ */
+const SEARCH_FROM = 16;
+
 export function CategoryCombobox({
   options,
   value,
@@ -90,7 +98,10 @@ export function CategoryCombobox({
   maxVisibleItems = 6,
 }: CategoryComboboxProps) {
   const controlledSearch = onSearchChange !== undefined;
+  const searchable =
+    controlledSearch || options.length + (allLabel ? 1 : 0) >= SEARCH_FROM;
   const [open, setOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.id === value);
 
   return (
@@ -124,6 +135,13 @@ export function CategoryCombobox({
           align="start"
           sideOffset={4}
           collisionPadding={8}
+          // Without a search box, focus goes to the list (arrow keys still
+          // work), never to a text field: no keyboard, nothing to reflow.
+          onOpenAutoFocus={(event) => {
+            if (searchable) return;
+            event.preventDefault();
+            listRef.current?.focus({ preventScroll: true });
+          }}
           // `w-(--var)` is Tailwind v4 syntax. This was `w-[--var]`, the v3
           // form, which v4 does not compile — so the popover had no width at
           // all and sat narrower than the field that opened it.
@@ -134,14 +152,19 @@ export function CategoryCombobox({
               "Agriculture & Maraîchage" and the option disappeared. Ignored
               when the parent owns the search (cities), which folds already. */}
           <Command
-            shouldFilter={!controlledSearch}
+            ref={listRef}
+            tabIndex={-1}
+            className="outline-none"
+            shouldFilter={searchable && !controlledSearch}
             filter={foldedCommandFilter}
           >
-            <CommandInput
-              placeholder="Rechercher…"
-              value={controlledSearch ? search : undefined}
-              onValueChange={onSearchChange}
-            />
+            {searchable && (
+              <CommandInput
+                placeholder="Rechercher…"
+                value={controlledSearch ? search : undefined}
+                onValueChange={onSearchChange}
+              />
+            )}
             <CommandList
               className="max-h-(--list-max-h)"
               style={
