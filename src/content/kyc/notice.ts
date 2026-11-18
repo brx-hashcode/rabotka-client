@@ -13,11 +13,11 @@ export const kycContent = {
   },
   rejected: {
     title: "Vérification refusée",
-    body: "Votre vérification d'identité n'a pas été validée. Envoyez de nouveaux documents, ou contactez notre support si vous contestez ce refus.",
+    // Resending is the whole route: it puts the dossier back under review.
+    // No claim, no support to write to.
+    body: "Votre vérification d'identité n'a pas été validée. Envoyez de nouveaux documents : votre dossier sera réexaminé.",
     shortLabel: "Vérification refusée",
     actionLabel: "Envoyer de nouveaux documents",
-    supportLabel: "Contacter le support",
-    supportMessage: "Bonjour, ma vérification d'identité a été refusée.",
   },
   screen: {
     backLabel: "Retour",

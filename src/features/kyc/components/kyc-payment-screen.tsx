@@ -2,7 +2,6 @@ import { useNavigate } from "react-router";
 
 import { PaymentScreen, PaymentNotice } from "@/features/payments";
 import { kycContent } from "@/content/kyc";
-import { whatsappLink } from "@/config";
 import type { KycBlockReason } from "@/hooks/use-kyc-gate";
 import { KYC_VERIFICATION_PATH } from "@/lib/kyc-upload-state";
 
@@ -35,23 +34,7 @@ export function KycPaymentScreen({
       <PaymentScreen>
         <PaymentNotice
           title={copy.title}
-          description={
-            reason === "REJECTED" ? (
-              <>
-                {kycContent.rejected.body}{" "}
-                <a
-                  href={whatsappLink(kycContent.rejected.supportMessage)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-foreground underline underline-offset-2"
-                >
-                  {kycContent.rejected.supportLabel}
-                </a>
-              </>
-            ) : (
-              kycContent.missing.body
-            )
-          }
+          description={copy.body}
           actionLabel={copy.actionLabel}
           onAction={() => navigate(KYC_VERIFICATION_PATH)}
         />

@@ -3,7 +3,6 @@ import { AlertCircle, AlertTriangle, IdCard } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { kycContent } from "@/content/kyc";
-import { whatsappLink } from "@/config";
 import { KYC_VERIFICATION_PATH } from "@/lib/kyc-upload-state";
 import type { KycBlockReason } from "@/hooks/use-kyc-gate";
 
@@ -30,22 +29,12 @@ export function KycNotice({ reason, className }: KycNoticeProps) {
             {kycContent.rejected.title}
           </p>
           <p className="text-muted-foreground">{kycContent.rejected.body}</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <Link
-              to={KYC_VERIFICATION_PATH}
-              className="inline-block font-medium text-destructive underline underline-offset-2"
-            >
-              {kycContent.rejected.actionLabel}
-            </Link>
-            <a
-              href={whatsappLink(kycContent.rejected.supportMessage)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block text-muted-foreground underline underline-offset-2"
-            >
-              {kycContent.rejected.supportLabel}
-            </a>
-          </div>
+          <Link
+            to={KYC_VERIFICATION_PATH}
+            className="inline-block font-medium text-destructive underline underline-offset-2"
+          >
+            {kycContent.rejected.actionLabel}
+          </Link>
         </div>
       </div>
     );
